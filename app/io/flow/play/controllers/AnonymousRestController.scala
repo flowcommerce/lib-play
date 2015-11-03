@@ -31,7 +31,7 @@ trait AnonymousRestController extends FlowControllerHelpers {
     def invokeBlock[A](request: Request[A], block: (AnonymousRequest[A]) => Future[Result]) = {
       block(
         new AnonymousRequest(
-          user = AuthHeaders(userTokensClient).user(request.headers),
+          user = Headers(userTokensClient).user(request.headers),
           request = request
         )
       )

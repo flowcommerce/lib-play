@@ -4,20 +4,20 @@ import io.flow.play.clients.UserTokenClient
 import io.flow.user.v0.models.User
 import scala.concurrent.Future
 
-object AuthHeaders {
+object Headers {
 
-  val AuthorizationHeader = "Authorization"
+  val Authorization = "Authorization"
 
 }
 
-case class AuthHeaders(users: UserTokenClient) {
+case class Headers(users: UserTokenClient) {
 
   def user(
     headers: play.api.mvc.Headers
   )(
     implicit ec: scala.concurrent.ExecutionContext
   ): Future[Option[User]] = {
-    headers.get(AuthHeaders.AuthorizationHeader) match {
+    headers.get(Headers.Authorization) match {
       case None => Future { None }
       case Some(h) => {
         BasicAuthorization.get(h) match {

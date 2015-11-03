@@ -1,0 +1,14 @@
+code:
+  flow:
+    common:
+      version: latest
+      generators:
+        play_2_x_json: "app/generated"
+    authorization:
+      version: latest
+      generators:
+        play_2_4_client: ["app/generated"]
+    user:
+      version: latest
+      generators:
+        play_2_4_client: ["app/generated"]

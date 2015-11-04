@@ -14,10 +14,10 @@ trait AuthorizationsClient {
     * Authorizes this user - will return true if the provide user has
     * each privilege specified for all contexts
     * 
-    *  @creates if specified, this is the context for which the user must have been granted the Create privilege.
-    *  @reads if specified, this is the context for which the user must have been granted the Read privilege.
-    *  @updates if specified, this is the context for which the user must have been granted the Update privilege.
-    *  @deletes if specified, this is the context for which the user must have been granted the Delete privilege.
+    *  @param creates if specified, this is the context for which the user must have been granted the Create privilege.
+    *  @param reads if specified, this is the context for which the user must have been granted the Read privilege.
+    *  @param updates if specified, this is the context for which the user must have been granted the Update privilege.
+    *  @param deletes if specified, this is the context for which the user must have been granted the Delete privilege.
     */
   def authorize(
     userGuid: UUID,

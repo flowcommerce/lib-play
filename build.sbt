@@ -2,6 +2,8 @@ import play.PlayImport.PlayKeys._
 
 name := "lib-play"
 
+organization := "io.flow"
+
 scalaVersion in ThisBuild := "2.11.7"
 
 lazy val root = project

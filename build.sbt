@@ -6,6 +6,10 @@ organization := "io.flow"
 
 scalaVersion in ThisBuild := "2.11.7"
 
+crossScalaVersions := Seq("2.11.7")
+
+version := "0.0.1-SNAPSHOT"
+
 lazy val root = project
   .in(file("."))
   .enablePlugins(PlayScala)
@@ -25,12 +29,7 @@ publishTo := {
   }
 }
 
-
-crossScalaVersions := Seq("2.11.7")
-
-version := "0.0.1-SNAPSHOT"
-
-credentials += Credentials(Path.userHome / ".artifactory")
+credentials += Credentials(Path.userHome / ".ivy2" / ".artifactory")
 
 
 

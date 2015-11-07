@@ -33,7 +33,7 @@ trait AuthorizedRestController extends AnonymousRestController {
             Future { Unauthorized }
           }
           case Some(user) => {
-            authorizationsClient.authorize(
+            authorizationClient.authorize(
               userGuid = user.guid,
               creates = creates,
               reads = reads,

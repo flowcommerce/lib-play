@@ -12,7 +12,7 @@ trait AuthorizedRestController extends AnonymousRestController {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  def authorizationsClient: AuthorizationClient
+  def authorizationClient: AuthorizationClient
 
   class AuthenticatedRequest[A](
     val user: User,

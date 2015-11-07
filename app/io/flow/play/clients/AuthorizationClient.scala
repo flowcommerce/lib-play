@@ -35,7 +35,7 @@ class DefaultAuthorizationClient() extends AuthorizationClient {
   def host: String = Config.requiredString("authorization.api.host")
   def token: String = Config.requiredString("authorization.api.token")
 
-  val client = new Client(
+  lazy val client = new Client(
     apiUrl = host,
     auth = Some(
       Authorization.Basic(

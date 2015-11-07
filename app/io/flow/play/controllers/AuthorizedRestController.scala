@@ -2,7 +2,7 @@ package io.flow.play.controllers
 
 import io.flow.user.v0.models.User
 import io.flow.authorization.v0.models.Check
-import io.flow.play.clients.AuthorizationsClient
+import io.flow.play.clients.AuthorizationClient
 import play.api.Logger
 import play.api.mvc._
 import play.api.mvc.Results.Unauthorized
@@ -12,7 +12,7 @@ trait AuthorizedRestController extends AnonymousRestController {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  def authorizationsClient: AuthorizationsClient
+  def authorizationsClient: AuthorizationClient
 
   class AuthenticatedRequest[A](
     val user: User,

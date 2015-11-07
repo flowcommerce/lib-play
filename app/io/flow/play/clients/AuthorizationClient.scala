@@ -8,7 +8,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 import java.util.UUID
 
-trait AuthorizationsClient {
+trait AuthorizationClient {
 
   /**
     * Authorizes this user - will return true if the provide user has
@@ -29,10 +29,11 @@ trait AuthorizationsClient {
 
 }
 
-case class PlayAuthorizationsClient(
-  host: String = Config.requiredString("authorization.api.host"),
-  token: String = Config.requiredString("authorization.api.token")
-) extends AuthorizationsClient {
+@javax.inject.Singleton
+class DefaultAuthorizationClient() extends AuthorizationClient {
+
+  def host: String = Config.requiredString("authorization.api.host")
+  def token: String = Config.requiredString("authorization.api.token")
 
   val client = new Client(
     apiUrl = host,

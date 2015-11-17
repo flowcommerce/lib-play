@@ -15,21 +15,23 @@ trait Validated {
 
 object Validation {
 
-  private[this] val InvalidJsonCode = "invalid_json"
-  private[this] val UserAuthorizationFailedCode = "user_authorization_failed"
-  private[this] val ErrorCode = "validation_error"
-  private[this] val ServerError = "server_error"
+  object Codes {
+    val InvalidJson = "invalid_json"
+    val UserAuthorizationFailed = "user_authorization_failed"
+    val Error = "validation_error"
+    val ServerError = "server_error"
+  }
 
   def invalidJson(errors: JsError): Seq[Error] = {
-    Seq(Error(InvalidJsonCode, errors.toString))
+    Seq(Error(Codes.InvalidJson, errors.toString))
   }
 
   def invalidJsonDocument(): Seq[Error] = {
-    Seq(Error(InvalidJsonCode, "Content is not valid JSON"))
+    Seq(Error(Codes.InvalidJson, "Content is not valid JSON"))
   }
 
   def userAuthorizationFailed(): Seq[Error] = {
-    Seq(Error(UserAuthorizationFailedCode, "Email address and/or password did not match"))
+    Seq(Error(Codes.UserAuthorizationFailed, "Email address and/or password did not match"))
   }
 
   def error(message: String): Seq[Error] = {
@@ -37,11 +39,11 @@ object Validation {
   }
 
   def errors(messages: Seq[String]): Seq[Error] = {
-    messages.map { msg => Error(ErrorCode, msg) }
+    messages.map { msg => Error(Codes.Error, msg) }
   }
 
   def serverError(error: String = "Internal Server Error"): Seq[Error] = {
-    Seq(Error(ServerError, error))
+    Seq(Error(Codes.ServerError, error))
   }
 
 }

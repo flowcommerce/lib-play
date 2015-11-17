@@ -8,6 +8,12 @@ import play.api.mvc._
 import play.api.mvc.Results.Unauthorized
 import scala.concurrent.Future
 
+/**
+  * Provides helpers for actions that require a user to be identified
+  * and authorized to perform an action. By default, authorization is
+  * DENIED - which means the user must be logged in (identified) and
+  * explicitly granted an authorization to perform an action.
+  */
 trait AuthorizedRestController extends AnonymousRestController {
 
   import scala.concurrent.ExecutionContext.Implicits.global

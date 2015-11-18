@@ -12,7 +12,7 @@ trait IdentifiedRestController extends AnonymousRestController {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  def unauthorized = Unauthorized
+  def unauthorized[A](request: Request[A]): Result = Unauthorized
 
   class IdentifiedRequest[A](
     val user: User,
@@ -25,7 +25,7 @@ trait IdentifiedRestController extends AnonymousRestController {
       Headers(userTokensClient).user(request.headers).flatMap { userOption =>
         userOption match {
           case None => {
-            Future { unauthorized }
+            Future { unauthorized(request) }
           }
           case Some(user) => {
             block(

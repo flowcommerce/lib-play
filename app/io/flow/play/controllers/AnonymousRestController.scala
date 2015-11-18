@@ -1,7 +1,7 @@
 package io.flow.play.controllers
 
 import io.flow.user.v0.models.User
-import io.flow.play.clients.UserTokenClient
+import io.flow.play.clients.UserTokensClient
 import scala.concurrent.Future
 import play.api.mvc._
 
@@ -19,7 +19,7 @@ trait AnonymousRestController extends FlowControllerHelpers {
     * Needed to fetch users by token when a token is present in the
     * HTTP Request Headers.
     */
-  def userTokensClient: UserTokenClient
+  def userTokensClient: UserTokensClient
 
   class AnonymousRequest[A](
     val user: Future[Option[User]],

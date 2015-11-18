@@ -6,7 +6,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 @javax.inject.Singleton
-class MockUserClient extends UserTokenClient {
+class MockUserClient extends UserTokensClient {
 
   def add(
     user: User,

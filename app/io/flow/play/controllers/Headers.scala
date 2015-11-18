@@ -1,6 +1,6 @@
 package io.flow.play.controllers
 
-import io.flow.play.clients.UserTokenClient
+import io.flow.play.clients.UserTokensClient
 import io.flow.user.v0.models.User
 import scala.concurrent.Future
 
@@ -10,7 +10,7 @@ object Headers {
 
 }
 
-case class Headers(users: UserTokenClient) {
+case class Headers(users: UserTokensClient) {
 
   def user(
     headers: play.api.mvc.Headers

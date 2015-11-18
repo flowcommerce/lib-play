@@ -16,7 +16,7 @@ object UserClient {
 
 }
 
-trait UserTokenClient {
+trait UserTokensClient {
 
   def getUserByToken(
     token: String
@@ -25,7 +25,7 @@ trait UserTokenClient {
 }
 
 @javax.inject.Singleton
-class DefaultUserTokenClient() extends UserTokenClient {
+class DefaultUserTokensClient() extends UserTokensClient {
 
   def host: String = Config.requiredString("user.api.host")
   def token: String = Config.requiredString("user.api.token")

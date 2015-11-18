@@ -20,6 +20,8 @@ trait AuthorizedRestController extends AnonymousRestController {
 
   def authorizationClient: AuthorizationClient
 
+  def unauthorized = Unauthorized
+
   class AuthenticatedRequest[A](
     val user: User,
     request: Request[A]
@@ -36,7 +38,7 @@ trait AuthorizedRestController extends AnonymousRestController {
       Headers(userTokensClient).user(request.headers).flatMap { userOption =>
         userOption match {
           case None => {
-            Future { Unauthorized }
+            Future { unauthorized }
           }
           case Some(user) => {
             authorizationClient.authorize(

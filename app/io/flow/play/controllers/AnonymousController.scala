@@ -24,7 +24,10 @@ trait AnonymousController extends FlowControllerHelpers {
   /**
    * Extracts the user from the headers
    */
-  def getUser(headers: play.api.mvc.Headers)(
+  def user(
+    session: Session,
+    headers: Headers
+  ) (
     implicit ec: ExecutionContext
   ): Future[Option[User]]
 
@@ -38,7 +41,7 @@ trait AnonymousController extends FlowControllerHelpers {
     def invokeBlock[A](request: Request[A], block: (AnonymousRequest[A]) => Future[Result]) = {
       block(
         new AnonymousRequest(
-          user = Headers(userTokensClient).user(request.headers),
+          user = user(request.session, request.headers),
           request = request
         )
       )
@@ -52,10 +55,18 @@ trait UserFromBasicAuthorizationToken {
 
   def userTokensClient: UserTokensClient
 
-  def getUser(headers: play.api.mvc.Headers)(
+  def user(
+    session: Session,
+    headers: Headers
+  ) (
     implicit ec: ExecutionContext
   ): Future[Option[User]] = {
-    Headers(userTokensClient).user(headers)
+    Headers.basicAuthorizationToken(headers) match {
+      case None => Future { None }
+      case Some(token) => {
+        userTokensClient.getUserByToken(token)
+      }
+    }
   }
 
 }

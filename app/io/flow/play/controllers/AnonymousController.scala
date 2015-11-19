@@ -2,7 +2,7 @@ package io.flow.play.controllers
 
 import io.flow.user.v0.models.User
 import io.flow.play.clients.UserTokensClient
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import play.api.mvc._
 
 /**
@@ -11,7 +11,7 @@ import play.api.mvc._
   * with users - intented to allow an anonymous action to succeed in cases
   * where we may or may not have a user.
   */
-trait AnonymousRestController extends FlowControllerHelpers {
+trait AnonymousController extends FlowControllerHelpers {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -20,6 +20,13 @@ trait AnonymousRestController extends FlowControllerHelpers {
     * HTTP Request Headers.
     */
   def userTokensClient: UserTokensClient
+
+  /**
+   * Extracts the user from the headers
+   */
+  def getUser(headers: play.api.mvc.Headers)(
+    implicit ec: ExecutionContext
+  ): Future[Option[User]]
 
   class AnonymousRequest[A](
     val user: Future[Option[User]],
@@ -40,3 +47,18 @@ trait AnonymousRestController extends FlowControllerHelpers {
   }
 
 }
+
+trait UserFromBasicAuthorizationToken {
+
+  def userTokensClient: UserTokensClient
+
+  def getUser(headers: play.api.mvc.Headers)(
+    implicit ec: ExecutionContext
+  ): Future[Option[User]] = {
+    Headers(userTokensClient).user(headers)
+  }
+
+}
+
+trait AnonymousRestController extends AnonymousController with UserFromBasicAuthorizationToken
+

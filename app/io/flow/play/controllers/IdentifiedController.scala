@@ -8,7 +8,7 @@ import play.api.mvc._
 /**
   * Provides helpers for actions that require a user to be identified.
   */
-trait IdentifiedRestController extends AnonymousRestController {
+trait IdentifiedController extends AnonymousController {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -22,7 +22,7 @@ trait IdentifiedRestController extends AnonymousRestController {
   object Identified extends ActionBuilder[IdentifiedRequest] {
 
     def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]) = {
-      Headers(userTokensClient).user(request.headers).flatMap { userOption =>
+      getUser(request.headers).flatMap { userOption =>
         userOption match {
           case None => {
             Future { unauthorized(request) }
@@ -39,3 +39,4 @@ trait IdentifiedRestController extends AnonymousRestController {
 
 }
 
+trait IdentifiedRestController extends IdentifiedController with UserFromBasicAuthorizationToken

@@ -47,24 +47,3 @@ object Validation {
   }
 
 }
-
-/**
-  * Utility class to aid in persisting validation information. General
-  * concept is to enable UI to validate a form - returning an instance
-  * of Validated. This makes it easy then for the data objects to call
-  * assertValid() to ensure form data was validated.
-  * 
-  * Example usage:
-  *   val form = UserForm(...)
-  *   val validatedForm = validate(form)
-  *   UsersDao.create(validatedForm)
-  * 
-  *   def create(valid: ValidatedForm[UserForm]) {
-  *     valid.assertValid()
-  *   }
-  */
-case class ValidatedForm[T](form: T, errorMessages: Seq[String]) extends Validated {
-
-  override def errors = Validation.errors(errorMessages)
-
-}

@@ -1,6 +1,6 @@
 package io.flow.play.clients
 
-import io.flow.play.util.Config
+import io.flow.play.util.DefaultConfig
 
 import io.flow.authorization.v0.{Authorization, Client}
 import io.flow.authorization.v0.models.{Check, Privilege}
@@ -32,8 +32,8 @@ trait AuthorizationClient {
 @javax.inject.Singleton
 class DefaultAuthorizationClient() extends AuthorizationClient {
 
-  def host: String = Config.requiredString("authorization.api.host")
-  def token: String = Config.requiredString("authorization.api.token")
+  def host: String = DefaultConfig.requiredString("authorization.api.host")
+  def token: String = DefaultConfig.requiredString("authorization.api.token")
 
   lazy val client = new Client(
     apiUrl = host,

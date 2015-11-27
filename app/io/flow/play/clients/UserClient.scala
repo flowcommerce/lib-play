@@ -1,6 +1,6 @@
 package io.flow.play.clients
 
-import io.flow.play.util.Config
+import io.flow.play.util.DefaultConfig
 
 import io.flow.user.v0.{Authorization, Client}
 import io.flow.user.v0.errors.UnitResponse
@@ -27,8 +27,8 @@ trait UserTokensClient {
 @javax.inject.Singleton
 class DefaultUserTokensClient() extends UserTokensClient {
 
-  def host: String = Config.requiredString("user.api.host")
-  def token: String = Config.requiredString("user.api.token")
+  def host: String = DefaultConfig.requiredString("user.api.host")
+  def token: String = DefaultConfig.requiredString("user.api.token")
 
   lazy val client = new Client(
     apiUrl = host,

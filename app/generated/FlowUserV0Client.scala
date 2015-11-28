@@ -5,14 +5,6 @@
  */
 package io.flow.user.v0.models {
 
-  /**
-   * Allow storing third party identifiers (e.g. github login ID)
-   */
-  case class ExternalId(
-    system: io.flow.user.v0.models.System,
-    id: String
-  )
-
   case class Name(
     first: _root_.scala.Option[String] = None,
     last: _root_.scala.Option[String] = None
@@ -36,8 +28,7 @@ package io.flow.user.v0.models {
   case class UserForm(
     email: _root_.scala.Option[String] = None,
     name: _root_.scala.Option[io.flow.user.v0.models.NameForm] = None,
-    avatarUrl: _root_.scala.Option[String] = None,
-    externalIds: _root_.scala.Option[Seq[io.flow.user.v0.models.ExternalId]] = None
+    avatarUrl: _root_.scala.Option[String] = None
   )
 
   sealed trait System
@@ -109,20 +100,6 @@ package io.flow.user.v0.models {
       def writes(x: System) = JsString(x.toString)
     }
 
-    implicit def jsonReadsUserExternalId: play.api.libs.json.Reads[ExternalId] = {
-      (
-        (__ \ "system").read[io.flow.user.v0.models.System] and
-        (__ \ "id").read[String]
-      )(ExternalId.apply _)
-    }
-
-    implicit def jsonWritesUserExternalId: play.api.libs.json.Writes[ExternalId] = {
-      (
-        (__ \ "system").write[io.flow.user.v0.models.System] and
-        (__ \ "id").write[String]
-      )(unlift(ExternalId.unapply _))
-    }
-
     implicit def jsonReadsUserName: play.api.libs.json.Reads[Name] = {
       (
         (__ \ "first").readNullable[String] and
@@ -173,8 +150,7 @@ package io.flow.user.v0.models {
       (
         (__ \ "email").readNullable[String] and
         (__ \ "name").readNullable[io.flow.user.v0.models.NameForm] and
-        (__ \ "avatar_url").readNullable[String] and
-        (__ \ "external_ids").readNullable[Seq[io.flow.user.v0.models.ExternalId]]
+        (__ \ "avatar_url").readNullable[String]
       )(UserForm.apply _)
     }
 
@@ -182,8 +158,7 @@ package io.flow.user.v0.models {
       (
         (__ \ "email").writeNullable[String] and
         (__ \ "name").writeNullable[io.flow.user.v0.models.NameForm] and
-        (__ \ "avatar_url").writeNullable[String] and
-        (__ \ "external_ids").writeNullable[Seq[io.flow.user.v0.models.ExternalId]]
+        (__ \ "avatar_url").writeNullable[String]
       )(unlift(UserForm.unapply _))
     }
   }

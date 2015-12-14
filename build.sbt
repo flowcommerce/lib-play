@@ -15,7 +15,8 @@ lazy val root = project
   .enablePlugins(PlayScala)
   .settings(
     libraryDependencies ++= Seq(
-      ws
+      ws,
+      "org.scalatest" % "scalatest_2.11" % "2.2.5" % "test"
     )
 )
 

@@ -9,7 +9,7 @@ trait FlowControllerHelpers {
    * to None. Here we return None if there is no list or the list is
    * empty.
    */
-  def optionalGuids(guids: Option[Seq[UUID]]): Option[Seq[UUID]] = {
+  def optionals[T](guids: Option[Seq[T]]): Option[Seq[T]] = {
     guids match {
       case None => None
       case Some(values) => {

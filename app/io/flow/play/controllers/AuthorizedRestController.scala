@@ -35,7 +35,7 @@ trait AuthorizedRestController extends AnonymousRestController {
   ) extends ActionBuilder[AuthenticatedRequest] {
 
     def invokeBlock[A](request: Request[A], block: (AuthenticatedRequest[A]) => Future[Result]) = {
-      user(request.session, request.headers).flatMap { userOption =>
+      user(request.session, request.headers, request.path, request.queryString).flatMap { userOption =>
         userOption match {
           case None => {
             Future { unauthorized(request) }

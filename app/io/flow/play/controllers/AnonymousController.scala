@@ -26,7 +26,9 @@ trait AnonymousController extends FlowControllerHelpers {
    */
   def user(
     session: Session,
-    headers: Headers
+    headers: Headers,
+    path: String,
+    queryString: Map[String, Seq[String]]
   ) (
     implicit ec: ExecutionContext
   ): Future[Option[User]]
@@ -41,7 +43,7 @@ trait AnonymousController extends FlowControllerHelpers {
     def invokeBlock[A](request: Request[A], block: (AnonymousRequest[A]) => Future[Result]) = {
       block(
         new AnonymousRequest(
-          user = user(request.session, request.headers),
+          user = user(request.session, request.headers, request.path, request.queryString),
           request = request
         )
       )
@@ -57,7 +59,9 @@ trait UserFromBasicAuthorizationToken {
 
   def user(
     session: Session,
-    headers: Headers
+    headers: Headers,
+    path: String,
+    queryString: Map[String, Seq[String]]
   ) (
     implicit ec: ExecutionContext
   ): Future[Option[User]] = {

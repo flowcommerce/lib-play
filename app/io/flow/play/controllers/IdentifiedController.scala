@@ -22,7 +22,7 @@ trait IdentifiedController extends AnonymousController {
   object Identified extends ActionBuilder[IdentifiedRequest] {
 
     def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]) = {
-      user(request.session, request.headers).flatMap { userOption =>
+      user(request.session, request.headers, request.path, request.queryString).flatMap { userOption =>
         userOption match {
           case None => {
             Future { unauthorized(request) }

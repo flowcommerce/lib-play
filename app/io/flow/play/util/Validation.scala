@@ -17,6 +17,7 @@ object Validation {
 
   object Codes {
     val InvalidJson = "invalid_json"
+    val InvalidSort = "invalid_sort"
     val UserAuthorizationFailed = "user_authorization_failed"
     val Error = "validation_error"
     val ServerError = "server_error"
@@ -28,6 +29,10 @@ object Validation {
 
   def invalidJsonDocument(): Seq[Error] = {
     Seq(Error(Codes.InvalidJson, "Content is not valid JSON"))
+  }
+
+  def invalidSort(errors: Seq[String]): Seq[Error] = {
+    errors.map { error => Error(Codes.InvalidSort, error) }
   }
 
   def userAuthorizationFailed(): Seq[Error] = {

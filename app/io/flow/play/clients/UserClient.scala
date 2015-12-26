@@ -28,17 +28,9 @@ trait UserTokensClient {
 class DefaultUserTokensClient() extends UserTokensClient {
 
   def host: String = DefaultConfig.requiredString("user.api.host")
-  def token: String = DefaultConfig.requiredString("user.api.token")
 
-  lazy val client = new Client(
-    apiUrl = host,
-    auth = Some(
-      Authorization.Basic(
-        username = token,
-        password = None
-      )
-      )
-  )
+  // host: e.g. http://api.flow.io/users
+  lazy val client = new Client(host)
 
   def callWith404[T](
     f: Future[T]

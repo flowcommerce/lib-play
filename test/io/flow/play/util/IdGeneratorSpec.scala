@@ -60,6 +60,10 @@ class IdGeneratorSpec extends FunSpec with Matchers {
     val ids = 1.to(100).map { _ => generator.randomId() }
     ids.size should be(100)
     ids.distinct.size should be(ids.size)
+    ids.foreach { id =>
+      println(id)
+      println(java.util.UUID.randomUUID)
+    }
   }
 
   it("randomId respects prefix") {

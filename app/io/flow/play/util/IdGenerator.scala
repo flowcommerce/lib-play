@@ -3,38 +3,34 @@ package io.flow.play.util
 import org.joda.time.{DateTime, DateTimeZone}
 
 object IdGenerator {
-
-  case object Carrier extends IdGenerator { override val prefix = "car" }
-  case object Center extends IdGenerator { override val prefix = "ctr" }
-  case object Region extends IdGenerator { override val prefix = "reg" }
-  case object Ruleset extends IdGenerator { override val prefix = "rls" }
-  case object ServiceLevel extends IdGenerator { override val prefix = "svl" }
-
-  private[util] val Separator = "-"
-  private[IdGenerator] val DefaultLength = 20
-
+  val PrefixLength = 3
+  val Separator = "-"
 }
 
 /**
-  * Unique set of prefixes we use when generated objects. This is here
-  * to centralize the allocation of prefixes used for unique
-  * identifiers to avoid conflicts.
+  * Generates a new unique ID for a resource. These IDs are a bit
+  * simpler for a human to understand / type and are preferred when we
+  * expect humans to interact w/ the IDs.
+  * 
+  * @prefix Global prefix to identify the type of resource for which you
+  *         are generating an ID. Must be 3 characters, lowercase.
+  * @timezone The ID includes a date stamp (e.g. 20150405) - the timezone
+  *         name is used to figure out what day it is. Defaults to America/New_York
   */
-sealed trait IdGenerator {
+case class IdGenerator(
+  prefix: String,
+  timezone: String = "America/New_York"
+) {
+  assert(prefix.toLowerCase == prefix, s"prefix[$prefix] must be in lower case")
+  assert(prefix.trim == prefix, s"prefix[$prefix] must be trimmed")
+  assert(prefix.length == IdGenerator.PrefixLength, s"prefix[$prefix] must be ${IdGenerator.PrefixLength} characters long")
 
   private[this] val random = new Random()
-  private[this] val tz = DateTimeZone.forID(timezoneName())
-
-  def prefix(): String
+  private[this] val tz = DateTimeZone.forID(timezone)
 
   def randomId(): String = {
-    prefix.toString + IdGenerator.Separator + dateString() + IdGenerator.Separator + random.alphaNumeric(randomLength)
     prefix.toString + IdGenerator.Separator + dateString() + IdGenerator.Separator + random.positiveInt()
   }
-
-  def length(): Int = IdGenerator.DefaultLength
-
-  def timezoneName(): String = "America/New_York"
 
   private[this] def prefixZero(value: Int): String = {
     (value < 10) match {
@@ -50,10 +46,6 @@ sealed trait IdGenerator {
   def dateString(): String = {
     val now = (new DateTime()).toDateTime(tz)
     s"${now.getYear}${prefixZero(now.getMonthOfYear)}${prefixZero(now.getDayOfMonth)}"
-  }
-
-  private[util] def randomLength = {
-    length - prefix().length - IdGenerator.Separator.length
   }
 
 }

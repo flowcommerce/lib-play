@@ -21,29 +21,7 @@ case class UrlKey(
   assert(minKeyLength > 0, s"minKeyLength[$minKeyLength] must be > 0")
   assert(maxIterations > 0, s"maxIterations[$maxIterations] must be > 0")
 
-  // Random generator
-  private[this] val random = new scala.util.Random
-  private[this] val Characters = "abcdefghijklmnopqrstuvwxyz"
-
-  /**
-    * Generate a random string of length n from the given alphabet
-    * 
-    * @param alphabet The complete set of 
-    * @param n Length of random string to generate
-    */
-  def randomString(alphabet: String)(n: Int): String = {
-    Stream.continually(random.nextInt(alphabet.size)).map(alphabet).take(n).mkString
-  }
- 
-  /**
-    * Generate a random string of length n using only a-z (lower case
-    * letters)
-    * 
-    * @param n Length of random string to generate
-    */
-  def randomAlphanumericString(n: Int) = {
-    randomString(Characters)(n)
-  }
+  private[this] val random = Random()
 
   // Only want lower case letters and dashes
   private[this] val Regexp1 = """([^0-9a-z\-\_\.])""".r
@@ -76,7 +54,7 @@ case class UrlKey(
     val formatted = format(value)
     (formatted.length < minKeyLength) match {
       case true => {
-        generate(value + randomAlphanumericString(minKeyLength - value.length), suffix)(checkFunction)
+        generate(value + random.alphaNumeric(minKeyLength - value.length), suffix)(checkFunction)
       }
       case false => {
         val (key, nextSuffix) = suffix match {

@@ -24,6 +24,12 @@ class IdGeneratorSpec extends FunSpec with Matchers {
     }.getMessage should be("assertion failed: prefix[  foo  ] must be trimmed")
   }
 
+  it("randomId must start with prefix") {
+    val generator = IdGenerator("tst")
+    val id = generator.randomId()
+    id.startsWith("tst-") should be(true)
+  }
+
   it("randomId") {
     val generator = IdGenerator("tst")
     val ids = 1.to(100).map { _ => generator.randomId() }

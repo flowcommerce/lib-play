@@ -3,6 +3,8 @@ package io.flow.play.util
 import org.joda.time.{DateTime, DateTimeZone}
 
 object IdGenerator {
+
+  val DefaultTimeZone = DateTimeZone.forID("America/New_York")
   val PrefixLength = 3
   val Separator = "-"
 }
@@ -19,24 +21,17 @@ object IdGenerator {
   */
 case class IdGenerator(
   prefix: String,
-  timezone: String = "America/New_York"
+  timezone: DateTimeZone = IdGenerator.DefaultTimeZone
 ) {
   assert(prefix.toLowerCase == prefix, s"prefix[$prefix] must be in lower case")
   assert(prefix.trim == prefix, s"prefix[$prefix] must be trimmed")
   assert(prefix.length == IdGenerator.PrefixLength, s"prefix[$prefix] must be ${IdGenerator.PrefixLength} characters long")
 
   private[this] val random = new Random()
-  private[this] val tz = DateTimeZone.forID(timezone)
+  private[this] val idFormat = Seq("%s", "%s", "%s").mkString(IdGenerator.Separator)
 
   def randomId(): String = {
-    prefix.toString + IdGenerator.Separator + dateString() + IdGenerator.Separator + random.positiveInt()
-  }
-
-  private[this] def prefixZero(value: Int): String = {
-    (value < 10) match {
-      case true => s"0$value"
-      case false => value.toString
-    }
+    idFormat.format(prefix, dateString(), random.positiveInt())
   }
 
   /**
@@ -44,8 +39,15 @@ case class IdGenerator(
     * "20150919"
     */
   def dateString(): String = {
-    val now = (new DateTime()).toDateTime(tz)
+    val now = (new DateTime()).toDateTime(timezone)
     s"${now.getYear}${prefixZero(now.getMonthOfYear)}${prefixZero(now.getDayOfMonth)}"
+  }
+
+  private[this] def prefixZero(value: Int): String = {
+    (value < 10) match {
+      case true => s"0$value"
+      case false => value.toString
+    }
   }
 
 }

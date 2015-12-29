@@ -5,8 +5,7 @@ import io.flow.play.util.DefaultConfig
 import io.flow.user.v0.{Authorization, Client}
 import io.flow.user.v0.errors.UnitResponse
 import io.flow.user.v0.models.User
-import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 import java.util.UUID
 
@@ -43,22 +42,13 @@ class DefaultUserTokensClient() extends UserTokensClient {
     }
   }
 
-  def awaitCallWith404[T](
-    future: Future[T]
-  )(implicit ec: ExecutionContext): Option[T] = {
-    Await.result(
-      callWith404(future),
-      1000.millis
-    )
-  }
-
   /**
     * Blocking call to fetch a user by Id.
     */
   def getUserById(
     id: String
-  )(implicit ec: ExecutionContext): Option[User] = {
-    awaitCallWith404( client.users.getById(id) )
+  )(implicit ec: ExecutionContext): Future[Option[User]] = {
+    callWith404( client.users.getById(id) )
   }
 
   /**

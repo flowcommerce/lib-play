@@ -43,15 +43,6 @@ class DefaultUserTokensClient() extends UserTokensClient {
   }
 
   /**
-    * Blocking call to fetch a user by Id.
-    */
-  def getUserById(
-    id: String
-  )(implicit ec: ExecutionContext): Future[Option[User]] = {
-    callWith404( client.users.getById(id) )
-  }
-
-  /**
     * Blocking call to fetch a user by API Token.
     */
   def getUserByToken(

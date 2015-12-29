@@ -22,12 +22,6 @@ class MockUserClient extends UserTokensClient {
     MockUserClient.getUserByToken(token)
   }
 
-  def getUserById(
-    id: String
-  )(implicit ec: ExecutionContext): Future[Option[User]] = {
-    MockUserClient.getUserById(id)
-  }
-
 }
 
 
@@ -76,14 +70,6 @@ object MockUserClient {
     token: String
   )(implicit ec: ExecutionContext): Future[Option[User]] = {
     Future { usersByToken.get(token) }
-  }
-
-  def getUserById(
-    id: String
-  )(implicit ec: ExecutionContext): Future[Option[User]] = {
-    Future {
-      usersById.get(id)
-    }
   }
 
 }

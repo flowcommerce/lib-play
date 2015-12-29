@@ -1,8 +1,7 @@
 package io.flow.play.clients
 
-import io.flow.common.v0.models.{Audit, Reference}
+import io.flow.play.util.IdGenerator
 import io.flow.user.v0.models.{Name, NameForm, User, UserForm}
-import java.util.UUID
 import org.joda.time.DateTime
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
@@ -23,10 +22,10 @@ class MockUserClient extends UserTokensClient {
     MockUserClient.getUserByToken(token)
   }
 
-  def getUserByGuid(
-    guid: String
+  def getUserById(
+    id: String
   )(implicit ec: ExecutionContext): Future[Option[User]] = {
-    MockUserClient.getUserByGuid(guid)
+    MockUserClient.getUserById(id)
   }
 
 }
@@ -34,19 +33,9 @@ class MockUserClient extends UserTokensClient {
 
 object MockUserClient {
 
-  private var usersByGuid = scala.collection.mutable.Map[UUID, User]()
-  private var usersByToken = scala.collection.mutable.Map[String, User]()
-
-  def makeAudit(): Audit = {
-    val reference = Reference(UUID.randomUUID())
-    val now = new DateTime()
-    Audit(
-      createdAt = now,
-      createdBy = reference,
-      updatedAt = now,
-      updatedBy = reference
-    )
-  }
+  private[this] var usersById = scala.collection.mutable.Map[String, User]()
+  private[this] var usersByToken = scala.collection.mutable.Map[String, User]()
+  private[this] val idGenerator = IdGenerator("tst")
 
   /**
     * Constructs a user object - in memory only.
@@ -55,7 +44,7 @@ object MockUserClient {
     form: UserForm = makeUserForm()
   ): User = {
     User(
-      guid = UUID.randomUUID,
+      id = idGenerator.randomId(),
       email = form.email,
       name = form.name match {
         case None => Name()
@@ -63,8 +52,7 @@ object MockUserClient {
           first = n.first,
           last = n.first
         )
-      },
-      audit = makeAudit
+      }
     )
   }
 
@@ -78,7 +66,7 @@ object MockUserClient {
     user: User,
     token: Option[String] = None
   ) {
-    usersByGuid ++= Map(user.guid -> user)
+    usersById ++= Map(user.id -> user)
     token.map { value =>
       usersByToken ++= Map(value -> user)
     }
@@ -90,14 +78,11 @@ object MockUserClient {
     Future { usersByToken.get(token) }
   }
 
-  def getUserByGuid(
-    guid: String
+  def getUserById(
+    id: String
   )(implicit ec: ExecutionContext): Future[Option[User]] = {
     Future {
-      Try(UUID.fromString(guid)) match {
-        case Success(validGuid) => usersByGuid.get(validGuid)
-        case Failure(_) => None
-      }
+      usersById.get(id)
     }
   }
 

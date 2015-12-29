@@ -42,7 +42,7 @@ trait AuthorizedRestController extends AnonymousRestController {
           }
           case Some(user) => {
             authorizationClient.authorize(
-              userGuid = user.guid,
+              userId = user.id,
               creates = creates,
               reads = reads,
               updates = updates,
@@ -61,7 +61,7 @@ trait AuthorizedRestController extends AnonymousRestController {
                     updates.map { context => s"updates($context)" },
                     deletes.map { context => s"deletes($context)" }
                   ).flatten.mkString(" ")
-                  Logger.info(s"authorization denied for userGuid[${user.guid}] context[$contexts]: $reason")
+                  Logger.info(s"authorization denied for userId[${user.id}] context[$contexts]: $reason")
                   Future {
                     Unauthorized
                   }

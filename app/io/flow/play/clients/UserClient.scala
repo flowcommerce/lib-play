@@ -53,16 +53,12 @@ class DefaultUserTokensClient() extends UserTokensClient {
   }
 
   /**
-    * Blocking call to fetch a user by Guid. If the provided guid is
-    * not a valid UUID, returns none.
+    * Blocking call to fetch a user by Id.
     */
-  def getUserByGuid(
-    guid: String
+  def getUserById(
+    id: String
   )(implicit ec: ExecutionContext): Option[User] = {
-    Try(UUID.fromString(guid)) match {
-      case Success(userGuid) => awaitCallWith404( client.users.getByGuid(userGuid) )
-      case Failure(ex) => None
-    }
+    awaitCallWith404( client.users.getById(id) )
   }
 
   /**
@@ -71,12 +67,7 @@ class DefaultUserTokensClient() extends UserTokensClient {
   def getUserByToken(
     token: String
   )(implicit ec: ExecutionContext): Future[Option[User]] = {
-    client.users.get(token = Some(token), limit = 1).map {
-      value => value.headOption
-    }.recover {
-      case UnitResponse(404) => None
-      case ex: Throwable => throw ex
-    }
+    callWith404( client.users.getTokensByToken(token) )
   }
 
 }

@@ -1,6 +1,5 @@
 package io.flow.play.clients
 
-import java.util.UUID
 import io.flow.authorization.v0.models.{Authorization, Check}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
@@ -8,23 +7,23 @@ import scala.util.{Failure, Success, Try}
 @javax.inject.Singleton
 class MockAuthorizationClient extends AuthorizationClient {
 
-  def grantAll(userGuid: UUID) {
-    MockAuthorizationClient.grantAll(userGuid)
+  def grantAll(userId: String) {
+    MockAuthorizationClient.grantAll(userId)
   }
 
-  def revokeAll(userGuid: UUID) {
-    MockAuthorizationClient.revokeAll(userGuid)
+  def revokeAll(userId: String) {
+    MockAuthorizationClient.revokeAll(userId)
   }
 
   override def authorize(
-    userGuid: UUID,
+    userId: String,
     creates: Option[String] = None,
     reads: Option[String] = None,
     updates: Option[String] = None,
     deletes: Option[String] = None
   )(implicit ec: ExecutionContext): Future[Check] = {
     MockAuthorizationClient.authorize(
-      userGuid = userGuid,
+      userId = userId,
       creates = creates,
       reads = reads,
       updates = updates,
@@ -52,19 +51,19 @@ object MockAuthorizationClient {
     reason = "No contexts were provided - by default we deny access"
   )
 
-  private var grantAll = scala.collection.mutable.ListBuffer[UUID]()
-  private var revokeAll = scala.collection.mutable.ListBuffer[UUID]()
+  private var grantAll = scala.collection.mutable.ListBuffer[String]()
+  private var revokeAll = scala.collection.mutable.ListBuffer[String]()
 
-  def grantAll(userGuid: UUID) {
-    grantAll.append(userGuid)
+  def grantAll(userId: String) {
+    grantAll.append(userId)
   }
 
-  def revokeAll(userGuid: UUID) {
-    revokeAll.append(userGuid)
+  def revokeAll(userId: String) {
+    revokeAll.append(userId)
   }
 
   def authorize(
-    userGuid: UUID,
+    userId: String,
     creates: Option[String] = None,
     reads: Option[String] = None,
     updates: Option[String] = None,
@@ -74,7 +73,7 @@ object MockAuthorizationClient {
       if (creates.isEmpty && reads.isEmpty && updates.isEmpty && deletes.isEmpty) {
         DeniedForNoContext
       } else {
-        (grantAll.contains(userGuid), revokeAll.contains(userGuid)) match {
+        (grantAll.contains(userId), revokeAll.contains(userId)) match {
           case (true, false) => Granted
           case _ => Denied
         }

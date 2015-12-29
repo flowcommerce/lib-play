@@ -6,7 +6,6 @@ import io.flow.authorization.v0.{Authorization, Client}
 import io.flow.authorization.v0.models.{Check, Privilege}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
-import java.util.UUID
 
 trait AuthorizationClient {
 
@@ -20,7 +19,7 @@ trait AuthorizationClient {
     *  @param deletes if specified, this is the context for which the user must have been granted the Delete privilege.
     */
   def authorize(
-    userGuid: UUID,
+    userId: String,
     creates: Option[String] = None,
     reads: Option[String] = None,
     updates: Option[String] = None,
@@ -51,7 +50,7 @@ class DefaultAuthorizationClient() extends AuthorizationClient {
   )
 
   override def authorize(
-    userGuid: UUID,
+    userId: String,
     creates: Option[String] = None,
     reads: Option[String] = None,
     updates: Option[String] = None,
@@ -63,16 +62,16 @@ class DefaultAuthorizationClient() extends AuthorizationClient {
     )
 
     if (!creates.isEmpty) {
-      checkAuthorization(userGuid, Privilege.Create, creates.get)
+      checkAuthorization(userId, Privilege.Create, creates.get)
 
     } else if (!reads.isEmpty) {
-      checkAuthorization(userGuid, Privilege.Read, reads.get)
+      checkAuthorization(userId, Privilege.Read, reads.get)
 
     } else if (!updates.isEmpty) {
-      checkAuthorization(userGuid, Privilege.Update, updates.get)
+      checkAuthorization(userId, Privilege.Update, updates.get)
 
     } else if (!deletes.isEmpty) {
-      checkAuthorization(userGuid, Privilege.Delete, updates.get)
+      checkAuthorization(userId, Privilege.Delete, updates.get)
 
     } else {
       Future {
@@ -82,12 +81,12 @@ class DefaultAuthorizationClient() extends AuthorizationClient {
   }
 
   private def checkAuthorization(
-    userGuid: UUID,
+    userId: String,
     privilege: Privilege,
     context: String
   )(implicit ec: ExecutionContext): Future[Check] = {
     client.checks.get(
-      userGuid = userGuid,
+      userId = userId,
       privilege = privilege,
       context = context
     )

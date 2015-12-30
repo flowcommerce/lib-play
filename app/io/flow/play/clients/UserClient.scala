@@ -2,16 +2,14 @@ package io.flow.play.clients
 
 import io.flow.play.util.DefaultConfig
 
-import io.flow.user.v0.{Authorization, Client}
+import io.flow.user.v0.Client
 import io.flow.user.v0.errors.UnitResponse
 import io.flow.user.v0.models.User
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
-import java.util.UUID
 
 object UserClient {
 
-  val AnonymousUserGuid = UUID.fromString("f2374f80-3a59-4194-aed2-ef228e6171e3")
+  val AnonymousUserId = "usr-20151006-2"
 
 }
 
@@ -26,9 +24,9 @@ trait UserTokensClient {
 @javax.inject.Singleton
 class DefaultUserTokensClient() extends UserTokensClient {
 
+  // e.g. http://api.flow.io/users
   def host: String = DefaultConfig.requiredString("user.api.host")
 
-  // host: e.g. http://api.flow.io/users
   lazy val client = new Client(host)
 
   def callWith404[T](

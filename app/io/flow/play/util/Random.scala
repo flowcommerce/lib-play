@@ -54,6 +54,10 @@ case class Random() {
     * prevent problems with any applications that infer numeric based
     * on first digit (or strip zeroes).
     * 
+    * The random string is guaranteed to start with a letter (we do
+    * this to avoid confusion in some programs like excel which can
+    * infer a numeric type based on the first character)
+    * 
     * @param n Length of random string to generate
     */
   def alphaNumeric(n: Int) = {
@@ -65,6 +69,10 @@ case class Random() {
     * numbers that are non ambiguous (e.g. B can look like an 8 so
     * neither B nor 8 is used in the random string). This is a good
     * option for random strings that will be read by humans.
+    * 
+    * The random string is guaranteed to start with a letter (we do
+    * this to avoid confusion in some programs like excel which can
+    * infer a numeric type based on the first character)
     * 
     * @param n Length of random string to generate
     */

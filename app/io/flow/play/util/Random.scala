@@ -8,13 +8,13 @@ case class Random() {
 
   private[this] val random = new scala.util.Random
 
+  private[this] val Ambiguous = "B8G6I1l0OoQDS5Z2".split("")
+  private[this] val Numbers = "0123456789"
   private[this] val Lower = "abcdefghijklmnopqrstuvwxyz"
   private[this] val LowerAndUpper = Lower + Lower.toUpperCase
   private[this] val LowerAndUpperAndNumbers = LowerAndUpper + "0123456789"
-  private[this] val Ambiguous = "B8G6I1l0OQDS5Z2"
-  private[this] val NonAmbiguousLowerAndUpperAndNumbers = LowerAndUpperAndNumbers.split("").filter ( l =>
-    !Ambiguous.split("").contains(l)
-  ).mkString("")
+  private[this] val NonAmbiguousLowerAndUpper = LowerAndUpper.split("").filter(!Ambiguous.contains(_)).mkString("")
+  private[this] val NonAmbiguousLowerAndUpperAndNumbers = NonAmbiguousLowerAndUpper + "3479"
 
   /**
     * Generate a random string of length n from the given alphabet
@@ -69,7 +69,7 @@ case class Random() {
     * @param n Length of random string to generate
     */
   def alphaNumericNonAmbiguous(n: Int) = {
-    alpha(1) + string(LowerAndUpperAndNumbers)(n - 1)
+    string(NonAmbiguousLowerAndUpper)(1) + string(NonAmbiguousLowerAndUpperAndNumbers)(n - 1)
   }
 
   /**

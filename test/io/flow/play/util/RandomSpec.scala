@@ -16,7 +16,7 @@ class RandomSpec extends FunSpec with Matchers {
       v.split("").find { l => !letters.contains(l) } match {
         case None => {}
         case Some(c) => {
-          sys.error(s"Found unexpected character[$c] for alphabet[$alphabet]")
+          sys.error(s"Found unexpected character[$c] for alphabet[$alphabet] value[$v]")
         }
       }
     }
@@ -28,6 +28,14 @@ class RandomSpec extends FunSpec with Matchers {
     // minimize chance of a false failure
     if (missing.size > 3) {
       sys.error("Did not find the following expected chars: " + missing.sorted.mkString(", "))
+    }
+  }
+
+  def validateDoesNotStartWithNumber(values: Seq[String]) {
+    val numbers = "0123456789".split("")
+    val found = values.filter { v => numbers.contains(v.substring(0, 1)) }
+    if (!found.isEmpty) {
+      sys.error("Value should not have started with a number: " + values.mkString(", "))
     }
   }
 
@@ -46,25 +54,21 @@ class RandomSpec extends FunSpec with Matchers {
   }
 
   it("alphaNumeric") {
-    val numbers = "0123456789"
     val values = 1.to(100).map { i => random.alphaNumeric(Length) }
     validate(
-      s"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$numbers",
+      s"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
       values
     )
-
-    values.find { v => numbers.split("").contains(v.substring(0, 1)) } should be(None)
+    validateDoesNotStartWithNumber(values)
   }
 
   it("alphaNumericNonAmbiguous") {
-    val numbers = "0123456789"
     val values = 1.to(100).map { i => random.alphaNumericNonAmbiguous(Length) }
     validate(
-      s"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$numbers",
+      s"abcdefghijkmnpqrstuvwxyzACEFHJKLMNPRTUVWXY3479",
       values
     )
-
-    values.find { v => numbers.split("").contains(v.substring(0, 1)) } should be(None)
+    validateDoesNotStartWithNumber(values)
   }
 
   it("positiveInt") {

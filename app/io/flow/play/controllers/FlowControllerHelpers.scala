@@ -1,7 +1,5 @@
 package io.flow.play.controllers
 
-import java.util.UUID
-
 trait FlowControllerHelpers {
 
   /**

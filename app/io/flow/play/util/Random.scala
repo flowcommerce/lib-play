@@ -11,6 +11,10 @@ case class Random() {
   private[this] val Lower = "abcdefghijklmnopqrstuvwxyz"
   private[this] val LowerAndUpper = Lower + Lower.toUpperCase
   private[this] val LowerAndUpperAndNumbers = LowerAndUpper + "0123456789"
+  private[this] val Ambiguous = "B8G6I1l0OQDS5Z2"
+  private[this] val NonAmbiguousLowerAndUpperAndNumbers = LowerAndUpperAndNumbers.split("").filter ( l =>
+    !Ambiguous.split("").contains(l)
+  ).mkString("")
 
   /**
     * Generate a random string of length n from the given alphabet
@@ -53,6 +57,18 @@ case class Random() {
     * @param n Length of random string to generate
     */
   def alphaNumeric(n: Int) = {
+    alpha(1) + string(LowerAndUpperAndNumbers)(n - 1)
+  }
+
+    /**
+    * Generate a random string of length n using only letters and
+    * numbers that are non ambiguous (e.g. B can look like an 8 so
+    * neither B nor 8 is used in the random string). This is a good
+    * option for random strings that will be read by humans.
+    * 
+    * @param n Length of random string to generate
+    */
+  def alphaNumericNonAmbiguous(n: Int) = {
     alpha(1) + string(LowerAndUpperAndNumbers)(n - 1)
   }
 

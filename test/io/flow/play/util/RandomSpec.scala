@@ -56,6 +56,17 @@ class RandomSpec extends FunSpec with Matchers {
     values.find { v => numbers.split("").contains(v.substring(0, 1)) } should be(None)
   }
 
+  it("alphaNumericNonAmbiguous") {
+    val numbers = "0123456789"
+    val values = 1.to(100).map { i => random.alphaNumericNonAmbiguous(Length) }
+    validate(
+      s"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ$numbers",
+      values
+    )
+
+    values.find { v => numbers.split("").contains(v.substring(0, 1)) } should be(None)
+  }
+
   it("positiveInt") {
     val values = 1.to(100).map { i => random.positiveInt() }
     values.distinct.size should be(values.size)

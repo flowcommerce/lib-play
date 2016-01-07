@@ -1,6 +1,6 @@
 package io.flow.play.controllers
 
-import io.flow.user.v0.models.User
+import io.flow.common.v0.models.User
 import io.flow.play.clients.UserTokensClient
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.mvc._

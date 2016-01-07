@@ -1,7 +1,8 @@
 package io.flow.play.clients
 
 import io.flow.play.util.IdGenerator
-import io.flow.user.v0.models.{Name, NameForm, User, UserForm}
+import io.flow.common.v0.models.{Name, User}
+import io.flow.user.v0.models.UserForm
 import org.joda.time.DateTime
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}

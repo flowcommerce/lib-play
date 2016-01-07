@@ -4,7 +4,7 @@ import io.flow.play.util.DefaultConfig
 
 import io.flow.user.v0.Client
 import io.flow.user.v0.errors.UnitResponse
-import io.flow.user.v0.models.User
+import io.flow.common.v0.models.User
 import scala.concurrent.{ExecutionContext, Future}
 
 object UserClient {

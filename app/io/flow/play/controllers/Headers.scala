@@ -1,7 +1,7 @@
 package io.flow.play.controllers
 
 import io.flow.play.clients.UserTokensClient
-import io.flow.user.v0.models.User
+import io.flow.common.v0.models.User
 import scala.concurrent.Future
 
 object Headers {

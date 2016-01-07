@@ -1,6 +1,6 @@
 package io.flow.play.controllers
 
-import io.flow.user.v0.models.User
+import io.flow.common.v0.models.User
 import play.api.mvc.Results.Unauthorized
 import scala.concurrent.Future
 import play.api.mvc._

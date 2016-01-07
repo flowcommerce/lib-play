@@ -1,6 +1,6 @@
 package io.flow.play.controllers
 
-import io.flow.user.v0.models.User
+import io.flow.common.v0.models.User
 import io.flow.authorization.v0.models.Check
 import io.flow.play.clients.AuthorizationClient
 import play.api.Logger

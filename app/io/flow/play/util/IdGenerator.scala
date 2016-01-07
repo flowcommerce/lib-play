@@ -14,9 +14,9 @@ object IdGenerator {
   * simpler for a human to understand / type and are preferred when we
   * expect humans to interact w/ the IDs.
   * 
-  * @prefix Global prefix to identify the type of resource for which you
+  * @param prefix Global prefix to identify the type of resource for which you
   *         are generating an ID. Must be 3 characters, lowercase.
-  * @timezone The ID includes a date stamp (e.g. 20150405) - the timezone
+  * @param timezone The ID includes a date stamp (e.g. 20150405) - the timezone
   *         name is used to figure out what day it is. Defaults to America/New_York
   */
 case class IdGenerator(

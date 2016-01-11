@@ -32,17 +32,8 @@ trait AuthorizationClient {
 class DefaultAuthorizationClient() extends AuthorizationClient {
 
   def host: String = DefaultConfig.requiredString("authorization.api.host")
-  def token: String = DefaultConfig.requiredString("authorization.api.token")
 
-  lazy val client = new Client(
-    apiUrl = host,
-    auth = Some(
-      Authorization.Basic(
-        username = token,
-        password = None
-      )
-    )
-  )
+  lazy val client = new Client(host)
 
   private[this] val DefaultDenial = Check(
     result = false,

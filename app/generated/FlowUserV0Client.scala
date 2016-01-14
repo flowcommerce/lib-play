@@ -5,10 +5,28 @@
  */
 package io.flow.user.v0.models {
 
+  sealed trait EventData
+
+  case class Event(
+    id: String,
+    timestamp: _root_.org.joda.time.DateTime,
+    user: io.flow.common.v0.models.UserReference,
+    `type`: io.flow.common.v0.models.ChangeType,
+    namespace: String,
+    version: String,
+    data: io.flow.user.v0.models.EventData
+  )
+
   case class NameForm(
     first: _root_.scala.Option[String] = None,
     last: _root_.scala.Option[String] = None
   )
+
+  case class UserData(
+    id: String,
+    email: _root_.scala.Option[String] = None,
+    name: io.flow.common.v0.models.Name
+  ) extends EventData
 
   case class UserForm(
     email: _root_.scala.Option[String] = None,
@@ -22,6 +40,15 @@ package io.flow.user.v0.models {
     `type`: io.flow.common.v0.models.ChangeType,
     user: io.flow.common.v0.models.User
   )
+
+  /**
+   * Provides future compatibility in clients - in the future, when a type is added
+   * to the union EventData, it will need to be handled in the client code. This
+   * implementation will deserialize these future types as an instance of this class.
+   */
+  case class EventDataUndefinedType(
+    description: String
+  ) extends EventData
 
   sealed trait System
 
@@ -113,6 +140,38 @@ package io.flow.user.v0.models {
       }
     }
 
+    implicit def jsonReadsUserEvent: play.api.libs.json.Reads[Event] = {
+      (
+        (__ \ "id").read[String] and
+        (__ \ "timestamp").read[_root_.org.joda.time.DateTime] and
+        (__ \ "user").read[io.flow.common.v0.models.UserReference] and
+        (__ \ "type").read[io.flow.common.v0.models.ChangeType] and
+        (__ \ "namespace").read[String] and
+        (__ \ "version").read[String] and
+        (__ \ "data").read[io.flow.user.v0.models.EventData]
+      )(Event.apply _)
+    }
+
+    def jsObjectEvent(obj: io.flow.user.v0.models.Event) = {
+      play.api.libs.json.Json.obj(
+        "id" -> play.api.libs.json.JsString(obj.id),
+        "timestamp" -> play.api.libs.json.JsString(_root_.org.joda.time.format.ISODateTimeFormat.dateTime.print(obj.timestamp)),
+        "user" -> io.flow.common.v0.models.json.jsObjectUserReference(obj.user),
+        "type" -> play.api.libs.json.JsString(obj.`type`.toString),
+        "namespace" -> play.api.libs.json.JsString(obj.namespace),
+        "version" -> play.api.libs.json.JsString(obj.version),
+        "data" -> jsObjectEventData(obj.data)
+      )
+    }
+
+    implicit def jsonWritesUserEvent: play.api.libs.json.Writes[Event] = {
+      new play.api.libs.json.Writes[io.flow.user.v0.models.Event] {
+        def writes(obj: io.flow.user.v0.models.Event) = {
+          jsObjectEvent(obj)
+        }
+      }
+    }
+
     implicit def jsonReadsUserNameForm: play.api.libs.json.Reads[NameForm] = {
       (
         (__ \ "first").readNullable[String] and
@@ -133,6 +192,22 @@ package io.flow.user.v0.models {
           jsObjectNameForm(obj)
         }
       }
+    }
+
+    implicit def jsonReadsUserUserData: play.api.libs.json.Reads[UserData] = {
+      (
+        (__ \ "id").read[String] and
+        (__ \ "email").readNullable[String] and
+        (__ \ "name").read[io.flow.common.v0.models.Name]
+      )(UserData.apply _)
+    }
+
+    def jsObjectUserData(obj: io.flow.user.v0.models.UserData) = {
+      play.api.libs.json.Json.obj(
+        "id" -> play.api.libs.json.JsString(obj.id),
+        "email" -> play.api.libs.json.Json.toJson(obj.email),
+        "name" -> io.flow.common.v0.models.json.jsObjectName(obj.name)
+      )
     }
 
     implicit def jsonReadsUserUserForm: play.api.libs.json.Reads[UserForm] = {
@@ -181,6 +256,37 @@ package io.flow.user.v0.models {
       new play.api.libs.json.Writes[io.flow.user.v0.models.UserVersion] {
         def writes(obj: io.flow.user.v0.models.UserVersion) = {
           jsObjectUserVersion(obj)
+        }
+      }
+    }
+
+    implicit def jsonReadsUserEventData: play.api.libs.json.Reads[EventData] = new play.api.libs.json.Reads[EventData] {
+      def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[EventData] = {
+        (js \ "discriminator").validate[String] match {
+          case play.api.libs.json.JsError(msg) => play.api.libs.json.JsError(msg)
+          case play.api.libs.json.JsSuccess(discriminator, _) => {
+            discriminator match {
+              case "user_data" => js.validate[io.flow.user.v0.models.UserData]
+              case other => play.api.libs.json.JsSuccess(io.flow.user.v0.models.EventDataUndefinedType(other))
+            }
+          }
+        }
+      }
+    }
+
+    def jsObjectEventData(obj: io.flow.user.v0.models.EventData) = {
+      obj match {
+        case x: io.flow.user.v0.models.UserData => jsObjectUserData(x) ++ play.api.libs.json.Json.obj("discriminator" -> "user_data")
+        case other => {
+          sys.error(s"The type[${other.getClass.getName}] has no JSON writer")
+        }
+      }
+    }
+
+    implicit def jsonWritesUserEventData: play.api.libs.json.Writes[EventData] = {
+      new play.api.libs.json.Writes[io.flow.user.v0.models.EventData] {
+        def writes(obj: io.flow.user.v0.models.EventData) = {
+          jsObjectEventData(obj)
         }
       }
     }
@@ -314,11 +420,25 @@ package io.flow.user.v0 {
 
       override def post(
         userForm: io.flow.user.v0.models.UserForm
-      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = {
+      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.UserReference] = {
         val payload = play.api.libs.json.Json.toJson(userForm)
 
         _executeRequest("POST", s"/", body = Some(payload)).map {
-          case r if r.status == 201 => _root_.io.flow.user.v0.Client.parseJson("io.flow.common.v0.models.User", r, _.validate[io.flow.common.v0.models.User])
+          case r if r.status == 201 => _root_.io.flow.user.v0.Client.parseJson("io.flow.common.v0.models.UserReference", r, _.validate[io.flow.common.v0.models.UserReference])
+          case r if r.status == 401 => throw new io.flow.user.v0.errors.UnitResponse(r.status)
+          case r if r.status == 422 => throw new io.flow.user.v0.errors.ErrorsResponse(r)
+          case r => throw new io.flow.user.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 201, 401, 422")
+        }
+      }
+
+      override def putById(
+        id: String,
+        userForm: io.flow.user.v0.models.UserForm
+      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.UserReference] = {
+        val payload = play.api.libs.json.Json.toJson(userForm)
+
+        _executeRequest("PUT", s"/${play.utils.UriEncoding.encodePathSegment(id, "UTF-8")}", body = Some(payload)).map {
+          case r if r.status == 201 => _root_.io.flow.user.v0.Client.parseJson("io.flow.common.v0.models.UserReference", r, _.validate[io.flow.common.v0.models.UserReference])
           case r if r.status == 401 => throw new io.flow.user.v0.errors.UnitResponse(r.status)
           case r if r.status == 422 => throw new io.flow.user.v0.errors.ErrorsResponse(r)
           case r => throw new io.flow.user.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 201, 401, 422")
@@ -472,7 +592,15 @@ package io.flow.user.v0 {
      */
     def post(
       userForm: io.flow.user.v0.models.UserForm
-    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User]
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.UserReference]
+
+    /**
+     * Update a user.
+     */
+    def putById(
+      id: String,
+      userForm: io.flow.user.v0.models.UserForm
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.UserReference]
 
     /**
      * Provides visibility into recent changes of each object, including deletion

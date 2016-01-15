@@ -4,8 +4,8 @@ import org.scalatest.{Matchers, FunSpec}
 import play.api.libs.json.JsValue
 
 
-class FormDataHelperSpec extends FunSpec with Matchers {
-  val fdHelper = FormDataHelper
+class FormDataSpec extends FunSpec with Matchers {
+  val fdHelper = FormData
 
   describe("convertFormDataValuesToJson") {
 

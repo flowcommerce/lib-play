@@ -35,7 +35,6 @@ object FormDataHelper {
         }
       case None =>
         Future {
-          // TODO: What do you think about inferring the type if not specified?
           UnprocessableEntity(
             Json.toJson(
               Validation.error(s"Missing Content-Type Header. Must be 'application/x-www-form-urlencoded' or 'application/json'")

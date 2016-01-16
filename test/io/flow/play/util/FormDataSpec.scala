@@ -15,7 +15,7 @@ class FormDataSpec extends FunSpec with Matchers {
         "field2.custom1" -> Seq("value"),
         "field2.custom2" -> Seq("value"))
 
-      fdHelper.convertFormDataValuesToJson(data) match {
+      fdHelper.convertFormDataValuesDotNotation(data) match {
         case res: Map[String, JsValue] => assert(true)
         case _ => assert(false)
       }

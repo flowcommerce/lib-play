@@ -18,7 +18,7 @@ package io.flow.authorization.v0.models {
     id: String,
     privilege: io.flow.authorization.v0.models.Privilege,
     context: String,
-    role: io.flow.authorization.v0.models.RoleSummary
+    role: io.flow.authorization.v0.models.Role
   ) extends Authorization
 
   case class AuthorizationUser(
@@ -42,7 +42,7 @@ package io.flow.authorization.v0.models {
 
   case class Membership(
     id: String,
-    role: io.flow.authorization.v0.models.RoleSummary,
+    role: io.flow.authorization.v0.models.Role,
     user: io.flow.common.v0.models.ExpandableUser
   )
 
@@ -64,11 +64,6 @@ package io.flow.authorization.v0.models {
   )
 
   case class RoleForm(
-    name: String
-  )
-
-  case class RoleSummary(
-    id: String,
     name: String
   )
 
@@ -213,7 +208,7 @@ package io.flow.authorization.v0.models {
         (__ \ "id").read[String] and
         (__ \ "privilege").read[io.flow.authorization.v0.models.Privilege] and
         (__ \ "context").read[String] and
-        (__ \ "role").read[io.flow.authorization.v0.models.RoleSummary]
+        (__ \ "role").read[io.flow.authorization.v0.models.Role]
       )(AuthorizationRole.apply _)
     }
 
@@ -222,7 +217,7 @@ package io.flow.authorization.v0.models {
         "id" -> play.api.libs.json.JsString(obj.id),
         "privilege" -> play.api.libs.json.JsString(obj.privilege.toString),
         "context" -> play.api.libs.json.JsString(obj.context),
-        "role" -> jsObjectRoleSummary(obj.role)
+        "role" -> jsObjectRole(obj.role)
       )
     }
 
@@ -295,7 +290,7 @@ package io.flow.authorization.v0.models {
     implicit def jsonReadsAuthorizationMembership: play.api.libs.json.Reads[Membership] = {
       (
         (__ \ "id").read[String] and
-        (__ \ "role").read[io.flow.authorization.v0.models.RoleSummary] and
+        (__ \ "role").read[io.flow.authorization.v0.models.Role] and
         (__ \ "user").read[io.flow.common.v0.models.ExpandableUser]
       )(Membership.apply _)
     }
@@ -303,7 +298,7 @@ package io.flow.authorization.v0.models {
     def jsObjectMembership(obj: io.flow.authorization.v0.models.Membership) = {
       play.api.libs.json.Json.obj(
         "id" -> play.api.libs.json.JsString(obj.id),
-        "role" -> jsObjectRoleSummary(obj.role),
+        "role" -> jsObjectRole(obj.role),
         "user" -> io.flow.common.v0.models.json.jsObjectExpandableUser(obj.user)
       )
     }
@@ -400,28 +395,6 @@ package io.flow.authorization.v0.models {
       new play.api.libs.json.Writes[io.flow.authorization.v0.models.RoleForm] {
         def writes(obj: io.flow.authorization.v0.models.RoleForm) = {
           jsObjectRoleForm(obj)
-        }
-      }
-    }
-
-    implicit def jsonReadsAuthorizationRoleSummary: play.api.libs.json.Reads[RoleSummary] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "name").read[String]
-      )(RoleSummary.apply _)
-    }
-
-    def jsObjectRoleSummary(obj: io.flow.authorization.v0.models.RoleSummary) = {
-      play.api.libs.json.Json.obj(
-        "id" -> play.api.libs.json.JsString(obj.id),
-        "name" -> play.api.libs.json.JsString(obj.name)
-      )
-    }
-
-    implicit def jsonWritesAuthorizationRoleSummary: play.api.libs.json.Writes[RoleSummary] = {
-      new play.api.libs.json.Writes[io.flow.authorization.v0.models.RoleSummary] {
-        def writes(obj: io.flow.authorization.v0.models.RoleSummary) = {
-          jsObjectRoleSummary(obj)
         }
       }
     }
@@ -594,7 +567,7 @@ package io.flow.authorization.v0 {
         id: _root_.scala.Option[Seq[String]] = None,
         limit: Long = 25,
         offset: Long = 0,
-        sort: String = "created_at"
+        sort: String = "journal_timestamp"
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.authorization.v0.models.AuthorizationVersion]] = {
         val queryParameters = Seq(
           Some("limit" -> limit.toString),
@@ -708,7 +681,7 @@ package io.flow.authorization.v0 {
         membershipId: _root_.scala.Option[Seq[String]] = None,
         limit: Long = 25,
         offset: Long = 0,
-        sort: String = "created_at"
+        sort: String = "journal_timestamp"
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.authorization.v0.models.MembershipVersion]] = {
         val queryParameters = Seq(
           Some("limit" -> limit.toString),
@@ -789,7 +762,7 @@ package io.flow.authorization.v0 {
         roleId: _root_.scala.Option[Seq[String]] = None,
         limit: Long = 25,
         offset: Long = 0,
-        sort: String = "created_at"
+        sort: String = "journal_timestamp"
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.authorization.v0.models.RoleVersion]] = {
         val queryParameters = Seq(
           Some("limit" -> limit.toString),
@@ -947,7 +920,7 @@ package io.flow.authorization.v0 {
       id: _root_.scala.Option[Seq[String]] = None,
       limit: Long = 25,
       offset: Long = 0,
-      sort: String = "created_at"
+      sort: String = "journal_timestamp"
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.authorization.v0.models.AuthorizationVersion]]
 
     def getById(
@@ -994,7 +967,7 @@ package io.flow.authorization.v0 {
       membershipId: _root_.scala.Option[Seq[String]] = None,
       limit: Long = 25,
       offset: Long = 0,
-      sort: String = "created_at"
+      sort: String = "journal_timestamp"
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.authorization.v0.models.MembershipVersion]]
 
     def getById(
@@ -1027,7 +1000,7 @@ package io.flow.authorization.v0 {
       roleId: _root_.scala.Option[Seq[String]] = None,
       limit: Long = 25,
       offset: Long = 0,
-      sort: String = "created_at"
+      sort: String = "journal_timestamp"
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.authorization.v0.models.RoleVersion]]
 
     def getById(

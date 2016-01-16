@@ -284,7 +284,7 @@ package io.flow.user.v0 {
         ).flatten ++
           id.getOrElse(Nil).map("id" -> _)
 
-        _executeRequest("GET", s"/", queryParameters = queryParameters).map {
+        _executeRequest("GET", s"/users", queryParameters = queryParameters).map {
           case r if r.status == 200 => _root_.io.flow.user.v0.Client.parseJson("Seq[io.flow.common.v0.models.User]", r, _.validate[Seq[io.flow.common.v0.models.User]])
           case r if r.status == 401 => throw new io.flow.user.v0.errors.UnitResponse(r.status)
           case r => throw new io.flow.user.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 200, 401")
@@ -294,7 +294,7 @@ package io.flow.user.v0 {
       override def getTokensByToken(
         token: String
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = {
-        _executeRequest("GET", s"/tokens/${play.utils.UriEncoding.encodePathSegment(token, "UTF-8")}").map {
+        _executeRequest("GET", s"/users/tokens/${play.utils.UriEncoding.encodePathSegment(token, "UTF-8")}").map {
           case r if r.status == 200 => _root_.io.flow.user.v0.Client.parseJson("io.flow.common.v0.models.User", r, _.validate[io.flow.common.v0.models.User])
           case r if r.status == 401 => throw new io.flow.user.v0.errors.UnitResponse(r.status)
           case r if r.status == 404 => throw new io.flow.user.v0.errors.UnitResponse(r.status)
@@ -305,7 +305,7 @@ package io.flow.user.v0 {
       override def getById(
         id: String
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = {
-        _executeRequest("GET", s"/${play.utils.UriEncoding.encodePathSegment(id, "UTF-8")}").map {
+        _executeRequest("GET", s"/users/${play.utils.UriEncoding.encodePathSegment(id, "UTF-8")}").map {
           case r if r.status == 200 => _root_.io.flow.user.v0.Client.parseJson("io.flow.common.v0.models.User", r, _.validate[io.flow.common.v0.models.User])
           case r if r.status == 401 => throw new io.flow.user.v0.errors.UnitResponse(r.status)
           case r if r.status == 404 => throw new io.flow.user.v0.errors.UnitResponse(r.status)
@@ -318,7 +318,7 @@ package io.flow.user.v0 {
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = {
         val payload = play.api.libs.json.Json.toJson(userForm)
 
-        _executeRequest("POST", s"/", body = Some(payload)).map {
+        _executeRequest("POST", s"/users", body = Some(payload)).map {
           case r if r.status == 201 => _root_.io.flow.user.v0.Client.parseJson("io.flow.common.v0.models.User", r, _.validate[io.flow.common.v0.models.User])
           case r if r.status == 401 => throw new io.flow.user.v0.errors.UnitResponse(r.status)
           case r if r.status == 422 => throw new io.flow.user.v0.errors.ErrorsResponse(r)
@@ -331,7 +331,7 @@ package io.flow.user.v0 {
         userId: _root_.scala.Option[Seq[String]] = None,
         limit: Long = 25,
         offset: Long = 0,
-        sort: String = "created_at"
+        sort: String = "journal_timestamp"
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.user.v0.models.UserVersion]] = {
         val queryParameters = Seq(
           Some("limit" -> limit.toString),
@@ -341,7 +341,7 @@ package io.flow.user.v0 {
           id.getOrElse(Nil).map("id" -> _) ++
           userId.getOrElse(Nil).map("user_id" -> _)
 
-        _executeRequest("GET", s"/versions", queryParameters = queryParameters).map {
+        _executeRequest("GET", s"/users/versions", queryParameters = queryParameters).map {
           case r if r.status == 200 => _root_.io.flow.user.v0.Client.parseJson("Seq[io.flow.user.v0.models.UserVersion]", r, _.validate[Seq[io.flow.user.v0.models.UserVersion]])
           case r if r.status == 401 => throw new io.flow.user.v0.errors.UnitResponse(r.status)
           case r => throw new io.flow.user.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 200, 401")
@@ -483,7 +483,7 @@ package io.flow.user.v0 {
       userId: _root_.scala.Option[Seq[String]] = None,
       limit: Long = 25,
       offset: Long = 0,
-      sort: String = "created_at"
+      sort: String = "journal_timestamp"
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.user.v0.models.UserVersion]]
   }
 

@@ -4,22 +4,24 @@ import play.api.libs.json.{JsObject, Json, JsValue}
 
 
 object FormData {
-  def convertFormDataValuesToJson(data: Map[String, Seq[String]]): Iterable[JsValue] = {
-    data.map{ case (key, value) =>
+  def formDataToJson(data: Map[String, Seq[String]]): JsValue = {
+    val nested = data.map{ case (key, value) =>
       key.split("\\[").foldRight(
         if(key.contains("[]"))
           Json.toJson(value)  //take seq for arrays
         else
-          Json.toJson(value.head)
+          Json.toJson(value.headOption.getOrElse(""))
       ){ case (newKey, v) =>
         val newVal = {
           val js = (v \ "").getOrElse(v)
+
+          //convert '{key: val}' to '[{key: val}]' if previous key specifies array type, otherwise nothing
           if(newKey == "]"){
             if(!js.toString.startsWith("[")) {
               val s = (v \ "").getOrElse(v).toString.
                 replaceFirst("\\{", "[{").
                 reverse.
-                replaceFirst("\\}", "]}").   //because its reversed
+                replaceFirst("\\}", "]}").
                 reverse
 
               Json.toJson(Json.parse(s))
@@ -34,10 +36,6 @@ object FormData {
         Json.obj(newKey.replace("]", "") -> newVal)
       }
     }
-  }
-
-  def formDataToJson(data: Map[String, Seq[String]]): JsValue = {
-    val nested = convertFormDataValuesToJson(data)
 
     Json.toJson(nested.foldLeft(Json.obj()){ case (a, b) => a.deepMerge(b.as[JsObject]) })
   }

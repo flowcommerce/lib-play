@@ -41,7 +41,7 @@ object FormData {
               val s = (v \ "").getOrElse(v).toString.
                 replaceFirst("\\{", "[{").
                 reverse.
-                replaceFirst("\\}", "]}").   //becuase its reversed
+                replaceFirst("\\}", "]}").   //because its reversed
                 reverse
 
               Json.toJson(Json.parse(s))

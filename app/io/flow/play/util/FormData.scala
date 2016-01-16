@@ -26,7 +26,7 @@ object FormData {
     }
   }
 
-  def convertFormDataValuesBracketNoations(data: Map[String, Seq[String]]): Iterable[JsValue] = {
+  def convertFormDataValuesBracketNotations(data: Map[String, Seq[String]]): Iterable[JsValue] = {
     data.map{ case (key, value) =>
       key.split("\\[").foldRight(
         if(key.contains("[]"))
@@ -64,7 +64,7 @@ object FormData {
         convertFormDataValuesDotNotation(data).map(fd =>
           fd._1.split("\\.").foldRight(fd._2) { case (key, value) => Json.obj(key -> value) })
       else
-        convertFormDataValuesBracketNoations(data)
+        convertFormDataValuesBracketNotations(data)
 
     Json.toJson(nested.foldLeft(Json.obj()){ case (a, b) => a.deepMerge(b.as[JsObject]) })
   }

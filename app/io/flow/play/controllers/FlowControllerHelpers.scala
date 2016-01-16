@@ -7,7 +7,7 @@ import play.api.mvc.{Result, AnyContent}
 import scala.concurrent.Future
 import play.api.libs.json._
 import io.flow.common.v0.models.json._
-
+import scala.concurrent.ExecutionContext.Implicits.global
 
 
 trait FlowControllerHelpers {

@@ -4,29 +4,7 @@ import play.api.libs.json.{JsObject, Json, JsValue}
 
 
 object FormData {
-  def convertFormDataValuesDotNotation(data: Map[String, Seq[String]]): Map[String, JsValue] = {
-    data.map { case (key, value) =>
-      key -> (value match {
-        case a: Seq[Any] => {
-          a.toList match {
-            case one :: Nil => {
-              // Normally we just have single parameters -
-              // we default to NON array json value.
-              Json.toJson(one)
-            }
-            case _ => {
-              Json.toJson(a)
-            }
-          }
-        }
-        case _ => {
-          Json.toJson(value)
-        }
-      })
-    }
-  }
-
-  def convertFormDataValuesBracketNotations(data: Map[String, Seq[String]]): Iterable[JsValue] = {
+  def convertFormDataValuesToJson(data: Map[String, Seq[String]]): Iterable[JsValue] = {
     data.map{ case (key, value) =>
       key.split("\\[").foldRight(
         if(key.contains("[]"))
@@ -59,12 +37,7 @@ object FormData {
   }
 
   def formDataToJson(data: Map[String, Seq[String]]): JsValue = {
-    val nested =
-      if (data.keySet.exists(k => k.contains(".")))
-        convertFormDataValuesDotNotation(data).map(fd =>
-          fd._1.split("\\.").foldRight(fd._2) { case (key, value) => Json.obj(key -> value) })
-      else
-        convertFormDataValuesBracketNotations(data)
+    val nested = convertFormDataValuesToJson(data)
 
     Json.toJson(nested.foldLeft(Json.obj()){ case (a, b) => a.deepMerge(b.as[JsObject]) })
   }

@@ -6,6 +6,8 @@ import play.api.mvc.Results._
 import play.api.mvc.{Result, AnyContent}
 import scala.concurrent.Future
 import play.api.libs.json._
+import io.flow.common.v0.models.json._
+
 
 
 trait FlowControllerHelpers {

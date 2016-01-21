@@ -29,6 +29,16 @@ trait FlowControllerHelpers {
     }
   }
 
+  /**
+    * Helper class that responds to either form data or a Json
+    * object. If we receive form data (content-type:
+    * application/x-www-form-urlencoded), we turn that into a JSON
+    * Object automatically. This enables us to provide API endpoints
+    * that can respond either to form data or posted JSON objects. The
+    * original use case for which we added support for form data was
+    * to enable using "-d" from curl in the command line (simplifying
+    * the examples for our users).
+    */
   object JsValue {
 
     def async(

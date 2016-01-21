@@ -29,40 +29,72 @@ trait FlowControllerHelpers {
     }
   }
 
-  def withJsValue(
-   contentType: Option[String],
-   body: AnyContent
-  ) (
-   function: JsValue => Future[Result]
-  ): Future[Result] = {
-    contentType match {
-      case Some("application/x-www-form-urlencoded") =>
-        function(
-          body.asFormUrlEncoded.map(FormData.formDataToJson(_)).getOrElse(Json.obj())
-        )
-      case Some("application/json") =>
-        function(
-          body.asJson match {
-            case Some(json) => json
-            case None => Json.toJson(Validation.invalidJsonDocument())
-          }
-        )
-      case Some(ct) =>
-        Future {
-          UnprocessableEntity(
-            Json.toJson(
-              Validation.error(s"Unsupported Content-Type, [$ct]. Must be 'application/x-www-form-urlencoded' or 'application/json'")
+  object JsValue {
+
+    def async(
+      contentType: Option[String],
+      body: AnyContent
+    ) (
+      function: JsValue => Future[Result]
+    ): Future[Result] = {
+      parse(
+        contentType,
+        body,
+        { jsValue => function(jsValue) },
+        { errorResult => Future { errorResult } }
+      )
+    }
+
+    def sync(
+      contentType: Option[String],
+      body: AnyContent
+    ) (
+      function: JsValue => Result
+    ): Result = {
+      parse(
+        contentType,
+        body,
+        { jsValue => function(jsValue) },
+        { errorResult => errorResult }
+      )
+    }
+
+    private[this] def parse[T](
+      contentType: Option[String],
+      body: AnyContent,
+      function: JsValue => T,
+      errorFunction: Result => T
+    ): T = {
+      contentType match {
+        case Some("application/x-www-form-urlencoded") =>
+          function(
+            body.asFormUrlEncoded.map(FormData.formDataToJson(_)).getOrElse(Json.obj())
+          )
+        case Some("application/json") =>
+          function(
+            body.asJson match {
+              case Some(json) => json
+              case None => Json.toJson(Validation.invalidJsonDocument())
+            }
+          )
+        case Some(ct) =>
+          errorFunction(
+            UnprocessableEntity(
+              Json.toJson(
+                Validation.error(s"Unsupported Content-Type, [$ct]. Must be 'application/x-www-form-urlencoded' or 'application/json'")
+              )
             )
           )
-        }
-      case None =>
-        Future {
-          UnprocessableEntity(
-            Json.toJson(
-              Validation.error(s"Missing Content-Type Header. Must be 'application/x-www-form-urlencoded' or 'application/json'")
+        case None =>
+          errorFunction(
+            UnprocessableEntity(
+              Json.toJson(
+                Validation.error(s"Missing Content-Type Header. Must be 'application/x-www-form-urlencoded' or 'application/json'")
+              )
             )
           )
-        }
+      }
     }
   }
+
 }

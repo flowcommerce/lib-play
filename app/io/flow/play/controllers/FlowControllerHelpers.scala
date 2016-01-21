@@ -40,7 +40,7 @@ trait FlowControllerHelpers {
       parse(
         contentType,
         body,
-        { jsValue => function(jsValue) },
+        function,
         { errorResult => Future { errorResult } }
       )
     }
@@ -54,7 +54,7 @@ trait FlowControllerHelpers {
       parse(
         contentType,
         body,
-        { jsValue => function(jsValue) },
+        function,
         { errorResult => errorResult }
       )
     }

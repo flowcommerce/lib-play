@@ -4,12 +4,13 @@ import io.flow.play.util.DefaultConfig
 
 import io.flow.user.v0.Client
 import io.flow.user.v0.errors.UnitResponse
-import io.flow.common.v0.models.User
+import io.flow.common.v0.models.{User, UserReference}
 import scala.concurrent.{ExecutionContext, Future}
 
 object UserClient {
 
-  val AnonymousUserId = "usr-20151006-2"
+  val SystemUser = UserReference("usr-20151006-1")
+  val AnonymousUser = UserReference("usr-20151006-2")
 
 }
 

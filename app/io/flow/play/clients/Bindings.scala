@@ -11,7 +11,7 @@ class UserTokensClientModule extends Module {
         bind[UserTokensClient].to[DefaultUserTokensClient]
       )
       case Mode.Test => Seq(
-        bind[UserTokensClient].to[MockUserClient]
+        bind[UserTokensClient].to[MockUserTokensClient]
       )
     }
   }

@@ -9,11 +9,21 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
 /**
-  * Common utilities to help with logging, scheduling of actors at FLow.
+  * Common utilities to help with logging, scheduling of actors.
+  * 
+  * This class requires configuration of the execution context called
+  * 'io-flow-play-actors-context'. Example configuration for the play
+  * project:
+  * 
+  *     io-flow-play-actors-context {
+  *       fork-join-executor {
+  *       parallelism-factor = 2.0
+  *       parallelism-max = 200
+  *     }
   */
 trait Util {
 
-  implicit val mainActorExecutionContext: ExecutionContext = Akka.system.dispatchers.lookup("main-actor-context")
+  private[this] implicit val mainActorExecutionContext: ExecutionContext = Akka.system.dispatchers.lookup("io-flow-play-actors-context")
 
   /**
    * Helper to schedule a message to be sent on a recurring interval

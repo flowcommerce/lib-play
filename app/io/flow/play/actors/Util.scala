@@ -17,8 +17,9 @@ import scala.concurrent.duration._
   * 
   *     io-flow-play-actors-context {
   *       fork-join-executor {
-  *       parallelism-factor = 2.0
-  *       parallelism-max = 200
+  *         parallelism-factor = 2.0
+  *         parallelism-max = 200
+  *       }
   *     }
   */
 trait Util {
@@ -49,6 +50,23 @@ trait Util {
     )
   }
 
+  /**
+    * Wraps a block with error handling that will catch any throwable and log it.
+    *
+    * Example usage:
+    * 
+    * class MainActor(name: String) extends Actor with ActorLogging with Util {
+    * 
+    * def receive = akka.event.LoggingReceive {
+    *   
+    *   case m @ MainActor.Messages.ExampleMessage => withErrorHandler(m) {
+    *     ...
+    *   }
+    *
+    *   case m: Any => logUnhandledMessage(m)
+    * 
+    * }
+    */
   def withErrorHandler[T](
     description: Any
   ) (
@@ -63,6 +81,24 @@ trait Util {
     }
   }
 
+  /**
+    * Wraps a block that will log that the message has been received. Also will
+    * catch any throwable and log it.
+    *
+    * Example usage:
+    * 
+    * class MainActor(name: String) extends Actor with ActorLogging with Util {
+    * 
+    * def receive = akka.event.LoggingReceive {
+    *   
+    *   case m @ MainActor.Messages.ExampleMessage => withVerboseErrorHandler(m) {
+    *     ...
+    *   }
+    *
+    *   case m: Any => logUnhandledMessage(m)
+    * 
+    * }
+    */
   def withVerboseErrorHandler[T](
     description: Any
   ) (

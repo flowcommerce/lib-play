@@ -962,7 +962,7 @@ package io.flow.common.v0.models {
     def jsObjectAddress(obj: io.flow.common.v0.models.Address) = {
       (obj.text match {
         case None => play.api.libs.json.Json.obj()
-        case Some(x) => play.api.libs.json.Json.obj("text" -> play.api.libs.json.Json.toJson(x))
+        case Some(x) => play.api.libs.json.Json.obj("text" -> play.api.libs.json.JsString(x))
       }) ++
       (obj.streets match {
         case None => play.api.libs.json.Json.obj()
@@ -970,19 +970,19 @@ package io.flow.common.v0.models {
       }) ++
       (obj.city match {
         case None => play.api.libs.json.Json.obj()
-        case Some(x) => play.api.libs.json.Json.obj("city" -> play.api.libs.json.Json.toJson(x))
+        case Some(x) => play.api.libs.json.Json.obj("city" -> play.api.libs.json.JsString(x))
       }) ++
       (obj.province match {
         case None => play.api.libs.json.Json.obj()
-        case Some(x) => play.api.libs.json.Json.obj("province" -> play.api.libs.json.Json.toJson(x))
+        case Some(x) => play.api.libs.json.Json.obj("province" -> play.api.libs.json.JsString(x))
       }) ++
       (obj.postalCode match {
         case None => play.api.libs.json.Json.obj()
-        case Some(x) => play.api.libs.json.Json.obj("postal_code" -> play.api.libs.json.Json.toJson(x))
+        case Some(x) => play.api.libs.json.Json.obj("postal_code" -> play.api.libs.json.JsString(x))
       }) ++
       (obj.country match {
         case None => play.api.libs.json.Json.obj()
-        case Some(x) => play.api.libs.json.Json.obj("country" -> play.api.libs.json.Json.toJson(x))
+        case Some(x) => play.api.libs.json.Json.obj("country" -> play.api.libs.json.JsString(x.toString))
       })
     }
 
@@ -1031,11 +1031,11 @@ package io.flow.common.v0.models {
         "name" -> jsObjectName(obj.name)
       ) ++ (obj.email match {
         case None => play.api.libs.json.Json.obj()
-        case Some(x) => play.api.libs.json.Json.obj("email" -> play.api.libs.json.Json.toJson(x))
+        case Some(x) => play.api.libs.json.Json.obj("email" -> play.api.libs.json.JsString(x))
       }) ++
       (obj.phone match {
         case None => play.api.libs.json.Json.obj()
-        case Some(x) => play.api.libs.json.Json.obj("phone" -> play.api.libs.json.Json.toJson(x))
+        case Some(x) => play.api.libs.json.Json.obj("phone" -> play.api.libs.json.JsString(x))
       })
     }
 
@@ -1181,11 +1181,11 @@ package io.flow.common.v0.models {
     def jsObjectName(obj: io.flow.common.v0.models.Name) = {
       (obj.first match {
         case None => play.api.libs.json.Json.obj()
-        case Some(x) => play.api.libs.json.Json.obj("first" -> play.api.libs.json.Json.toJson(x))
+        case Some(x) => play.api.libs.json.Json.obj("first" -> play.api.libs.json.JsString(x))
       }) ++
       (obj.last match {
         case None => play.api.libs.json.Json.obj()
-        case Some(x) => play.api.libs.json.Json.obj("last" -> play.api.libs.json.Json.toJson(x))
+        case Some(x) => play.api.libs.json.Json.obj("last" -> play.api.libs.json.JsString(x))
       })
     }
 
@@ -1279,7 +1279,7 @@ package io.flow.common.v0.models {
         "name" -> jsObjectName(obj.name)
       ) ++ (obj.email match {
         case None => play.api.libs.json.Json.obj()
-        case Some(x) => play.api.libs.json.Json.obj("email" -> play.api.libs.json.Json.toJson(x))
+        case Some(x) => play.api.libs.json.Json.obj("email" -> play.api.libs.json.JsString(x))
       })
     }
 

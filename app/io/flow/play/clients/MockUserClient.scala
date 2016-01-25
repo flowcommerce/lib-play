@@ -8,25 +8,25 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 @javax.inject.Singleton
-class MockUserClient extends UserTokensClient {
+class MockUserTokensClient extends UserTokensClient {
 
   def add(
     user: User,
     token: Option[String] = None
   ) {
-    MockUserClient.add(user, token)
+    MockUserTokensClient.add(user, token)
   }
 
   override def getUserByToken(
     token: String
   )(implicit ec: ExecutionContext): Future[Option[User]] = {
-    MockUserClient.getUserByToken(token)
+    MockUserTokensClient.getUserByToken(token)
   }
 
 }
 
 
-object MockUserClient {
+object MockUserTokensClient {
 
   private[this] var usersById = scala.collection.mutable.Map[String, User]()
   private[this] var usersByToken = scala.collection.mutable.Map[String, User]()

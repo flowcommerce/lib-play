@@ -18,7 +18,12 @@ trait FlowControllerHelpers {
     * For example:
     * override expanders = Seq(new io.flow.play.expanders.User("user", userClient))
    */
-  var expanders: Seq[Expander] = Nil
+  def expanders: Seq[Expander] = Nil
+  private[this] lazy val expandersResult = {
+    val tmp = expanders
+    assert(!tmp.isEmpty, "You must have at least one expander when calling withExpansion")
+    tmp
+  }
 
   /**
    * Even if not specified, play router passed in Some(Nil) as opposed
@@ -154,7 +159,7 @@ trait FlowControllerHelpers {
       function: JsValue => T,
       errorFunction: Result => T
     ): T = {
-      val res = expanders.filter(e => expand.getOrElse(Nil).contains(e.fieldName)).foldLeft(records) {
+      val res = expandersResult.filter(e => expand.getOrElse(Nil).contains(e.fieldName)).foldLeft(records) {
         case (records, e) => Await.result(e.expand(records), Duration(5, "seconds"))
       }
 

@@ -127,11 +127,11 @@ package io.flow.user.v0.models {
     def jsObjectNameForm(obj: io.flow.user.v0.models.NameForm) = {
       (obj.first match {
         case None => play.api.libs.json.Json.obj()
-        case Some(x) => play.api.libs.json.Json.obj("first" -> play.api.libs.json.Json.toJson(x))
+        case Some(x) => play.api.libs.json.Json.obj("first" -> play.api.libs.json.JsString(x))
       }) ++
       (obj.last match {
         case None => play.api.libs.json.Json.obj()
-        case Some(x) => play.api.libs.json.Json.obj("last" -> play.api.libs.json.Json.toJson(x))
+        case Some(x) => play.api.libs.json.Json.obj("last" -> play.api.libs.json.JsString(x))
       })
     }
 
@@ -154,15 +154,15 @@ package io.flow.user.v0.models {
     def jsObjectUserForm(obj: io.flow.user.v0.models.UserForm) = {
       (obj.email match {
         case None => play.api.libs.json.Json.obj()
-        case Some(x) => play.api.libs.json.Json.obj("email" -> play.api.libs.json.Json.toJson(x))
+        case Some(x) => play.api.libs.json.Json.obj("email" -> play.api.libs.json.JsString(x))
       }) ++
       (obj.name match {
         case None => play.api.libs.json.Json.obj()
-        case Some(x) => play.api.libs.json.Json.obj("name" -> play.api.libs.json.Json.toJson(x))
+        case Some(x) => play.api.libs.json.Json.obj("name" -> jsObjectNameForm(x))
       }) ++
       (obj.avatarUrl match {
         case None => play.api.libs.json.Json.obj()
-        case Some(x) => play.api.libs.json.Json.obj("avatar_url" -> play.api.libs.json.Json.toJson(x))
+        case Some(x) => play.api.libs.json.Json.obj("avatar_url" -> play.api.libs.json.JsString(x))
       })
     }
 

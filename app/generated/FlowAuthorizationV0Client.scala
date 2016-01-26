@@ -226,11 +226,11 @@ package io.flow.authorization.v0.models {
         "context" -> play.api.libs.json.JsString(obj.context)
       ) ++ (obj.userId match {
         case None => play.api.libs.json.Json.obj()
-        case Some(x) => play.api.libs.json.Json.obj("user_id" -> play.api.libs.json.Json.toJson(x))
+        case Some(x) => play.api.libs.json.Json.obj("user_id" -> play.api.libs.json.JsString(x))
       }) ++
       (obj.roleId match {
         case None => play.api.libs.json.Json.obj()
-        case Some(x) => play.api.libs.json.Json.obj("role_id" -> play.api.libs.json.Json.toJson(x))
+        case Some(x) => play.api.libs.json.Json.obj("role_id" -> play.api.libs.json.JsString(x))
       })
     }
 

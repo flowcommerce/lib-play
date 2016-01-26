@@ -16,7 +16,8 @@ lazy val root = project
   .settings(
     libraryDependencies ++= Seq(
       ws,
-      "org.scalatest" %% "scalatest" % "2.2.6" % "test"
+      "org.scalatest" %% "scalatest" % "2.2.6" % "test",
+      "org.scalatestplus" %% "play" % "1.4.0" % "test"
     )
 )
 

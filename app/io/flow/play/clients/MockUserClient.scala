@@ -39,7 +39,7 @@ object MockUserTokensClient {
     form: UserForm = makeUserForm()
   ): User = {
     User(
-      id = idGenerator.randomId(),
+      id = "usr-123",
       email = form.email,
       name = form.name match {
         case None => Name()

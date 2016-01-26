@@ -81,7 +81,7 @@ class UserSpec extends PlaySpec with MockClient {
       }
     }
 
-    "return user reference when user does not exist" in new WithServer(port=port) {
+    "return user reference when user does not exist" in {
       running(FakeApplication()) {
         val user = User("user", identifiedClient)
         val doExpand = user.expand(invalidExpandRecord)

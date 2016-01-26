@@ -9,6 +9,9 @@ class UserClientModule(
   config: Configuration
   ) extends AbstractModule {
 
+  /*
+    userApiHost is required only when running in Prod/Dev mode.
+   */
   private[this] val userApiHost = config.getString("user.api.host").getOrElse("Missing user.api.host")
 
   override def configure() {}
@@ -26,9 +29,6 @@ class UserClientModule(
 class MockUserClient extends io.flow.user.v0.mock.Client {
 
   import io.flow.common.v0.models.User
-  import io.flow.play.util.IdGenerator
-
-  private[this] val idGenerator = IdGenerator("tst")
 
   override def users = Mock()
 

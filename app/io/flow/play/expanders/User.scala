@@ -6,6 +6,12 @@ import play.api.libs.json._
 import scala.concurrent.{Future, ExecutionContext}
 import io.flow.common.v0.models.json._
 
+/*
+  User 'Expander' work by:
+  1. Generate list of all User Ids from the passed in JsValue
+  2. Query User API with just those User Ids that may be expandable
+  3. For each returned (valid) User, if an expanded User exists, return it, otherwise, return the UserReference as is
+ */
 case class User (
   fieldName: String,
   userClient: io.flow.user.v0.interfaces.Client

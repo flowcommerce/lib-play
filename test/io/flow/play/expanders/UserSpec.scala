@@ -1,8 +1,6 @@
 package io.flow.play.expanders
 
 import clients.MockClient
-import io.flow.play.controllers.FlowControllerHelpers.Expansion
-import io.flow.play.controllers.FlowControllerHelpers.Expansion
 import play.api.libs.json.Json
 import org.scalatestplus.play._
 import scala.concurrent.Await

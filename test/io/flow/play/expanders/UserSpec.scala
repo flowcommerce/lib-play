@@ -69,9 +69,6 @@ class UserSpec extends PlaySpec with MockClient {
   "expand" should {
     "return expanded user when user exists" in {
       running(FakeApplication()) {
-        val users = identifiedClient.users.get()
-        Await.result(users.map(u => println("Users: " + u)), Duration(5, "seconds"))
-
         val user = User("user", identifiedClient)
         val doExpand = user.expand(validExpandRecord)
 

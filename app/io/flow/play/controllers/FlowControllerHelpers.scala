@@ -1,16 +1,24 @@
 package io.flow.play.controllers
 
-import io.flow.play.util.{FormData, Validation}
+import io.flow.play.util.{Expander, FormData, Validation}
 import play.api.libs.json.JsValue
 import play.api.mvc.Results._
 import play.api.mvc.{Result, AnyContent}
-import scala.concurrent.Future
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 import play.api.libs.json._
 import io.flow.common.v0.models.json._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 
 trait FlowControllerHelpers {
+
+  /**
+    * Applications may override this variable to define applicable Expanders.
+    * For example:
+    * override expanders = Seq(new io.flow.play.expanders.User("user", userClient))
+   */
+  var expanders: Seq[Expander] = Nil
 
   /**
    * Even if not specified, play router passed in Some(Nil) as opposed
@@ -107,4 +115,59 @@ trait FlowControllerHelpers {
     }
   }
 
+  /**
+    * Helper class that iterates through defined 'expanders' and attempts to expand Json objects of the expandable type.
+    */
+
+  object Expansion {
+    def async(
+     expand: Option[Seq[String]],
+     records: Seq[JsValue]
+   ) (
+     function: JsValue => Future[Result]
+   ): Future[Result] = {
+      withExpansion(
+        expand,
+        records,
+        function,
+        { errorResult => Future { errorResult } }
+      )
+    }
+
+    def sync(
+      expand: Option[Seq[String]],
+      records: Seq[JsValue]
+     ) (
+       function: JsValue => Result
+     ): Result = {
+      withExpansion(
+        expand,
+        records,
+        function,
+        { errorResult => errorResult }
+      )
+    }
+
+    private[this] def withExpansion[T](
+      expand: Option[Seq[String]],
+      records: Seq[JsValue],
+      function: JsValue => T,
+      errorFunction: Result => T
+    ): T = {
+      val res = expanders.filter(e => expand.getOrElse(Nil).contains(e.fieldName)).foldLeft(records) {
+        case (records, e) => Await.result(e.expand(records), Duration(5, "seconds"))
+      }
+
+      res match {
+        case js: Seq[JsValue] => function(Json.toJson(js))
+        case _ => errorFunction(
+          UnprocessableEntity(
+            Json.toJson(
+              Validation.error(s"Expansion failed for 'expand': $expand and 'records': $records")
+            )
+          )
+        )
+      }
+    }
+  }
 }

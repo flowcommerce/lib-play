@@ -37,24 +37,6 @@ class UserSpec extends PlaySpec with MockClient {
     )
   )
 
-  val invalidExpandRecord = Seq(
-    Json.parse(
-      """
-      {
-        "user": {
-          "id": "usr-bogus",
-          "email": "test@flow.io",
-          "name": {
-           "first": "testFirst",
-           "last": "testLast"
-          },
-          "discriminator": "user"
-        }
-      }
-      """.stripMargin
-    )
-  )
-
   val userReferenceRecord =
     Json.parse(
       """
@@ -66,11 +48,23 @@ class UserSpec extends PlaySpec with MockClient {
         }
       """.stripMargin)
 
+
+  val userReferenceRecordToExpand = Seq(
+    Json.parse(
+      """
+        {
+          "user": {
+            "id": "usr-123",
+            "discriminator": "user_reference"
+          }
+        }
+      """.stripMargin))
+
   "expand" should {
     "return expanded user when user exists" in {
       running(FakeApplication()) {
         val user = User("user", identifiedClient)
-        val doExpand = user.expand(validExpandRecord)
+        val doExpand = user.expand(userReferenceRecordToExpand)
 
         Await.result(doExpand.map(e =>
           e.head must equal(validExpandRecord.head))
@@ -81,7 +75,7 @@ class UserSpec extends PlaySpec with MockClient {
     "return user reference when user does not exist" in {
       running(FakeApplication()) {
         val user = User("user", identifiedClient)
-        val doExpand = user.expand(invalidExpandRecord)
+        val doExpand = user.expand(Seq(userReferenceRecord))
 
         Await.result(doExpand.map(e =>
           e.head must equal(userReferenceRecord))

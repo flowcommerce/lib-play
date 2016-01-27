@@ -20,7 +20,7 @@ trait MockClient {
   val port = 8002
 
   lazy val anonClient = new Client(s"http://localhost:$port")
-  lazy val identifiedClient = makeIdentifiedClient(user = testUser)
+  lazy val identifiedClient = makeIdentifiedClient(user = testUser.copy(id = "usr-123"))
 
   /**
     * Generates an instance of the client where the user has been

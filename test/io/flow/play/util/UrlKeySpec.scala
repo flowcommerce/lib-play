@@ -77,6 +77,10 @@ class UrlKeySpec extends FunSpec with Matchers {
       urlKey.validate("api") should be(Seq("api is a reserved word and cannot be used for the key"))
     }
 
+    it("label") {
+      urlKey.validate("bad", "Id") should be(Seq(s"Id must be at least ${urlKey.minKeyLength} characters"))
+      urlKey.validate("no spaces", "Id") should be(Seq("Id must be in all lower case and contain alphanumerics only (-, _, and . are supported). A valid id would be: no-spaces"))
+    }
   }
 
 }

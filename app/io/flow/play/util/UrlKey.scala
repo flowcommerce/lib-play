@@ -98,12 +98,12 @@ case class UrlKey(
     )
   }
 
-  def validate(key: String): Seq[String] = {
+  def validate(key: String, label: String = "Key"): Seq[String] = {
     val generated = format(key)
     if (key.length < minKeyLength) {
-      Seq(s"Key must be at least $minKeyLength characters")
+      Seq(s"$label must be at least $minKeyLength characters")
     } else if (key != generated) {
-      Seq(s"Key must be in all lower case and contain alphanumerics only (-, _, and . are supported). A valid key would be: $generated")
+      Seq(s"$label must be in all lower case and contain alphanumerics only (-, _, and . are supported). A valid ${label.toLowerCase} would be: $generated")
     } else {
       reservedKeys.find(_ == generated) match {
         case Some(value) => Seq(s"$key is a reserved word and cannot be used for the key")

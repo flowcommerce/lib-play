@@ -1,6 +1,6 @@
 package io.flow.play.util
 
-import play.api.libs.json.{JsObject, Json, JsValue}
+import play.api.libs.json._
 
 
 object FormData {
@@ -29,8 +29,12 @@ object FormData {
             else
               js
           }
-          else
-            js
+          else {
+            safeConvertToLong(js.toString.replace("\"", "")) match {
+              case Some(num) => JsNumber(num)
+              case _ => js
+            }
+          }
         }
 
         Json.obj(newKey.replace("]", "") -> newVal)
@@ -38,5 +42,13 @@ object FormData {
     }
 
     Json.toJson(nested.foldLeft(Json.obj()){ case (a, b) => a.deepMerge(b.as[JsObject]) })
+  }
+
+  def safeConvertToLong(s: String): Option[Long] = {
+    try {
+      Some(s.toLong)
+    } catch {
+      case e: Exception => None
+    }
   }
 }

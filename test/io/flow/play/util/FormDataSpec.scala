@@ -17,7 +17,8 @@ class FormDataSpec extends FunSpec with Matchers {
       "one[two][three][five]" -> Seq("wow"),
       "arr[][arr2][]" -> Seq("fruit", "vegitables"),
       "tags[]" -> Seq("foo", "bar"),
-      "yikes" -> Seq("yes", "no"))
+      "yikes" -> Seq("yes", "no"),
+      "port" -> Seq("9999"))
 
     it("returns JsValue") {
       fdHelper.formDataToJson(data) match {
@@ -41,6 +42,13 @@ class FormDataSpec extends FunSpec with Matchers {
 
       (fdHelper.formDataToJson(data) \ "name" \ "last").validate[String] match {
         case JsSuccess(succ,_) => succ should be("roth")
+        case JsError(_) => assert(false)
+      }
+    }
+
+    it("converts numerical value to number") {
+      (fdHelper.formDataToJson(data) \ "port").validate[JsNumber] match {
+        case JsSuccess(succ,_) => succ should be(JsNumber(9999))
         case JsError(_) => assert(false)
       }
     }

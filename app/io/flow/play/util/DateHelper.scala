@@ -1,4 +1,5 @@
-package io.flow.play.util
+package io.flow.delta.www.lib
+//package io.flow.play.util
 
 import org.joda.time.{DateTime, DateTimeZone}
 import org.joda.time.format.DateTimeFormat
@@ -28,6 +29,22 @@ object DateHelper {
     }
   }
 
+  def shortDateTime(
+    dateTime: DateTime
+  ): String = shortDateTimeOption(Some(dateTime))
+
+  def shortDateTimeOption(
+    dateTime: Option[DateTime],
+    default: String = DefaultLabel
+  ): String = {
+    dateTime match {
+      case None => default
+      case Some(dt) => {
+        DateTimeFormat.forPattern("MM/dd/YY HH:mm:ss z").withZone(EasternTime).print(dt)
+      }
+    }
+  }
+  
   def longDateTime(
     dateTime: DateTime
   ): String = longDateTimeOption(Some(dateTime))
@@ -44,4 +61,20 @@ object DateHelper {
     }
   }
 
+  def consoleLongDateTime(
+    dateTime: DateTime
+  ): String = consoleLongDateTimeOption(Some(dateTime))
+
+  def consoleLongDateTimeOption(
+    dateTime: Option[DateTime],
+    default: String = DefaultLabel
+  ): String = {
+    dateTime match {
+      case None => default
+      case Some(dt) => {
+        DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss z").withZone(EasternTime).print(dt)
+      }
+    }
+  }
+  
 }

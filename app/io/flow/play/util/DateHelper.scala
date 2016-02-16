@@ -1,5 +1,4 @@
-package io.flow.delta.www.lib
-//package io.flow.play.util
+package io.flow.play.util
 
 import org.joda.time.{DateTime, DateTimeZone}
 import org.joda.time.format.DateTimeFormat

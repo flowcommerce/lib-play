@@ -23,7 +23,7 @@ trait UserTokensClient {
 }
 
 @javax.inject.Singleton
-class DefaultUserTokensClient(env: Environment) extends UserTokensClient {
+class DefaultUserTokensClient @javax.inject.Inject() (env: Environment) extends UserTokensClient {
 
   lazy val client: Client = new Registry(env).withHost("user") { new Client(_) }
 

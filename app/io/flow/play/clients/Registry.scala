@@ -37,6 +37,7 @@ class Registry(env: Environment) {
   // private[this] val RegistryHost = "registry.api.flow.io"
   private[this] val RegistryHost = DefaultConfig.optionalString("io.flow.registry.host").getOrElse(s"http://${DEV_HOST}:6011")
 
+  println(s"[io.flow.play.clients.Registry] Host[$RegistryHost] Env[${env.mode}]")
 
   /**
     * This is the token to identify the user making the API calls.
@@ -66,12 +67,11 @@ class Registry(env: Environment) {
             val port = app.ports.headOption.getOrElse {
               sys.error(s"application[$applicationId] does not have any ports in registry at $RegistryHost")
             }
-            println("withHostAndToken($applicationId): http://vm:${port.external}")
             f("http://vm:${port.external}", token)
           }.recover {
             case UnitResponse(401) => sys.error(s"Unauthorized to fetch application[$applicationId] from registry at $RegistryHost")
             case UnitResponse(404) => sys.error(s"application[$applicationId] not found in registry at $RegistryHost")
-            case ex: Throwable => throw ex
+            case ex: Throwable => throw new Exception(s"ERROR connecting to registry at $RegistryHost", ex)
           }
         , Duration(5, "seconds"))
       }

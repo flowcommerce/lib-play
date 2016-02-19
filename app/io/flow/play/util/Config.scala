@@ -65,7 +65,7 @@ object PropertyConfig extends Config {
     sys.props.get(name).map(_.trim).map { value =>
       value match {
         case "" => {
-          val msg = s"Value for sysmet property[$name] cannot be blank"
+          val msg = s"Value for system property[$name] cannot be blank"
           Logger.error(msg)
           sys.error(msg)
         }

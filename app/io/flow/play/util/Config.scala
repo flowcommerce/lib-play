@@ -33,11 +33,11 @@ case class ChainedConfig(configs: Seq[Config]) extends Config {
 
 /**
   * A chained configuration that favors environment variables, then
-  * the play application configuration file.
+  * system properties, then the play application configuration file.
   */
 object DefaultConfig extends Config {
 
-  private[this] val config = ChainedConfig(Seq(EnvironmentConfig, ApplicationConfig))
+  private[this] val config = ChainedConfig(Seq(EnvironmentConfig, PropertyConfig, ApplicationConfig))
 
   override def optionalString(name: String) = config.optionalString(name)
 
@@ -50,6 +50,22 @@ object EnvironmentConfig extends Config {
       value match {
         case "" => {
           val msg = s"Value for environment variable[$name] cannot be blank"
+          Logger.error(msg)
+          sys.error(msg)
+        }
+        case _ => value
+      }
+    }
+  }
+}
+
+object PropertyConfig extends Config {
+
+  override def optionalString(name: String): Option[String] = {
+    sys.props.get(name).map(_.trim).map { value =>
+      value match {
+        case "" => {
+          val msg = s"Value for sysmet property[$name] cannot be blank"
           Logger.error(msg)
           sys.error(msg)
         }

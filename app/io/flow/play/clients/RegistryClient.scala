@@ -7,7 +7,6 @@ import play.api.{Environment, Mode}
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.Duration
 
-@javax.inject.Singleton
 /**
   * This class implements service discovery for flow based on the
   * environment in which we are in. In production, hostnames are build
@@ -24,6 +23,7 @@ import scala.concurrent.duration.Duration
   *    }
   * 
   */
+@javax.inject.Singleton
 class Registry(env: Environment) {
 
   /**

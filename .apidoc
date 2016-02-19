@@ -8,9 +8,14 @@ code:
     authorization:
       version: latest
       generators:
-        play_2_4_client: ["app/generated"]
+        play_2_4_client: "app/generated"
     user:
       version: latest
       generators:
-        play_2_4_client: ["app/generated"]
+        play_2_4_client: "app/generated"
         play_2_4_mock_client: "app/generated"
+    registry:
+      version: latest
+      generators:
+        play_2_4_client: "app/generated"
+

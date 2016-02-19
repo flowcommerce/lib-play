@@ -1,10 +1,10 @@
 package io.flow.play.clients
 
+import io.flow.common.v0.models.{User, UserReference}
 import io.flow.play.util.DefaultConfig
-
 import io.flow.user.v0.Client
 import io.flow.user.v0.errors.UnitResponse
-import io.flow.common.v0.models.{User, UserReference}
+import play.api.Environment
 import scala.concurrent.{ExecutionContext, Future}
 
 object UserClient {
@@ -23,12 +23,9 @@ trait UserTokensClient {
 }
 
 @javax.inject.Singleton
-class DefaultUserTokensClient() extends UserTokensClient {
+class DefaultUserTokensClient(env: Environment) extends UserTokensClient {
 
-  // e.g. http://api.flow.io/users
-  def host: String = DefaultConfig.requiredString("user.api.host")
-
-  lazy val client = new Client(host)
+  lazy val client: Client = new Registry(env).withHost("user") { new Client(_) }
 
   def callWith404[T](
     f: Future[T]

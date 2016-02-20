@@ -25,7 +25,7 @@ trait UserTokensClient {
 @javax.inject.Singleton
 class DefaultUserTokensClient @javax.inject.Inject() (registry: Registry) extends UserTokensClient {
 
-  lazy val client: Client = registry.withHost("user") { new Client(_) }
+  lazy val client: Client = new Client(registry.host("user"))
 
   def callWith404[T](
     f: Future[T]

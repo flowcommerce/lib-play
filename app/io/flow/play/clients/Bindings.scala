@@ -7,8 +7,11 @@ class RegistryModule extends Module {
 
   def bindings(env: Environment, conf: Configuration) = {
     env.mode match {
-      case Mode.Prod | Mode.Dev => Seq(
-        bind[Registry].to[DefaultRegistry]
+      case Mode.Prod => Seq(
+        bind[Registry].to[ProductionRegistry]
+      )
+      case Mode.Dev => Seq(
+        bind[Registry].to[DevelopmentRegistry]
       )
       case Mode.Test => Seq(
         bind[Registry].to[MockRegistry]

@@ -4,7 +4,6 @@ import io.flow.common.v0.models.{User, UserReference}
 import io.flow.play.util.DefaultConfig
 import io.flow.user.v0.Client
 import io.flow.user.v0.errors.UnitResponse
-import play.api.Environment
 import scala.concurrent.{ExecutionContext, Future}
 
 object UserClient {
@@ -39,7 +38,7 @@ class DefaultUserTokensClient @javax.inject.Inject() (registry: Registry) extend
   }
 
   /**
-    * Blocking call to fetch a user by API Token.
+    * Fetch a user by API Token.
     */
   def getUserByToken(
     token: String

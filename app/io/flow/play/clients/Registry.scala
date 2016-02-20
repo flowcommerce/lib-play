@@ -99,16 +99,34 @@ class ProductionRegistry() extends Registry with RegistryConstants {
 trait RegistryApplicationProvider extends Registry with RegistryConstants {
 
   override def host(applicationId: String): String = {
-    val port = getById(applicationId).ports.headOption.getOrElse {
-      sys.error(s"application[$applicationId] does not have any ports in registry")
+    overridden(applicationId) match {
+      case Some(host) => {
+        log("Development", applicationId, s"Host[$host] (overridden via environment variable)")
+        host
+      }
+
+      case None => {
+        val port = getById(applicationId).ports.headOption.getOrElse {
+          sys.error(s"application[$applicationId] does not have any ports in registry")
+        }
+        val host = s"http://${DevHost}:${port.external}"
+        log("Development", applicationId, s"Host[$host]")
+        host
+      }
     }
-    val host = s"http://${DevHost}:${port.external}"
-    log("Development", applicationId, s"Host[$host]")
-    host
   }
 
   def getById(applicationId: String): Application
 
+  /**
+    * Allows user to set an environment variable to specify the
+    * specific path of an application. If found, we use this value as
+    * the host for that service. Ex: USER_HOST=http://localhost:6021
+    */
+  private[this] def overridden(applicationId: String): Option[String] = {
+    DefaultConfig.optionalString(s"${applicationId.toUpperCase}_HOST")
+  }
+  
 }
 
 class DevelopmentRegistry() extends RegistryApplicationProvider {

@@ -10,21 +10,8 @@ import scala.concurrent.duration._
 
 /**
   * Common utilities to help with logging, scheduling of actors.
-  * 
-  * This class requires configuration of the execution context called
-  * 'io-flow-play-actors-context'. Example configuration for the play
-  * project:
-  * 
-  *     io-flow-play-actors-context {
-  *       fork-join-executor {
-  *         parallelism-factor = 2.0
-  *         parallelism-max = 200
-  *       }
-  *     }
   */
 trait Util {
-
-  private[this] implicit val mainActorExecutionContext: ExecutionContext = Akka.system.dispatchers.lookup("io-flow-play-actors-context")
 
   /**
    * Helper to schedule a message to be sent on a recurring interval
@@ -39,10 +26,12 @@ trait Util {
     actor: ActorRef,
     configName: String,
     message: T
+  ) (
+    implicit ec: ExecutionContext
   ) {
     val seconds = DefaultConfig.requiredString(configName).toInt
     val initial = DefaultConfig.optionalString(s"${configName}_initial").map(_.toInt).getOrElse(seconds)
-    Logger.info(s"scheduling a periodic message[$message]. Initial[$initial seconds], recurring[$seconds seconds]")
+    Logger.info(msg(s"scheduling periodic message[$message]. Initial[$initial seconds], recurring[$seconds seconds]"))
     Akka.system.scheduler.schedule(
       FiniteDuration(initial, SECONDS),
       FiniteDuration(seconds, SECONDS),

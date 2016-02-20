@@ -3,6 +3,7 @@ package io.flow.play.clients
 import io.flow.play.util.DefaultConfig
 import io.flow.registry.v0.{Authorization, Client}
 import io.flow.registry.v0.errors.UnitResponse
+import io.flow.registry.v0.models.Application
 import play.api.{Environment, Logger, Mode}
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.Duration
@@ -90,29 +91,41 @@ class ProductionRegistry() extends Registry with RegistryConstants {
 
 }
 
-class DevelopmentRegistry() extends Registry with RegistryConstants {
+/**
+  * This trait fetches a registry Application - and from there
+  * provides the full host using the external port for that
+  * application.
+  */
+trait RegistryApplicationProvider extends Registry with RegistryConstants {
+
+  override def host(applicationId: String): String = {
+    val port = getById(applicationId).ports.headOption.getOrElse {
+      sys.error(s"application[$applicationId] does not have any ports in registry")
+    }
+    val host = s"http://${DevHost}:${port.external}"
+    log("Development", applicationId, s"Host[$host]")
+    host
+  }
+
+  def getById(applicationId: String): Application
+
+}
+
+class DevelopmentRegistry() extends RegistryApplicationProvider {
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  // TODO: Enable once ready
-  // private[this] val RegistryHost = "registry.api.flow.io"
   private[this] lazy val RegistryHost = {
-    val host = DefaultConfig.optionalString("io.flow.registry.host").getOrElse(s"http://${DevHost}:6011")
+    val host = DefaultConfig.optionalString("io.flow.registry.host").getOrElse(s"http://registry.$ProductionDomain")
     log("Development", "registry", s"Host[$host]")
     host
   }
 
   private[this] lazy val client = new Client(RegistryHost, Some(Authorization.Basic(token)))
 
-  override def host(applicationId: String): String = {
+  override def getById(applicationId: String): Application = {
     Await.result(
       client.applications.getById(applicationId).map { app =>
-        val port = app.ports.headOption.getOrElse {
-          sys.error(s"application[$applicationId] does not have any ports in registry at $RegistryHost")
-        }
-        val host = s"http://${DevHost}:${port.external}"
-        log("Development", applicationId, s"Host[$host]")
-        host
-
+        app
       }.recover {
         case UnitResponse(401) => sys.error(s"Unauthorized to fetch application[$applicationId] from registry at $RegistryHost")
         case UnitResponse(404) => sys.error(s"application[$applicationId] not found in registry at $RegistryHost")

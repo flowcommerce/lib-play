@@ -1,6 +1,6 @@
 package io.flow.play.clients
 
-import io.flow.play.util.FlowEnvironment
+import io.flow.play.util.{Config, DefaultConfig, FlowEnvironment}
 import play.api.{Environment, Configuration, Mode}
 import play.api.inject.Module
 
@@ -22,6 +22,16 @@ class RegistryModule extends Module {
         bind[Registry].to[MockRegistry]
       )
     }
+  }
+
+}
+
+class ConfigModule extends Module {
+
+  def bindings(env: Environment, conf: Configuration) = {
+    Seq(
+      bind[Config].to[DefaultConfig]
+    )
   }
 
 }

@@ -2,7 +2,7 @@
 Library supporting building REST APIs on play framework.
 
 Traits:
-  Anonyous Controller
+  Anonymous Controller
 
    -- Provides user(...) method to get an instance of the current
       user.
@@ -18,6 +18,14 @@ Traits:
        Default implementation uses user token through basic
        authorization
 
-  AuthorizedXXXController
-    -- mixes in the authorization service
-    
+## Publishing a new version
+
+    go run ~/go/src/github.com/flowcommerce/tools/dev.go tag --label micro
+    sbt publish
+
+## Publishing a new snapshot for local development
+
+    edit build.sbt and append -SNAPSHOT to version
+    sbt +publishLocal
+
+

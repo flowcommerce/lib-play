@@ -68,7 +68,7 @@ object FlowEnvironment {
     }
   }
 
-  private[this] def parse(value: String, source: String): FlowEnvironment = {
+  private[util] def parse(source: String, value: String): FlowEnvironment = {
     FlowEnvironment.fromString(value) match {
       case Some(env) => {
         play.api.Logger.info(s"Set flow environment to[$env] from $source[env]")

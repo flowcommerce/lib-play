@@ -3,7 +3,7 @@ package io.flow.play.clients
 import io.flow.play.util.DefaultConfig
 import io.flow.registry.v0.{Authorization, Client}
 import io.flow.registry.v0.errors.UnitResponse
-import play.api.{Environment, Mode}
+import play.api.{Environment, Logger, Mode}
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.Duration
 
@@ -23,28 +23,7 @@ import scala.concurrent.duration.Duration
   *    }
   * 
   */
-@javax.inject.Singleton
-class Registry(env: Environment) {
-
-  /**
-    * Name of an environment variable containing the name of the VM
-    * Host. This is used for local development and should resolve to
-    * the VM of the virtual machine running the docker containers.
-    */
-  private[this] val DEV_HOST = DefaultConfig.optionalString("io.flow.dev.host").getOrElse("vm")
-
-  // TODO: Enable once ready
-  // private[this] val RegistryHost = "registry.api.flow.io"
-  private[this] val RegistryHost = DefaultConfig.optionalString("io.flow.registry.host").getOrElse(s"http://${DEV_HOST}:6011")
-
-  println(s"[io.flow.play.clients.Registry] Host[$RegistryHost] Env[${env.mode}]")
-
-  /**
-    * This is the token to identify the user making the API calls.
-    */
-  private[this] lazy val token = DefaultConfig.requiredString("io.flow.user.token")
-
-  private[this] lazy val client = new Client(RegistryHost, Some(Authorization.Basic(token)))
+trait Registry {
 
   /**
     * Executes your function with (host, token) as parameters.
@@ -53,30 +32,7 @@ class Registry(env: Environment) {
     applicationId: String
   ) (
     f: (String, String) => T
-  ): T = {
-    env.mode match {
-      case Mode.Prod => {
-        f(s"http://${applicationId}.api.flow.io", token)
-      }
-
-      case Mode.Dev => {
-        import scala.concurrent.ExecutionContext.Implicits.global
-
-        Await.result(
-          client.applications.getById(applicationId).map { app =>
-            val port = app.ports.headOption.getOrElse {
-              sys.error(s"application[$applicationId] does not have any ports in registry at $RegistryHost")
-            }
-            f("http://vm:${port.external}", token)
-          }.recover {
-            case UnitResponse(401) => sys.error(s"Unauthorized to fetch application[$applicationId] from registry at $RegistryHost")
-            case UnitResponse(404) => sys.error(s"application[$applicationId] not found in registry at $RegistryHost")
-            case ex: Throwable => throw new Exception(s"ERROR connecting to registry at $RegistryHost", ex)
-          }
-        , Duration(5, "seconds"))
-      }
-    }
-  }
+  ): T
 
   /**
     * Executes your function with (host) as parameter.
@@ -90,5 +46,77 @@ class Registry(env: Environment) {
       f(host)
     }
   }
+  
+}
+
+class DefaultRegistry @javax.inject.Inject() (env: Environment) extends Registry {
+
+  /**
+    * Name of an environment variable containing the name of the VM
+    * Host. This is used for local development and should resolve to
+    * the VM of the virtual machine running the docker containers.
+    */
+  private[this] lazy val DevHost = DefaultConfig.optionalString("io.flow.dev.host").getOrElse("vm")
+
+  // TODO: Enable once ready
+  // private[this] val RegistryHost = "registry.api.flow.io"
+  private[this] lazy val RegistryHost = {
+    val host = DefaultConfig.optionalString("io.flow.registry.host").getOrElse(s"http://${DevHost}:6011")
+    Logger.info(s"[io.flow.play.clients.DefaultRegistry] Host[$host] Env[${env.mode}]")
+    host
+  }
+
+  /**
+    * This is the token to identify the user making the API calls.
+    */
+  private[this] lazy val token = DefaultConfig.requiredString("io.flow.user.token")
+
+  private[this] lazy val client = new Client(RegistryHost, Some(Authorization.Basic(token)))
+
+  override def withHostAndToken[T](
+    applicationId: String
+  ) (
+    f: (String, String) => T
+  ): T = {
+    env.mode match {
+      case Mode.Prod => {
+        val host = s"http://${applicationId}.api.flow.io"
+        Logger.info(s"[io.flow.play.clients.DefaultRegistry] app[$applicationId] Host[$host]")
+        f(host, token)
+      }
+
+      case Mode.Dev => {
+        import scala.concurrent.ExecutionContext.Implicits.global
+
+        Await.result(
+          client.applications.getById(applicationId).map { app =>
+            val port = app.ports.headOption.getOrElse {
+              sys.error(s"application[$applicationId] does not have any ports in registry at $RegistryHost")
+            }
+            val host = s"http://${DevHost}:${port.external}"
+            Logger.info(s"[io.flow.play.clients.DefaultRegistry] app[$applicationId] Host[$host]")
+            f(host, token)
+
+          }.recover {
+            case UnitResponse(401) => sys.error(s"Unauthorized to fetch application[$applicationId] from registry at $RegistryHost")
+            case UnitResponse(404) => sys.error(s"application[$applicationId] not found in registry at $RegistryHost")
+            case ex: Throwable => throw new Exception(s"ERROR connecting to registry at $RegistryHost", ex)
+          }
+        , Duration(5, "seconds"))
+      }
+    }
+  }
+
+}
+
+
+@javax.inject.Singleton
+class MockRegistry() extends Registry {
+
+  override def withHostAndToken[T](
+    applicationId: String
+  ) (
+    f: (String, String) => T
+  ): T = f("localhost", "test")
 
 }

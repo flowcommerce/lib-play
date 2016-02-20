@@ -120,8 +120,11 @@ trait RegistryApplicationProvider extends Registry with RegistryConstants {
 
   /**
     * Allows user to set an environment variable to specify the
-    * specific path of an application. If found, we use this value as
+    * specific host for an application. If found, we use this value as
     * the host for that service. Ex: USER_HOST=http://localhost:6021
+    * 
+    * Ex:
+    *   USER_HOST="http://localhost:6021" sbt
     */
   private[this] def overridden(applicationId: String): Option[String] = {
     DefaultConfig.optionalString(s"${applicationId.toUpperCase}_HOST")

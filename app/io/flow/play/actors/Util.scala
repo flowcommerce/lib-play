@@ -16,6 +16,12 @@ trait Util {
   /**
    * Helper to schedule a recurring interval based on a configuration
    * parameter.
+   * 
+   * Example:
+   * 
+   *   scheduleRecurring("io.flow.delta.api.CheckProjects.seconds") {
+   *     periodicActor ! PeriodicActor.Messages.CheckProjects
+   *   }
    *
    * @param configName The name of the configuration parameter containing the number
    *        of seconds between runs. You can also optionally add a

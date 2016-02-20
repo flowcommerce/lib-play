@@ -1,7 +1,6 @@
 package io.flow.play.clients
 
 import io.flow.common.v0.models.{User, UserReference}
-import io.flow.play.util.DefaultConfig
 import io.flow.user.v0.Client
 import io.flow.user.v0.errors.UnitResponse
 import scala.concurrent.{ExecutionContext, Future}

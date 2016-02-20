@@ -1,6 +1,6 @@
 package io.flow.play.clients
 
-import io.flow.play.util.DefaultConfig
+import io.flow.play.util.Config
 import io.flow.registry.v0.{Authorization, Client}
 import io.flow.registry.v0.errors.UnitResponse
 import io.flow.registry.v0.models.Application
@@ -15,14 +15,9 @@ import scala.concurrent.duration.Duration
   * development, hostnames are built by querying the registry for port
   * mappings.
   * 
-  * Examples:
+  * Example:
   *
-  *    lazy val anonymousClient: Client = new Client(new Registry(env).host("user"))
-  *
-  *    lazy val authenticatedClient: Client = new Registry(env).withHostAndToken("user") { (host, token) =>
-  *      new Client(host, Some(Authorization.Basic(token)))
-  *    }
-  * 
+  *    lazy val client = new Client(new Registry(env).host("user"))
   */
 trait Registry {
 
@@ -31,24 +26,6 @@ trait Registry {
     * (e.g. http://user.api.flow.io or http://vm:6011)
     */
   def host(applicationId: String): String
-
-  /**
-    * Returns the value for the required io.flow.user.token
-    */
-  protected def token: String
-
-  /**
-    * Executes your function with (host, token) as parameters. The
-    * token here is the flow API token coming from the configuration
-    * parameter io.flow.user.token.
-    */
-  def withHostAndToken[T](
-    applicationId: String
-  ) (
-    f: (String, String) => T
-  ): T = {
-    f(host(applicationId), token)
-  }
   
 }
 
@@ -56,17 +33,6 @@ trait RegistryConstants {
 
   val ProductionDomain = "api.flow.io"
   val TokenVariableName = "io.flow.user.token"
-
-  /**
-    * Name of an environment variable containing the name of the VM
-    * Host. This is used for local development and should resolve to
-    * the VM of the virtual machine running the docker containers.
-    */
-  lazy val DevHost = DefaultConfig.optionalString("io.flow.dev.host").getOrElse("vm")
-
-  def token: String = {
-    DefaultConfig.requiredString("io.flow.user.token")
-  }
 
   def log(env: String, applicationId: String, message: String) {
     Logger.info(s"[${getClass.getName} $env] app[$applicationId] $message")
@@ -85,10 +51,6 @@ class ProductionRegistry() extends Registry with RegistryConstants {
     host
   }
 
-  override def token: String = {
-    DefaultConfig.requiredString("io.flow.user.token")
-  }
-
 }
 
 /**
@@ -97,6 +59,18 @@ class ProductionRegistry() extends Registry with RegistryConstants {
   * application.
   */
 trait RegistryApplicationProvider extends Registry with RegistryConstants {
+
+  val DevHostName = "io.flow.dev.host"
+  val RegistryHostName = "io.flow.registry.host"
+
+  def config: Config
+
+  /**
+    * Name of an environment variable containing the name of the VM
+    * Host. This is used for local development and should resolve to
+    * the VM of the virtual machine running the docker containers.
+    */
+  lazy val DevHost = config.optionalString(DevHostName).getOrElse("vm")
 
   override def host(applicationId: String): String = {
     overridden(applicationId) match {
@@ -127,19 +101,22 @@ trait RegistryApplicationProvider extends Registry with RegistryConstants {
     *   USER_HOST="http://localhost:6021" sbt
     */
   private[this] def overridden(applicationId: String): Option[String] = {
-    DefaultConfig.optionalString(s"${applicationId.toUpperCase}_HOST")
+    config.optionalString(s"${applicationId.toUpperCase}_HOST")
   }
   
 }
 
-class DevelopmentRegistry() extends RegistryApplicationProvider {
+@javax.inject.Singleton
+class DevelopmentRegistry @javax.inject.Inject() (val config: Config) extends RegistryApplicationProvider {
   import scala.concurrent.ExecutionContext.Implicits.global
 
   private[this] lazy val RegistryHost = {
-    val host = DefaultConfig.optionalString("io.flow.registry.host").getOrElse(s"http://registry.$ProductionDomain")
+    val host = config.optionalString(RegistryHostName).getOrElse(s"http://registry.$ProductionDomain")
     log("Development", "registry", s"Host[$host]")
     host
   }
+
+  private[this] lazy val token = config.requiredString(TokenVariableName)
 
   private[this] lazy val client = new Client(RegistryHost, Some(Authorization.Basic(token)))
 
@@ -162,6 +139,5 @@ class DevelopmentRegistry() extends RegistryApplicationProvider {
 class MockRegistry() extends Registry {
 
   override def host(applicationId: String) = "http://localhost"
-  override def token: String = "test"
 
 }

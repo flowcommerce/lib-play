@@ -1,7 +1,7 @@
 package io.flow.play.util
 
 import play.api.Logger
-import play.api.Play.current
+import play.api.Configuration
 
 /**
   * Wrapper on play config testing for empty strings and standardizing
@@ -35,11 +35,12 @@ case class ChainedConfig(configs: Seq[Config]) extends Config {
   * A chained configuration that favors environment variables, then
   * system properties, then the play application configuration file.
   */
-object DefaultConfig extends Config {
+@javax.inject.Singleton
+case class DefaultConfig @javax.inject.Inject() (config: Configuration) extends Config {
 
-  private[this] val config = ChainedConfig(Seq(EnvironmentConfig, PropertyConfig, ApplicationConfig))
+  private[this] val chain = ChainedConfig(Seq(EnvironmentConfig, PropertyConfig, ApplicationConfig(config)))
 
-  override def optionalString(name: String) = config.optionalString(name)
+  override def optionalString(name: String) = chain.optionalString(name)
 
 }
 
@@ -75,10 +76,11 @@ object PropertyConfig extends Config {
   }
 }
 
-object ApplicationConfig extends Config {
+@javax.inject.Singleton
+case class ApplicationConfig @javax.inject.Inject() (configuration: Configuration) extends Config {
 
   override def optionalString(name: String): Option[String] = {
-    current.configuration.getString(name).map(_.trim).map { value =>
+    configuration.getString(name).map(_.trim).map { value =>
       value match {
         case "" => {
           val msg = s"Value for configuration parameter[$name] cannot be blank"

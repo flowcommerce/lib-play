@@ -14,28 +14,31 @@ import scala.concurrent.duration._
 trait Util {
 
   /**
-   * Helper to schedule a message to be sent on a recurring interval
-   * based on a configuration parameter.
+   * Helper to schedule a recurring interval based on a configuration
+   * parameter.
    *
    * @param configName The name of the configuration parameter containing the number
-   *        of seconds between runs. You can also optionally add a configuration
-   *        parameter of the same name with "_inital" appended to set the initial
-   *        interval if you wish it to be different.
+   *        of seconds between runs. You can also optionally add a
+   *        configuration parameter of the same name with "_inital"
+   *        appended to set the initial interval if you wish it to be
+   *        different.
    */
   def scheduleRecurring[T](
-    actor: ActorRef,
-    configName: String,
-    message: T
+    configName: String
+  ) (
+    f: => T
   ) (
     implicit ec: ExecutionContext
   ) {
     val seconds = DefaultConfig.requiredString(configName).toInt
     val initial = DefaultConfig.optionalString(s"${configName}_initial").map(_.toInt).getOrElse(seconds)
-    Logger.info(msg(s"scheduling periodic message[$message]. Initial[$initial seconds], recurring[$seconds seconds]"))
+    Logger.info(msg(s"[${getClass.getName}] scheduleRecurring[$configName]: Initial[$initial seconds], recurring[$seconds seconds]"))
     Akka.system.scheduler.schedule(
       FiniteDuration(initial, SECONDS),
       FiniteDuration(seconds, SECONDS),
-      actor, message
+      new Runnable {
+        def run = f
+      }
     )
   }
 

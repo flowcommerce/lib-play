@@ -30,7 +30,6 @@ trait MockClient {
     user: User = MockUserTokensClient.makeUser(),
     token: String = createTestToken()
   ): io.flow.user.v0.mock.Client = {
-    MockAuthorizationClient.grantAll(user.id)
     MockUserTokensClient.add(user, token = Some(token))
     new MockUserClient()
   }

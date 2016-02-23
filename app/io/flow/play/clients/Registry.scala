@@ -60,22 +60,22 @@ class ProductionRegistry() extends Registry with RegistryConstants {
   */
 trait RegistryApplicationProvider extends Registry with RegistryConstants {
 
-  val DevHostName = "io.flow.dev.host"
-  val RegistryHostName = "io.flow.registry.host"
-
-  def config: Config
-
   /**
     * Name of an environment variable containing the name of the VM
     * Host. This is used for local development and should resolve to
     * the VM of the virtual machine running the docker containers.
+    */
+  val DevHostName = "io.flow.dev.host"
+
+  /**
+    * The resolved name of the development host
     */
   lazy val DevHost = config.optionalString(DevHostName).getOrElse("vm")
 
   override def host(applicationId: String): String = {
     overridden(applicationId) match {
       case Some(host) => {
-        log("Development", applicationId, s"Host[$host] (overridden via environment variable)")
+        log("Development", applicationId, s"Host[$host] (overridden via env var[${overriddeVariableName(applicationId)}]")
         host
       }
 
@@ -84,11 +84,13 @@ trait RegistryApplicationProvider extends Registry with RegistryConstants {
           sys.error(s"application[$applicationId] does not have any ports in registry")
         }
         val host = s"http://${DevHost}:${port.external}"
-        log("Development", applicationId, s"Host[$host]")
+        log("Development", applicationId, s"Host[$host] (can override via env var[${overriddeVariableName(applicationId)}]")
         host
       }
     }
   }
+
+  def config: Config
 
   def getById(applicationId: String): Application
 
@@ -100,10 +102,13 @@ trait RegistryApplicationProvider extends Registry with RegistryConstants {
     * Ex:
     *   USER_HOST="http://localhost:6021" sbt
     */
-  private[this] def overridden(applicationId: String): Option[String] = {
-    config.optionalString(s"${applicationId.toUpperCase}_HOST")
+  protected def overridden(applicationId: String): Option[String] = {
+    config.optionalString(overriddeVariableName(applicationId))
   }
-  
+
+  protected def overriddeVariableName(applicationId: String): String = {
+    s"${applicationId.toUpperCase}_HOST"
+  }
 }
 
 @javax.inject.Singleton
@@ -111,9 +116,17 @@ class DevelopmentRegistry @javax.inject.Inject() (val config: Config) extends Re
   import scala.concurrent.ExecutionContext.Implicits.global
 
   private[this] lazy val RegistryHost = {
-    val host = config.optionalString(RegistryHostName).getOrElse(s"http://registry.$ProductionDomain")
-    log("Development", "registry", s"Host[$host]")
-    host
+    overridden("registry") match {
+      case None => {
+        val host = s"http://registry.$ProductionDomain"
+        log("Development", "registry", s"Host[$host] (can override via env var[${overriddeVariableName("registry")}])")
+        host
+      }
+      case Some(host) => {
+        log("Development", "registry", s"Host[$host] (overridden via env var[${overriddeVariableName("registry")}]")
+        host
+      }
+    }
   }
 
   private[this] lazy val token = config.requiredString(TokenVariableName)

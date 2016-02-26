@@ -1,7 +1,7 @@
 package io.flow.play.actors
 
 import akka.actor.ActorSystem
-import io.flow.play.util.DefaultConfig
+import io.flow.play.util.Config
 import play.api.Logger
 import play.api.Play.current
 import scala.concurrent.ExecutionContext
@@ -13,7 +13,7 @@ import scala.concurrent.duration._
   */
 trait Scheduler {
 
-  def config: DefaultConfig
+  def config: Config
 
   /**
    * Helper to schedule a recurring interval based on a configuration
@@ -29,7 +29,7 @@ trait Scheduler {
    *     scheduleRecurring("io.flow.delta.api.CheckProjects.seconds") {
    *       periodicActor ! PeriodicActor.Messages.CheckProjects
    *     }
-   *
+b   *
    * @param configName The name of the configuration parameter containing the number
    *        of seconds between runs. You can also optionally add a
    *        configuration parameter of the same name with "_inital"

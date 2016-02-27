@@ -29,7 +29,7 @@ trait Scheduler {
    *     scheduleRecurring("io.flow.delta.api.CheckProjects.seconds") {
    *       periodicActor ! PeriodicActor.Messages.CheckProjects
    *     }
-b   *
+   *
    * @param configName The name of the configuration parameter containing the number
    *        of seconds between runs. You can also optionally add a
    *        configuration parameter of the same name with "_inital"

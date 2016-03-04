@@ -2,6 +2,7 @@ package io.flow.play.util
 
 import play.api.Logger
 import play.api.Configuration
+import scala.util.{Failure, Success, Try}
 
 /**
   * Wrapper on play config testing for empty strings and standardizing
@@ -19,6 +20,36 @@ trait Config {
 
   def optionalString(name: String): Option[String]
 
+  def requiredLong(name: String): Long = toLong(name, requiredString(name))
+
+  def optionalLong(name: String): Option[Long] = optionalString(name).map(toLong(name, _))
+
+  private[this] def toLong(name: String, value: String): Long = {
+    Try(value.toLong) match {
+      case Success(v) => v
+      case Failure(ex) => {
+        val msg = s"Configuration variable[$name] has invalid value[$value]: must be a long"
+        Logger.error(msg)
+        sys.error(msg)
+      }
+    }
+  }
+  
+  def requiredInt(name: String): Int = toInt(name, requiredString(name))
+
+  def optionalInt(name: String): Option[Int] = optionalString(name).map(toInt(name, _))
+
+  private[this] def toInt(name: String, value: String): Int = {
+    Try(value.toInt) match {
+      case Success(v) => v
+      case Failure(ex) => {
+        val msg = s"Configuration variable[$name] has invalid value[$value]: must be an int"
+        Logger.error(msg)
+        sys.error(msg)
+      }
+    }
+  }
+  
 }
 
 case class ChainedConfig(configs: Seq[Config]) extends Config {

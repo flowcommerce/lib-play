@@ -67,8 +67,11 @@ trait UserFromBasicAuthorizationToken {
   ): Future[Option[User]] = {
     Headers.basicAuthorizationToken(headers) match {
       case None => Future { None }
-      case Some(token) => {
-        userTokensClient.getUserByToken(token)
+      case Some(token: BasicAuthorization.Token) => {
+        userTokensClient.getUserByToken(token.token)
+      }
+      case Some(token: BasicAuthorization.JWTToken) => {
+        userTokensClient.getUserById(token.userId)
       }
     }
   }

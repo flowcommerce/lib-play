@@ -18,6 +18,10 @@ trait UserTokensClient {
     token: String
   )(implicit ec: ExecutionContext): Future[Option[User]]
 
+  def getUserById(
+    userId: String
+  )(implicit  ec: ExecutionContext): Future[Option[User]]
+
 }
 
 @javax.inject.Singleton
@@ -43,6 +47,15 @@ class DefaultUserTokensClient @javax.inject.Inject() (registry: Registry) extend
     token: String
   )(implicit ec: ExecutionContext): Future[Option[User]] = {
     callWith404( client.users.getTokensByToken(token) )
+  }
+
+  /**
+    * Fetch a user by user id (should be derived from JWT Token)
+    */
+  def getUserById(
+   userId: String
+ )(implicit  ec: ExecutionContext): Future[Option[User]] = {
+    callWith404( client.users.getById(userId))
   }
 
 }

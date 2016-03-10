@@ -1,9 +1,5 @@
 package io.flow.play.controllers
 
-import io.flow.play.clients.UserTokensClient
-import io.flow.common.v0.models.User
-import scala.concurrent.Future
-
 object Headers {
 
   val Authorization = "Authorization"
@@ -14,12 +10,9 @@ object Headers {
     */
   def basicAuthorizationToken(
     headers: play.api.mvc.Headers
-  ): Option[String] = {
+  ): Option[BasicAuthorization.Authorization] = {
     headers.get(Authorization).flatMap { h =>
-      BasicAuthorization.get(h) match {
-        case Some(auth: BasicAuthorization.Token) => Some(auth.token)
-        case _ => None
-      }
+      BasicAuthorization.get(h)
     }
   }
 

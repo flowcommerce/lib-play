@@ -16,6 +16,7 @@ lazy val root = project
   .settings(
     libraryDependencies ++= Seq(
       ws,
+      "com.jason-goodwin" %% "authentikat-jwt" % "0.3.5",
       "org.scalatest" %% "scalatest" % "2.2.6" % "test",
       "org.scalatestplus" %% "play" % "1.4.0" % "test"
     )

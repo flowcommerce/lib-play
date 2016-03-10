@@ -5,8 +5,6 @@ import org.scalatest.{Matchers, FunSpec}
 
 
 class BasicAuthorizationSpec extends FunSpec with Matchers {
-  val jwtSalt = "development-$342-salt"
-
   describe("BasicAuthorization") {
     describe("Basic") {
       it("should decode a basic auth header") {

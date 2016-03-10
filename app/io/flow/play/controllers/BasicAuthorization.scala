@@ -38,16 +38,9 @@ object BasicAuthorization {
     }
   }
 
-  private[this] def createJWTToken(claimsSet: JwtClaimsSetJValue): Option[JWTToken] = {
+  private[this] def createJWTToken(claimsSet: JwtClaimsSetJValue): Option[JWTToken] =
     claimsSet.asSimpleMap.toOption match {
-      case Some(claims) =>
-        println(s"got claims! ${claims}")
-        claims.get("id").map(JWTToken)
-      case _ => {
-        println("got nothing back?")
-        None
-      }
+      case Some(claims) => claims.get("id").map(JWTToken)
+      case _ => None
     }
-  }
-
 }

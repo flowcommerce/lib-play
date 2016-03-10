@@ -1,10 +1,21 @@
 package io.flow.play.controllers
 
+import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
 import io.flow.play.controllers.BasicAuthorization.{Token, JWTToken}
+import io.flow.play.util.EnvironmentConfig
 import org.scalatest.{Matchers, FunSpec}
 
 
 class BasicAuthorizationSpec extends FunSpec with Matchers {
+  val jwtSalt = EnvironmentConfig.requiredString("JWT_SALT")
+
+  def createJWTHeader(userId: String, salt: Option[String] = None): String = {
+    val header = JwtHeader("HS256")
+    val claimsSet = JwtClaimsSet(Map("id" -> userId))
+    val token = JsonWebToken(header, claimsSet, salt.getOrElse(jwtSalt))
+    s"Bearer $token"
+  }
+
   describe("BasicAuthorization") {
     describe("Basic") {
       it("should decode a basic auth header") {
@@ -20,15 +31,30 @@ class BasicAuthorizationSpec extends FunSpec with Matchers {
     }
 
     describe("JWT") {
-      it("should decode a basic auth bearer header") {
-        val headerValue = "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpZCI6InVzci0yMDE2MDEzMC0xIiwiaWF0IjoxNDU3NjIyMzg2LCJleHAiOjE0NTc3MDg3ODYsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3QiLCJzdWIiOiJ0ZXN0dXNlckB0ZXN0LmNvbSJ9.v9HkqkKEaiq88T6QjLkpiKW2mjM_mqqg2owW_SzxjCw"
+      it("should decode") {
+        val userId = "usr-20160130-1"
+        val headerValue = createJWTHeader(userId = userId)
 
         BasicAuthorization.get(headerValue).map { authToken =>
           authToken match {
-            case JWTToken(userId) => userId shouldBe "usr-20160130-1"
+            case JWTToken(id) => id shouldBe userId
             case _ => fail("Did not parse a JWTToken, got a different type instead.")
           }
         }.getOrElse(fail("Could not parse token!"))
+      }
+
+      it("should fail to decode") {
+        val userId = "usr-20160130-1"
+        val headerValue = createJWTHeader(userId = userId, salt = Some("a different salt"))
+
+        val authorization = BasicAuthorization.get(headerValue).map { authToken =>
+          authToken match {
+            case t:JWTToken => fail("expected not to get a token due to bad salt.")
+            case _ => fail("Did not parse a JWTToken, got a different type instead.")
+          }
+        }
+
+        authorization shouldEqual None
       }
     }
   }

@@ -1,7 +1,7 @@
 package io.flow.play.controllers
 
 import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
-import io.flow.play.controllers.Authorization.{Token, JWTToken}
+import io.flow.play.controllers.Authorization.{Token, JwtToken}
 import io.flow.play.util.EnvironmentConfig
 import org.scalatest.{Matchers, FunSpec}
 
@@ -37,8 +37,8 @@ class BasicAuthorizationSpec extends FunSpec with Matchers {
 
         Authorization.get(headerValue).map { authToken =>
           authToken match {
-            case JWTToken(id) => id shouldBe userId
-            case _ => fail("Did not parse a JWTToken, got a different type instead.")
+            case JwtToken(id) => id shouldBe userId
+            case _ => fail("Did not parse a JwtToken, got a different type instead.")
           }
         }.getOrElse(fail("Could not parse token!"))
       }
@@ -49,8 +49,8 @@ class BasicAuthorizationSpec extends FunSpec with Matchers {
 
         val authorization = Authorization.get(headerValue).map { authToken =>
           authToken match {
-            case t:JWTToken => fail("expected not to get a token due to bad salt.")
-            case _ => fail("Did not parse a JWTToken, got a different type instead.")
+            case t:JwtToken => fail("expected not to get a token due to bad salt.")
+            case _ => fail("Did not parse a JwtToken, got a different type instead.")
           }
         }
 

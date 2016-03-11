@@ -73,7 +73,7 @@ trait UserFromAuthorizationToken {
             // TODO: Replace with call to token service and remove dependency on user service
             userTokensClient.getUserByToken(token.token).map(_.map(user => UserReference(user.id)))
           }
-          case token: Authorization.JWTToken => {
+          case token: Authorization.JwtToken => {
             Future { Some(UserReference(token.userId)) }
           }
         }

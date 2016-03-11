@@ -3,13 +3,13 @@ package clients
 
 import io.flow.user.v0.Client
 import io.flow.play.clients._
-import io.flow.common.v0.models.User
+import io.flow.common.v0.models.UserReference
 import scala.concurrent.duration.Duration
 import java.util.concurrent.TimeUnit
 
 trait MockClient {
 
-  lazy val testUser = MockUserTokensClient.makeUser()
+  lazy val testUser = MockUserTokensClient.makeUserReference()
 
   def createTestToken(): String = {
     "test"
@@ -27,7 +27,7 @@ trait MockClient {
     * granted all privileges.
     */
   def makeIdentifiedClient(
-    user: User = MockUserTokensClient.makeUser(),
+    user: UserReference = MockUserTokensClient.makeUserReference(),
     token: String = createTestToken()
   ): io.flow.user.v0.mock.Client = {
     MockUserTokensClient.add(user, token = Some(token))

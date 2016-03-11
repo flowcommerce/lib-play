@@ -53,7 +53,7 @@ trait AnonymousController extends FlowControllerHelpers {
 
 }
 
-trait UserFromBasicAuthorizationToken {
+trait UserFromAuthorizationToken {
 
   def userTokensClient: UserTokensClient
 
@@ -69,11 +69,11 @@ trait UserFromBasicAuthorizationToken {
       case None => Future { None }
       case Some(token) => {
         token match {
-          case token: BasicAuthorization.Token => {
+          case token: Authorization.Token => {
             // TODO: Replace with call to token service and remove dependency on user service
             userTokensClient.getUserByToken(token.token).map(_.map(user => UserReference(user.id)))
           }
-          case token: BasicAuthorization.JWTToken => {
+          case token: Authorization.JwtToken => {
             Future { Some(UserReference(token.userId)) }
           }
         }
@@ -83,5 +83,5 @@ trait UserFromBasicAuthorizationToken {
 
 }
 
-trait AnonymousRestController extends AnonymousController with UserFromBasicAuthorizationToken
+trait AnonymousRestController extends AnonymousController with UserFromAuthorizationToken
 

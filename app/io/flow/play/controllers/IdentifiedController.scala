@@ -36,4 +36,4 @@ trait IdentifiedController extends AnonymousController {
   }
 }
 
-trait IdentifiedRestController extends IdentifiedController with UserFromBasicAuthorizationToken
+trait IdentifiedRestController extends IdentifiedController with UserFromAuthorizationToken

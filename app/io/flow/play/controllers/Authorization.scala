@@ -1,18 +1,22 @@
 package io.flow.play.controllers
 
-import io.flow.play.util.EnvironmentConfig
+import io.flow.play.util.{Config, EnvironmentConfig}
 import org.apache.commons.codec.binary.Base64
 
 import authentikat.jwt._
 import play.api.Logger
 
-object BasicAuthorization {
+trait Authorization
 
-  trait Authorization
+object Authorization {
+
   case class Token(token: String) extends Authorization
-  case class JWTToken(userId: String) extends Authorization
+  case class JwtToken(userId: String) extends Authorization
 
-  val jwtSalt = EnvironmentConfig.requiredString("JWT_SALT")
+  private[this] lazy val jwtSalt = {
+    val config = play.api.Play.current.injector.instanceOf[Config]
+    config.requiredString("JWT_SALT")
+  }
 
   def get(value: Option[String]): Option[Authorization] = {
     value.flatMap { get }
@@ -34,9 +38,9 @@ object BasicAuthorization {
 
       case "Bearer" :: value :: Nil => {
         value match {
-          case JsonWebToken(header, claimsSet, signature) if jwtIsValid(value) => createJWTToken(claimsSet)
+          case JsonWebToken(header, claimsSet, signature) if jwtIsValid(value) => createJwtToken(claimsSet)
           case JsonWebToken(header, claimsSet, signature) =>
-            val tokenData = createJWTToken(claimsSet)
+            val tokenData = createJwtToken(claimsSet)
             Logger.error(s"JWT Token for user[${tokenData.map(_.userId).getOrElse("unknown")}] was invalid, bad salt")
             None
           case _ => None
@@ -48,9 +52,9 @@ object BasicAuthorization {
 
   private[this] def jwtIsValid(token: String): Boolean = JsonWebToken.validate(token, jwtSalt)
 
-  private[this] def createJWTToken(claimsSet: JwtClaimsSetJValue): Option[JWTToken] =
+  private[this] def createJwtToken(claimsSet: JwtClaimsSetJValue): Option[JwtToken] =
     claimsSet.asSimpleMap.toOption match {
-      case Some(claims) => claims.get("id").map(JWTToken)
+      case Some(claims) => claims.get("id").map(JwtToken)
       case _ => None
     }
 }

@@ -6,9 +6,10 @@ import org.apache.commons.codec.binary.Base64
 import authentikat.jwt._
 import play.api.Logger
 
-object BasicAuthorization {
+trait Authorization
 
-  trait Authorization
+object Authorization {
+
   case class Token(token: String) extends Authorization
   case class JWTToken(userId: String) extends Authorization
 

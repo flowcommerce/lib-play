@@ -2,7 +2,7 @@ package io.flow.play.controllers
 
 object Headers {
 
-  val Authorization = "Authorization"
+  val AuthorizationHeaderName = "Authorization"
 
   /**
     * If present, parses the basic authorization header and returns
@@ -10,9 +10,9 @@ object Headers {
     */
   def basicAuthorizationToken(
     headers: play.api.mvc.Headers
-  ): Option[BasicAuthorization.Authorization] = {
-    headers.get(Authorization).flatMap { h =>
-      BasicAuthorization.get(h)
+  ): Option[Authorization] = {
+    headers.get(AuthorizationHeaderName).flatMap { h =>
+      Authorization.get(h)
     }
   }
 

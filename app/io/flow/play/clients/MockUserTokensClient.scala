@@ -1,8 +1,7 @@
 package io.flow.play.clients
 
 import io.flow.play.util.IdGenerator
-import io.flow.common.v0.models.{Name, User}
-import io.flow.user.v0.models.UserForm
+import io.flow.common.v0.models.UserReference
 import org.joda.time.DateTime
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
@@ -11,7 +10,7 @@ import scala.util.{Failure, Success, Try}
 class MockUserTokensClient extends UserTokensClient {
 
   def add(
-    user: User,
+    user: UserReference,
     token: Option[String] = None
   ) {
     MockUserTokensClient.add(user, token)
@@ -19,13 +18,13 @@ class MockUserTokensClient extends UserTokensClient {
 
   override def getUserByToken(
     token: String
-  )(implicit ec: ExecutionContext): Future[Option[User]] = {
+  )(implicit ec: ExecutionContext): Future[Option[UserReference]] = {
     MockUserTokensClient.getUserByToken(token)
   }
 
   override def getUserById(
     userId: String
-  )(implicit  ec: ExecutionContext): Future[Option[User]] = {
+  )(implicit  ec: ExecutionContext): Future[Option[UserReference]] = {
     MockUserTokensClient.getUserById(userId)
   }
 
@@ -34,37 +33,17 @@ class MockUserTokensClient extends UserTokensClient {
 
 object MockUserTokensClient {
 
-  private[this] var usersById = scala.collection.mutable.Map[String, User]()
-  private[this] var usersByToken = scala.collection.mutable.Map[String, User]()
+  private[this] var usersById = scala.collection.mutable.Map[String, UserReference]()
+  private[this] var usersByToken = scala.collection.mutable.Map[String, UserReference]()
   private[this] val idGenerator = IdGenerator("tst")
 
   /**
     * Constructs a user object - in memory only.
     */
-  def makeUser(
-    form: UserForm = makeUserForm()
-  ): User = {
-    User(
-      id = idGenerator.randomId(),
-      email = form.email,
-      name = form.name match {
-        case None => Name()
-        case Some(n) => Name(
-          first = n.first,
-          last = n.first
-        )
-      }
-    )
-  }
-
-  def makeUserForm() = UserForm(
-    email = None,
-    name = None,
-    avatarUrl = None
-  )
+  def makeUserReference() = UserReference(id = idGenerator.randomId())
 
   def add(
-    user: User,
+    user: UserReference,
     token: Option[String] = None
   ) {
     usersById ++= Map(user.id -> user)
@@ -75,13 +54,13 @@ object MockUserTokensClient {
 
   def getUserByToken(
     token: String
-  )(implicit ec: ExecutionContext): Future[Option[User]] = {
+  )(implicit ec: ExecutionContext): Future[Option[UserReference]] = {
     Future { usersByToken.get(token) }
   }
 
   def getUserById(
     userId: String
-  )(implicit ec: ExecutionContext): Future[Option[User]] = {
+  )(implicit ec: ExecutionContext): Future[Option[UserReference]] = {
     Future { usersById.get(userId) }
   }
 

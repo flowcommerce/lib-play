@@ -16,11 +16,11 @@ trait UserTokensClient {
 
   def getUserByToken(
     token: String
-  )(implicit ec: ExecutionContext): Future[Option[User]]
+  )(implicit ec: ExecutionContext): Future[Option[UserReference]]
 
   def getUserById(
     userId: String
-  )(implicit  ec: ExecutionContext): Future[Option[User]]
+  )(implicit  ec: ExecutionContext): Future[Option[UserReference]]
 
 }
 
@@ -45,8 +45,8 @@ class DefaultUserTokensClient @javax.inject.Inject() (registry: Registry) extend
     */
   def getUserByToken(
     token: String
-  )(implicit ec: ExecutionContext): Future[Option[User]] = {
-    callWith404( client.users.getTokensByToken(token) )
+  )(implicit ec: ExecutionContext): Future[Option[UserReference]] = {
+    callWith404( client.users.getTokensByToken(token).map(toUserReference) )
   }
 
   /**
@@ -54,8 +54,10 @@ class DefaultUserTokensClient @javax.inject.Inject() (registry: Registry) extend
     */
   def getUserById(
    userId: String
- )(implicit  ec: ExecutionContext): Future[Option[User]] = {
-    callWith404( client.users.getById(userId))
+ )(implicit  ec: ExecutionContext): Future[Option[UserReference]] = {
+    callWith404( client.users.getById(userId).map(toUserReference) )
   }
+
+  private[this] def toUserReference(user: User) = UserReference(id = user.id)
 
 }

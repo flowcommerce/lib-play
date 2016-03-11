@@ -1,6 +1,6 @@
 package io.flow.play.clients
 
-import io.flow.common.v0.models.{User, UserReference}
+import io.flow.common.v0.models.UserReference
 import io.flow.user.v0.Client
 import io.flow.user.v0.errors.UnitResponse
 import scala.concurrent.{ExecutionContext, Future}
@@ -17,10 +17,6 @@ trait UserTokensClient {
   def getUserByToken(
     token: String
   )(implicit ec: ExecutionContext): Future[Option[UserReference]]
-
-  def getUserById(
-    userId: String
-  )(implicit  ec: ExecutionContext): Future[Option[UserReference]]
 
 }
 
@@ -46,18 +42,7 @@ class DefaultUserTokensClient @javax.inject.Inject() (registry: Registry) extend
   def getUserByToken(
     token: String
   )(implicit ec: ExecutionContext): Future[Option[UserReference]] = {
-    callWith404( client.users.getTokensByToken(token).map(toUserReference) )
+    callWith404( client.users.getTokensByToken(token).map { u => UserReference(id = u.id) } )
   }
-
-  /**
-    * Fetch a user by user id (should be derived from JWT Token)
-    */
-  def getUserById(
-   userId: String
- )(implicit  ec: ExecutionContext): Future[Option[UserReference]] = {
-    callWith404( client.users.getById(userId).map(toUserReference) )
-  }
-
-  private[this] def toUserReference(user: User) = UserReference(id = user.id)
 
 }

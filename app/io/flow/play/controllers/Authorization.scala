@@ -1,6 +1,6 @@
 package io.flow.play.controllers
 
-import io.flow.play.util.EnvironmentConfig
+import io.flow.play.util.{Config, EnvironmentConfig}
 import org.apache.commons.codec.binary.Base64
 
 import authentikat.jwt._
@@ -13,7 +13,10 @@ object Authorization {
   case class Token(token: String) extends Authorization
   case class JwtToken(userId: String) extends Authorization
 
-  val jwtSalt = EnvironmentConfig.requiredString("JWT_SALT")
+  private[this] lazy val jwtSalt = {
+    val config = play.api.Play.current.injector.instanceOf[Config]
+    config.requiredString("JWT_SALT")
+  }
 
   def get(value: Option[String]): Option[Authorization] = {
     value.flatMap { get }

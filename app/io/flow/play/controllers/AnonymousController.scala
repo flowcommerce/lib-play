@@ -1,6 +1,6 @@
 package io.flow.play.controllers
 
-import io.flow.common.v0.models.User
+import io.flow.common.v0.models.{UserReference, User}
 import io.flow.play.clients.UserTokensClient
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.mvc._
@@ -31,10 +31,10 @@ trait AnonymousController extends FlowControllerHelpers {
     queryString: Map[String, Seq[String]]
   ) (
     implicit ec: ExecutionContext
-  ): Future[Option[User]]
+  ): Future[Option[UserReference]]
 
   class AnonymousRequest[A](
-    val user: Future[Option[User]],
+    val user: Future[Option[UserReference]],
     request: Request[A]
   ) extends WrappedRequest[A](request)
 
@@ -64,14 +64,15 @@ trait UserFromBasicAuthorizationToken {
     queryString: Map[String, Seq[String]]
   ) (
     implicit ec: ExecutionContext
-  ): Future[Option[User]] = {
+  ): Future[Option[UserReference]] = {
     Headers.basicAuthorizationToken(headers) match {
       case None => Future { None }
       case Some(token: BasicAuthorization.Token) => {
-        userTokensClient.getUserByToken(token.token)
+        // TODO: Replace with call to token service and remove dependency on user service
+        userTokensClient.getUserByToken(token.token).map(_.map(user => UserReference(user.id)))
       }
       case Some(token: BasicAuthorization.JWTToken) => {
-        userTokensClient.getUserById(token.userId)
+        Future { Some(UserReference(token.userId)) }
       }
     }
   }

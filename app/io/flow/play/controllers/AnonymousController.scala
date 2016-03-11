@@ -67,12 +67,16 @@ trait UserFromBasicAuthorizationToken {
   ): Future[Option[UserReference]] = {
     Headers.basicAuthorizationToken(headers) match {
       case None => Future { None }
-      case Some(token: BasicAuthorization.Token) => {
-        // TODO: Replace with call to token service and remove dependency on user service
-        userTokensClient.getUserByToken(token.token).map(_.map(user => UserReference(user.id)))
-      }
-      case Some(token: BasicAuthorization.JWTToken) => {
-        Future { Some(UserReference(token.userId)) }
+      case Some(token) => {
+        token match {
+          case token: BasicAuthorization.Token => {
+            // TODO: Replace with call to token service and remove dependency on user service
+            userTokensClient.getUserByToken(token.token).map(_.map(user => UserReference(user.id)))
+          }
+          case token: BasicAuthorization.JWTToken => {
+            Future { Some(UserReference(token.userId)) }
+          }
+        }
       }
     }
   }

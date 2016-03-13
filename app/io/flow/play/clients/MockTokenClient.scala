@@ -5,7 +5,7 @@ import io.flow.common.v0.models.UserReference
 import scala.concurrent.{ExecutionContext, Future}
 
 @javax.inject.Singleton
-class MockTokenClient extends TokenClient {
+class MockTokenClient() extends TokenClient {
 
   def add(token: String, user: UserReference) {
     MockTokenClient.add(token, user)
@@ -18,7 +18,6 @@ class MockTokenClient extends TokenClient {
   }
 
 }
-
 
 object MockTokenClient {
 

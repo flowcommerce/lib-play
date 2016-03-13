@@ -19,5 +19,4 @@ code:
       version: latest
       generators:
         play_2_4_client: "app/generated"
-
-
+        play_2_4_mock_client: "app/generated"

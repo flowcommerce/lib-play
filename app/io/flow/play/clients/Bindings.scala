@@ -1,6 +1,7 @@
 package io.flow.play.clients
 
 import io.flow.play.util.{Config, DefaultConfig, FlowEnvironment}
+import io.flow.token.v0.interfaces.{Client => TokenClient}
 import play.api.{Environment, Configuration, Mode}
 import play.api.inject.Module
 

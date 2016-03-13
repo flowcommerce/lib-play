@@ -1,6 +1,7 @@
 package io.flow.play.expanders
 
 import io.flow.play.clients.MockUserClient
+import io.flow.user.v0.interfaces.{Client => UserClient}
 import org.scalatestplus.play._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
@@ -11,7 +12,7 @@ import play.api.test.Helpers._
 class UserSpec extends PlaySpec {
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  val client = play.api.Play.current.injector.instanceOf[UserClient]
+  val client: MockUserClient = play.api.Play.current.injector.instanceOf[UserClient].asInstanceOf[MockUserClient]
 
   //For reference, an example of a GuiceApplicationBuilder
   //val application: Application = new GuiceApplicationBuilder()
@@ -64,7 +65,7 @@ class UserSpec extends PlaySpec {
   "expand" should {
     "return expanded user when user exists" in {
       running(FakeApplication()) {
-        val user = User("user", identifiedClient)
+        val user = User("user", client)
         val doExpand = user.expand(userReferenceRecordToExpand)
 
         Await.result(doExpand.map(e =>
@@ -75,7 +76,7 @@ class UserSpec extends PlaySpec {
 
     "return user reference when user does not exist" in {
       running(FakeApplication()) {
-        val user = User("user", identifiedClient)
+        val user = User("user", client)
         val doExpand = user.expand(Seq(userReferenceRecord))
 
         Await.result(doExpand.map(e =>

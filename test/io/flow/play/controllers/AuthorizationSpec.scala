@@ -16,7 +16,9 @@ import org.scalatestplus.play._
 class AuthorizationSpec extends PlaySpec with OneAppPerSuite {
 
   private[this] val mockConfig = new MockConfig()
-  //override lazy val app = new GuiceApplicationBuilder().bindings(bind[Config].to[MockConfig]).build()
+
+  // TODO: Bind to the specific instance of mockConfig
+  override lazy val app = new GuiceApplicationBuilder().bindings(bind[Config].to[MockConfig]).build()
 
   def createJWTHeader(
     userId: String,

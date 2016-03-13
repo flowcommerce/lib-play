@@ -1,7 +1,7 @@
 package io.flow.play.controllers
 
 import io.flow.common.v0.models.UserReference
-import io.flow.token.v0.{Client => TokenClient}
+import io.flow.token.v0.interfaces.{Client => TokenClient}
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.mvc._
 

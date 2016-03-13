@@ -1,29 +1,22 @@
 package io.flow.play.clients
 
 import io.flow.common.v0.models.UserReference
-import io.flow.user.v0.Client
-import io.flow.user.v0.errors.UnitResponse
+import io.flow.token.v0.Client
+import io.flow.token.v0.errors.UnitResponse
 import scala.concurrent.{ExecutionContext, Future}
 
-object UserClient {
+trait TokenClient {
 
-  val SystemUser = UserReference("usr-20151006-1")
-  val AnonymousUser = UserReference("usr-20151006-2")
-
-}
-
-trait UserTokensClient {
-
-  def getUserByToken(
+  def getByToken(
     token: String
   )(implicit ec: ExecutionContext): Future[Option[UserReference]]
 
 }
 
 @javax.inject.Singleton
-class DefaultUserTokensClient @javax.inject.Inject() (registry: Registry) extends UserTokensClient {
+class DefaultTokenClient @javax.inject.Inject() (registry: Registry) extends TokenClient {
 
-  lazy val client: Client = new Client(registry.host("user"))
+  private[this] lazy val client: Client = new Client(registry.host("token"))
 
   def callWith404[T](
     f: Future[T]
@@ -37,12 +30,15 @@ class DefaultUserTokensClient @javax.inject.Inject() (registry: Registry) extend
   }
 
   /**
-    * Fetch a user by API Token.
+    * Getch the given token from the token service, and if found,
+    * return the underlying user reference.
     */
-  def getUserByToken(
+  def getByToken(
     token: String
   )(implicit ec: ExecutionContext): Future[Option[UserReference]] = {
-    callWith404( client.users.getTokensByToken(token).map { u => UserReference(id = u.id) } )
+    callWith404 {
+      client.tokens.getByToken(token).map(_.user)
+    }
   }
 
 }

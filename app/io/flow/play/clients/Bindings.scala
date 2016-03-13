@@ -36,15 +36,15 @@ class ConfigModule extends Module {
 
 }
 
-class UserTokensClientModule extends Module {
+class TokenClientModule extends Module {
 
   def bindings(env: Environment, conf: Configuration) = {
     env.mode match {
       case Mode.Prod | Mode.Dev => Seq(
-        bind[UserTokensClient].to[DefaultUserTokensClient]
+        bind[TokenClient].to[DefaultTokenClient]
       )
       case Mode.Test => Seq(
-        bind[UserTokensClient].to[MockUserTokensClient]
+        bind[TokenClient].to[MockTokenClient]
       )
     }
   }

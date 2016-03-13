@@ -9,9 +9,6 @@ class UserClientModule(
   config: Configuration
   ) extends AbstractModule {
 
-  /*
-    userApiHost is required only when running in Prod/Dev mode.
-   */
   private[this] val userApiHost = config.getString("user.api.host").getOrElse("Missing user.api.host")
 
   override def configure() {}

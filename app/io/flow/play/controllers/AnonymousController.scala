@@ -1,7 +1,7 @@
 package io.flow.play.controllers
 
-import io.flow.common.v0.models.{UserReference, User}
-import io.flow.play.clients.UserTokensClient
+import io.flow.common.v0.models.UserReference
+import io.flow.token.v0.{Client => TokenClient}
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.mvc._
 
@@ -16,10 +16,10 @@ trait AnonymousController extends FlowControllerHelpers {
   import scala.concurrent.ExecutionContext.Implicits.global
 
   /**
-    * Needed to fetch users by token when a token is present in the
-    * HTTP Request Headers.
+    * token client is used to validate API tokens when present in
+    * requests
     */
-  def userTokensClient: UserTokensClient
+  def tokenClient: TokenClient
 
   /**
    * Extracts the user from the headers
@@ -55,7 +55,7 @@ trait AnonymousController extends FlowControllerHelpers {
 
 trait UserFromAuthorizationToken {
 
-  def userTokensClient: UserTokensClient
+  def tokenClient: TokenClient
 
   def user(
     session: Session,
@@ -70,11 +70,12 @@ trait UserFromAuthorizationToken {
       case Some(token) => {
         token match {
           case token: Authorization.Token => {
-            // TODO: Replace with call to token service and remove dependency on user service
-            userTokensClient.getUserByToken(token.token).map(_.map(user => UserReference(user.id)))
+            tokenClient.tokens.get(token = Seq(token.token)).map(_.headOption.map(_.user))
           }
           case token: Authorization.JwtToken => {
-            Future { Some(UserReference(token.userId)) }
+            Future {
+              Some(UserReference(token.userId))
+            }
           }
         }
       }

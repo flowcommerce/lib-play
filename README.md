@@ -1,7 +1,15 @@
 # lib-play
 Library supporting building REST APIs on play framework.
 
-Traits:
+# Provided Bindings
+
+    play.modules.enabled += "io.flow.play.clients.ConfigModule"
+    play.modules.enabled += "io.flow.play.clients.RegistryModule"
+    play.modules.enabled += "io.flow.play.clients.TokenModule"
+    play.modules.enabled += "io.flow.play.clients.UserModule"
+
+# Traits
+
   Anonymous Controller
 
    -- Provides user(...) method to get an instance of the current
@@ -20,7 +28,7 @@ Traits:
 
 ## Publishing a new version
 
-    go run ~/go/src/github.com/flowcommerce/tools/dev.go tag --label micro
+    dev tag --label micro
     sbt publish
 
 ## Publishing a new snapshot for local development

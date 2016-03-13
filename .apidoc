@@ -9,9 +9,14 @@ code:
       version: latest
       generators:
         play_2_4_client: "app/generated"
+    token:
+      version: latest
+      generators:
+        play_2_4_client: "app/generated"
+        play_2_4_mock_client: "app/generated"
+    # User is needed for 'user' expansion
     user:
       version: latest
       generators:
         play_2_4_client: "app/generated"
         play_2_4_mock_client: "app/generated"
-

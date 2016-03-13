@@ -1,86 +1,65 @@
 package io.flow.play.expanders
 
-import clients.MockClient
-import play.api.libs.json.Json
+import io.flow.common.v0.{models => common}
+import io.flow.common.v0.models.json._
+import io.flow.play.clients.MockUserClient
+import io.flow.play.util.IdGenerator
+import io.flow.user.v0.interfaces.{Client => UserClient}
+import io.flow.user.v0.models.json._
+
 import org.scalatestplus.play._
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
+
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.Json
 import play.api.test._
 import play.api.test.Helpers._
 
+class UserSpec extends PlaySpec with OneAppPerSuite {
 
-class UserSpec extends PlaySpec with MockClient {
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  //For reference, an example of a GuiceApplicationBuilder
-  //val application: Application = new GuiceApplicationBuilder()
-    //.bindings(bind[AuthorizationClient].to[MockAuthorizationClient])
-    //.bindings(bind[UserTokensClient].to[MockUserTokensClient])
-    //.bindings(bind[io.flow.user.v0.mock.Client].to[MockUserClient])
-    //.build
+  lazy val client: MockUserClient = play.api.Play.current.injector.instanceOf[UserClient].asInstanceOf[MockUserClient]
 
-  val validExpandRecord = Seq(
-    Json.parse(
-    """
-      {
-        "user": {
-          "id": "usr-123",
-          "email": "test@flow.io",
-          "name": {
-           "first": "testFirst",
-           "last": "testLast"
-          },
-          "discriminator": "user"
-        }
-      }
-    """.stripMargin
+  def toReference(user: common.User) = common.UserReference(id = user.id)
+
+  def buildUser(): common.User = {
+    common.User(
+      id = IdGenerator("tst").randomId(),
+      email = Some("test@flow.io"),
+      name = common.Name(first = Some("John"), last = Some("Smith"))
     )
-  )
+  }
 
-  val userReferenceRecord =
-    Json.parse(
-      """
-        {
-          "user": {
-            "id": "usr-bogus",
-            "discriminator": "user_reference"
-          }
-        }
-      """.stripMargin)
-
-
-  val userReferenceRecordToExpand = Seq(
-    Json.parse(
-      """
-        {
-          "user": {
-            "id": "usr-123",
-            "discriminator": "user_reference"
-          }
-        }
-      """.stripMargin))
+  
+  // TODO: Bind to the specific client instance
+  override lazy val app = new GuiceApplicationBuilder().bindings(bind[UserClient].to[MockUserClient]).build()
 
   "expand" should {
     "return expanded user when user exists" in {
-      running(FakeApplication()) {
-        val user = User("user", identifiedClient)
-        val doExpand = user.expand(userReferenceRecordToExpand)
+      val user = buildUser()
+      client.data.add(user)
 
-        Await.result(doExpand.map(e =>
-          e.head must equal(validExpandRecord.head))
-          , Duration(5, "seconds"))
+      val expanded = await(
+        User("user", client).expand(Seq(Json.obj("user" -> Json.toJson(toReference(user)))))
+      ).headOption.getOrElse {
+        sys.error("Expanded user not found")
       }
+
+      expanded must equal(Json.obj("user" -> Json.toJson(user)))
     }
 
     "return user reference when user does not exist" in {
-      running(FakeApplication()) {
-        val user = User("user", identifiedClient)
-        val doExpand = user.expand(Seq(userReferenceRecord))
+      val user = buildUser()
 
-        Await.result(doExpand.map(e =>
-          e.head must equal(userReferenceRecord))
-          , Duration(5, "seconds"))
+      val expanded = await(
+        User("user", client).expand(Seq(Json.obj("user" -> Json.toJson(toReference(user)))))
+      ).headOption.getOrElse {
+        sys.error("Expanded user not found")
       }
+
+      expanded must equal(Json.obj("user" -> Json.toJson(toReference(user))))
     }
+
   }
 }

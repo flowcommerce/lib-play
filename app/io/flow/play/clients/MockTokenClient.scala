@@ -24,11 +24,11 @@ object MockTokenClient {
 
   private[this] var usersByToken = scala.collection.mutable.Map[String, UserReference]()
 
-  override def add(token: String, user: UserReference) {
+  def add(token: String, user: UserReference) {
     usersByToken ++= Map(token -> user)
   }
 
-  override def getByToken(
+  def getByToken(
     token: String
   )(implicit ec: ExecutionContext): Future[Option[UserReference]] = {
     Future { usersByToken.get(token) }

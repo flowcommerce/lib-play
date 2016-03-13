@@ -1,15 +1,17 @@
 package io.flow.play.expanders
 
-import clients.MockUserClient
-import play.api.libs.json.Json
+import io.flow.play.clients.MockUserClient
 import org.scalatestplus.play._
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
+import play.api.libs.json.Json
 import play.api.test._
 import play.api.test.Helpers._
 
-class UserSpec extends PlaySpec with MockUserClient {
+class UserSpec extends PlaySpec {
   import scala.concurrent.ExecutionContext.Implicits.global
+
+  val client = play.api.Play.current.injector.instanceOf[UserClient]
 
   //For reference, an example of a GuiceApplicationBuilder
   //val application: Application = new GuiceApplicationBuilder()

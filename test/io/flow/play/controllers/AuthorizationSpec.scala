@@ -1,6 +1,7 @@
 package io.flow.play.controllers
 
 import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
+import io.flow.play.clients.MockConfig
 import io.flow.play.controllers.Authorization.{Token, JwtToken}
 import io.flow.play.util.Config
 
@@ -14,9 +15,8 @@ import org.scalatestplus.play._
 
 class AuthorizationSpec extends PlaySpec with OneAppPerSuite {
 
-  private[this] val mockConfig = MockConfig()
-
-  override lazy val app = new GuiceApplicationBuilder().bindings(bind[Config].to[MockConfig]).build()
+  private[this] val mockConfig = new MockConfig()
+  //override lazy val app = new GuiceApplicationBuilder().bindings(bind[Config].to[MockConfig]).build()
 
   def createJWTHeader(
     userId: String,

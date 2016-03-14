@@ -1,5 +1,6 @@
 package io.flow.play.controllers
 
+import io.flow.play.clients.DefaultTokenClient
 import io.flow.common.v0.models.UserReference
 import io.flow.token.v0.interfaces.{Client => TokenClient}
 import scala.concurrent.{ExecutionContext, Future}
@@ -70,7 +71,14 @@ trait UserFromAuthorizationToken {
       case Some(token) => {
         token match {
           case token: Authorization.Token => {
-            tokenClient.tokens.get(token = Seq(token.token)).map(_.headOption.map(_.user))
+
+            tokenClient.tokens.get(token = Seq(token.token)).map(_.headOption.map(_.user)).recover {
+              case ex: Throwable => {
+                val msg = s"Error communicating with token service at ${tokenClient.baseUrl}: $ex"
+                throw new Exception(msg, ex)
+              }
+            }
+
           }
           case token: Authorization.JwtToken => {
             Future {

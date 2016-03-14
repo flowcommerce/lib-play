@@ -7,6 +7,8 @@ package io.flow.token.v0.mock {
 
   trait Client extends io.flow.token.v0.interfaces.Client {
 
+    def baseUrl = "http://mock.localhost"
+
     override def healthchecks: MockHealthchecks = MockHealthchecksImpl
     override def tokens: MockTokens = MockTokensImpl
 

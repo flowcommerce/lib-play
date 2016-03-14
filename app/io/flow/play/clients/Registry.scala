@@ -32,24 +32,22 @@ trait Registry {
 object RegistryConstants {
 
   val ProductionDomain = "api.flow.io"
-  val TokenVariableName = "io.flow.user.token"
+
+  val TokenVariableName = "FLOW_API_TOKEN"
+  val DevHostVariableName = "DEV_HOST"
 
   /**
-    * The resolved name of the development host. At Flow, this is the
-    * alias 'vm' which we expect to be setup in /etc/hosts to point to
-    * the IP address of the VM running our docker containers locally.
-    * 
-    * Note that if you specify an environment variable of
-    * 'CONF_IO_FLOW_DEV_HOST', we will use that instead of the
-    * development host.
+    * The resolved name of the development host. At Flow, we require
+    * an environment variable of DEV_HOST
     */
-  val DefaultDevelopmentHost = "vm"
-
   private[this] lazy val devHost: String = {
-    val name = "CONF_IO_FLOW_DEV_HOST"
-    EnvironmentConfig.optionalString(name).getOrElse {
-      PropertyConfig.optionalString(name).getOrElse {
-        DefaultDevelopmentHost
+    EnvironmentConfig.optionalString(DevHostVariableName).getOrElse {
+      PropertyConfig.optionalString(DevHostVariableName).getOrElse {
+        sys.error(
+          s"Missing required environment variable named[$DevHostVariableName].\n" +
+            "This variable should be the IP address where we can find development instances.\n" +
+            "In development mode, this is commonly set to the IP address of virtual box (e.g. 192.168.99.100)"
+        )
       }
     }
   }

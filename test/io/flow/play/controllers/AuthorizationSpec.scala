@@ -15,7 +15,7 @@ import org.scalatestplus.play._
 
 class AuthorizationSpec extends PlaySpec with OneAppPerSuite {
 
-  private[this] val mockConfig = new MockConfig()
+  private[this] lazy val mockConfig = play.api.Play.current.injector.instanceOf[MockConfig]
 
   // TODO: Bind to the specific instance of mockConfig
   override lazy val app = new GuiceApplicationBuilder().bindings(bind[Config].to[MockConfig]).build()

@@ -402,7 +402,7 @@ package io.flow.registry.v0 {
   }
 
   class Client(
-    apiUrl: String,
+    val baseUrl: String,
     auth: scala.Option[io.flow.registry.v0.Authorization] = None,
     defaultHeaders: Seq[(String, String)] = Nil
   ) extends interfaces.Client {
@@ -411,7 +411,7 @@ package io.flow.registry.v0 {
 
     private[this] val logger = play.api.Logger("io.flow.registry.v0.Client")
 
-    logger.info(s"Initializing io.flow.registry.v0.Client for url $apiUrl")
+    logger.info(s"Initializing io.flow.registry.v0.Client for url $baseUrl")
 
     def applications: Applications = Applications
 
@@ -628,7 +628,7 @@ package io.flow.registry.v0 {
     def _requestHolder(path: String): play.api.libs.ws.WSRequest = {
       import play.api.Play.current
 
-      val holder = play.api.libs.ws.WS.url(apiUrl + path).withHeaders(
+      val holder = play.api.libs.ws.WS.url(baseUrl + path).withHeaders(
         "User-Agent" -> Constants.UserAgent,
         "X-Apidoc-Version" -> Constants.Version,
         "X-Apidoc-Version-Major" -> Constants.VersionMajor.toString
@@ -715,6 +715,7 @@ package io.flow.registry.v0 {
   package interfaces {
 
     trait Client {
+      def baseUrl: String
       def applications: io.flow.registry.v0.Applications
       def healthchecks: io.flow.registry.v0.Healthchecks
       def services: io.flow.registry.v0.Services

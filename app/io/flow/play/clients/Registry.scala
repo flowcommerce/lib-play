@@ -1,6 +1,6 @@
 package io.flow.play.clients
 
-import io.flow.play.util.{Config, FlowEnvironment}
+import io.flow.play.util.{Config, EnvironmentConfig, FlowEnvironment, PropertyConfig}
 import io.flow.registry.v0.{Authorization, Client}
 import io.flow.registry.v0.errors.UnitResponse
 import io.flow.registry.v0.models.Application
@@ -38,9 +38,22 @@ object RegistryConstants {
     * The resolved name of the development host. At Flow, this is the
     * alias 'vm' which we expect to be setup in /etc/hosts to point to
     * the IP address of the VM running our docker containers locally.
+    * 
+    * Note that if you specify an environment variable of
+    * 'CONF_IO_FLOW_DEV_HOST', we will use that instead of the
+    * development host.
     */
-  val DevelopmentHost = "vm"
-  
+  val DefaultDevelopmentHost = "vm"
+
+  private[this] lazy val devHost: String = {
+    val name = "CONF_IO_FLOW_DEV_HOST"
+    EnvironmentConfig.optionalString(name).getOrElse {
+      PropertyConfig.optionalString(name).getOrElse {
+        DefaultDevelopmentHost
+      }
+    }
+  }
+
   def log(env: String, applicationId: String, message: String) {
     Logger.info(s"[${getClass.getName} $env] app[$applicationId] $message")
   }
@@ -54,7 +67,8 @@ object RegistryConstants {
   }
 
   def developmentHost(applicationId: String, port: Long): String = {
-    s"http://$DevelopmentHost:$port"
+
+    s"http://$devHost:$port"
   }
 
   def host(applicationId: String, port: Long) = {

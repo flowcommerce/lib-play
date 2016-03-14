@@ -1,6 +1,6 @@
 package io.flow.play.clients
 
-import io.flow.play.util.{Config, FlowEnvironment}
+import io.flow.play.util.{Config, EnvironmentConfig, FlowEnvironment, PropertyConfig}
 import io.flow.registry.v0.{Authorization, Client}
 import io.flow.registry.v0.errors.UnitResponse
 import io.flow.registry.v0.models.Application
@@ -32,15 +32,26 @@ trait Registry {
 object RegistryConstants {
 
   val ProductionDomain = "api.flow.io"
-  val TokenVariableName = "io.flow.user.token"
+
+  val TokenVariableName = "FLOW_API_TOKEN"
+  val DevHostVariableName = "DEV_HOST"
 
   /**
-    * The resolved name of the development host. At Flow, this is the
-    * alias 'vm' which we expect to be setup in /etc/hosts to point to
-    * the IP address of the VM running our docker containers locally.
+    * The resolved name of the development host. At Flow, we require
+    * an environment variable of DEV_HOST
     */
-  val DevelopmentHost = "vm"
-  
+  private[this] lazy val devHost: String = {
+    EnvironmentConfig.optionalString(DevHostVariableName).getOrElse {
+      PropertyConfig.optionalString(DevHostVariableName).getOrElse {
+        sys.error(
+          s"Missing required environment variable named[$DevHostVariableName].\n" +
+            "This variable should be the IP address where we can find development instances.\n" +
+            "In development mode, this is commonly set to the IP address of virtual box (e.g. 192.168.99.100)"
+        )
+      }
+    }
+  }
+
   def log(env: String, applicationId: String, message: String) {
     Logger.info(s"[${getClass.getName} $env] app[$applicationId] $message")
   }
@@ -54,7 +65,8 @@ object RegistryConstants {
   }
 
   def developmentHost(applicationId: String, port: Long): String = {
-    s"http://$DevelopmentHost:$port"
+
+    s"http://$devHost:$port"
   }
 
   def host(applicationId: String, port: Long) = {

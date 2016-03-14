@@ -9,7 +9,10 @@ import play.api.inject.Module
 class ConfigModule extends Module {
 
   def bindings(env: Environment, conf: Configuration) = {
-    Seq(bind[Config].to[DefaultConfig])
+    env.mode match {
+      case Mode.Prod | Mode.Dev => Seq(bind[Config].to[DefaultConfig])
+      case Mode.Test => Seq(bind[Config].to[MockConfig])
+    }
   }
 
 }

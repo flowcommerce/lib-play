@@ -1,10 +1,10 @@
 package io.flow.play.clients
 
-import io.flow.play.util.Config
+import io.flow.play.util.{Config, FlowEnvironment}
 import io.flow.registry.v0.{Authorization, Client}
 import io.flow.registry.v0.errors.UnitResponse
 import io.flow.registry.v0.models.Application
-import play.api.{Environment, Logger, Mode}
+import play.api.Logger
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.Duration
 
@@ -26,10 +26,10 @@ trait Registry {
     * (e.g. http://user.api.flow.io or http://vm:6011)
     */
   def host(applicationId: String): String
-  
+
 }
 
-trait RegistryConstants {
+object RegistryConstants {
 
   val ProductionDomain = "api.flow.io"
   val TokenVariableName = "io.flow.user.token"
@@ -53,16 +53,27 @@ trait RegistryConstants {
     s"https://${applicationId}.${ProductionDomain}"
   }
 
+  def developmentHost(applicationId: String, port: Long): String = {
+    s"http://$DevelopmentHost:$port"
+  }
+
+  def host(applicationId: String, port: Long) = {
+    FlowEnvironment.Current match {
+      case FlowEnvironment.Production => productionHost(applicationId)
+      case FlowEnvironment.Development => developmentHost(applicationId, port)
+    }
+  }
+
 }
 
 /**
   * Production works by convention with no external dependencies.
   */
-class ProductionRegistry() extends Registry with RegistryConstants {
+class ProductionRegistry() extends Registry {
 
   override def host(applicationId: String) = {
-    val host = productionHost(applicationId)
-    log("Production", applicationId, s"Host[$host]")
+    val host = RegistryConstants.productionHost(applicationId)
+    RegistryConstants.log("Production", applicationId, s"Host[$host]")
     host
   }
 
@@ -72,7 +83,7 @@ class ProductionRegistry() extends Registry with RegistryConstants {
 class DevelopmentRegistry @javax.inject.Inject() (
   app: play.api.Application,
   config: Config
-) extends Registry with RegistryConstants {
+) extends Registry {
 
   private[this] lazy val RegistryHost: String = {
     val applicationId = "registry"
@@ -80,19 +91,19 @@ class DevelopmentRegistry @javax.inject.Inject() (
 
     overridden(applicationId) match {
       case Some(host) => {
-        log("Development", applicationId, s"Host[$host] (overridden via env var[$varName]")
+        RegistryConstants.log("Development", applicationId, s"Host[$host] (overridden via env var[$varName]")
         host
       }
 
       case None => {
-        val host = productionHost(applicationId)
-        log("Development", applicationId, s"Host[$host] (can override via env var[$varName]")
+        val host = RegistryConstants.productionHost(applicationId)
+        RegistryConstants.log("Development", applicationId, s"Host[$host] (can override via env var[$varName]")
         host
       }
     }
   }
 
-  private[this] lazy val token = config.requiredString(TokenVariableName)
+  private[this] lazy val token = config.requiredString(RegistryConstants.TokenVariableName)
   private[this] lazy val client = new Client(RegistryHost, Some(Authorization.Basic(token)))
 
   override def host(applicationId: String): String = {
@@ -100,7 +111,7 @@ class DevelopmentRegistry @javax.inject.Inject() (
 
     overridden(applicationId) match {
       case Some(host) => {
-        log("Development", applicationId, s"Host[$host] (overridden via env var[$varName]")
+        RegistryConstants.log("Development", applicationId, s"Host[$host] (overridden via env var[$varName]")
         host
       }
 
@@ -108,14 +119,14 @@ class DevelopmentRegistry @javax.inject.Inject() (
         val port = getById(applicationId).ports.headOption.getOrElse {
           sys.error(s"application[$applicationId] does not have any ports in registry")
         }
-        val host = s"http://${DevelopmentHost}:${port.external}"
-        log("Development", applicationId, s"Host[$host] (can override via env var[$varName]")
+        val host = RegistryConstants.developmentHost(applicationId, port.external)
+        RegistryConstants.log("Development", applicationId, s"Host[$host] (can override via env var[$varName]")
         host
       }
     }
   }
 
-  def getById(applicationId: String): Application = {
+  protected def getById(applicationId: String): Application = {
     import scala.concurrent.ExecutionContext.Implicits.global
 
     Await.result(

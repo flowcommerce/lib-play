@@ -21,8 +21,8 @@ sealed trait FlowEnvironment
   * environment will be set to production. The Flow environment is
   * determined by:
   * 
-  *   1. an environment variable named 'env'
-  *   2. a system property named 'env'
+  *   1. an environment variable named 'FLOW_ENV'
+  *   2. a system property named 'FLOW_ENV'
   *   3. a default of 'development'
   * 
   * Valid values for the environment are: 'development' or 'production'
@@ -50,17 +50,17 @@ object FlowEnvironment {
   def fromString(value: String): Option[FlowEnvironment] = byName.get(value.toLowerCase)
 
   val Current = {
-    EnvironmentConfig.optionalString("env") match {
+    EnvironmentConfig.optionalString("FLOW_ENV") match {
       case Some(value) => {
         parse("environment variable", value)
       }
       case None => {
-        PropertyConfig.optionalString("env") match {
+        PropertyConfig.optionalString("FLOW_ENV") match {
           case Some(value) => {
             parse("system property", value)
           }
           case None => {
-            play.api.Logger.info("Using default flow environment[development]. To override, specify environment variable or system property named[env]")
+            play.api.Logger.info("Using default flow environment[development]. To override, specify environment variable or system property named[FLOW_ENV]")
             FlowEnvironment.Development
           }
         }
@@ -71,11 +71,11 @@ object FlowEnvironment {
   private[util] def parse(source: String, value: String): FlowEnvironment = {
     FlowEnvironment.fromString(value) match {
       case Some(env) => {
-        play.api.Logger.info(s"Set flow environment to[$env] from $source[env]")
+        play.api.Logger.info(s"Set flow environment to[$env] from $source[FLOW_ENV]")
         env
       }
       case None => {
-        val message = s"Value[$value] from $source[env] is invalid. Valid values are: " + all.map(_.toString).mkString(", ")
+        val message = s"Value[$value] from $source[FLOW_ENV] is invalid. Valid values are: " + all.map(_.toString).mkString(", ")
         play.api.Logger.error(message)
         sys.error(message)
       }

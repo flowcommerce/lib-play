@@ -18,7 +18,7 @@ class FlowEnvironmentSpec extends FunSpec with Matchers {
     FlowEnvironment.parse("test", "production") should be(FlowEnvironment.Production)
     intercept[Throwable] {
       FlowEnvironment.parse("test", "other")
-    }.getMessage should be("Value[other] from test[env] is invalid. Valid values are: development, production")
+    }.getMessage should be("Value[other] from test[FLOW_ENV] is invalid. Valid values are: development, production")
   }
 
 }

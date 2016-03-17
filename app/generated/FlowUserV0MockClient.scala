@@ -48,7 +48,6 @@ package io.flow.user.v0.mock {
     def get(
       id: _root_.scala.Option[Seq[String]] = None,
       email: _root_.scala.Option[String] = None,
-      token: _root_.scala.Option[String] = None,
       limit: Long = 25,
       offset: Long = 0,
       sort: String = "-created_at"
@@ -70,21 +69,10 @@ package io.flow.user.v0.mock {
     }
 
     /**
-     * Lookup a user by token. This is publicly available method given that the tokens
-     * themselves are secure random strings.
+     * Authenticates a user by email / password.
      */
     def postAuthenticate(
       authenticationForm: io.flow.user.v0.models.AuthenticationForm
-    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = scala.concurrent.Future {
-      io.flow.common.v0.mock.Factories.makeUser()
-    }
-
-    /**
-     * Lookup a user by token. This is publicly available method given that the tokens
-     * themselves are secure random strings.
-     */
-    def getTokensByToken(
-      token: String
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = scala.concurrent.Future {
       io.flow.common.v0.mock.Factories.makeUser()
     }

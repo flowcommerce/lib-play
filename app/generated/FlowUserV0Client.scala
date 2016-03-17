@@ -423,14 +423,12 @@ package io.flow.user.v0 {
       override def get(
         id: _root_.scala.Option[Seq[String]] = None,
         email: _root_.scala.Option[String] = None,
-        token: _root_.scala.Option[String] = None,
         limit: Long = 25,
         offset: Long = 0,
         sort: String = "-created_at"
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.common.v0.models.User]] = {
         val queryParameters = Seq(
           email.map("email" -> _),
-          token.map("token" -> _),
           Some("limit" -> limit.toString),
           Some("offset" -> offset.toString),
           Some("sort" -> sort)
@@ -477,17 +475,6 @@ package io.flow.user.v0 {
           case r if r.status == 404 => throw new io.flow.user.v0.errors.UnitResponse(r.status)
           case r if r.status == 422 => throw new io.flow.user.v0.errors.ErrorsResponse(r)
           case r => throw new io.flow.user.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 200, 401, 404, 422")
-        }
-      }
-
-      override def getTokensByToken(
-        token: String
-      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = {
-        _executeRequest("GET", s"/users/tokens/${play.utils.UriEncoding.encodePathSegment(token, "UTF-8")}").map {
-          case r if r.status == 200 => _root_.io.flow.user.v0.Client.parseJson("io.flow.common.v0.models.User", r, _.validate[io.flow.common.v0.models.User])
-          case r if r.status == 401 => throw new io.flow.user.v0.errors.UnitResponse(r.status)
-          case r if r.status == 404 => throw new io.flow.user.v0.errors.UnitResponse(r.status)
-          case r => throw new io.flow.user.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 200, 401, 404")
         }
       }
 
@@ -685,7 +672,6 @@ package io.flow.user.v0 {
     def get(
       id: _root_.scala.Option[Seq[String]] = None,
       email: _root_.scala.Option[String] = None,
-      token: _root_.scala.Option[String] = None,
       limit: Long = 25,
       offset: Long = 0,
       sort: String = "-created_at"
@@ -703,19 +689,10 @@ package io.flow.user.v0 {
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.user.v0.models.UserVersion]]
 
     /**
-     * Lookup a user by token. This is publicly available method given that the tokens
-     * themselves are secure random strings.
+     * Authenticates a user by email / password.
      */
     def postAuthenticate(
       authenticationForm: io.flow.user.v0.models.AuthenticationForm
-    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User]
-
-    /**
-     * Lookup a user by token. This is publicly available method given that the tokens
-     * themselves are secure random strings.
-     */
-    def getTokensByToken(
-      token: String
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User]
 
     /**

@@ -71,6 +71,11 @@ package io.flow.common.v0.mock {
       value = randomString()
     )
 
+    def makeMeasurement() = io.flow.common.v0.models.Measurement(
+      value = randomString(),
+      units = io.flow.common.v0.mock.Factories.makeUnitOfMeasurement()
+    )
+
     def makeName() = io.flow.common.v0.models.Name(
       first = None,
       last = None

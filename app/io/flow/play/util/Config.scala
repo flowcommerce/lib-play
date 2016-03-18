@@ -67,9 +67,11 @@ case class ChainedConfig(configs: Seq[Config]) extends Config {
   * system properties, then the play application configuration file.
   */
 @javax.inject.Singleton
-case class DefaultConfig @javax.inject.Inject() (config: Configuration) extends Config {
+case class DefaultConfig @javax.inject.Inject() (appConfig: ApplicationConfig) extends Config {
 
-  private[this] val chain = ChainedConfig(Seq(EnvironmentConfig, PropertyConfig, ApplicationConfig(config)))
+  private[this] val chain = ChainedConfig(
+    Seq(EnvironmentConfig, PropertyConfig, appConfig)
+  )
 
   override def optionalString(name: String) = chain.optionalString(name)
 

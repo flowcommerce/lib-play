@@ -96,7 +96,7 @@ package io.flow.common.v0.mock {
     )
 
     def makePrice() = io.flow.common.v0.models.Price(
-      amount = randomString(),
+      amount = 1.0,
       currency = randomString()
     )
 

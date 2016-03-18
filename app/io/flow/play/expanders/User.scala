@@ -16,7 +16,7 @@ case class User (
   fieldName: String,
   userClient: io.flow.user.v0.interfaces.Client
   ) extends Expander {
-  def expand(records: Seq[JsValue])(implicit ec: ExecutionContext): Future[Seq[JsValue]] = {
+  def expand(records: Seq[JsValue], headers: Seq[(String, String)] = Nil)(implicit ec: ExecutionContext): Future[Seq[JsValue]] = {
     val userIds: Seq[String] = records.map { r =>
       ((r \ fieldName).validate[UserReference]: @unchecked) match {
         case JsSuccess(userReference, _) => userReference.id
@@ -28,7 +28,7 @@ case class User (
         records
       }
       case ids => {
-        userClient.users.get(id = Some(ids), limit = userIds.size).map(users =>
+        userClient.withHeaders(headers).users.get(id = Some(ids), limit = userIds.size).map(users =>
           Map(users.map(user => user.id -> user): _*)
         ).map(userIdLookup =>
           records.map { r =>

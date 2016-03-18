@@ -127,7 +127,8 @@ trait FlowControllerHelpers {
   object Expansion {
     def async(
      expand: Option[Seq[String]],
-     records: Seq[JsValue]
+     records: Seq[JsValue],
+     headers: Seq[(String, String)] = Nil
    ) (
      function: JsValue => Future[Result]
    ): Future[Result] = {
@@ -135,13 +136,16 @@ trait FlowControllerHelpers {
         expand,
         records,
         function,
-        { errorResult => Future { errorResult } }
+        { errorResult => Future { errorResult } },
+        headers = headers
+
       )
     }
 
     def sync(
       expand: Option[Seq[String]],
-      records: Seq[JsValue]
+      records: Seq[JsValue],
+      headers: Seq[(String, String)] = Nil
      ) (
        function: JsValue => Result
      ): Result = {
@@ -149,7 +153,8 @@ trait FlowControllerHelpers {
         expand,
         records,
         function,
-        { errorResult => errorResult }
+        { errorResult => errorResult },
+        headers = headers
       )
     }
 
@@ -157,10 +162,11 @@ trait FlowControllerHelpers {
       expand: Option[Seq[String]],
       records: Seq[JsValue],
       function: JsValue => T,
-      errorFunction: Result => T
+      errorFunction: Result => T,
+      headers: Seq[(String, String)] = Nil
     ): T = {
       val res = expandersResult.filter(e => expand.getOrElse(Nil).contains(e.fieldName)).foldLeft(records) {
-        case (records, e) => Await.result(e.expand(records), Duration(5, "seconds"))
+        case (records, e) => Await.result(e.expand(records, headers = headers), Duration(5, "seconds"))
       }
 
       res match {

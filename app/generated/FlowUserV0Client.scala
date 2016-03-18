@@ -365,6 +365,20 @@ package io.flow.user.v0 {
 
     def users: Users = Users
 
+    /**
+      * Leaning on builder method since adding a curried parameter is a breaking change.
+      * Also tried adding it after the implicit execution context which is breaking as well.
+      *
+      * Since clients are cheap, am adding this method so that a new one can be made if there are custom headers
+      * for the request
+      * @return
+      */
+    def withHeaders(headers: Seq[(String, String)] = Nil): interfaces.Client = new _root_.io.flow.user.v0.Client(
+      baseUrl = baseUrl,
+      auth = auth,
+      defaultHeaders = defaultHeaders ++ headers
+    )
+
     object EmailVerifications extends EmailVerifications {
       override def postByToken(
         token: String
@@ -640,6 +654,8 @@ package io.flow.user.v0 {
       def healthchecks: io.flow.user.v0.Healthchecks
       def passwordResetForms: io.flow.user.v0.PasswordResetForms
       def users: io.flow.user.v0.Users
+
+      def withHeaders(headers: Seq[(String, String)] = Nil): Client
     }
 
   }

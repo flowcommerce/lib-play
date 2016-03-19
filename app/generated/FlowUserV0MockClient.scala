@@ -50,8 +50,7 @@ package io.flow.user.v0.mock {
       email: _root_.scala.Option[String] = None,
       limit: Long = 25,
       offset: Long = 0,
-      sort: String = "-created_at"
-    ) (
+      sort: String = "-created_at",
       headers: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.common.v0.models.User]] = scala.concurrent.Future {
       Nil
@@ -84,11 +83,7 @@ package io.flow.user.v0.mock {
      */
     def getById(
       id: String
-      ) (
-        headers: Seq[(String, String)] = Nil
-      ) (
-        implicit ec: scala.concurrent.ExecutionContext
-      ): scala.concurrent.Future[io.flow.common.v0.models.User] = scala.concurrent.Future {
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = scala.concurrent.Future {
       io.flow.common.v0.mock.Factories.makeUser()
     }
 

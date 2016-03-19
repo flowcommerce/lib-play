@@ -28,7 +28,7 @@ case class User (
         records
       }
       case ids => {
-        userClient.users.get(id = Some(ids), limit = userIds.size)(headers, ec).map(users =>
+        userClient.users.get(id = Some(ids), limit = userIds.size, headers = headers).map(users =>
           Map(users.map(user => user.id -> user): _*)
         ).map(userIdLookup =>
           records.map { r =>

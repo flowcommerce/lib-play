@@ -14,6 +14,9 @@ package io.flow.user.v0.mock {
     override def users: MockUsers = MockUsersImpl
     override def passwordResetForms: MockPasswordResetForms = MockPasswordResetFormsImpl
 
+    override def withHeaders(headers: Seq[(String, String)] = Nil): io.flow.user.v0.interfaces.Client = this
+
+
   }
 
   object MockEmailVerificationsImpl extends MockEmailVerifications

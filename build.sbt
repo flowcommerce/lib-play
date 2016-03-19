@@ -8,7 +8,7 @@ scalaVersion in ThisBuild := "2.11.8"
 
 crossScalaVersions := Seq("2.11.8")
 
-version := "0.1.14"
+version := "0.1.15-SNAPSHOT"
 
 lazy val root = project
   .in(file("."))
@@ -18,7 +18,8 @@ lazy val root = project
       ws,
       "com.jason-goodwin" %% "authentikat-jwt" % "0.4.1",
       "org.scalatest" %% "scalatest" % "2.2.6" % "test",
-      "org.scalatestplus" %% "play" % "1.4.0" % "test"
+      "org.scalatestplus" %% "play" % "1.4.0" % "test",
+      "org.mockito" % "mockito-all" % "1.10.19" % "test"
     )
 )
 

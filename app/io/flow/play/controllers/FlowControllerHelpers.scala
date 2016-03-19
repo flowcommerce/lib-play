@@ -3,7 +3,7 @@ package io.flow.play.controllers
 import io.flow.play.util.{Expander, FormData, Validation}
 import play.api.libs.json.JsValue
 import play.api.mvc.Results._
-import play.api.mvc.{Result, AnyContent}
+import play.api.mvc.{Request, Result, AnyContent}
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 import play.api.libs.json._
@@ -127,10 +127,11 @@ trait FlowControllerHelpers {
   object Expansion {
     def async(
      expand: Option[Seq[String]],
-     records: Seq[JsValue]
+     records: Seq[JsValue],
+     headers: Seq[(String, String)] = Nil
    ) (
      function: JsValue => Future[Result]
-   ): Future[Result] = {
+   )(implicit request: Request[_]): Future[Result] = {
       withExpansion(
         expand,
         records,
@@ -141,10 +142,11 @@ trait FlowControllerHelpers {
 
     def sync(
       expand: Option[Seq[String]],
-      records: Seq[JsValue]
+      records: Seq[JsValue],
+      headers: Seq[(String, String)] = Nil
      ) (
        function: JsValue => Result
-     ): Result = {
+     )(implicit request: Request[_]): Result = {
       withExpansion(
         expand,
         records,
@@ -158,7 +160,7 @@ trait FlowControllerHelpers {
       records: Seq[JsValue],
       function: JsValue => T,
       errorFunction: Result => T
-    ): T = {
+    )(implicit request: Request[_]): T = {
       val res = expandersResult.filter(e => expand.getOrElse(Nil).contains(e.fieldName)).foldLeft(records) {
         case (records, e) => Await.result(e.expand(records), Duration(5, "seconds"))
       }

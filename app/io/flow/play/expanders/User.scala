@@ -3,6 +3,7 @@ package io.flow.play.expanders
 import io.flow.common.v0.models.UserReference
 import io.flow.play.util.Expander
 import play.api.libs.json._
+import play.api.mvc.Request
 import scala.concurrent.{Future, ExecutionContext}
 import io.flow.common.v0.models.json._
 
@@ -16,7 +17,7 @@ case class User (
   fieldName: String,
   userClient: io.flow.user.v0.interfaces.Client
   ) extends Expander {
-  def expand(records: Seq[JsValue])(implicit ec: ExecutionContext): Future[Seq[JsValue]] = {
+  def expand(records: Seq[JsValue])(implicit ec: ExecutionContext, request: Request[_]): Future[Seq[JsValue]] = {
     val userIds: Seq[String] = records.map { r =>
       ((r \ fieldName).validate[UserReference]: @unchecked) match {
         case JsSuccess(userReference, _) => userReference.id
@@ -28,7 +29,7 @@ case class User (
         records
       }
       case ids => {
-        userClient.users.get(id = Some(ids), limit = userIds.size).map(users =>
+        userClient.withHeaders(request.headers.headers).users.get(id = Some(ids), limit = userIds.size).map(users =>
           Map(users.map(user => user.id -> user): _*)
         ).map(userIdLookup =>
           records.map { r =>

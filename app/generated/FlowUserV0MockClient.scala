@@ -14,9 +14,6 @@ package io.flow.user.v0.mock {
     override def users: MockUsers = MockUsersImpl
     override def passwordResetForms: MockPasswordResetForms = MockPasswordResetFormsImpl
 
-    override def withHeaders(headers: Seq[(String, String)] = Nil): io.flow.user.v0.interfaces.Client = this
-
-
   }
 
   object MockEmailVerificationsImpl extends MockEmailVerifications
@@ -54,6 +51,8 @@ package io.flow.user.v0.mock {
       limit: Long = 25,
       offset: Long = 0,
       sort: String = "-created_at"
+    ) (
+      headers: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.common.v0.models.User]] = scala.concurrent.Future {
       Nil
     }
@@ -85,7 +84,11 @@ package io.flow.user.v0.mock {
      */
     def getById(
       id: String
-    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = scala.concurrent.Future {
+      ) (
+        headers: Seq[(String, String)] = Nil
+      ) (
+        implicit ec: scala.concurrent.ExecutionContext
+      ): scala.concurrent.Future[io.flow.common.v0.models.User] = scala.concurrent.Future {
       io.flow.common.v0.mock.Factories.makeUser()
     }
 

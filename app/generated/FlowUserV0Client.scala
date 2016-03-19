@@ -365,20 +365,6 @@ package io.flow.user.v0 {
 
     def users: Users = Users
 
-    /**
-      * Leaning on builder method since adding a curried parameter is a breaking change.
-      * Also tried adding it after the implicit execution context which is breaking as well.
-      *
-      * Since clients are cheap, am adding this method so that a new one can be made if there are custom headers
-      * for the request
-      * @return
-      */
-    def withHeaders(headers: Seq[(String, String)] = Nil): interfaces.Client = new _root_.io.flow.user.v0.Client(
-      baseUrl = baseUrl,
-      auth = auth,
-      defaultHeaders = defaultHeaders ++ headers
-    )
-
     object EmailVerifications extends EmailVerifications {
       override def postByToken(
         token: String
@@ -440,7 +426,10 @@ package io.flow.user.v0 {
         limit: Long = 25,
         offset: Long = 0,
         sort: String = "-created_at"
-      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.common.v0.models.User]] = {
+      ) (
+        implicit headers: Seq[(String, String)] = Nil,
+        ec: scala.concurrent.ExecutionContext
+      ): scala.concurrent.Future[Seq[io.flow.common.v0.models.User]] = {
         val queryParameters = Seq(
           email.map("email" -> _),
           Some("limit" -> limit.toString),
@@ -494,7 +483,9 @@ package io.flow.user.v0 {
 
       override def getById(
         id: String
-      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = {
+      ) (
+        implicit headers: Seq[(String, String)] = Nil => implicit ec: scala.concurrent.ExecutionContext
+      ): scala.concurrent.Future[io.flow.common.v0.models.User] = {
         _executeRequest("GET", s"/users/${play.utils.UriEncoding.encodePathSegment(id, "UTF-8")}").map {
           case r if r.status == 200 => _root_.io.flow.user.v0.Client.parseJson("io.flow.common.v0.models.User", r, _.validate[io.flow.common.v0.models.User])
           case r if r.status == 401 => throw new io.flow.user.v0.errors.UnitResponse(r.status)
@@ -654,8 +645,6 @@ package io.flow.user.v0 {
       def healthchecks: io.flow.user.v0.Healthchecks
       def passwordResetForms: io.flow.user.v0.PasswordResetForms
       def users: io.flow.user.v0.Users
-
-      def withHeaders(headers: Seq[(String, String)] = Nil): Client
     }
 
   }
@@ -691,7 +680,8 @@ package io.flow.user.v0 {
       limit: Long = 25,
       offset: Long = 0,
       sort: String = "-created_at"
-    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.common.v0.models.User]]
+    ) (
+      implicit headers: Seq[(String, String)] = Nil, ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.common.v0.models.User]]
 
     /**
      * Provides visibility into recent changes of each object, including deletion
@@ -716,7 +706,9 @@ package io.flow.user.v0 {
      */
     def getById(
       id: String
-    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User]
+    )(
+      implicit headers: Seq[(String, String)] = Nil, ec: scala.concurrent.ExecutionContext
+    ): scala.concurrent.Future[io.flow.common.v0.models.User]
 
     /**
      * Create a new user.

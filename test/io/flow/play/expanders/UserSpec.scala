@@ -8,18 +8,22 @@ import io.flow.user.v0.interfaces.{Client => UserClient}
 import io.flow.user.v0.models.json._
 
 import org.scalatestplus.play._
+import org.mockito.Mockito._
 
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
-import play.api.test._
+import play.api.mvc.{Result, Request}
 import play.api.test.Helpers._
+
 
 class UserSpec extends PlaySpec with OneAppPerSuite {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
   lazy val client: MockUserClient = play.api.Play.current.injector.instanceOf[UserClient].asInstanceOf[MockUserClient]
+
+  implicit val mockRequest = mock(classOf[Request[Result]])
 
   def toReference(user: common.User) = common.UserReference(id = user.id)
 
@@ -38,6 +42,7 @@ class UserSpec extends PlaySpec with OneAppPerSuite {
   "expand" should {
     "return expanded user when user exists" in {
       val user = buildUser()
+
       client.data.add(user)
 
       val expanded = await(

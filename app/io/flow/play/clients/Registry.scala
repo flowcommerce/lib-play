@@ -103,13 +103,13 @@ class DevelopmentRegistry @javax.inject.Inject() (
 
     overridden(applicationId) match {
       case Some(host) => {
-        RegistryConstants.log("Development", applicationId, s"Host[$host] (overridden via env var[$varName)]")
+        RegistryConstants.log("Development", applicationId, s"Host[$host] (overridden via env var[$varName])")
         host
       }
 
       case None => {
         val host = RegistryConstants.productionHost(applicationId)
-        RegistryConstants.log("Development", applicationId, s"Host[$host] (can override via env var[$varName)]")
+        RegistryConstants.log("Development", applicationId, s"Host[$host] (can override via env var[$varName])")
         host
       }
     }
@@ -123,7 +123,7 @@ class DevelopmentRegistry @javax.inject.Inject() (
 
     overridden(applicationId) match {
       case Some(host) => {
-        RegistryConstants.log("Development", applicationId, s"Host[$host] (overridden via env var[$varName)]")
+        RegistryConstants.log("Development", applicationId, s"Host[$host] (overridden via env var[$varName])")
         host
       }
 
@@ -132,7 +132,7 @@ class DevelopmentRegistry @javax.inject.Inject() (
           sys.error(s"application[$applicationId] does not have any ports in registry")
         }
         val host = RegistryConstants.developmentHost(applicationId, port.external)
-        RegistryConstants.log("Development", applicationId, s"Host[$host] (can override via env var[$varName)]")
+        RegistryConstants.log("Development", applicationId, s"Host[$host] (can override via env var[$varName])")
         host
       }
     }

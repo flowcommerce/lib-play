@@ -128,7 +128,7 @@ trait FlowControllerHelpers {
     def async(
      expand: Option[Seq[String]],
      records: Seq[JsValue],
-     headers: Seq[(String, String)] = Nil
+     requestHeaders: Seq[(String, String)] = Nil
    ) (
      function: JsValue => Future[Result]
    ): Future[Result] = {
@@ -137,7 +137,7 @@ trait FlowControllerHelpers {
         records,
         function,
         { errorResult => Future { errorResult } },
-        headers = headers
+        requestHeaders = requestHeaders
 
       )
     }
@@ -145,7 +145,7 @@ trait FlowControllerHelpers {
     def sync(
       expand: Option[Seq[String]],
       records: Seq[JsValue],
-      headers: Seq[(String, String)] = Nil
+      requestHeaders: Seq[(String, String)] = Nil
      ) (
        function: JsValue => Result
      ): Result = {
@@ -154,7 +154,7 @@ trait FlowControllerHelpers {
         records,
         function,
         { errorResult => errorResult },
-        headers = headers
+        requestHeaders = requestHeaders
       )
     }
 
@@ -163,10 +163,10 @@ trait FlowControllerHelpers {
       records: Seq[JsValue],
       function: JsValue => T,
       errorFunction: Result => T,
-      headers: Seq[(String, String)] = Nil
+      requestHeaders: Seq[(String, String)] = Nil
     ): T = {
       val res = expandersResult.filter(e => expand.getOrElse(Nil).contains(e.fieldName)).foldLeft(records) {
-        case (records, e) => Await.result(e.expand(records, headers = headers), Duration(5, "seconds"))
+        case (records, e) => Await.result(e.expand(records, requestHeaders = requestHeaders), Duration(5, "seconds"))
       }
 
       res match {

@@ -402,7 +402,8 @@ package io.flow.registry.v0 {
         q: _root_.scala.Option[String] = None,
         limit: Long = 25,
         offset: Long = 0,
-        sort: String = "-created_at"
+        sort: String = "-created_at",
+        requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.registry.v0.models.Application]] = {
         val queryParameters = Seq(
           prefix.map("prefix" -> _),
@@ -415,7 +416,7 @@ package io.flow.registry.v0 {
           port.getOrElse(Nil).map("port" -> _.toString) ++
           service.getOrElse(Nil).map("service" -> _)
 
-        _executeRequest("GET", s"/applications", queryParameters = queryParameters).map {
+        _executeRequest("GET", s"/applications", queryParameters = queryParameters, requestHeaders = requestHeaders).map {
           case r if r.getStatusCode == 200 => _root_.io.flow.registry.v0.Client.parseJson("Seq[io.flow.registry.v0.models.Application]", r, _.validate[Seq[io.flow.registry.v0.models.Application]])
           case r if r.getStatusCode == 401 => throw new io.flow.registry.v0.errors.UnitResponse(r.getStatusCode)
           case r => throw new io.flow.registry.v0.errors.FailedRequest(r.getStatusCode, s"Unsupported response code[${r.getStatusCode}]. Expected: 200, 401", requestUri = Some(r.getUri.toJavaNetURI))
@@ -427,7 +428,8 @@ package io.flow.registry.v0 {
         application: _root_.scala.Option[Seq[String]] = None,
         limit: Long = 25,
         offset: Long = 0,
-        sort: String = "journal_timestamp"
+        sort: String = "journal_timestamp",
+        requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.registry.v0.models.ApplicationVersion]] = {
         val queryParameters = Seq(
           Some("limit" -> limit.toString),
@@ -437,7 +439,7 @@ package io.flow.registry.v0 {
           id.getOrElse(Nil).map("id" -> _) ++
           application.getOrElse(Nil).map("application" -> _)
 
-        _executeRequest("GET", s"/applications/versions", queryParameters = queryParameters).map {
+        _executeRequest("GET", s"/applications/versions", queryParameters = queryParameters, requestHeaders = requestHeaders).map {
           case r if r.getStatusCode == 200 => _root_.io.flow.registry.v0.Client.parseJson("Seq[io.flow.registry.v0.models.ApplicationVersion]", r, _.validate[Seq[io.flow.registry.v0.models.ApplicationVersion]])
           case r if r.getStatusCode == 401 => throw new io.flow.registry.v0.errors.UnitResponse(r.getStatusCode)
           case r => throw new io.flow.registry.v0.errors.FailedRequest(r.getStatusCode, s"Unsupported response code[${r.getStatusCode}]. Expected: 200, 401", requestUri = Some(r.getUri.toJavaNetURI))
@@ -445,9 +447,10 @@ package io.flow.registry.v0 {
       }
 
       override def getById(
-        id: String
+        id: String,
+        requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.registry.v0.models.Application] = {
-        _executeRequest("GET", s"/applications/${_root_.io.flow.registry.v0.PathSegment.encode(id, "UTF-8")}").map {
+        _executeRequest("GET", s"/applications/${_root_.io.flow.registry.v0.PathSegment.encode(id, "UTF-8")}", requestHeaders = requestHeaders).map {
           case r if r.getStatusCode == 200 => _root_.io.flow.registry.v0.Client.parseJson("io.flow.registry.v0.models.Application", r, _.validate[io.flow.registry.v0.models.Application])
           case r if r.getStatusCode == 401 => throw new io.flow.registry.v0.errors.UnitResponse(r.getStatusCode)
           case r if r.getStatusCode == 404 => throw new io.flow.registry.v0.errors.UnitResponse(r.getStatusCode)
@@ -456,11 +459,12 @@ package io.flow.registry.v0 {
       }
 
       override def post(
-        applicationForm: io.flow.registry.v0.models.ApplicationForm
+        applicationForm: io.flow.registry.v0.models.ApplicationForm,
+        requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.registry.v0.models.Application] = {
         val payload = play.api.libs.json.Json.toJson(applicationForm)
 
-        _executeRequest("POST", s"/applications", body = Some(payload)).map {
+        _executeRequest("POST", s"/applications", body = Some(payload), requestHeaders = requestHeaders).map {
           case r if r.getStatusCode == 201 => _root_.io.flow.registry.v0.Client.parseJson("io.flow.registry.v0.models.Application", r, _.validate[io.flow.registry.v0.models.Application])
           case r if r.getStatusCode == 401 => throw new io.flow.registry.v0.errors.UnitResponse(r.getStatusCode)
           case r if r.getStatusCode == 422 => throw new io.flow.registry.v0.errors.ErrorsResponse(r)
@@ -470,11 +474,12 @@ package io.flow.registry.v0 {
 
       override def putById(
         id: String,
-        applicationPutForm: io.flow.registry.v0.models.ApplicationPutForm
+        applicationPutForm: io.flow.registry.v0.models.ApplicationPutForm,
+        requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.registry.v0.models.Application] = {
         val payload = play.api.libs.json.Json.toJson(applicationPutForm)
 
-        _executeRequest("PUT", s"/applications/${_root_.io.flow.registry.v0.PathSegment.encode(id, "UTF-8")}", body = Some(payload)).map {
+        _executeRequest("PUT", s"/applications/${_root_.io.flow.registry.v0.PathSegment.encode(id, "UTF-8")}", body = Some(payload), requestHeaders = requestHeaders).map {
           case r if r.getStatusCode == 200 => _root_.io.flow.registry.v0.Client.parseJson("io.flow.registry.v0.models.Application", r, _.validate[io.flow.registry.v0.models.Application])
           case r if r.getStatusCode == 201 => _root_.io.flow.registry.v0.Client.parseJson("io.flow.registry.v0.models.Application", r, _.validate[io.flow.registry.v0.models.Application])
           case r if r.getStatusCode == 401 => throw new io.flow.registry.v0.errors.UnitResponse(r.getStatusCode)
@@ -484,9 +489,10 @@ package io.flow.registry.v0 {
       }
 
       override def deleteById(
-        id: String
+        id: String,
+        requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit] = {
-        _executeRequest("DELETE", s"/applications/${_root_.io.flow.registry.v0.PathSegment.encode(id, "UTF-8")}").map {
+        _executeRequest("DELETE", s"/applications/${_root_.io.flow.registry.v0.PathSegment.encode(id, "UTF-8")}", requestHeaders = requestHeaders).map {
           case r if r.getStatusCode == 204 => ()
           case r if r.getStatusCode == 401 => throw new io.flow.registry.v0.errors.UnitResponse(r.getStatusCode)
           case r if r.getStatusCode == 404 => throw new io.flow.registry.v0.errors.UnitResponse(r.getStatusCode)
@@ -496,8 +502,10 @@ package io.flow.registry.v0 {
     }
 
     object Healthchecks extends Healthchecks {
-      override def getHealthcheck()(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.Healthcheck] = {
-        _executeRequest("GET", s"/_internal_/healthcheck").map {
+      override def getHealthcheck(
+        requestHeaders: Seq[(String, String)] = Nil
+      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.Healthcheck] = {
+        _executeRequest("GET", s"/_internal_/healthcheck", requestHeaders = requestHeaders).map {
           case r if r.getStatusCode == 200 => _root_.io.flow.registry.v0.Client.parseJson("io.flow.common.v0.models.Healthcheck", r, _.validate[io.flow.common.v0.models.Healthcheck])
           case r => throw new io.flow.registry.v0.errors.FailedRequest(r.getStatusCode, s"Unsupported response code[${r.getStatusCode}]. Expected: 200", requestUri = Some(r.getUri.toJavaNetURI))
         }
@@ -509,7 +517,8 @@ package io.flow.registry.v0 {
         id: _root_.scala.Option[Seq[String]] = None,
         limit: Long = 25,
         offset: Long = 0,
-        sort: String = "-created_at"
+        sort: String = "-created_at",
+        requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.registry.v0.models.Service]] = {
         val queryParameters = Seq(
           Some("limit" -> limit.toString),
@@ -518,7 +527,7 @@ package io.flow.registry.v0 {
         ).flatten ++
           id.getOrElse(Nil).map("id" -> _)
 
-        _executeRequest("GET", s"/services", queryParameters = queryParameters).map {
+        _executeRequest("GET", s"/services", queryParameters = queryParameters, requestHeaders = requestHeaders).map {
           case r if r.getStatusCode == 200 => _root_.io.flow.registry.v0.Client.parseJson("Seq[io.flow.registry.v0.models.Service]", r, _.validate[Seq[io.flow.registry.v0.models.Service]])
           case r if r.getStatusCode == 401 => throw new io.flow.registry.v0.errors.UnitResponse(r.getStatusCode)
           case r => throw new io.flow.registry.v0.errors.FailedRequest(r.getStatusCode, s"Unsupported response code[${r.getStatusCode}]. Expected: 200, 401", requestUri = Some(r.getUri.toJavaNetURI))
@@ -530,7 +539,8 @@ package io.flow.registry.v0 {
         service: _root_.scala.Option[Seq[String]] = None,
         limit: Long = 25,
         offset: Long = 0,
-        sort: String = "journal_timestamp"
+        sort: String = "journal_timestamp",
+        requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.registry.v0.models.ServiceVersion]] = {
         val queryParameters = Seq(
           Some("limit" -> limit.toString),
@@ -540,7 +550,7 @@ package io.flow.registry.v0 {
           id.getOrElse(Nil).map("id" -> _) ++
           service.getOrElse(Nil).map("service" -> _)
 
-        _executeRequest("GET", s"/services/versions", queryParameters = queryParameters).map {
+        _executeRequest("GET", s"/services/versions", queryParameters = queryParameters, requestHeaders = requestHeaders).map {
           case r if r.getStatusCode == 200 => _root_.io.flow.registry.v0.Client.parseJson("Seq[io.flow.registry.v0.models.ServiceVersion]", r, _.validate[Seq[io.flow.registry.v0.models.ServiceVersion]])
           case r if r.getStatusCode == 401 => throw new io.flow.registry.v0.errors.UnitResponse(r.getStatusCode)
           case r => throw new io.flow.registry.v0.errors.FailedRequest(r.getStatusCode, s"Unsupported response code[${r.getStatusCode}]. Expected: 200, 401", requestUri = Some(r.getUri.toJavaNetURI))
@@ -548,9 +558,10 @@ package io.flow.registry.v0 {
       }
 
       override def getById(
-        id: String
+        id: String,
+        requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.registry.v0.models.Service] = {
-        _executeRequest("GET", s"/services/${_root_.io.flow.registry.v0.PathSegment.encode(id, "UTF-8")}").map {
+        _executeRequest("GET", s"/services/${_root_.io.flow.registry.v0.PathSegment.encode(id, "UTF-8")}", requestHeaders = requestHeaders).map {
           case r if r.getStatusCode == 200 => _root_.io.flow.registry.v0.Client.parseJson("io.flow.registry.v0.models.Service", r, _.validate[io.flow.registry.v0.models.Service])
           case r if r.getStatusCode == 401 => throw new io.flow.registry.v0.errors.UnitResponse(r.getStatusCode)
           case r if r.getStatusCode == 404 => throw new io.flow.registry.v0.errors.UnitResponse(r.getStatusCode)
@@ -559,11 +570,12 @@ package io.flow.registry.v0 {
       }
 
       override def post(
-        serviceForm: io.flow.registry.v0.models.ServiceForm
+        serviceForm: io.flow.registry.v0.models.ServiceForm,
+        requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.registry.v0.models.Service] = {
         val payload = play.api.libs.json.Json.toJson(serviceForm)
 
-        _executeRequest("POST", s"/services", body = Some(payload)).map {
+        _executeRequest("POST", s"/services", body = Some(payload), requestHeaders = requestHeaders).map {
           case r if r.getStatusCode == 201 => _root_.io.flow.registry.v0.Client.parseJson("io.flow.registry.v0.models.Service", r, _.validate[io.flow.registry.v0.models.Service])
           case r if r.getStatusCode == 401 => throw new io.flow.registry.v0.errors.UnitResponse(r.getStatusCode)
           case r if r.getStatusCode == 422 => throw new io.flow.registry.v0.errors.ErrorsResponse(r)
@@ -573,11 +585,12 @@ package io.flow.registry.v0 {
 
       override def putById(
         id: String,
-        servicePutForm: io.flow.registry.v0.models.ServicePutForm
+        servicePutForm: io.flow.registry.v0.models.ServicePutForm,
+        requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.registry.v0.models.Service] = {
         val payload = play.api.libs.json.Json.toJson(servicePutForm)
 
-        _executeRequest("PUT", s"/services/${_root_.io.flow.registry.v0.PathSegment.encode(id, "UTF-8")}", body = Some(payload)).map {
+        _executeRequest("PUT", s"/services/${_root_.io.flow.registry.v0.PathSegment.encode(id, "UTF-8")}", body = Some(payload), requestHeaders = requestHeaders).map {
           case r if r.getStatusCode == 200 => _root_.io.flow.registry.v0.Client.parseJson("io.flow.registry.v0.models.Service", r, _.validate[io.flow.registry.v0.models.Service])
           case r if r.getStatusCode == 201 => _root_.io.flow.registry.v0.Client.parseJson("io.flow.registry.v0.models.Service", r, _.validate[io.flow.registry.v0.models.Service])
           case r if r.getStatusCode == 401 => throw new io.flow.registry.v0.errors.UnitResponse(r.getStatusCode)
@@ -587,9 +600,10 @@ package io.flow.registry.v0 {
       }
 
       override def deleteById(
-        id: String
+        id: String,
+        requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit] = {
-        _executeRequest("DELETE", s"/services/${_root_.io.flow.registry.v0.PathSegment.encode(id, "UTF-8")}").map {
+        _executeRequest("DELETE", s"/services/${_root_.io.flow.registry.v0.PathSegment.encode(id, "UTF-8")}", requestHeaders = requestHeaders).map {
           case r if r.getStatusCode == 204 => ()
           case r if r.getStatusCode == 401 => throw new io.flow.registry.v0.errors.UnitResponse(r.getStatusCode)
           case r if r.getStatusCode == 404 => throw new io.flow.registry.v0.errors.UnitResponse(r.getStatusCode)
@@ -603,7 +617,7 @@ package io.flow.registry.v0 {
       logger.info("_logRequest: " + request)
     }
 
-    def _requestBuilder(method: String, path: String): RequestBuilder = {
+    def _requestBuilder(method: String, path: String, requestHeaders: Seq[(String, String)]): RequestBuilder = {
       val builder = new RequestBuilder(method)
         .setUrl(baseUrl + path)
         .addHeader("User-Agent", Constants.UserAgent)
@@ -611,6 +625,7 @@ package io.flow.registry.v0 {
         .addHeader("X-Apidoc-Version-Major", Constants.VersionMajor.toString)
 
       defaultHeaders.foreach { h => builder.addHeader(h._1, h._2) }
+      requestHeaders.foreach { h => builder.addHeader(h._1, h._2) }
 
       auth.fold(builder) {
         case Authorization.Basic(username, passwordOpt) => {
@@ -630,10 +645,11 @@ package io.flow.registry.v0 {
     def _executeRequest(
       method: String,
       path: String,
-      queryParameters: Seq[(String, String)] = Seq.empty,
+      queryParameters: Seq[(String, String)] = Nil,
+      requestHeaders: Seq[(String, String)] = Nil,
       body: Option[play.api.libs.json.JsValue] = None
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[com.ning.http.client.Response] = {
-      val request = _requestBuilder(method, path)
+      val request = _requestBuilder(method, path, requestHeaders)
 
       queryParameters.foreach { pair =>
         request.addQueryParam(pair._1, pair._2)
@@ -712,7 +728,8 @@ package io.flow.registry.v0 {
       q: _root_.scala.Option[String] = None,
       limit: Long = 25,
       offset: Long = 0,
-      sort: String = "-created_at"
+      sort: String = "-created_at",
+      requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.registry.v0.models.Application]]
 
     /**
@@ -723,21 +740,24 @@ package io.flow.registry.v0 {
       application: _root_.scala.Option[Seq[String]] = None,
       limit: Long = 25,
       offset: Long = 0,
-      sort: String = "journal_timestamp"
+      sort: String = "journal_timestamp",
+      requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.registry.v0.models.ApplicationVersion]]
 
     /**
      * Returns information about a specific application.
      */
     def getById(
-      id: String
+      id: String,
+      requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.registry.v0.models.Application]
 
     /**
      * Create a new application.
      */
     def post(
-      applicationForm: io.flow.registry.v0.models.ApplicationForm
+      applicationForm: io.flow.registry.v0.models.ApplicationForm,
+      requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.registry.v0.models.Application]
 
     /**
@@ -745,19 +765,23 @@ package io.flow.registry.v0 {
      */
     def putById(
       id: String,
-      applicationPutForm: io.flow.registry.v0.models.ApplicationPutForm
+      applicationPutForm: io.flow.registry.v0.models.ApplicationPutForm,
+      requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.registry.v0.models.Application]
 
     /**
      * Delete the application with this id
      */
     def deleteById(
-      id: String
+      id: String,
+      requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit]
   }
 
   trait Healthchecks {
-    def getHealthcheck()(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.Healthcheck]
+    def getHealthcheck(
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.Healthcheck]
   }
 
   trait Services {
@@ -768,7 +792,8 @@ package io.flow.registry.v0 {
       id: _root_.scala.Option[Seq[String]] = None,
       limit: Long = 25,
       offset: Long = 0,
-      sort: String = "-created_at"
+      sort: String = "-created_at",
+      requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.registry.v0.models.Service]]
 
     /**
@@ -779,21 +804,24 @@ package io.flow.registry.v0 {
       service: _root_.scala.Option[Seq[String]] = None,
       limit: Long = 25,
       offset: Long = 0,
-      sort: String = "journal_timestamp"
+      sort: String = "journal_timestamp",
+      requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.registry.v0.models.ServiceVersion]]
 
     /**
      * Returns information about a specific service.
      */
     def getById(
-      id: String
+      id: String,
+      requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.registry.v0.models.Service]
 
     /**
      * Create a new service.
      */
     def post(
-      serviceForm: io.flow.registry.v0.models.ServiceForm
+      serviceForm: io.flow.registry.v0.models.ServiceForm,
+      requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.registry.v0.models.Service]
 
     /**
@@ -801,14 +829,16 @@ package io.flow.registry.v0 {
      */
     def putById(
       id: String,
-      servicePutForm: io.flow.registry.v0.models.ServicePutForm
+      servicePutForm: io.flow.registry.v0.models.ServicePutForm,
+      requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.registry.v0.models.Service]
 
     /**
      * Delete the service with this id
      */
     def deleteById(
-      id: String
+      id: String,
+      requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit]
   }
 

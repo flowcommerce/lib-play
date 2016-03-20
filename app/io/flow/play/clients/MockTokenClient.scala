@@ -36,7 +36,8 @@ class MockTokenClient @javax.inject.Inject() () extends mock.Client {
 case class MockTokens(data: MockTokenData) extends mock.MockTokens {
 
   override def get(
-    token: Seq[String]
+    token: Seq[String],
+    requestHeaders: Seq[(String, String)] = Nil
   )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.token.v0.models.Token]] = scala.concurrent.Future {
     data.tokens.filter { t =>
       token.contains(t.key)
@@ -44,7 +45,8 @@ case class MockTokens(data: MockTokenData) extends mock.MockTokens {
   }
 
   override def getByToken(
-    token: String
+    token: String,
+    requestHeaders: Seq[(String, String)] = Nil
   )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.token.v0.models.Token] = {
     get(Seq(token)).map { _.headOption.getOrElse {
       throw new io.flow.token.v0.errors.UnitResponse(404)

@@ -367,8 +367,9 @@ package io.flow.user.v0 {
 
     object EmailVerifications extends EmailVerifications {
       override def postByToken(
-        token: String
-      , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.user.v0.models.EmailVerification] = {
+        token: String,
+        requestHeaders: Seq[(String, String)] = Nil
+      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.user.v0.models.EmailVerification] = {
         _executeRequest("POST", s"/users/emails/verifications/${play.utils.UriEncoding.encodePathSegment(token, "UTF-8")}").map {
           case r if r.status == 200 => _root_.io.flow.user.v0.Client.parseJson("io.flow.user.v0.models.EmailVerification", r, _.validate[io.flow.user.v0.models.EmailVerification])
           case r if r.status == 401 => throw new io.flow.user.v0.errors.UnitResponse(r.status)
@@ -379,7 +380,9 @@ package io.flow.user.v0 {
     }
 
     object Healthchecks extends Healthchecks {
-      override def getHealthcheck(requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.Healthcheck] = {
+      override def getHealthcheck(
+        requestHeaders: Seq[(String, String)] = Nil
+      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.Healthcheck] = {
         _executeRequest("GET", s"/_internal_/healthcheck").map {
           case r if r.status == 200 => _root_.io.flow.user.v0.Client.parseJson("io.flow.common.v0.models.Healthcheck", r, _.validate[io.flow.common.v0.models.Healthcheck])
           case r => throw new io.flow.user.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 200")
@@ -389,8 +392,9 @@ package io.flow.user.v0 {
 
     object PasswordResetForms extends PasswordResetForms {
       override def postResets(
-        passwordResetRequestForm: io.flow.user.v0.models.PasswordResetRequestForm
-      , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit] = {
+        passwordResetRequestForm: io.flow.user.v0.models.PasswordResetRequestForm,
+        requestHeaders: Seq[(String, String)] = Nil
+      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit] = {
         val payload = play.api.libs.json.Json.toJson(passwordResetRequestForm)
 
         _executeRequest("POST", s"/users/passwords/resets", body = Some(payload)).map {
@@ -403,8 +407,9 @@ package io.flow.user.v0 {
 
       override def post(
         passwordResetForm: io.flow.user.v0.models.PasswordResetForm,
-        expand: _root_.scala.Option[Seq[String]] = None
-      , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.ExpandableUser] = {
+        expand: _root_.scala.Option[Seq[String]] = None,
+        requestHeaders: Seq[(String, String)] = Nil
+      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.ExpandableUser] = {
         val payload = play.api.libs.json.Json.toJson(passwordResetForm)
 
         val queryParameters = expand.getOrElse(Nil).map("expand" -> _)
@@ -425,8 +430,9 @@ package io.flow.user.v0 {
         email: _root_.scala.Option[String] = None,
         limit: Long = 25,
         offset: Long = 0,
-        sort: String = "-created_at"
-      , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.common.v0.models.User]] = {
+        sort: String = "-created_at",
+        requestHeaders: Seq[(String, String)] = Nil
+      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.common.v0.models.User]] = {
         val queryParameters = Seq(
           email.map("email" -> _),
           Some("limit" -> limit.toString),
@@ -447,8 +453,9 @@ package io.flow.user.v0 {
         userId: _root_.scala.Option[Seq[String]] = None,
         limit: Long = 25,
         offset: Long = 0,
-        sort: String = "journal_timestamp"
-      , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.user.v0.models.UserVersion]] = {
+        sort: String = "journal_timestamp",
+        requestHeaders: Seq[(String, String)] = Nil
+      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.user.v0.models.UserVersion]] = {
         val queryParameters = Seq(
           Some("limit" -> limit.toString),
           Some("offset" -> offset.toString),
@@ -465,8 +472,9 @@ package io.flow.user.v0 {
       }
 
       override def postAuthenticate(
-        authenticationForm: io.flow.user.v0.models.AuthenticationForm
-      , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = {
+        authenticationForm: io.flow.user.v0.models.AuthenticationForm,
+        requestHeaders: Seq[(String, String)] = Nil
+      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = {
         val payload = play.api.libs.json.Json.toJson(authenticationForm)
 
         _executeRequest("POST", s"/users/authenticate", body = Some(payload)).map {
@@ -479,8 +487,9 @@ package io.flow.user.v0 {
       }
 
       override def getById(
-        id: String
-      , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = {
+        id: String,
+        requestHeaders: Seq[(String, String)] = Nil
+      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = {
         _executeRequest("GET", s"/users/${play.utils.UriEncoding.encodePathSegment(id, "UTF-8")}").map {
           case r if r.status == 200 => _root_.io.flow.user.v0.Client.parseJson("io.flow.common.v0.models.User", r, _.validate[io.flow.common.v0.models.User])
           case r if r.status == 401 => throw new io.flow.user.v0.errors.UnitResponse(r.status)
@@ -490,8 +499,9 @@ package io.flow.user.v0 {
       }
 
       override def post(
-        userForm: io.flow.user.v0.models.UserForm
-      , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = {
+        userForm: io.flow.user.v0.models.UserForm,
+        requestHeaders: Seq[(String, String)] = Nil
+      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = {
         val payload = play.api.libs.json.Json.toJson(userForm)
 
         _executeRequest("POST", s"/users", body = Some(payload)).map {
@@ -504,8 +514,9 @@ package io.flow.user.v0 {
 
       override def putById(
         id: String,
-        userPutForm: io.flow.user.v0.models.UserPutForm
-      , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = {
+        userPutForm: io.flow.user.v0.models.UserPutForm,
+        requestHeaders: Seq[(String, String)] = Nil
+      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = {
         val payload = play.api.libs.json.Json.toJson(userPutForm)
 
         _executeRequest("PUT", s"/users/${play.utils.UriEncoding.encodePathSegment(id, "UTF-8")}", body = Some(payload)).map {
@@ -519,8 +530,9 @@ package io.flow.user.v0 {
 
       override def patchPasswordsById(
         id: String,
-        passwordChangeForm: io.flow.user.v0.models.PasswordChangeForm
-      , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit] = {
+        passwordChangeForm: io.flow.user.v0.models.PasswordChangeForm,
+        requestHeaders: Seq[(String, String)] = Nil
+      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit] = {
         val payload = play.api.libs.json.Json.toJson(passwordChangeForm)
 
         _executeRequest("PATCH", s"/users/${play.utils.UriEncoding.encodePathSegment(id, "UTF-8")}/passwords", body = Some(payload)).map {
@@ -533,8 +545,9 @@ package io.flow.user.v0 {
       }
 
       override def deletePasswordsById(
-        id: String
-      , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit] = {
+        id: String,
+        requestHeaders: Seq[(String, String)] = Nil
+      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit] = {
         _executeRequest("DELETE", s"/users/${play.utils.UriEncoding.encodePathSegment(id, "UTF-8")}/passwords").map {
           case r if r.status == 204 => ()
           case r if r.status == 401 => throw new io.flow.user.v0.errors.UnitResponse(r.status)
@@ -646,23 +659,28 @@ package io.flow.user.v0 {
 
   trait EmailVerifications {
     def postByToken(
-      token: String
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.user.v0.models.EmailVerification]
+      token: String,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.user.v0.models.EmailVerification]
   }
 
   trait Healthchecks {
-    def getHealthcheck(requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.Healthcheck]
+    def getHealthcheck(
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.Healthcheck]
   }
 
   trait PasswordResetForms {
     def postResets(
-      passwordResetRequestForm: io.flow.user.v0.models.PasswordResetRequestForm
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit]
+      passwordResetRequestForm: io.flow.user.v0.models.PasswordResetRequestForm,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit]
 
     def post(
       passwordResetForm: io.flow.user.v0.models.PasswordResetForm,
-      expand: _root_.scala.Option[Seq[String]] = None
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.ExpandableUser]
+      expand: _root_.scala.Option[Seq[String]] = None,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.ExpandableUser]
   }
 
   trait Users {
@@ -674,8 +692,9 @@ package io.flow.user.v0 {
       email: _root_.scala.Option[String] = None,
       limit: Long = 25,
       offset: Long = 0,
-      sort: String = "-created_at"
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.common.v0.models.User]]
+      sort: String = "-created_at",
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.common.v0.models.User]]
 
     /**
      * Provides visibility into recent changes of each object, including deletion
@@ -685,52 +704,59 @@ package io.flow.user.v0 {
       userId: _root_.scala.Option[Seq[String]] = None,
       limit: Long = 25,
       offset: Long = 0,
-      sort: String = "journal_timestamp"
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.user.v0.models.UserVersion]]
+      sort: String = "journal_timestamp",
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.user.v0.models.UserVersion]]
 
     /**
      * Authenticates a user by email / password.
      */
     def postAuthenticate(
-      authenticationForm: io.flow.user.v0.models.AuthenticationForm
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User]
+      authenticationForm: io.flow.user.v0.models.AuthenticationForm,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User]
 
     /**
      * Returns information about a specific user.
      */
     def getById(
-      id: String
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User]
+      id: String,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User]
 
     /**
      * Create a new user.
      */
     def post(
-      userForm: io.flow.user.v0.models.UserForm
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User]
+      userForm: io.flow.user.v0.models.UserForm,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User]
 
     /**
      * Update a user.
      */
     def putById(
       id: String,
-      userPutForm: io.flow.user.v0.models.UserPutForm
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User]
+      userPutForm: io.flow.user.v0.models.UserPutForm,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User]
 
     /**
      * Update the password for a user.
      */
     def patchPasswordsById(
       id: String,
-      passwordChangeForm: io.flow.user.v0.models.PasswordChangeForm
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit]
+      passwordChangeForm: io.flow.user.v0.models.PasswordChangeForm,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit]
 
     /**
      * Deletes a password for the given user.
      */
     def deletePasswordsById(
-      id: String
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit]
+      id: String,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit]
   }
 
   package errors {

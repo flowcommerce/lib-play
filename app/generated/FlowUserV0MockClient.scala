@@ -21,8 +21,9 @@ package io.flow.user.v0.mock {
   trait MockEmailVerifications extends io.flow.user.v0.EmailVerifications {
 
     def postByToken(
-      token: String
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.user.v0.models.EmailVerification] = scala.concurrent.Future {
+      token: String,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.user.v0.models.EmailVerification] = scala.concurrent.Future {
       io.flow.user.v0.mock.Factories.makeEmailVerification()
     }
 
@@ -32,7 +33,9 @@ package io.flow.user.v0.mock {
 
   trait MockHealthchecks extends io.flow.user.v0.Healthchecks {
 
-    def getHealthcheck(requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.Healthcheck] = scala.concurrent.Future {
+    def getHealthcheck(
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.Healthcheck] = scala.concurrent.Future {
       io.flow.common.v0.mock.Factories.makeHealthcheck()
     }
 
@@ -50,8 +53,9 @@ package io.flow.user.v0.mock {
       email: _root_.scala.Option[String] = None,
       limit: Long = 25,
       offset: Long = 0,
-      sort: String = "-created_at"
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.common.v0.models.User]] = scala.concurrent.Future {
+      sort: String = "-created_at",
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.common.v0.models.User]] = scala.concurrent.Future {
       Nil
     }
 
@@ -63,8 +67,9 @@ package io.flow.user.v0.mock {
       userId: _root_.scala.Option[Seq[String]] = None,
       limit: Long = 25,
       offset: Long = 0,
-      sort: String = "journal_timestamp"
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.user.v0.models.UserVersion]] = scala.concurrent.Future {
+      sort: String = "journal_timestamp",
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.user.v0.models.UserVersion]] = scala.concurrent.Future {
       Nil
     }
 
@@ -72,8 +77,9 @@ package io.flow.user.v0.mock {
      * Authenticates a user by email / password.
      */
     def postAuthenticate(
-      authenticationForm: io.flow.user.v0.models.AuthenticationForm
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = scala.concurrent.Future {
+      authenticationForm: io.flow.user.v0.models.AuthenticationForm,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = scala.concurrent.Future {
       io.flow.common.v0.mock.Factories.makeUser()
     }
 
@@ -81,8 +87,9 @@ package io.flow.user.v0.mock {
      * Returns information about a specific user.
      */
     def getById(
-      id: String
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = scala.concurrent.Future {
+      id: String,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = scala.concurrent.Future {
       io.flow.common.v0.mock.Factories.makeUser()
     }
 
@@ -90,8 +97,9 @@ package io.flow.user.v0.mock {
      * Create a new user.
      */
     def post(
-      userForm: io.flow.user.v0.models.UserForm
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = scala.concurrent.Future {
+      userForm: io.flow.user.v0.models.UserForm,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = scala.concurrent.Future {
       io.flow.common.v0.mock.Factories.makeUser()
     }
 
@@ -100,8 +108,9 @@ package io.flow.user.v0.mock {
      */
     def putById(
       id: String,
-      userPutForm: io.flow.user.v0.models.UserPutForm
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = scala.concurrent.Future {
+      userPutForm: io.flow.user.v0.models.UserPutForm,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = scala.concurrent.Future {
       io.flow.common.v0.mock.Factories.makeUser()
     }
 
@@ -110,8 +119,9 @@ package io.flow.user.v0.mock {
      */
     def patchPasswordsById(
       id: String,
-      passwordChangeForm: io.flow.user.v0.models.PasswordChangeForm
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit] = scala.concurrent.Future {
+      passwordChangeForm: io.flow.user.v0.models.PasswordChangeForm,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit] = scala.concurrent.Future {
       // unit type
     }
 
@@ -119,8 +129,9 @@ package io.flow.user.v0.mock {
      * Deletes a password for the given user.
      */
     def deletePasswordsById(
-      id: String
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit] = scala.concurrent.Future {
+      id: String,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit] = scala.concurrent.Future {
       // unit type
     }
 
@@ -131,15 +142,17 @@ package io.flow.user.v0.mock {
   trait MockPasswordResetForms extends io.flow.user.v0.PasswordResetForms {
 
     def postResets(
-      passwordResetRequestForm: io.flow.user.v0.models.PasswordResetRequestForm
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit] = scala.concurrent.Future {
+      passwordResetRequestForm: io.flow.user.v0.models.PasswordResetRequestForm,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit] = scala.concurrent.Future {
       // unit type
     }
 
     def post(
       passwordResetForm: io.flow.user.v0.models.PasswordResetForm,
-      expand: _root_.scala.Option[Seq[String]] = None
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.ExpandableUser] = scala.concurrent.Future {
+      expand: _root_.scala.Option[Seq[String]] = None,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.ExpandableUser] = scala.concurrent.Future {
       io.flow.common.v0.mock.Factories.makeExpandableUser()
     }
 

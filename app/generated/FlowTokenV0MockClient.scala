@@ -18,7 +18,9 @@ package io.flow.token.v0.mock {
 
   trait MockHealthchecks extends io.flow.token.v0.Healthchecks {
 
-    def getHealthcheck(requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.Healthcheck] = scala.concurrent.Future {
+    def getHealthcheck(
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.Healthcheck] = scala.concurrent.Future {
       io.flow.common.v0.mock.Factories.makeHealthcheck()
     }
 
@@ -32,8 +34,9 @@ package io.flow.token.v0.mock {
      * Get user reference by token
      */
     def get(
-      token: Seq[String]
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.token.v0.models.Token]] = scala.concurrent.Future {
+      token: Seq[String],
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.token.v0.models.Token]] = scala.concurrent.Future {
       Nil
     }
 
@@ -41,8 +44,9 @@ package io.flow.token.v0.mock {
      * Get the user for this specified token
      */
     def getByToken(
-      token: String
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.token.v0.models.Token] = scala.concurrent.Future {
+      token: String,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.token.v0.models.Token] = scala.concurrent.Future {
       io.flow.token.v0.mock.Factories.makeToken()
     }
 
@@ -50,14 +54,16 @@ package io.flow.token.v0.mock {
      * Create a user token
      */
     def post(
-      tokenForm: io.flow.token.v0.models.TokenForm
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.token.v0.models.Token]] = scala.concurrent.Future {
+      tokenForm: io.flow.token.v0.models.TokenForm,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.token.v0.models.Token]] = scala.concurrent.Future {
       Nil
     }
 
     def deleteByToken(
-      token: String
-    , requestHeaders: Seq[(String, String)] = Nil)(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit] = scala.concurrent.Future {
+      token: String,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit] = scala.concurrent.Future {
       // unit type
     }
 

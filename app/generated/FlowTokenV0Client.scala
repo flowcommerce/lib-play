@@ -154,8 +154,10 @@ package io.flow.token.v0 {
     def tokens: Tokens = Tokens
 
     object Healthchecks extends Healthchecks {
-      override def getHealthcheck()(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.Healthcheck] = {
-        _executeRequest("GET", s"/_internal_/healthcheck").map {
+      override def getHealthcheck(
+        requestHeaders: Seq[(String, String)] = Nil
+      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.Healthcheck] = {
+        _executeRequest("GET", s"/_internal_/healthcheck", requestHeaders = requestHeaders).map {
           case r if r.status == 200 => _root_.io.flow.token.v0.Client.parseJson("io.flow.common.v0.models.Healthcheck", r, _.validate[io.flow.common.v0.models.Healthcheck])
           case r => throw new io.flow.token.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 200")
         }
@@ -164,20 +166,22 @@ package io.flow.token.v0 {
 
     object Tokens extends Tokens {
       override def get(
-        token: Seq[String]
+        token: Seq[String],
+        requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.token.v0.models.Token]] = {
         val queryParameters = token.map("token" -> _)
 
-        _executeRequest("GET", s"/tokens", queryParameters = queryParameters).map {
+        _executeRequest("GET", s"/tokens", queryParameters = queryParameters, requestHeaders = requestHeaders).map {
           case r if r.status == 200 => _root_.io.flow.token.v0.Client.parseJson("Seq[io.flow.token.v0.models.Token]", r, _.validate[Seq[io.flow.token.v0.models.Token]])
           case r => throw new io.flow.token.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 200")
         }
       }
 
       override def getByToken(
-        token: String
+        token: String,
+        requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.token.v0.models.Token] = {
-        _executeRequest("GET", s"/tokens/${play.utils.UriEncoding.encodePathSegment(token, "UTF-8")}").map {
+        _executeRequest("GET", s"/tokens/${play.utils.UriEncoding.encodePathSegment(token, "UTF-8")}", requestHeaders = requestHeaders).map {
           case r if r.status == 200 => _root_.io.flow.token.v0.Client.parseJson("io.flow.token.v0.models.Token", r, _.validate[io.flow.token.v0.models.Token])
           case r if r.status == 404 => throw new io.flow.token.v0.errors.UnitResponse(r.status)
           case r => throw new io.flow.token.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 200, 404")
@@ -185,11 +189,12 @@ package io.flow.token.v0 {
       }
 
       override def post(
-        tokenForm: io.flow.token.v0.models.TokenForm
+        tokenForm: io.flow.token.v0.models.TokenForm,
+        requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.token.v0.models.Token] = {
         val payload = play.api.libs.json.Json.toJson(tokenForm)
 
-        _executeRequest("POST", s"/tokens", body = Some(payload)).map {
+        _executeRequest("POST", s"/tokens", body = Some(payload), requestHeaders = requestHeaders).map {
           case r if r.status == 200 => _root_.io.flow.token.v0.Client.parseJson("io.flow.token.v0.models.Token", r, _.validate[io.flow.token.v0.models.Token])
           case r if r.status == 401 => throw new io.flow.token.v0.errors.UnitResponse(r.status)
           case r if r.status == 422 => throw new io.flow.token.v0.errors.ErrorsResponse(r)
@@ -198,9 +203,10 @@ package io.flow.token.v0 {
       }
 
       override def deleteByToken(
-        token: String
+        token: String,
+        requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit] = {
-        _executeRequest("DELETE", s"/tokens/${play.utils.UriEncoding.encodePathSegment(token, "UTF-8")}").map {
+        _executeRequest("DELETE", s"/tokens/${play.utils.UriEncoding.encodePathSegment(token, "UTF-8")}", requestHeaders = requestHeaders).map {
           case r if r.status == 204 => ()
           case r if r.status == 404 => throw new io.flow.token.v0.errors.UnitResponse(r.status)
           case r => throw new io.flow.token.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 204, 404")
@@ -239,33 +245,34 @@ package io.flow.token.v0 {
     def _executeRequest(
       method: String,
       path: String,
-      queryParameters: Seq[(String, String)] = Seq.empty,
+      queryParameters: Seq[(String, String)] = Nil,
+      requestHeaders: Seq[(String, String)] = Nil,
       body: Option[play.api.libs.json.JsValue] = None
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[play.api.libs.ws.WSResponse] = {
       method.toUpperCase match {
         case "GET" => {
-          _logRequest("GET", _requestHolder(path).withQueryString(queryParameters:_*)).get()
+          _logRequest("GET", _requestHolder(path).withHeaders(requestHeaders:_*).withQueryString(queryParameters:_*)).get()
         }
         case "POST" => {
-          _logRequest("POST", _requestHolder(path).withQueryString(queryParameters:_*).withHeaders("Content-Type" -> "application/json; charset=UTF-8")).post(body.getOrElse(play.api.libs.json.Json.obj()))
+          _logRequest("POST", _requestHolder(path).withHeaders(requestHeaders:_*).withQueryString(queryParameters:_*).withHeaders("Content-Type" -> "application/json; charset=UTF-8")).post(body.getOrElse(play.api.libs.json.Json.obj()))
         }
         case "PUT" => {
-          _logRequest("PUT", _requestHolder(path).withQueryString(queryParameters:_*).withHeaders("Content-Type" -> "application/json; charset=UTF-8")).put(body.getOrElse(play.api.libs.json.Json.obj()))
+          _logRequest("PUT", _requestHolder(path).withHeaders(requestHeaders:_*).withQueryString(queryParameters:_*).withHeaders("Content-Type" -> "application/json; charset=UTF-8")).put(body.getOrElse(play.api.libs.json.Json.obj()))
         }
         case "PATCH" => {
-          _logRequest("PATCH", _requestHolder(path).withQueryString(queryParameters:_*)).patch(body.getOrElse(play.api.libs.json.Json.obj()))
+          _logRequest("PATCH", _requestHolder(path).withHeaders(requestHeaders:_*).withQueryString(queryParameters:_*)).patch(body.getOrElse(play.api.libs.json.Json.obj()))
         }
         case "DELETE" => {
-          _logRequest("DELETE", _requestHolder(path).withQueryString(queryParameters:_*)).delete()
+          _logRequest("DELETE", _requestHolder(path).withHeaders(requestHeaders:_*).withQueryString(queryParameters:_*)).delete()
         }
          case "HEAD" => {
-          _logRequest("HEAD", _requestHolder(path).withQueryString(queryParameters:_*)).head()
+          _logRequest("HEAD", _requestHolder(path).withHeaders(requestHeaders:_*).withQueryString(queryParameters:_*)).head()
         }
          case "OPTIONS" => {
-          _logRequest("OPTIONS", _requestHolder(path).withQueryString(queryParameters:_*)).options()
+          _logRequest("OPTIONS", _requestHolder(path).withHeaders(requestHeaders:_*).withQueryString(queryParameters:_*)).options()
         }
         case _ => {
-          _logRequest(method, _requestHolder(path).withQueryString(queryParameters:_*))
+          _logRequest(method, _requestHolder(path).withHeaders(requestHeaders:_*).withQueryString(queryParameters:_*))
           sys.error("Unsupported method[%s]".format(method))
         }
       }
@@ -306,7 +313,9 @@ package io.flow.token.v0 {
   }
 
   trait Healthchecks {
-    def getHealthcheck()(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.Healthcheck]
+    def getHealthcheck(
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.Healthcheck]
   }
 
   trait Tokens {
@@ -314,25 +323,29 @@ package io.flow.token.v0 {
      * Get user reference by token
      */
     def get(
-      token: Seq[String]
+      token: Seq[String],
+      requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.token.v0.models.Token]]
 
     /**
      * Get the user for this specified token
      */
     def getByToken(
-      token: String
+      token: String,
+      requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.token.v0.models.Token]
 
     /**
      * Create a user token
      */
     def post(
-      tokenForm: io.flow.token.v0.models.TokenForm
+      tokenForm: io.flow.token.v0.models.TokenForm,
+      requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.token.v0.models.Token]
 
     def deleteByToken(
-      token: String
+      token: String,
+      requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit]
   }
 

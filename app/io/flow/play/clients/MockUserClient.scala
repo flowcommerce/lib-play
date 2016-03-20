@@ -34,8 +34,9 @@ case class MockUsers(data: MockUserData) extends mock.MockUsers {
     email: _root_.scala.Option[String] = None,
     limit: Long = 25,
     offset: Long = 0,
-    sort: String = "-created_at"
-  )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.common.v0.models.User]] = scala.concurrent.Future {
+    sort: String = "-created_at",
+    requestHeaders: Seq[(String, String)] = Nil
+  ) (implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.common.v0.models.User]] = scala.concurrent.Future {
     data.users.filter { u =>
       id match {
         case None => true
@@ -48,16 +49,17 @@ case class MockUsers(data: MockUserData) extends mock.MockUsers {
         case Some(email) => u.email == Some(email)
       }
 
-    }.filter { u =>
-      // token is deprecated - ignore for now as will shortly be removed
-      true
     }.drop(offset.toInt).take(limit.toInt) // TODO: Add sorting
   }
 
   override def getById(
-    id: String
-  )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = {
-    get(id = Some(Seq(id))).map { _.headOption.getOrElse {
+    id: String,
+    requestHeaders: Seq[(String, String)] = Nil
+  ) (implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = {
+    get(
+      id = Some(Seq(id)),
+      requestHeaders = requestHeaders
+    ).map { _.headOption.getOrElse {
       throw new io.flow.token.v0.errors.UnitResponse(404)
     }}
   }

@@ -16,6 +16,7 @@ lazy val root = project
   .settings(
     libraryDependencies ++= Seq(
       ws,
+      filters,
       "com.jason-goodwin" %% "authentikat-jwt" % "0.4.1",
       "org.scalatest" %% "scalatest" % "2.2.6" % "test",
       "org.scalatestplus" %% "play" % "1.4.0" % "test"
@@ -39,4 +40,3 @@ publishTo := {
     Some("Artifactory Realm" at s"$host/libs-release-local")
   }
 }
-

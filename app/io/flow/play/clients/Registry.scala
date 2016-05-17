@@ -46,7 +46,7 @@ object RegistryConstants {
         sys.error(
           s"Missing required environment variable named[$DevHostVariableName].\n" +
             "This variable should be the IP address where we can find development instances.\n" +
-            "In development mode, this is commonly set to the IP address of virtual box (e.g. 192.168.99.100)"
+            "In development mode, this is commonly set to the IP address of Mac Docker VM (e.g. 0.0.0.0)"
         )
       }
     }

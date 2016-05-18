@@ -5,6 +5,8 @@
  */
 package io.flow.common.v0.models {
 
+  sealed trait ExpandableLocation
+
   sealed trait ExpandableOrganization
 
   sealed trait ExpandableUser
@@ -20,7 +22,11 @@ package io.flow.common.v0.models {
     province: _root_.scala.Option[String] = None,
     postal: _root_.scala.Option[String] = None,
     country: _root_.scala.Option[String] = None
-  )
+  ) extends ExpandableLocation
+
+  case class AddressSummary(
+    text: _root_.scala.Option[String] = None
+  ) extends ExpandableLocation
 
   /**
    * Defines structured fields for a contact person. Typically used for specifying
@@ -128,6 +134,16 @@ package io.flow.common.v0.models {
     email: _root_.scala.Option[String] = None,
     name: String
   )
+
+  /**
+   * Provides future compatibility in clients - in the future, when a type is added
+   * to the union ExpandableLocation, it will need to be handled in the client code.
+   * This implementation will deserialize these future types as an instance of this
+   * class.
+   */
+  case class ExpandableLocationUndefinedType(
+    description: String
+  ) extends ExpandableLocation
 
   /**
    * Provides future compatibility in clients - in the future, when a type is added
@@ -924,12 +940,15 @@ package io.flow.common.v0.models {
       })
     }
 
-    implicit def jsonWritesCommonAddress: play.api.libs.json.Writes[Address] = {
-      new play.api.libs.json.Writes[io.flow.common.v0.models.Address] {
-        def writes(obj: io.flow.common.v0.models.Address) = {
-          jsObjectAddress(obj)
-        }
-      }
+    implicit def jsonReadsCommonAddressSummary: play.api.libs.json.Reads[AddressSummary] = {
+      (__ \ "text").readNullable[String].map { x => new AddressSummary(text = x) }
+    }
+
+    def jsObjectAddressSummary(obj: io.flow.common.v0.models.AddressSummary) = {
+      (obj.text match {
+        case None => play.api.libs.json.Json.obj()
+        case Some(x) => play.api.libs.json.Json.obj("text" -> play.api.libs.json.JsString(x))
+      })
     }
 
     implicit def jsonReadsCommonContact: play.api.libs.json.Reads[Contact] = {
@@ -1282,6 +1301,39 @@ package io.flow.common.v0.models {
       new play.api.libs.json.Writes[io.flow.common.v0.models.UserSummary] {
         def writes(obj: io.flow.common.v0.models.UserSummary) = {
           jsObjectUserSummary(obj)
+        }
+      }
+    }
+
+    implicit def jsonReadsCommonExpandableLocation: play.api.libs.json.Reads[ExpandableLocation] = new play.api.libs.json.Reads[ExpandableLocation] {
+      def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[ExpandableLocation] = {
+        (js \ "discriminator").validate[String] match {
+          case play.api.libs.json.JsError(msg) => play.api.libs.json.JsError(msg)
+          case play.api.libs.json.JsSuccess(discriminator, _) => {
+            discriminator match {
+              case "address" => js.validate[io.flow.common.v0.models.Address]
+              case "address_summary" => js.validate[io.flow.common.v0.models.AddressSummary]
+              case other => play.api.libs.json.JsSuccess(io.flow.common.v0.models.ExpandableLocationUndefinedType(other))
+            }
+          }
+        }
+      }
+    }
+
+    def jsObjectExpandableLocation(obj: io.flow.common.v0.models.ExpandableLocation) = {
+      obj match {
+        case x: io.flow.common.v0.models.Address => jsObjectAddress(x) ++ play.api.libs.json.Json.obj("discriminator" -> "address")
+        case x: io.flow.common.v0.models.AddressSummary => jsObjectAddressSummary(x) ++ play.api.libs.json.Json.obj("discriminator" -> "address_summary")
+        case other => {
+          sys.error(s"The type[${other.getClass.getName}] has no JSON writer")
+        }
+      }
+    }
+
+    implicit def jsonWritesCommonExpandableLocation: play.api.libs.json.Writes[ExpandableLocation] = {
+      new play.api.libs.json.Writes[io.flow.common.v0.models.ExpandableLocation] {
+        def writes(obj: io.flow.common.v0.models.ExpandableLocation) = {
+          jsObjectExpandableLocation(obj)
         }
       }
     }

@@ -60,6 +60,10 @@ package io.flow.common.v0.mock {
       country = None
     )
 
+    def makeAddressSummary() = io.flow.common.v0.models.AddressSummary(
+      text = None
+    )
+
     def makeContact() = io.flow.common.v0.models.Contact(
       name = io.flow.common.v0.mock.Factories.makeName(),
       email = None,
@@ -145,6 +149,8 @@ package io.flow.common.v0.mock {
       email = None,
       name = randomString()
     )
+
+    def makeExpandableLocation() = io.flow.common.v0.mock.Factories.makeAddress()
 
     def makeExpandableOrganization() = io.flow.common.v0.mock.Factories.makeOrganization()
 

@@ -51,19 +51,6 @@ package io.flow.common.v0.mock {
 
     def makeVisibility() = io.flow.common.v0.models.Visibility.Public
 
-    def makeAddress() = io.flow.common.v0.models.Address(
-      text = None,
-      streets = None,
-      city = None,
-      province = None,
-      postal = None,
-      country = None
-    )
-
-    def makeAddressSummary() = io.flow.common.v0.models.AddressSummary(
-      text = None
-    )
-
     def makeContact() = io.flow.common.v0.models.Contact(
       name = io.flow.common.v0.mock.Factories.makeName(),
       email = None,
@@ -95,7 +82,18 @@ package io.flow.common.v0.mock {
     )
 
     def makeLocation() = io.flow.common.v0.models.Location(
-      value = randomString()
+      text = None,
+      streets = None,
+      city = None,
+      province = None,
+      postal = None,
+      country = None,
+      latitude = None,
+      longitude = None
+    )
+
+    def makeLocationReference() = io.flow.common.v0.models.LocationReference(
+      text = None
     )
 
     def makeMeasurement() = io.flow.common.v0.models.Measurement(
@@ -150,7 +148,7 @@ package io.flow.common.v0.mock {
       name = randomString()
     )
 
-    def makeExpandableLocation() = io.flow.common.v0.mock.Factories.makeAddress()
+    def makeExpandableLocation() = io.flow.common.v0.mock.Factories.makeLocation()
 
     def makeExpandableOrganization() = io.flow.common.v0.mock.Factories.makeOrganization()
 

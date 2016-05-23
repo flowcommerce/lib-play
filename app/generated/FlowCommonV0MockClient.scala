@@ -43,6 +43,8 @@ package io.flow.common.v0.mock {
 
     def makeScheduleExceptionStatus() = io.flow.common.v0.models.ScheduleExceptionStatus.Open
 
+    def makeSortDirection() = io.flow.common.v0.models.SortDirection.Ascending
+
     def makeUnitOfMeasurement() = io.flow.common.v0.models.UnitOfMeasurement.Millimeter
 
     def makeUnitOfTime() = io.flow.common.v0.models.UnitOfTime.Day

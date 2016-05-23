@@ -373,6 +373,40 @@ package io.flow.common.v0.models {
 
   }
 
+  sealed trait SortDirection
+
+  object SortDirection {
+
+    case object Ascending extends SortDirection { override def toString = "ascending" }
+    case object Descending extends SortDirection { override def toString = "descending" }
+
+    /**
+     * UNDEFINED captures values that are sent either in error or
+     * that were added by the server after this library was
+     * generated. We want to make it easy and obvious for users of
+     * this library to handle this case gracefully.
+     *
+     * We use all CAPS for the variable name to avoid collisions
+     * with the camel cased values above.
+     */
+    case class UNDEFINED(override val toString: String) extends SortDirection
+
+    /**
+     * all returns a list of all the valid, known values. We use
+     * lower case to avoid collisions with the camel cased values
+     * above.
+     */
+    val all = Seq(Ascending, Descending)
+
+    private[this]
+    val byName = all.map(x => x.toString.toLowerCase -> x).toMap
+
+    def apply(value: String): SortDirection = fromString(value).getOrElse(UNDEFINED(value))
+
+    def fromString(value: String): _root_.scala.Option[SortDirection] = byName.get(value.toLowerCase)
+
+  }
+
   /**
    * Defines the units of measurement that we support. As units are added, we conform
    * with the standard units provided by jscience as part of JSR 363 - see
@@ -771,6 +805,36 @@ package io.flow.common.v0.models {
       new play.api.libs.json.Writes[io.flow.common.v0.models.ScheduleExceptionStatus] {
         def writes(obj: io.flow.common.v0.models.ScheduleExceptionStatus) = {
           jsonWritesCommonScheduleExceptionStatus(obj)
+        }
+      }
+    }
+
+    implicit val jsonReadsCommonSortDirection = new play.api.libs.json.Reads[io.flow.common.v0.models.SortDirection] {
+      def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[io.flow.common.v0.models.SortDirection] = {
+        js match {
+          case v: play.api.libs.json.JsString => play.api.libs.json.JsSuccess(io.flow.common.v0.models.SortDirection(v.value))
+          case _ => {
+            (js \ "value").validate[String] match {
+              case play.api.libs.json.JsSuccess(v, _) => play.api.libs.json.JsSuccess(io.flow.common.v0.models.SortDirection(v))
+              case err: play.api.libs.json.JsError => err
+            }
+          }
+        }
+      }
+    }
+
+    def jsonWritesCommonSortDirection(obj: io.flow.common.v0.models.SortDirection) = {
+      play.api.libs.json.JsString(obj.toString)
+    }
+
+    def jsObjectSortDirection(obj: io.flow.common.v0.models.SortDirection) = {
+      play.api.libs.json.Json.obj("value" -> play.api.libs.json.JsString(obj.toString))
+    }
+
+    implicit def jsonWritesCommonSortDirection: play.api.libs.json.Writes[SortDirection] = {
+      new play.api.libs.json.Writes[io.flow.common.v0.models.SortDirection] {
+        def writes(obj: io.flow.common.v0.models.SortDirection) = {
+          jsonWritesCommonSortDirection(obj)
         }
       }
     }
@@ -1482,6 +1546,17 @@ package io.flow.common.v0 {
 
     implicit val queryStringBindableEnumScheduleExceptionStatus = new QueryStringBindable.Parsing[io.flow.common.v0.models.ScheduleExceptionStatus](
       ScheduleExceptionStatus.fromString(_).get, _.toString, enumScheduleExceptionStatusNotFound
+    )
+
+    // Enum: SortDirection
+    private[this] val enumSortDirectionNotFound = (key: String, e: _root_.java.lang.Exception) => s"Unrecognized $key, should be one of ${io.flow.common.v0.models.SortDirection.all.mkString(", ")}"
+
+    implicit val pathBindableEnumSortDirection = new PathBindable.Parsing[io.flow.common.v0.models.SortDirection] (
+      SortDirection.fromString(_).get, _.toString, enumSortDirectionNotFound
+    )
+
+    implicit val queryStringBindableEnumSortDirection = new QueryStringBindable.Parsing[io.flow.common.v0.models.SortDirection](
+      SortDirection.fromString(_).get, _.toString, enumSortDirectionNotFound
     )
 
     // Enum: UnitOfMeasurement

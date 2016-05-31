@@ -30,8 +30,7 @@ Library supporting building REST APIs on play framework.
 
 ## Publishing a new version
 
-    dev tag --label micro
-    sbt publish
+    go run release.go
 
 ## Publishing a new snapshot for local development
 

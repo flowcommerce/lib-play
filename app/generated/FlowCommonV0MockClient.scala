@@ -37,6 +37,8 @@ package io.flow.common.v0.mock {
 
     def makeChangeType() = io.flow.common.v0.models.ChangeType.Insert
 
+    def makeDimensionType() = io.flow.common.v0.models.DimensionType.Product
+
     def makeExceptionType() = io.flow.common.v0.models.ExceptionType.Open
 
     def makeHolidayCalendar() = io.flow.common.v0.models.HolidayCalendar.UsBankHolidays
@@ -65,8 +67,11 @@ package io.flow.common.v0.mock {
     )
 
     def makeDimension() = io.flow.common.v0.models.Dimension(
-      value = 1.0,
-      units = io.flow.common.v0.mock.Factories.makeUnitOfMeasurement()
+      `type` = io.flow.common.v0.mock.Factories.makeDimensionType(),
+      depth = None,
+      length = None,
+      weight = None,
+      width = None
     )
 
     def makeError() = io.flow.common.v0.models.Error(
@@ -120,11 +125,6 @@ package io.flow.common.v0.mock {
     def makeOrganizationSummary() = io.flow.common.v0.models.OrganizationSummary(
       id = randomString(),
       name = randomString()
-    )
-
-    def makePrice() = io.flow.common.v0.models.Price(
-      amount = 1.0,
-      currency = randomString()
     )
 
     def makeSchedule() = io.flow.common.v0.models.Schedule(

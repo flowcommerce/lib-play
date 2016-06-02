@@ -27,8 +27,11 @@ package io.flow.common.v0.models {
   )
 
   case class Dimension(
-    value: Double,
-    units: io.flow.common.v0.models.UnitOfMeasurement
+    `type`: io.flow.common.v0.models.DimensionType,
+    depth: _root_.scala.Option[io.flow.common.v0.models.Measurement] = None,
+    length: _root_.scala.Option[io.flow.common.v0.models.Measurement] = None,
+    weight: _root_.scala.Option[io.flow.common.v0.models.Measurement] = None,
+    width: _root_.scala.Option[io.flow.common.v0.models.Measurement] = None
   )
 
   case class Error(
@@ -92,11 +95,6 @@ package io.flow.common.v0.models {
   case class OrganizationSummary(
     id: String,
     name: String
-  )
-
-  case class Price(
-    amount: Double,
-    currency: String
   )
 
   /**
@@ -265,6 +263,53 @@ package io.flow.common.v0.models {
     def apply(value: String): ChangeType = fromString(value).getOrElse(UNDEFINED(value))
 
     def fromString(value: String): _root_.scala.Option[ChangeType] = byName.get(value.toLowerCase)
+
+  }
+
+  /**
+   * Specifies the difference between product dimensions and the actual packaged
+   * dimensions. This enables us to generate more accurate shipping estimates based
+   * on the packaged dimensions. The common example is a scarf which may have product
+   * dimensions of 6 feet long even though it can be folded to have very small
+   * package dimensions.
+   */
+  sealed trait DimensionType
+
+  object DimensionType {
+
+    /**
+     * The standalone dimensions of an item.
+     */
+    case object Product extends DimensionType { override def toString = "product" }
+    /**
+     * The boxed dimensions of an item.
+     */
+    case object Package extends DimensionType { override def toString = "package" }
+
+    /**
+     * UNDEFINED captures values that are sent either in error or
+     * that were added by the server after this library was
+     * generated. We want to make it easy and obvious for users of
+     * this library to handle this case gracefully.
+     *
+     * We use all CAPS for the variable name to avoid collisions
+     * with the camel cased values above.
+     */
+    case class UNDEFINED(override val toString: String) extends DimensionType
+
+    /**
+     * all returns a list of all the valid, known values. We use
+     * lower case to avoid collisions with the camel cased values
+     * above.
+     */
+    val all = Seq(Product, Package)
+
+    private[this]
+    val byName = all.map(x => x.toString.toLowerCase -> x).toMap
+
+    def apply(value: String): DimensionType = fromString(value).getOrElse(UNDEFINED(value))
+
+    def fromString(value: String): _root_.scala.Option[DimensionType] = byName.get(value.toLowerCase)
 
   }
 
@@ -719,6 +764,36 @@ package io.flow.common.v0.models {
       }
     }
 
+    implicit val jsonReadsCommonDimensionType = new play.api.libs.json.Reads[io.flow.common.v0.models.DimensionType] {
+      def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[io.flow.common.v0.models.DimensionType] = {
+        js match {
+          case v: play.api.libs.json.JsString => play.api.libs.json.JsSuccess(io.flow.common.v0.models.DimensionType(v.value))
+          case _ => {
+            (js \ "value").validate[String] match {
+              case play.api.libs.json.JsSuccess(v, _) => play.api.libs.json.JsSuccess(io.flow.common.v0.models.DimensionType(v))
+              case err: play.api.libs.json.JsError => err
+            }
+          }
+        }
+      }
+    }
+
+    def jsonWritesCommonDimensionType(obj: io.flow.common.v0.models.DimensionType) = {
+      play.api.libs.json.JsString(obj.toString)
+    }
+
+    def jsObjectDimensionType(obj: io.flow.common.v0.models.DimensionType) = {
+      play.api.libs.json.Json.obj("value" -> play.api.libs.json.JsString(obj.toString))
+    }
+
+    implicit def jsonWritesCommonDimensionType: play.api.libs.json.Writes[DimensionType] = {
+      new play.api.libs.json.Writes[io.flow.common.v0.models.DimensionType] {
+        def writes(obj: io.flow.common.v0.models.DimensionType) = {
+          jsonWritesCommonDimensionType(obj)
+        }
+      }
+    }
+
     implicit val jsonReadsCommonExceptionType = new play.api.libs.json.Reads[io.flow.common.v0.models.ExceptionType] {
       def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[io.flow.common.v0.models.ExceptionType] = {
         js match {
@@ -1012,16 +1087,33 @@ package io.flow.common.v0.models {
 
     implicit def jsonReadsCommonDimension: play.api.libs.json.Reads[Dimension] = {
       (
-        (__ \ "value").read[Double] and
-        (__ \ "units").read[io.flow.common.v0.models.UnitOfMeasurement]
+        (__ \ "type").read[io.flow.common.v0.models.DimensionType] and
+        (__ \ "depth").readNullable[io.flow.common.v0.models.Measurement] and
+        (__ \ "length").readNullable[io.flow.common.v0.models.Measurement] and
+        (__ \ "weight").readNullable[io.flow.common.v0.models.Measurement] and
+        (__ \ "width").readNullable[io.flow.common.v0.models.Measurement]
       )(Dimension.apply _)
     }
 
     def jsObjectDimension(obj: io.flow.common.v0.models.Dimension) = {
       play.api.libs.json.Json.obj(
-        "value" -> play.api.libs.json.JsNumber(obj.value),
-        "units" -> play.api.libs.json.JsString(obj.units.toString)
-      )
+        "type" -> play.api.libs.json.JsString(obj.`type`.toString)
+      ) ++ (obj.depth match {
+        case None => play.api.libs.json.Json.obj()
+        case Some(x) => play.api.libs.json.Json.obj("depth" -> jsObjectMeasurement(x))
+      }) ++
+      (obj.length match {
+        case None => play.api.libs.json.Json.obj()
+        case Some(x) => play.api.libs.json.Json.obj("length" -> jsObjectMeasurement(x))
+      }) ++
+      (obj.weight match {
+        case None => play.api.libs.json.Json.obj()
+        case Some(x) => play.api.libs.json.Json.obj("weight" -> jsObjectMeasurement(x))
+      }) ++
+      (obj.width match {
+        case None => play.api.libs.json.Json.obj()
+        case Some(x) => play.api.libs.json.Json.obj("width" -> jsObjectMeasurement(x))
+      })
     }
 
     implicit def jsonWritesCommonDimension: play.api.libs.json.Writes[Dimension] = {
@@ -1243,28 +1335,6 @@ package io.flow.common.v0.models {
       new play.api.libs.json.Writes[io.flow.common.v0.models.OrganizationSummary] {
         def writes(obj: io.flow.common.v0.models.OrganizationSummary) = {
           jsObjectOrganizationSummary(obj)
-        }
-      }
-    }
-
-    implicit def jsonReadsCommonPrice: play.api.libs.json.Reads[Price] = {
-      (
-        (__ \ "amount").read[Double] and
-        (__ \ "currency").read[String]
-      )(Price.apply _)
-    }
-
-    def jsObjectPrice(obj: io.flow.common.v0.models.Price) = {
-      play.api.libs.json.Json.obj(
-        "amount" -> play.api.libs.json.JsNumber(obj.amount),
-        "currency" -> play.api.libs.json.JsString(obj.currency)
-      )
-    }
-
-    implicit def jsonWritesCommonPrice: play.api.libs.json.Writes[Price] = {
-      new play.api.libs.json.Writes[io.flow.common.v0.models.Price] {
-        def writes(obj: io.flow.common.v0.models.Price) = {
-          jsObjectPrice(obj)
         }
       }
     }
@@ -1515,6 +1585,17 @@ package io.flow.common.v0 {
       ChangeType.fromString(_).get, _.toString, enumChangeTypeNotFound
     )
 
+    // Enum: DimensionType
+    private[this] val enumDimensionTypeNotFound = (key: String, e: _root_.java.lang.Exception) => s"Unrecognized $key, should be one of ${io.flow.common.v0.models.DimensionType.all.mkString(", ")}"
+
+    implicit val pathBindableEnumDimensionType = new PathBindable.Parsing[io.flow.common.v0.models.DimensionType] (
+      DimensionType.fromString(_).get, _.toString, enumDimensionTypeNotFound
+    )
+
+    implicit val queryStringBindableEnumDimensionType = new QueryStringBindable.Parsing[io.flow.common.v0.models.DimensionType](
+      DimensionType.fromString(_).get, _.toString, enumDimensionTypeNotFound
+    )
+
     // Enum: ExceptionType
     private[this] val enumExceptionTypeNotFound = (key: String, e: _root_.java.lang.Exception) => s"Unrecognized $key, should be one of ${io.flow.common.v0.models.ExceptionType.all.mkString(", ")}"
 
@@ -1638,7 +1719,8 @@ package io.flow.common.v0 {
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.Healthcheck] = {
         _executeRequest("GET", s"/_internal_/healthcheck", requestHeaders = requestHeaders).map {
           case r if r.status == 200 => _root_.io.flow.common.v0.Client.parseJson("io.flow.common.v0.models.Healthcheck", r, _.validate[io.flow.common.v0.models.Healthcheck])
-          case r => throw new io.flow.common.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 200")
+          case r if r.status == 422 => throw new io.flow.common.v0.errors.ErrorsResponse(r)
+          case r => throw new io.flow.common.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 200, 422")
         }
       }
     }
@@ -1758,6 +1840,15 @@ package io.flow.common.v0 {
   }
 
   package errors {
+
+    import io.flow.common.v0.models.json._
+
+    case class ErrorsResponse(
+      response: play.api.libs.ws.WSResponse,
+      message: Option[String] = None
+    ) extends Exception(message.getOrElse(response.status + ": " + response.body)){
+      lazy val errors = _root_.io.flow.common.v0.Client.parseJson("Seq[io.flow.common.v0.models.Error]", response, _.validate[Seq[io.flow.common.v0.models.Error]])
+    }
 
     case class FailedRequest(responseCode: Int, message: String, requestUri: Option[_root_.java.net.URI] = None) extends _root_.java.lang.Exception(s"HTTP $responseCode: $message")
 

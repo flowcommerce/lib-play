@@ -13,7 +13,7 @@ import play.filters.cors.CORSFilter
  * To use in any Flow app depending on lib-play:
  *
  * (1) Add this to your base.conf:
- *    play.http.filters=io.flow.play.util.CorsFilter
+ *    play.http.filters=io.flow.play.util.CorsFilter (or CorsWithLoggingFilter, if logging is to be added too)
  *    play.filters.cors.preflightMaxAge = 3 days
  *    play.filters.cors.allowedHttpMethods = ["GET", "POST", "OPTIONS"] // whatever you allow in your service
  *
@@ -25,4 +25,8 @@ import play.filters.cors.CORSFilter
  **/
 class CorsFilter @Inject() (corsFilter: CORSFilter) extends HttpFilters {
   def filters = Seq(corsFilter)
+}
+
+class CorsWithLoggingFilter @javax.inject.Inject() (corsFilter: CORSFilter, loggingFilter: FlowLoggingFilter) extends HttpFilters {
+  def filters = Seq(corsFilter, loggingFilter)
 }

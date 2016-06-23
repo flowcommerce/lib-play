@@ -54,7 +54,7 @@ case class UrlKey(
     val formatted = format(value)
     (formatted.length < minKeyLength) match {
       case true => {
-        generate(value + random.alphaNumeric(minKeyLength - value.length), suffix)(checkFunction)
+        generate(formatted + random.alphaNumeric(minKeyLength - formatted.length), suffix)(checkFunction)
       }
       case false => {
         val (key, nextSuffix) = suffix match {

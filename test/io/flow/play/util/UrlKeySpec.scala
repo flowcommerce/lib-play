@@ -14,6 +14,10 @@ class UrlKeySpec extends FunSpec with Matchers {
       urlKey.validate(key) should be(Nil)
     }
 
+    it("handles edge case on length") {
+      urlKey.generate("can").length should be(4)
+    }
+    
     it("executes check function") {
       val sample = UUID.randomUUID.toString
       val key = urlKey.generate(sample) { k => (k != sample) }

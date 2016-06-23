@@ -61,7 +61,10 @@ case class Random() {
     * @param n Length of random string to generate
     */
   def alphaNumeric(n: Int) = {
-    alpha(1) + string(LowerAndUpperAndNumbers)(n - 1)
+    n == 1 match {
+      case true => alpha(1)
+      case false => alpha(1) + string(LowerAndUpperAndNumbers)(n - 1)
+    }
   }
 
     /**
@@ -77,7 +80,10 @@ case class Random() {
     * @param n Length of random string to generate
     */
   def alphaNumericNonAmbiguous(n: Int) = {
-    string(NonAmbiguousLowerAndUpper)(1) + string(NonAmbiguousLowerAndUpperAndNumbers)(n - 1)
+    n == 1 match {
+      case true => string(NonAmbiguousLowerAndUpper)(1)
+      case false => string(NonAmbiguousLowerAndUpper)(1) + string(NonAmbiguousLowerAndUpperAndNumbers)(n - 1)
+    }
   }
 
   /**

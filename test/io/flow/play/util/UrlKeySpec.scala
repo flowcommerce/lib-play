@@ -25,6 +25,18 @@ class UrlKeySpec extends FunSpec with Matchers {
       urlKey.validate(key) should be(Nil)
     }
 
+    it("executes check function multiple times") {
+      val sample = UUID.randomUUID.toString
+      val key = urlKey.generate(sample) { k => (k != sample) }
+      key should be(sample + "-1")
+      urlKey.validate(key) should be(Nil)
+
+      val nextKey = urlKey.generate(sample, Some(2)) { k => (k != sample) }
+      nextKey should be(sample + "-2")
+      urlKey.validate(nextKey) should be(Nil)
+
+    }
+
     it("appends string to make min length") {
       val urlKey = UrlKey(minKeyLength = 5)
 

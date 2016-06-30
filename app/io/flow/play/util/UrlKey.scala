@@ -61,7 +61,7 @@ case class UrlKey(
       case false => {
         val (key, nextSuffix) = suffix match {
           case None => (formatted, 1)
-          case Some(i) => (formatted + "-1", i + 1)
+          case Some(i) => (formatted + s"-$i", i + 1)
         }
 
         validate(key) match {

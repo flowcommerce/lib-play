@@ -14,7 +14,13 @@ Library supporting building REST APIs on play framework.
 
 This error handler capture client and server errors, always
 returning application/json. This handler also makes sure to
-log server error messages and assigns a unique 
+log server error messages and assigns a unique error number
+that is returned to the user. This error number is also logged
+making it easy to find a particular error in the log.
+
+Additionally, if flow environment is development, the actual contents
+of the exception will be returned (disabled in production to avoid
+leaking information).
 
     play.http.errorHandler = "io.flow.play.util.ErrorHandler"
 

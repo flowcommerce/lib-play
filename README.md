@@ -3,14 +3,20 @@
 # lib-play
 Library supporting building REST APIs on play framework.
 
-# Provided Bindings
+## Provided Bindings
 
     play.modules.enabled += "io.flow.play.clients.ConfigModule"
     play.modules.enabled += "io.flow.play.clients.RegistryModule"
     play.modules.enabled += "io.flow.play.clients.TokenModule"
     play.modules.enabled += "io.flow.play.clients.UserModule"
 
-# Traits
+## Global error handler for JSON APIs
+
+This error handler capture client and server errors, returning
+
+    play.http.errorHandler = "io.flow.play.util.ErrorHandler"
+
+## Traits
 
   Anonymous Controller
 
@@ -36,5 +42,3 @@ Library supporting building REST APIs on play framework.
 
     edit build.sbt and append -SNAPSHOT to version
     sbt +publishLocal
-
-

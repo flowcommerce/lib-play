@@ -34,6 +34,12 @@ class ErrorHandler extends HttpErrorHandler {
   override def onServerError(request: RequestHeader, exception: Throwable) = {
     val errorId = idGenerator.randomId()
     Logger.error(s"Error[$errorId] ${request.method} ${request.path}", exception)
-    Future.successful(InternalServerError(Json.toJson(Validation.serverError(s"A server error has occurred (#$errorId)"))))
+
+    val msg = FlowEnvironment.Current match {
+      case FlowEnvironment.Development => s"A server error has occurred (#$errorId). Additional info for development environment: $exception"
+      case FlowEnvironment.Production => s"A server error has occurred (#$errorId)"
+    }
+
+    Future.successful(InternalServerError(Json.toJson(Validation.serverError(msg))))
   }
 }

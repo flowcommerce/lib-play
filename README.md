@@ -12,7 +12,9 @@ Library supporting building REST APIs on play framework.
 
 ## Global error handler for JSON APIs
 
-This error handler capture client and server errors, returning
+This error handler capture client and server errors, always
+returning application/json. This handler also makes sure to
+log server error messages and assigns a unique 
 
     play.http.errorHandler = "io.flow.play.util.ErrorHandler"
 

@@ -20,6 +20,7 @@ object Validation {
     val InvalidSort = "invalid_sort"
     val UserAuthorizationFailed = "user_authorization_failed"
     val Error = "validation_error"
+    val ClientError = "client_error"
     val ServerError = "server_error"
   }
 
@@ -47,8 +48,12 @@ object Validation {
     messages.map { msg => Error(Codes.Error, msg) }
   }
 
+  def clientError(error: String = "Client Error"): Seq[Error] = {
+    Seq(Error(Codes.ClientError, error))
+  }
+
   def serverError(error: String = "Internal Server Error"): Seq[Error] = {
     Seq(Error(Codes.ServerError, error))
   }
-
+  
 }

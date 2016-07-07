@@ -7,13 +7,13 @@ import play.api.mvc.{Headers, Session}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait UserFromFlowAuth extends UserFromAuthorizationToken {
+trait UserFromFlowAuth  {
 
   def config: Config
 
   private[this] lazy val jwtSalt = config.requiredString("JWT_SALT")
   
-  override def user(
+  def user(
     session: Session,
     headers: Headers,
     path: String,
@@ -23,8 +23,7 @@ trait UserFromFlowAuth extends UserFromAuthorizationToken {
   ): Future[Option[UserReference]] = {
     headers.get("X-Flow-Auth") match {
       case None => {
-        // Delegate for now pending upgrade of library
-        super.user(session, headers, path, queryString)
+        legacyUser(session, headers, path, queryString)
       }
 
       case Some(value) => Future {
@@ -49,6 +48,56 @@ trait UserFromFlowAuth extends UserFromAuthorizationToken {
           role = claims.get("role").map { Role(_) }
         )
       }
+    }
+  }
+
+  // Everything below will be removed after all applications are
+  // upgraded to use X-Flow-Auth header.
+  import io.flow.token.v0.interfaces.{Client => TokenClient}
+
+  def tokenClient: TokenClient
+
+  private[this] def legacyUser(
+    session: Session,
+    headers: Headers,
+    path: String,
+    queryString: Map[String, Seq[String]]
+  ) (
+    implicit ec: ExecutionContext
+  ): Future[Option[UserReference]] = {
+    basicAuthorizationToken(headers) match {
+      case None => Future { None }
+      case Some(token) => {
+        token match {
+          case token: Authorization.Token => {
+
+            tokenClient.tokens.get(token = Seq(token.token)).map(_.headOption.map(_.user)).recover {
+              case ex: Throwable => {
+                val msg = s"Error communicating with token service at ${tokenClient.baseUrl}: $ex"
+                throw new Exception(msg, ex)
+              }
+            }
+
+          }
+          case token: Authorization.JwtToken => {
+            Future {
+              Some(UserReference(token.userId))
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /**
+    * If present, parses the basic authorization header and returns
+    * its decoded value.
+    */
+  private[this] def basicAuthorizationToken(
+    headers: play.api.mvc.Headers
+  ): Option[Authorization] = {
+    headers.get("Authorization").flatMap { h =>
+      Authorization.get(h)
     }
   }
 

@@ -66,7 +66,7 @@ trait UserFromAuthorizationToken {
   ) (
     implicit ec: ExecutionContext
   ): Future[Option[UserReference]] = {
-    Headers.basicAuthorizationToken(headers) match {
+    basicAuthorizationToken(headers) match {
       case None => Future { None }
       case Some(token) => {
         token match {
@@ -90,6 +90,18 @@ trait UserFromAuthorizationToken {
     }
   }
 
+  /**
+    * If present, parses the basic authorization header and returns
+    * its decoded value.
+    */
+  private[this] def basicAuthorizationToken(
+    headers: play.api.mvc.Headers
+  ): Option[Authorization] = {
+    headers.get("Authorization").flatMap { h =>
+      Authorization.get(h)
+    }
+  }
+  
 }
 
 trait AnonymousRestController extends AnonymousController with UserFromAuthorizationToken

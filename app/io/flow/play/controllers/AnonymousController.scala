@@ -54,43 +54,5 @@ trait AnonymousController extends FlowControllerHelpers {
 
 }
 
-trait UserFromAuthorizationToken {
-
-  def tokenClient: TokenClient
-
-  def user(
-    session: Session,
-    headers: Headers,
-    path: String,
-    queryString: Map[String, Seq[String]]
-  ) (
-    implicit ec: ExecutionContext
-  ): Future[Option[UserReference]] = {
-    Headers.basicAuthorizationToken(headers) match {
-      case None => Future { None }
-      case Some(token) => {
-        token match {
-          case token: Authorization.Token => {
-
-            tokenClient.tokens.get(token = Seq(token.token)).map(_.headOption.map(_.user)).recover {
-              case ex: Throwable => {
-                val msg = s"Error communicating with token service at ${tokenClient.baseUrl}: $ex"
-                throw new Exception(msg, ex)
-              }
-            }
-
-          }
-          case token: Authorization.JwtToken => {
-            Future {
-              Some(UserReference(token.userId))
-            }
-          }
-        }
-      }
-    }
-  }
-
-}
-
-trait AnonymousRestController extends AnonymousController with UserFromAuthorizationToken
+trait AnonymousRestController extends AnonymousController with UserFromFlowAuth
 

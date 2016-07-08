@@ -71,7 +71,7 @@ trait UserFromFlowAuth  {
         token match {
           case token: Authorization.Token => {
 
-            tokenClient.tokens.get(token = Seq(token.token)).map(_.headOption.map(_.user)).recover {
+            tokenClient.tokens.get(token = Some(token.token)).map(_.headOption.map(_.user)).recover {
               case ex: Throwable => {
                 val msg = s"Error communicating with token service at ${tokenClient.baseUrl}: $ex"
                 throw new Exception(msg, ex)

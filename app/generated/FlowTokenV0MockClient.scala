@@ -19,47 +19,44 @@ package io.flow.token.v0.mock {
   trait MockTokens extends io.flow.token.v0.Tokens {
 
     /**
-     * Get users by token
+     * Get all tokens that you are authorized to view. Note that the cleartext token
+     * value is never sent.
      */
     def get(
-      token: Seq[String],
-      requestHeaders: Seq[(String, String)] = Nil
-    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.token.v0.models.TokenReference]] = scala.concurrent.Future {
-      Nil
-    }
-
-    /**
-     * Get the user for this specified token
-     */
-    def getByToken(
-      token: String,
-      requestHeaders: Seq[(String, String)] = Nil
-    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.token.v0.models.TokenReference] = scala.concurrent.Future {
-      io.flow.token.v0.mock.Factories.makeTokenReference()
-    }
-
-    /**
-     * Get all tokens for a user
-     */
-    def getByUserId(
-      userId: String,
+      id: _root_.scala.Option[Seq[String]] = None,
+      token: _root_.scala.Option[String] = None,
+      limit: Long = 25,
+      offset: Long = 0,
+      sort: String = "-created_at",
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.token.v0.models.Token]] = scala.concurrent.Future {
       Nil
     }
 
     /**
-     * Get the user for this specified token if it is valid
+     * Get metadata for the token with this ID
      */
-    def getAuthenticateByToken(
-      token: String,
+    def getById(
+      id: String,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.token.v0.models.Token] = scala.concurrent.Future {
+      io.flow.token.v0.mock.Factories.makeToken()
+    }
+
+    /**
+     * Preferred method to validate a token, obtaining user information if the token is
+     * valid (or a 404 if the token does not exist). We use an HTTP POST with a form
+     * body to enusre that the token itself is not logged in the request logs.
+     */
+    def postAuthentications(
+      authenticationForm: io.flow.token.v0.models.AuthenticationForm,
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.token.v0.models.TokenReference] = scala.concurrent.Future {
       io.flow.token.v0.mock.Factories.makeTokenReference()
     }
 
     /**
-     * Create a user token
+     * Create a new token for the requesting user
      */
     def post(
       tokenForm: io.flow.token.v0.models.TokenForm,
@@ -68,8 +65,8 @@ package io.flow.token.v0.mock {
       io.flow.token.v0.mock.Factories.makeToken()
     }
 
-    def deleteByToken(
-      token: String,
+    def deleteById(
+      id: String,
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit] = scala.concurrent.Future {
       // unit type
@@ -96,24 +93,28 @@ package io.flow.token.v0.mock {
       "Test " + _root_.java.util.UUID.randomUUID.toString.replaceAll("-", " ")
     }
 
+    def makeAuthenticationForm() = io.flow.token.v0.models.AuthenticationForm(
+      token = randomString()
+    )
+
     def makeToken() = io.flow.token.v0.models.Token(
+      id = randomString(),
       user = io.flow.common.v0.mock.Factories.makeUserReference(),
-      description = randomString(),
-      value = None
+      createdAt = new org.joda.time.DateTime(),
+      description = None
     )
 
     def makeTokenForm() = io.flow.token.v0.models.TokenForm(
-      userId = randomString(),
-      description = randomString()
+      description = None
     )
 
     def makeTokenReference() = io.flow.token.v0.models.TokenReference(
+      id = randomString(),
       user = io.flow.common.v0.mock.Factories.makeUserReference()
     )
 
     def makeValidation() = io.flow.token.v0.models.Validation(
-      status = randomString(),
-      description = None
+      status = randomString()
     )
 
     def makeValidationForm() = io.flow.token.v0.models.ValidationForm(

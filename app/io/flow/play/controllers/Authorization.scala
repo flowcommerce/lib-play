@@ -41,7 +41,7 @@ object Authorization {
           case JsonWebToken(header, claimsSet, signature) if jwtIsValid(value) => createJwtToken(claimsSet)
           case JsonWebToken(header, claimsSet, signature) =>
             val tokenData = createJwtToken(claimsSet)
-            Logger.error(s"JWT Token for user[${tokenData.map(_.userId).getOrElse("unknown")}] was invalid, bad salt")
+            Logger.warn(s"JWT Token for user[${tokenData.map(_.userId).getOrElse("unknown")}] was invalid, bad salt")
             None
           case _ => None
         }

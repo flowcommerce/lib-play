@@ -7,6 +7,7 @@ class FlowEnvironmentSpec extends FunSpec with Matchers {
   it("fromString") {
     FlowEnvironment.fromString("development") should be(Some(FlowEnvironment.Development))
     FlowEnvironment.fromString("production") should be(Some(FlowEnvironment.Production))
+    FlowEnvironment.fromString("workstation") should be(Some(FlowEnvironment.Workstation))
   }
 
   it("Current is defined") {

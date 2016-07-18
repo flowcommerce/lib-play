@@ -6,9 +6,9 @@ sealed trait FlowEnvironment
   * We introduced our own environment primarily to support our
   * dockerized environments and to integrate nicely with the flow
   * registry. The environment is used by the registry to identify
-  * hostnames to use in either production or development, and within
-  * development, we needed a way to reliably identify our intended
-  * environment as opposed to the Play environment.
+  * hostnames to use in either production, development or workstation,
+  * and within workstation, we needed a way to reliably identify our
+  * intended environment as opposed to the Play environment.
   * 
   * Specifically, we use sbt stage to create the run scripts for
   * play. These scripts are the entrypoints in the docker containers
@@ -25,7 +25,8 @@ sealed trait FlowEnvironment
   *   2. a system property named 'FLOW_ENV'
   *   3. a default of 'development'
   * 
-  * Valid values for the environment are: 'development' or 'production'
+  * Valid values for the environment are: 'development',
+  * 'workstation', 'production'
   * 
   * To get the current environment:
   * 
@@ -33,16 +34,17 @@ sealed trait FlowEnvironment
   *
   *     FlowEnvironment.Current match {
   *       case FlowEnvironment.Development => ...
+  *       case FlowEnvironment.Workstation => ...
   *       case FlowEnvironment.Production => ...
   *     }
   */
 object FlowEnvironment {
 
   case object Development extends FlowEnvironment { override def toString() = "development" }
-
   case object Production extends FlowEnvironment { override def toString() = "production" }
+  case object Workstation extends FlowEnvironment { override def toString() = "workstation" }
 
-  val all = Seq(Development, Production)
+  val all = Seq(Development, Production, Workstation)
 
   private[this]
   val byName = all.map(x => x.toString.toLowerCase -> x).toMap

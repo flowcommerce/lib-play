@@ -3,6 +3,7 @@ package io.flow.play.controllers
 import authentikat.jwt.{JsonWebToken, JwtClaimsSetJValue}
 import io.flow.common.v0.models.{Environment, Role, UserReference}
 import io.flow.play.util.{AuthData, Config, OrganizationAuthData}
+import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import play.api.Logger
 import play.api.mvc.{Headers, Session}
@@ -15,7 +16,7 @@ trait UserFromFlowAuth  {
   private[this] val DefaultAuthExpirationTimeSeconds = 120
 
   private[this] lazy val jwtSalt = config.requiredString("JWT_SALT")
-  private[this] lazy val authExpirationTimeSeconds = config.optionalString("FLOW_AUTH_EXPIRATION_TIME_SECONDS").getOrElse(DefaultAuthExpirationTimeSeconds)
+  private[this] lazy val authExpirationTimeSeconds = config.optionalInt("FLOW_AUTH_EXPIRATION_SECONDS").getOrElse(DefaultAuthExpirationTimeSeconds)
   
   def user(
     session: Session,
@@ -46,37 +47,50 @@ trait UserFromFlowAuth  {
   private[this] def parseJwtToken(claimsSet: JwtClaimsSetJValue): Option[AuthData] = {
     claimsSet.asSimpleMap.toOption.flatMap { claims =>
       claims.get("user_id").flatMap { userId =>
-        claims.get("created_at").map { ts =>
+        claims.get("created_at").flatMap { ts =>
           val createdAt = ISODateTimeFormat.dateTimeParser.parseDateTime(ts)
+          val expiration = (new DateTime()).plusSeconds(authExpirationTimeSeconds)
+          createdAt.isBefore(expiration) match {
+            case false => {
+              Logger.warn(s"Flow auth data is expired. CreatedAt[$createdAt] expiration[$expiration] userId[$userId]")
+              None
+            }
 
-          val orgAuthData = claims.get("organization").flatMap { org =>
-            (claims.get("role").map { Role(_) }, claims.get("environment").map { Environment(_) }) match {
-              case (Some(role), Some(env)) => {
-                Some(
-                  OrganizationAuthData(
-                    organization = org,
-                    role = role,
-                    environment = env
-                  )
+            case true => {
+              Some(
+                AuthData(
+                  createdAt = createdAt,
+                  userId = userId,
+                  organization = orgAuthData(claims)
                 )
-              }
-              case (role, env) => {
-                Logger.error(s"Flow auth data had an organization specified but missing role[$role] or environment[$env]")
-                None
-              }
+              )
             }
           }
-
-          AuthData(
-            createdAt = createdAt,
-            userId = userId,
-            organization = orgAuthData
-          )
         }
       }
     }
   }
 
+  private[this] def orgAuthData(claims: Map[String, String]): Option[OrganizationAuthData] = {
+    claims.get("organization").flatMap { org =>
+      (claims.get("role").map { Role(_) }, claims.get("environment").map { Environment(_) }) match {
+        case (Some(role), Some(env)) => {
+          Some(
+            OrganizationAuthData(
+              organization = org,
+              role = role,
+              environment = env
+            )
+          )
+        }
+        case (role, env) => {
+          Logger.error(s"Flow auth data had an organization specified but missing role[$role] or environment[$env]")
+          None
+        }
+      }
+    }
+  }
+  
   // Everything below will be removed after all applications are
   // upgraded to use X-Flow-Auth header.
   import io.flow.token.v0.interfaces.{Client => TokenClient}

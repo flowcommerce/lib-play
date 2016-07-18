@@ -26,7 +26,7 @@ class RegistryModule extends Module {
           case FlowEnvironment.Production => Seq(
             bind[Registry].to[ProductionRegistry]
           )
-          case FlowEnvironment.Development => Seq(
+          case FlowEnvironment.Development | FlowEnvironment.Workstation => Seq(
             bind[Registry].to[DevelopmentRegistry]
           )
         }

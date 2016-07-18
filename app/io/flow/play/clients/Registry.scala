@@ -33,21 +33,23 @@ object RegistryConstants {
 
   val ProductionDomain = "api.flow.io"
 
-  val TokenVariableName = "FLOW_API_TOKEN"
-  val DevHostVariableName = "DEV_HOST"
+  val WorkstationHostVariableName = "WORKSTATION_HOST"
+
+  val DefaultWorkstationHost = "ws"
 
   /**
-    * The resolved name of the development host. At Flow, we require
-    * an environment variable of DEV_HOST
+    * Defaults to the workstation host
     */
-  private[this] lazy val devHost: String = {
-    EnvironmentConfig.optionalString(DevHostVariableName).getOrElse {
-      PropertyConfig.optionalString(DevHostVariableName).getOrElse {
-        sys.error(
-          s"Missing required environment variable named[$DevHostVariableName].\n" +
-            "This variable should be the IP address where we can find development instances.\n" +
-            "In development mode, this is commonly set to the IP address of Mac Docker VM (e.g. 0.0.0.0)"
-        )
+  private[this] lazy val devHost: String = workstationHost
+
+  /**
+    * The resolved name of the host used in workstation
+    */
+  private[this] lazy val workstationHost: String = {
+    EnvironmentConfig.optionalString(WorkstationHostVariableName).getOrElse {
+      PropertyConfig.optionalString(WorkstationHostVariableName).getOrElse {
+        Logger.info(s"[${getClass.getName}] defaulting workstationHost to '$DefaultWorkstationHost' (can override via env var[$WorkstationHostVariableName])")
+        DefaultWorkstationHost
       }
     }
   }
@@ -65,14 +67,18 @@ object RegistryConstants {
   }
 
   def developmentHost(applicationId: String, port: Long): String = {
-
     s"http://$devHost:$port"
+  }
+
+  def workstationHost(applicationId: String, port: Long): String = {
+    s"http://$workstationHost:$port"
   }
 
   def host(applicationId: String, port: Long) = {
     FlowEnvironment.Current match {
       case FlowEnvironment.Production => productionHost(applicationId)
       case FlowEnvironment.Development => developmentHost(applicationId, port)
+      case FlowEnvironment.Workstation => workstationHost(applicationId, port)
     }
   }
 
@@ -115,8 +121,7 @@ class DevelopmentRegistry @javax.inject.Inject() (
     }
   }
 
-  private[this] lazy val token = config.requiredString(RegistryConstants.TokenVariableName)
-  private[this] lazy val client = new Client(RegistryHost, Some(Authorization.Basic(token)))
+  private[this] lazy val client = new Client(RegistryHost)
 
   override def host(applicationId: String): String = {
     val varName = overriddeVariableName(applicationId)

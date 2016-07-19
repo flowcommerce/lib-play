@@ -1,6 +1,9 @@
 package io.flow.play.util
 
-import io.flow.common.v0.models.Role
+import authentikat.jwt.{JwtClaimsSet, JwtHeader, JsonWebToken}
+import io.flow.common.v0.models.{Environment, Role}
+import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat.dateTime
 
 /**
   * Represents the data securely authenticated by the API proxy
@@ -13,8 +16,43 @@ import io.flow.common.v0.models.Role
   * organization.
   */
 case class AuthData(
+  createdAt: DateTime,
   userId: String,
-  organization: Option[String],
-  role: Option[Role]
-)
+  organization: Option[OrganizationAuthData]
+) {
 
+  private[this] val header = JwtHeader("HS256")
+
+  /**
+    * Converts this auth data to a map containing only the keys with
+    * their values.
+    */
+  def toMap(): Map[String, String] = {
+    Map(
+      "created_at" -> Some(dateTime.print(createdAt)),
+      "user_id" -> Some(userId),
+      "organization" -> organization.map(_.organization),
+      "role" -> organization.map(_.role.toString),
+      "environment" -> organization.map(_.environment.toString)
+    ).flatMap { case (key, value) => value.map { v => (key -> v)} }
+  }
+
+  /**
+    * Converts this auth data to a valid JWT string using the provided
+    * jwt salt.
+    */
+  def jwt(salt: String): String = {
+    val claimsSet = JwtClaimsSet(toMap())
+    JsonWebToken(header, claimsSet, salt)
+  }
+
+}
+
+/**
+ * Represents authorization data for a given organization.
+ */
+case class OrganizationAuthData(
+  organization: String,
+  role: Role,
+  environment: Environment
+)

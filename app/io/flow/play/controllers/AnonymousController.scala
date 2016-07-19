@@ -12,7 +12,7 @@ import play.api.mvc._
   * with users - intented to allow an anonymous action to succeed in cases
   * where we may or may not have a user.
   */
-trait AnonymousController extends FlowControllerHelpers {
+trait AnonymousController extends FlowControllerHelpers with AuthDataFromFlowAuthHeader {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 

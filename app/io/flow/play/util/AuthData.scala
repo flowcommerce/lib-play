@@ -1,7 +1,7 @@
 package io.flow.play.util
 
 import authentikat.jwt.{JwtClaimsSet, JwtHeader, JsonWebToken}
-import io.flow.common.v0.models.{Environment, Role}
+import io.flow.common.v0.models.{Environment, Role, UserReference}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat.dateTime
 
@@ -17,7 +17,7 @@ import org.joda.time.format.ISODateTimeFormat.dateTime
   */
 case class AuthData(
   createdAt: DateTime,
-  userId: String,
+  user: UserReference,
   organization: Option[OrganizationAuthData]
 ) {
 
@@ -30,7 +30,7 @@ case class AuthData(
   def toMap(): Map[String, String] = {
     Map(
       "created_at" -> Some(dateTime.print(createdAt)),
-      "user_id" -> Some(userId),
+      "user_id" -> Some(user.id),
       "organization" -> organization.map(_.organization),
       "role" -> organization.map(_.role.toString),
       "environment" -> organization.map(_.environment.toString)

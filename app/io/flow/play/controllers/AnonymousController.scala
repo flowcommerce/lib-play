@@ -23,12 +23,6 @@ trait AnonymousController extends FlowControllerHelpers with AuthDataFromFlowAut
     */
   def tokenClient: TokenClient
 
-  def auth(
-    headers: Headers
-  ) (
-    implicit ec: ExecutionContext
-  ): Option[AuthData]
-
   class AnonymousRequest[A](
     val auth: Option[AuthData],
     request: Request[A]

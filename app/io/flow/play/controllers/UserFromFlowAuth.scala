@@ -12,12 +12,16 @@ import scala.concurrent.duration.Duration
   */
 trait UserFromFlowAuth extends AuthDataFromFlowAuthHeader {
 
+  /**
+    * Uses the x-flow-auth header if present; otherwise defaults to
+    * legacy method of validating the token directly.
+    */
   override def auth(
     headers: Headers
   ) (
     implicit ec: ExecutionContext
   ): Option[AuthData] = {
-    auth(headers) match {
+    super.auth(headers) match {
       case Some(data) => Some(data)
       case None => {
         Await.result(

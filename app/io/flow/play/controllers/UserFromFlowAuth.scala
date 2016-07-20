@@ -1,96 +1,39 @@
 package io.flow.play.controllers
 
-import authentikat.jwt.{JsonWebToken, JwtClaimsSetJValue}
-import io.flow.common.v0.models.{Environment, Role, UserReference}
-import io.flow.play.util.{AuthData, Config, OrganizationAuthData}
+import io.flow.common.v0.models.UserReference
+import io.flow.play.util.AuthData
 import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
-import play.api.Logger
 import play.api.mvc.{Headers, Session}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.duration.Duration
 
-trait UserFromFlowAuth  {
+/**
+  * @deprecated Use AuthDataFromFlowAuthHeader
+  */
+trait UserFromFlowAuth extends AuthDataFromFlowAuthHeader {
 
-  def config: Config
-
-  private[this] val DefaultAuthExpirationTimeSeconds = 120
-
-  private[this] lazy val jwtSalt = config.requiredString("JWT_SALT")
-  private[this] lazy val authExpirationTimeSeconds = config.optionalInt("FLOW_AUTH_EXPIRATION_SECONDS").getOrElse(DefaultAuthExpirationTimeSeconds)
-  
-  def user(
-    session: Session,
-    headers: Headers,
-    path: String,
-    queryString: Map[String, Seq[String]]
+  override def auth(
+    headers: Headers
   ) (
     implicit ec: ExecutionContext
-  ): Future[Option[UserReference]] = {
-    headers.get("X-Flow-Auth") match {
+  ): Option[AuthData] = {
+    auth(headers) match {
+      case Some(data) => Some(data)
       case None => {
-        legacyUser(session, headers, path, queryString)
-      }
-
-      case Some(value) => Future {
-        value match {
-          case JsonWebToken(header, claimsSet, signature) if jwtIsValid(value) => parseJwtToken(claimsSet).map { data =>
-            UserReference(data.userId)
-          }
-          case _ => None
-        }
-      }
-    }
-  }
-
-  private[this] def jwtIsValid(token: String): Boolean = JsonWebToken.validate(token, jwtSalt)
-
-  private[this] def parseJwtToken(claimsSet: JwtClaimsSetJValue): Option[AuthData] = {
-    claimsSet.asSimpleMap.toOption.flatMap { claims =>
-      claims.get("user_id").flatMap { userId =>
-        claims.get("created_at").flatMap { ts =>
-          val createdAt = ISODateTimeFormat.dateTimeParser.parseDateTime(ts)
-          val expiration = (new DateTime()).plusSeconds(authExpirationTimeSeconds)
-          createdAt.isBefore(expiration) match {
-            case false => {
-              Logger.warn(s"Flow auth data is expired. CreatedAt[$createdAt] expiration[$expiration] userId[$userId]")
-              None
-            }
-
-            case true => {
-              Some(
-                AuthData(
-                  createdAt = createdAt,
-                  userId = userId,
-                  organization = orgAuthData(claims)
-                )
-              )
-            }
-          }
-        }
-      }
-    }
-  }
-
-  private[this] def orgAuthData(claims: Map[String, String]): Option[OrganizationAuthData] = {
-    claims.get("organization").flatMap { org =>
-      (claims.get("role").map { Role(_) }, claims.get("environment").map { Environment(_) }) match {
-        case (Some(role), Some(env)) => {
-          Some(
-            OrganizationAuthData(
-              organization = org,
-              role = role,
-              environment = env
-            )
+        Await.result(
+          legacyUser(headers),
+          Duration(5, "seconds")
+        ).map { u =>
+          AuthData(
+            createdAt = new DateTime(),
+            user = u,
+            organization = None
           )
         }
-        case (role, env) => {
-          Logger.error(s"Flow auth data had an organization specified but missing role[$role] or environment[$env]")
-          None
-        }
       }
     }
   }
-  
+
   // Everything below will be removed after all applications are
   // upgraded to use X-Flow-Auth header.
   import io.flow.token.v0.interfaces.{Client => TokenClient}
@@ -98,10 +41,7 @@ trait UserFromFlowAuth  {
   def tokenClient: TokenClient
 
   private[this] def legacyUser(
-    session: Session,
-    headers: Headers,
-    path: String,
-    queryString: Map[String, Seq[String]]
+    headers: Headers
   ) (
     implicit ec: ExecutionContext
   ): Future[Option[UserReference]] = {

@@ -1,6 +1,7 @@
 package io.flow.play.controllers
 
 import io.flow.play.clients.DefaultTokenClient
+import io.flow.play.util.AuthData
 import io.flow.common.v0.models.UserReference
 import io.flow.token.v0.interfaces.{Client => TokenClient}
 import scala.concurrent.{ExecutionContext, Future}
@@ -22,29 +23,25 @@ trait AnonymousController extends FlowControllerHelpers with AuthDataFromFlowAut
     */
   def tokenClient: TokenClient
 
-  /**
-   * Extracts the user from the headers
-   */
-  def user(
-    session: Session,
-    headers: Headers,
-    path: String,
-    queryString: Map[String, Seq[String]]
+  def auth(
+    headers: Headers
   ) (
     implicit ec: ExecutionContext
-  ): Future[Option[UserReference]]
+  ): Option[AuthData]
 
   class AnonymousRequest[A](
-    val user: Future[Option[UserReference]],
+    val auth: Option[AuthData],
     request: Request[A]
-  ) extends WrappedRequest[A](request)
+  ) extends WrappedRequest[A](request) {
+    val user: Option[UserReference] = auth.map(_.user)
+  }
 
   object Anonymous extends ActionBuilder[AnonymousRequest] {
 
     def invokeBlock[A](request: Request[A], block: (AnonymousRequest[A]) => Future[Result]) = {
       block(
         new AnonymousRequest(
-          user = user(request.session, request.headers, request.path, request.queryString),
+          auth = auth(request.headers),
           request = request
         )
       )

@@ -85,7 +85,7 @@ package io.flow.common.v0.mock {
     )
 
     def makeCustomer() = io.flow.common.v0.models.Customer(
-      name = randomString(),
+      name = io.flow.common.v0.mock.Factories.makeName(),
       number = None,
       phone = None,
       email = None

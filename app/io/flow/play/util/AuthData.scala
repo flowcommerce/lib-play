@@ -5,6 +5,45 @@ import io.flow.common.v0.models.{Environment, Role, UserReference}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat.dateTime
 
+object AuthData {
+
+  val Header = "X-Flow-Auth"
+
+  /**
+    * Helper to create a valid auth data for this user (no organization)
+    */
+  def user(user: UserReference): AuthData = {
+    AuthData(
+      createdAt = new DateTime(),
+      user = user,
+      organization = None
+    )
+  }
+
+  /**
+    * Helper to create a valid auth data for this user and organization.
+    */
+  def organization(
+    user: UserReference,
+    org: String,
+    role: Role = Role.Member,
+    environment: Environment = Environment.Sandbox
+  ): AuthData = {
+    AuthData(
+      createdAt = new DateTime(),
+      user = user,
+      organization = Some(
+        OrganizationAuthData(
+          organization = org,
+          role = role,
+          environment = environment
+        )
+      )
+    )
+  }
+
+}
+
 /**
   * Represents the data securely authenticated by the API proxy
   * server. All of our software should depend on data from this object

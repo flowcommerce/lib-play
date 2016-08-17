@@ -22,7 +22,7 @@ trait AuthDataFromFlowAuthHeader  {
   def auth(headers: Headers) (
     implicit ec: ExecutionContext
   ): Option[AuthData] = {
-    headers.get("X-Flow-Auth").flatMap { parse(_) }
+    headers.get(AuthData.Header).flatMap { parse(_) }
   }
 
   def parse(value: String): Option[AuthData] = {

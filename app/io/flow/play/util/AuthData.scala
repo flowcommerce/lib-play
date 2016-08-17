@@ -7,6 +7,8 @@ import org.joda.time.format.ISODateTimeFormat.dateTime
 
 object AuthData {
 
+  val Header = "X-Flow-Auth"
+
   /**
     * Helper to create a valid auth data for this user (no organization)
     */

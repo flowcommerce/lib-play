@@ -5,6 +5,26 @@ import io.flow.common.v0.models.{Environment, Role, UserReference}
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat.dateTime
 
+import javax.inject.{Inject, Singleton}
+
+/**
+  * Creates a valid X-Flow-Auth header for talking directly to a
+  * service. Bound config must have a JWT_SALT parameter.
+  */
+@Singleton
+class AuthHeaders @Inject() (
+  config: Config
+) {
+
+  private[this] lazy val jwtSalt = config.requiredString("JWT_SALT")
+
+  def headers(auth: AuthData) = Seq(
+    AuthData.Header -> auth.jwt(jwtSalt)
+  )
+  
+}
+
+
 object AuthData {
 
   val Header = "X-Flow-Auth"
@@ -12,8 +32,9 @@ object AuthData {
   /**
     * Helper to create a valid auth data for this user (no organization)
     */
-  def user(user: UserReference): AuthData = {
+  def user(requestId: String, user: UserReference): AuthData = {
     AuthData(
+      requestId = requestId,
       createdAt = new DateTime(),
       user = user,
       organization = None
@@ -24,12 +45,14 @@ object AuthData {
     * Helper to create a valid auth data for this user and organization.
     */
   def organization(
+    requestId: String,
     user: UserReference,
     org: String,
     role: Role = Role.Member,
     environment: Environment = Environment.Sandbox
   ): AuthData = {
     AuthData(
+      requestId = requestId,
       createdAt = new DateTime(),
       user = user,
       organization = Some(
@@ -53,8 +76,14 @@ object AuthData {
   * The API Proxy server validates this data, and also guarantees that
   * the user is authorized to access information for the specified
   * organization.
+  * 
+  * @param requestId In production, we set request id in the API Proxy, and it is
+  *        included as part of the auth header. Doing so allows us to trace a single
+  *        API request across all the service calls we make (assuming we propagate
+  *        the headers from auth data).
   */
 case class AuthData(
+  requestId: String,
   createdAt: DateTime,
   user: UserReference,
   organization: Option[OrganizationAuthData]
@@ -68,6 +97,7 @@ case class AuthData(
     */
   def toMap(): Map[String, String] = {
     Map(
+      "request_id" -> Some(requestId),
       "created_at" -> Some(dateTime.print(createdAt)),
       "user_id" -> Some(user.id),
       "organization" -> organization.map(_.organization),

@@ -33,6 +33,7 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
     val ts = new DateTime()
     val user = UserReference("usr-20151006-1")
     val data = AuthData(
+      requestId = "test",
       createdAt = ts,
       user = user,
       organization = None
@@ -41,6 +42,7 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
     val result = testTrait.parse(data.jwt(salt)).getOrElse {
       sys.error("Failed to parse")
     }
+    result.requestId must be("test")
     result.createdAt must be(ts)
     result.user must be(user)
     result.organization must be(None)
@@ -55,6 +57,7 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
       environment = Environment.Sandbox
     )
     val data = AuthData(
+      requestId = "test2",
       createdAt = ts,
       user = user,
       organization = Some(org)
@@ -63,6 +66,7 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
     val result = testTrait.parse(data.jwt(salt)).getOrElse {
       sys.error("Failed to parse")
     }
+    result.requestId must be("test2")
     result.createdAt must be(ts)
     result.user must be(user)
     result.organization must be(Some(org))
@@ -72,6 +76,7 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
     val ts = (new DateTime()).plusMinutes(5)
     val user = UserReference("usr-20151006-1")
     val data = AuthData(
+      requestId = "test2",
       createdAt = ts,
       user = user,
       organization = None

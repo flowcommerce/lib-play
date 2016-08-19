@@ -2,6 +2,7 @@ package io.flow.play.controllers
 
 import io.flow.common.v0.models.UserReference
 import io.flow.play.util.AuthData
+import java.util.UUID
 import org.joda.time.DateTime
 import play.api.mvc.{Headers, Session}
 import scala.concurrent.{Await, ExecutionContext, Future}
@@ -28,7 +29,9 @@ trait UserFromFlowAuth extends AuthDataFromFlowAuthHeader {
           legacyUser(headers),
           Duration(5, "seconds")
         ).map { u =>
+          val requestId: String = headers.get("X-Flow-Request-Id").getOrElse(UUID.randomUUID.toString)
           AuthData(
+            requestId = requestId,
             createdAt = new DateTime(),
             user = u,
             organization = None

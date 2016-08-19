@@ -3,6 +3,7 @@ package io.flow.play.controllers
 import authentikat.jwt.{JsonWebToken, JwtClaimsSetJValue}
 import io.flow.common.v0.models.{Environment, Role, UserReference}
 import io.flow.play.util.{AuthData, Config, OrganizationAuthData}
+import java.util.UUID
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import play.api.Logger
@@ -38,6 +39,11 @@ trait AuthDataFromFlowAuthHeader  {
     claimsSet.asSimpleMap.toOption.flatMap { claims =>
       claims.get("user_id").flatMap { userId =>
         claims.get("created_at").flatMap { ts =>
+          val requestId = claims.get("request_id").getOrElse {
+            Logger.warn("JWT Token did not have a request_id - generated a new request id")
+            UUID.randomUUID.toString
+          }
+
           val createdAt = ISODateTimeFormat.dateTimeParser.parseDateTime(ts)
           val expiration = (new DateTime()).plusSeconds(authExpirationTimeSeconds)
           createdAt.isBefore(expiration) match {
@@ -49,6 +55,7 @@ trait AuthDataFromFlowAuthHeader  {
             case true => {
               Some(
                 AuthData(
+                  requestId = requestId,
                   createdAt = createdAt,
                   user = UserReference(userId),
                   organization = orgAuthData(claims)

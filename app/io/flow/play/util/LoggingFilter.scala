@@ -31,6 +31,7 @@ class FlowLoggingFilter @javax.inject.Inject() (implicit ec: ExecutionContext) e
         s"${requestHeader.host}${requestHeader.uri}",
         result.header.status,
         s"${requestTime}ms",
+        headerMap.getOrElse("X-Flow-Request-Id", Nil).mkString(","),
         headerMap.getOrElse("User-Agent", Nil).mkString(","),
         headerMap.getOrElse("X-Forwarded-For", Nil).mkString(","),
         headerMap.getOrElse("CF-Connecting-IP", Nil).mkString(",")

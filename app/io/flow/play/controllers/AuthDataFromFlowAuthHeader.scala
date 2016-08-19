@@ -41,7 +41,7 @@ trait AuthDataFromFlowAuthHeader  {
         claims.get("created_at").flatMap { ts =>
           val requestId = claims.get("request_id").getOrElse {
             Logger.warn("JWT Token did not have a request_id - generated a new request id")
-            UUID.randomUUID.toString
+            "lib-play-" + UUID.randomUUID.toString
           }
 
           val createdAt = ISODateTimeFormat.dateTimeParser.parseDateTime(ts)

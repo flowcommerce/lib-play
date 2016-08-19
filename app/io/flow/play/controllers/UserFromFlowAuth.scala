@@ -29,7 +29,7 @@ trait UserFromFlowAuth extends AuthDataFromFlowAuthHeader {
           legacyUser(headers),
           Duration(5, "seconds")
         ).map { u =>
-          val requestId: String = headers.get("X-Flow-Request-Id").getOrElse(UUID.randomUUID.toString)
+          val requestId: String = headers.get("X-Flow-Request-Id").getOrElse("lib-play-depr-" + UUID.randomUUID.toString)
           AuthData(
             requestId = requestId,
             createdAt = new DateTime(),

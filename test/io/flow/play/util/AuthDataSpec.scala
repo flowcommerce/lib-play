@@ -7,14 +7,14 @@ class AuthDataSpec extends FunSpec with Matchers {
 
   it("AuthData.user") {
     val id = "user-1"
-    val auth = AuthData.user("test1", UserReference(id))
+    val auth = AuthData.user(UserReference(id), requestId = Some("test1"))
     auth.requestId should be("test1")
     auth.user.id should be(id)
     auth.organization should be(None)
   }
 
   it("AuthData.organization defaults") {
-    val auth = AuthData.organization("test2", UserReference("user-1"), "demo")
+    val auth = AuthData.organization(UserReference("user-1"), "demo")
     auth.user.id should be("user-1")
     auth.organization should be(
       Some(
@@ -24,13 +24,20 @@ class AuthDataSpec extends FunSpec with Matchers {
   }
 
   it("AuthData.organization") {
-    val auth = AuthData.organization("test2", UserReference("user-1"), "demo", Role.Admin, Environment.Production)
+    val auth = AuthData.organization(UserReference("user-1"), "demo", Role.Admin, Environment.Production)
     auth.user.id should be("user-1")
     auth.organization should be(
       Some(
         OrganizationAuthData("demo", Role.Admin, Environment.Production)
       )
     )
+  }
+
+  it("AuthData.generateRequestId") {
+    AuthData.generateRequestId("foo").startsWith("foo") should be(true)
+
+    val all = 1.to(100).map { _ => AuthData.generateRequestId("foo") }
+    all.distinct.size should be(100)
   }
 
 }

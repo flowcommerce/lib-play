@@ -10,21 +10,31 @@ import scala.util.{Failure, Success, Try}
   */
 trait Config {
 
-  def requiredString(name: String): String = {
-    optionalString(name).getOrElse {
-      val msg = s"Configuration variable[$name] is required"
-      Logger.error(msg)
-      sys.error(msg)
+  /**
+    * Return the value for the configuration parameter with the specified name
+    */
+  def get(name: String): Option[String]
+
+  def requiredString(name: String): String = mustGet(name, optionalString(name))
+
+  def optionalString(name: String): Option[String] = get(name).map(_.trim) match {
+    case Some("") => None
+    case v => v
+  }
+
+  def requiredPositiveLong(name: String): Long = mustGet(name, optionalPositiveLong(name))
+
+  def optionalPositiveLong(name: String): Option[Long] = optionalLong(name) match {
+    case None => None
+    case Some(v) => v > 0 match {
+      case true => Some(v)
+      case false => sys.error(s"Configuration variable[$name] has invalid value[$v]: must be > 0")
     }
   }
 
-  def optionalString(name: String): Option[String]
+  def requiredLong(name: String): Long = mustGet(name, optionalLong(name))
 
-  def requiredLong(name: String): Long = toLong(name, requiredString(name))
-
-  def optionalLong(name: String): Option[Long] = optionalString(name).map(toLong(name, _))
-
-  private[this] def toLong(name: String, value: String): Long = {
+  def optionalLong(name: String): Option[Long] = optionalString(name).map { value =>
     Try(value.toLong) match {
       case Success(v) => v
       case Failure(ex) => {
@@ -35,11 +45,20 @@ trait Config {
     }
   }
   
-  def requiredInt(name: String): Int = toInt(name, requiredString(name))
 
-  def optionalInt(name: String): Option[Int] = optionalString(name).map(toInt(name, _))
+  def requiredPositiveInt(name: String): Int = mustGet(name, optionalPositiveInt(name))
 
-  private[this] def toInt(name: String, value: String): Int = {
+  def optionalPositiveInt(name: String): Option[Int] = optionalInt(name) match {
+    case None => None
+    case Some(v) => v > 0 match {
+      case true => Some(v)
+      case false => sys.error(s"Configuration variable[$name] has invalid value[$v]: must be > 0")
+    }
+  }
+
+  def requiredInt(name: String): Int = mustGet(name, optionalInt(name))
+
+  def optionalInt(name: String): Option[Int] = optionalString(name).map { value =>
     Try(value.toInt) match {
       case Success(v) => v
       case Failure(ex) => {
@@ -50,11 +69,31 @@ trait Config {
     }
   }
   
+  def requiredBoolean(name: String): Boolean = mustGet(name, optionalBoolean(name))
+
+  def optionalBoolean(name: String): Option[Boolean] = optionalString(name).map { value =>
+    value.toLowerCase match {
+      case "true" | "t" => true
+      case "false" | "f" => false
+      case other => {
+        val msg = s"Configuration variable[$name] has invalid value[$value]: must be true, t, false, or f"
+        Logger.error(msg)
+        sys.error(msg)
+      }
+    }
+  }
+  
+  private[this] def mustGet[T](name: String, value: Option[T]): T = {
+    value.getOrElse {
+      sys.error(s"Configuration variable[$name] is required")
+    }
+  }
+
 }
 
 case class ChainedConfig(configs: Seq[Config]) extends Config {
 
-  override def optionalString(name: String): Option[String] = {
+  override def get(name: String): Option[String] = {
     configs.find { c =>
       !c.optionalString(name).isEmpty
     }.flatMap(_.optionalString(name))
@@ -73,13 +112,13 @@ case class DefaultConfig @javax.inject.Inject() (appConfig: ApplicationConfig) e
     Seq(EnvironmentConfig, PropertyConfig, appConfig)
   )
 
-  override def optionalString(name: String) = chain.optionalString(name)
+  override def get(name: String) = chain.optionalString(name)
 
 }
 
 object EnvironmentConfig extends Config {
 
-  override def optionalString(name: String): Option[String] = {
+  override def get(name: String): Option[String] = {
     sys.env.get(name).map(_.trim).map { value =>
       value match {
         case "" => {
@@ -95,7 +134,7 @@ object EnvironmentConfig extends Config {
 
 object PropertyConfig extends Config {
 
-  override def optionalString(name: String): Option[String] = {
+  override def get(name: String): Option[String] = {
     sys.props.get(name).map(_.trim).map { value =>
       value match {
         case "" => {
@@ -112,7 +151,7 @@ object PropertyConfig extends Config {
 @javax.inject.Singleton
 case class ApplicationConfig @javax.inject.Inject() (configuration: Configuration) extends Config {
 
-  override def optionalString(name: String): Option[String] = {
+  override def get(name: String): Option[String] = {
     configuration.getString(name).map(_.trim).map { value =>
       value match {
         case "" => {

@@ -44,8 +44,8 @@ trait Scheduler {
   ) (
     implicit ec: ExecutionContext
   ) {
-    val seconds = config.requiredString(configName).toInt
-    val initial = config.optionalString(s"${configName}_initial").map(_.toInt).getOrElse(seconds)
+    val seconds = config.requiredPositiveInt(configName)
+    val initial = config.optionalPositiveInt(s"${configName}_initial").getOrElse(seconds)
     Logger.info(s"[${getClass.getName}] scheduleRecurring[$configName]: Initial[$initial seconds], recurring[$seconds seconds]")
     system.scheduler.schedule(
       FiniteDuration(initial, SECONDS),

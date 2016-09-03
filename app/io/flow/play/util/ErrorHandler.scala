@@ -36,7 +36,7 @@ class ErrorHandler extends HttpErrorHandler {
     val requestId = headerMap.getOrElse("X-Flow-Request-Id", Nil).mkString(",")
 
     val errorId = idGenerator.randomId().replaceAll("-", "")
-    Logger.error(s"FlowError [$errorId] ${request.method} ${request.path} $requestId", exception)
+    Logger.error(s"FlowError [$errorId] ${request.method} ${request.path} $requestId: ${exception.getMessage}", exception)
 
     val msg = FlowEnvironment.Current match {
       case FlowEnvironment.Development | FlowEnvironment.Workstation => s"A server error has occurred (#$errorId) for requestId($requestId). Additional info for development environment: $exception"

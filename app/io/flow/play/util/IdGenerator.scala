@@ -27,7 +27,7 @@ case class IdGenerator(
   private[this] val idFormat = Seq("%s", "%s").mkString(IdGenerator.Separator)
 
   def randomId(): String = {
-    idFormat.format(prefix, UUID.randomUUID.toString)
+    idFormat.format(prefix, UUID.randomUUID.toString.replaceAll("\\-", ""))
   }
 
 }

@@ -39,4 +39,18 @@ class IdGeneratorSpec extends FunSpec with Matchers {
     ids.foreach { _.length should be >=(MinimumRandomLength) }
   }
 
+  it("format") {
+    val generator = IdGenerator("tst")
+    val id = generator.randomId()
+    id.split("-").toList match {
+      case prefix :: uuid :: Nil => {
+        prefix should be("tst")
+        uuid.length should be(32)
+      }
+      case other => {
+        sys.error("Expected one dash")
+      }
+    }
+  }
+
 }

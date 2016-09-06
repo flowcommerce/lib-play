@@ -32,8 +32,9 @@ class IdGeneratorSpec extends FunSpec with Matchers {
 
   it("randomId") {
     val generator = IdGenerator("tst")
-    val ids = 1.to(100).map { _ => generator.randomId() }
-    ids.size should be(100)
+    val num = 10000
+    val ids = 1.to(num).map { _ => generator.randomId() }
+    ids.size should be(num)
     ids.distinct.size should be(ids.size)
     ids.foreach { _.length should be >=(MinimumRandomLength) }
   }

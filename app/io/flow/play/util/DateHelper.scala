@@ -75,5 +75,22 @@ object DateHelper {
       }
     }
   }
-  
+
+  /**
+    * Returns the current date as a string like
+    * "20150919". By default, we use the Eastern Timezone.
+    */
+  def yyyymmdd(
+    zone: DateTimeZone = EasternTime
+  ): String = {
+    val now = (new DateTime()).toDateTime(zone)
+    s"${now.getYear}${prefixZero(now.getMonthOfYear)}${prefixZero(now.getDayOfMonth)}"
+  }
+
+  private[this] def prefixZero(value: Int): String = {
+    (value < 10) match {
+      case true => s"0$value"
+      case false => value.toString
+    }
+  }
 }

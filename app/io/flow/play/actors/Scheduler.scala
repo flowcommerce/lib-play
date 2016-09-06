@@ -18,13 +18,13 @@ trait Scheduler {
   /**
    * Helper to schedule a recurring interval based on a configuration
    * parameter.
-   * 
+   *
    * Example:
-   * 
+   *
    *   conf/base.conf:
    *     io.flow.delta.api.CheckProjects.seconds = 300
    *     io.flow.delta.api.CheckProjects.seconds_initial = 3
-   * 
+   *
    *   conf/api/actors/...
    *     scheduleRecurring("io.flow.delta.api.CheckProjects.seconds") {
    *       periodicActor ! PeriodicActor.Messages.CheckProjects
@@ -47,6 +47,28 @@ trait Scheduler {
     val seconds = config.requiredPositiveInt(configName)
     val initial = config.optionalPositiveInt(s"${configName}_initial").getOrElse(seconds)
     Logger.info(s"[${getClass.getName}] scheduleRecurring[$configName]: Initial[$initial seconds], recurring[$seconds seconds]")
+    system.scheduler.schedule(
+      FiniteDuration(initial, SECONDS),
+      FiniteDuration(seconds, SECONDS),
+      new Runnable {
+        def run = f
+      }
+    )
+  }
+
+  def scheduleRecurringWithDefault[T](
+    system: ActorSystem,
+    configName: String,
+    default: Int
+  )(
+    f: => T
+  )(
+    implicit ec: ExecutionContext
+  ) {
+    val seconds = config.optionalPositiveInt(configName).getOrElse(default)
+    val initial = config.optionalPositiveInt(s"${configName}_initial").getOrElse(seconds)
+
+    Logger.info(s"[${getClass.getName}] scheduleRecurringWithDefault[$configName]: Initial[$initial seconds], recurring[$seconds seconds]")
     system.scheduler.schedule(
       FiniteDuration(initial, SECONDS),
       FiniteDuration(seconds, SECONDS),

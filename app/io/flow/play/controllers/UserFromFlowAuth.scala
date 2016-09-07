@@ -53,7 +53,7 @@ trait UserFromFlowAuth extends AuthDataFromFlowAuthHeader {
     implicit ec: ExecutionContext
   ): Future[Option[UserReference]] = {
     basicAuthorizationToken(headers) match {
-      case None => Future { None }
+      case None => Future(None)
       case Some(token) => {
         token match {
           case token: Authorization.Token => {
@@ -67,9 +67,9 @@ trait UserFromFlowAuth extends AuthDataFromFlowAuthHeader {
 
           }
           case token: Authorization.JwtToken => {
-            Future {
+            Future(
               Some(UserReference(token.userId))
-            }
+            )
           }
         }
       }

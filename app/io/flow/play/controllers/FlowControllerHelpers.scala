@@ -64,7 +64,7 @@ trait FlowControllerHelpers {
         contentType,
         body,
         function,
-        { errorResult => Future { errorResult } }
+        { errorResult => Future(errorResult) }
       )
     }
 
@@ -136,7 +136,7 @@ trait FlowControllerHelpers {
         expand,
         records,
         function,
-        { errorResult => Future { errorResult } },
+        { errorResult => Future(errorResult) },
         requestHeaders = requestHeaders
 
       )

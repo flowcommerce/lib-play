@@ -26,9 +26,9 @@ trait IdentifiedController extends AnonymousController {
 
     def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]) = {
       auth(request.headers) match {
-        case None => {
-          Future { unauthorized(request) }
-        }
+        case None => Future(
+          unauthorized(request)
+        )
         case Some(auth) => {
           block(
             new IdentifiedRequest(auth, request)

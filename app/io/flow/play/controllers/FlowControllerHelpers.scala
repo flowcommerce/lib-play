@@ -7,7 +7,7 @@ import play.api.mvc.{Result, AnyContent}
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}
 import play.api.libs.json._
-import io.flow.common.v0.models.json._
+import io.flow.error.v0.models.json._
 import scala.concurrent.ExecutionContext.Implicits.global
 
 

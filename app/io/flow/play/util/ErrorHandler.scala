@@ -1,6 +1,6 @@
 package io.flow.play.util
 
-import io.flow.common.v0.models.json._
+import io.flow.error.v0.models.json._
 import play.api.http.HttpErrorHandler
 import play.api.libs.json.Json
 import play.api.Logger
@@ -25,7 +25,7 @@ class ErrorHandler extends HttpErrorHandler {
       case other => {
         message.trim match {
           case "" => Future.successful(Status(statusCode))
-          case msg => Future.successful(Status(statusCode)(Json.toJson(Validation.clientError(msg))))
+          case msg => Future.successful(Status(statusCode)(Json.toJson(Validation.error(msg))))
         }
       }
     }
@@ -43,6 +43,6 @@ class ErrorHandler extends HttpErrorHandler {
       case FlowEnvironment.Production => s"A server error has occurred (#$errorId)"
     }
 
-    Future.successful(InternalServerError(Json.toJson(Validation.serverError(msg))))
+    Future.successful(InternalServerError(Json.toJson(Validation.error(msg))))
   }
 }

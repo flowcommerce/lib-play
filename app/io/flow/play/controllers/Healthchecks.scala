@@ -1,7 +1,7 @@
 package io.flow.play.controllers
 
-import io.flow.common.v0.models.Healthcheck
-import io.flow.common.v0.models.json._
+import io.flow.healthcheck.v0.models.Healthcheck
+import io.flow.healthcheck.v0.models.json._
 
 import play.api._
 import play.api.mvc._

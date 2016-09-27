@@ -416,7 +416,7 @@ package io.flow.token.v0 {
           case r if r.status == 200 => _root_.io.flow.token.v0.Client.parseJson("io.flow.token.v0.models.TokenReference", r, _.validate[io.flow.token.v0.models.TokenReference])
           case r if r.status == 401 => throw new io.flow.token.v0.errors.UnitResponse(r.status)
           case r if r.status == 404 => throw new io.flow.token.v0.errors.UnitResponse(r.status)
-          case r if r.status == 422 => throw new io.flow.token.v0.errors.ValidationErrorsResponse(r)
+          case r if r.status == 422 => throw new io.flow.token.v0.errors.ValidationErrorResponse(r)
           case r => throw new io.flow.token.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 200, 401, 404, 422")
         }
       }
@@ -430,7 +430,7 @@ package io.flow.token.v0 {
         _executeRequest("POST", s"/tokens", body = Some(payload), requestHeaders = requestHeaders).map {
           case r if r.status == 200 => _root_.io.flow.token.v0.Client.parseJson("io.flow.token.v0.models.Token", r, _.validate[io.flow.token.v0.models.Token])
           case r if r.status == 401 => throw new io.flow.token.v0.errors.UnitResponse(r.status)
-          case r if r.status == 422 => throw new io.flow.token.v0.errors.ValidationErrorsResponse(r)
+          case r if r.status == 422 => throw new io.flow.token.v0.errors.ValidationErrorResponse(r)
           case r => throw new io.flow.token.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 200, 401, 422")
         }
       }
@@ -458,7 +458,7 @@ package io.flow.token.v0 {
         _executeRequest("POST", s"/token-validations", body = Some(payload), requestHeaders = requestHeaders).map {
           case r if r.status == 200 => _root_.io.flow.token.v0.Client.parseJson("io.flow.token.v0.models.Validation", r, _.validate[io.flow.token.v0.models.Validation])
           case r if r.status == 401 => throw new io.flow.token.v0.errors.UnitResponse(r.status)
-          case r if r.status == 422 => throw new io.flow.token.v0.errors.ValidationErrorsResponse(r)
+          case r if r.status == 422 => throw new io.flow.token.v0.errors.ValidationErrorResponse(r)
           case r => throw new io.flow.token.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 200, 401, 422")
         }
       }
@@ -652,11 +652,11 @@ package io.flow.token.v0 {
 
     case class UnitResponse(status: Int) extends Exception(s"HTTP $status")
 
-    case class ValidationErrorsResponse(
+    case class ValidationErrorResponse(
       response: play.api.libs.ws.WSResponse,
       message: Option[String] = None
     ) extends Exception(message.getOrElse(response.status + ": " + response.body)){
-      lazy val validationErrors = _root_.io.flow.token.v0.Client.parseJson("Seq[io.flow.error.v0.models.ValidationError]", response, _.validate[Seq[io.flow.error.v0.models.ValidationError]])
+      lazy val validationError = _root_.io.flow.token.v0.Client.parseJson("io.flow.error.v0.models.ValidationError", response, _.validate[io.flow.error.v0.models.ValidationError])
     }
 
     case class FailedRequest(responseCode: Int, message: String, requestUri: Option[_root_.java.net.URI] = None) extends _root_.java.lang.Exception(s"HTTP $responseCode: $message")

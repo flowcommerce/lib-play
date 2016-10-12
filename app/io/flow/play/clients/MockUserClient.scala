@@ -32,6 +32,7 @@ case class MockUsers(data: MockUserData) extends mock.MockUsers {
   override def get(
     id: _root_.scala.Option[Seq[String]] = None,
     email: _root_.scala.Option[String] = None,
+    status: Option[io.flow.common.v0.models.UserStatus],
     limit: Long = 25,
     offset: Long = 0,
     sort: String = "-created_at",

@@ -6,5 +6,6 @@ object Constants {
 
   val SystemUser = UserReference("usr-20151006-1")
   val AnonymousUser = UserReference("usr-20151006-2")
+  val DefaultTaxName = "VAT"
 
 }

@@ -2,6 +2,8 @@ package io.flow.play.controllers
 
 import io.flow.common.v0.models.UserReference
 import io.flow.play.util.AuthData
+import io.flow.token.v0.errors.UnitResponse
+import io.flow.token.v0.models.TokenAuthenticationForm
 import java.util.UUID
 import org.joda.time.DateTime
 import play.api.mvc.{Headers, Session}
@@ -57,14 +59,16 @@ trait UserFromFlowAuth extends AuthDataFromFlowAuthHeader {
       case Some(token) => {
         token match {
           case token: Authorization.Token => {
-
-            tokenClient.tokens.get(token = Some(token.token)).map(_.headOption.map(_.user)).recover {
-              case ex: Throwable => {
-                val msg = s"Error communicating with token service at ${tokenClient.baseUrl}: $ex"
-                throw new Exception(msg, ex)
+            val form = TokenAuthenticationForm(token = token.token)
+            tokenClient.tokens.postAuthentications(form).
+              map{ t => Some(t.user) }.
+              recover {
+                case UnitResponse(404) => None
+                case ex: Throwable => {
+                  val msg = s"Error communicating with token service at ${tokenClient.baseUrl}: $ex"
+                  throw new Exception(msg, ex)
+                }
               }
-            }
-
           }
           case token: Authorization.JwtToken => {
             Future(

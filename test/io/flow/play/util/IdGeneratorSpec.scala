@@ -24,6 +24,12 @@ class IdGeneratorSpec extends FunSpec with Matchers {
     }.getMessage should be("assertion failed: prefix[  foo  ] must be trimmed")
   }
 
+  it("prefix is not on black list") {
+    intercept[AssertionError] {
+      IdGenerator("ass")
+    }.getMessage should be("assertion failed: prefix[ass] is on the black list and cannot be used")
+  }
+
   it("randomId must start with prefix") {
     val generator = IdGenerator("tst")
     val id = generator.randomId()

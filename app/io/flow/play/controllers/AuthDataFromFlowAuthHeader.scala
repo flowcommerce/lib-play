@@ -4,7 +4,7 @@ import authentikat.jwt.{JsonWebToken, JwtClaimsSetJValue}
 import io.flow.common.v0.models.{Environment, Role, UserReference}
 import io.flow.play.util.{AuthData, Config, OrganizationAuthData}
 import io.flow.token.v0.errors.UnitResponse
-import io.flow.token.v0.models.TokenAuthenticationForm
+import io.flow.token.v0.models._
 import java.util.UUID
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
@@ -96,6 +96,18 @@ trait AuthDataFromFlowAuthHeader  {
 
   def tokenClient: TokenClient
 
+  private[this] def selectUser(token: TokenReference): Option[UserReference] = {
+    token match {
+      case t: LegacyTokenReference => Some(t.user)
+      case t: OrganizationTokenReference => Some(t.user)
+      case t: PartnerTokenReference => Some(t.user)
+      case TokenReferenceUndefinedType(other) => {
+        Logger.warn(s"TokenReferenceUndefinedType($other) - assuming no user")
+        None
+      }
+    }
+  }
+
   private[this] def legacyUser(
     session: Session,
     headers: Headers,
@@ -111,7 +123,7 @@ trait AuthDataFromFlowAuthHeader  {
           case token: Authorization.Token => {
             val form = TokenAuthenticationForm(token = token.token)
             tokenClient.tokens.postAuthentications(form).
-              map{ t => Some(t.user) }.
+              map { t => selectUser(t) }.
               recover {
                 case UnitResponse(404) => None
                 case ex: Throwable => {

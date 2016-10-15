@@ -38,6 +38,8 @@ case class MockTokens(data: MockTokenData) extends mock.MockTokens {
   override def get(
     id: _root_.scala.Option[Seq[String]] = None,
     token: _root_.scala.Option[String] = None,
+    organizationId: _root_.scala.Option[String] = None,
+    partnerId: _root_.scala.Option[String] = None,
     limit: Long = 25,
     offset: Long = 0,
     sort: String = "-created_at",

@@ -3,6 +3,8 @@ package io.flow.play.controllers
 import authentikat.jwt.{JsonWebToken, JwtClaimsSetJValue}
 import io.flow.common.v0.models.{Environment, Role, UserReference}
 import io.flow.play.util.{AuthData, Config, OrganizationAuthData}
+import io.flow.token.v0.errors.UnitResponse
+import io.flow.token.v0.models._
 import java.util.UUID
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
@@ -80,8 +82,7 @@ trait AuthDataFromFlowAuthHeader  {
             )
           )
         }
-        case (role, env) => {
-          Logger.error(s"Flow auth data had an organization specified but missing role[$role] or environment[$env]")
+        case (_, _) => {
           None
         }
       }
@@ -94,34 +95,13 @@ trait AuthDataFromFlowAuthHeader  {
 
   def tokenClient: TokenClient
 
-  private[this] def legacyUser(
-    session: Session,
-    headers: Headers,
-    path: String,
-    queryString: Map[String, Seq[String]]
-  ) (
-    implicit ec: ExecutionContext
-  ): Future[Option[UserReference]] = {
-    basicAuthorizationToken(headers) match {
-      case None => Future(None)
-      case Some(token) => {
-        token match {
-          case token: Authorization.Token => {
-
-            tokenClient.tokens.get(token = Some(token.token)).map(_.headOption.map(_.user)).recover {
-              case ex: Throwable => {
-                val msg = s"Error communicating with token service at ${tokenClient.baseUrl}: $ex"
-                throw new Exception(msg, ex)
-              }
-            }
-
-          }
-          case token: Authorization.JwtToken => {
-            Future(
-              Some(UserReference(token.userId))
-            )
-          }
-        }
+  private[this] def selectUser(token: TokenReference): Option[UserReference] = {
+    token match {
+      case t: OrganizationTokenReference => Some(t.user)
+      case t: PartnerTokenReference => Some(t.user)
+      case TokenReferenceUndefinedType(other) => {
+        Logger.warn(s"TokenReferenceUndefinedType($other) - assuming no user")
+        None
       }
     }
   }

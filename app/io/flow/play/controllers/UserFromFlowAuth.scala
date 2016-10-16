@@ -2,8 +2,11 @@ package io.flow.play.controllers
 
 import io.flow.common.v0.models.UserReference
 import io.flow.play.util.AuthData
+import io.flow.token.v0.errors.UnitResponse
+import io.flow.token.v0.models._
 import java.util.UUID
 import org.joda.time.DateTime
+import play.api.Logger
 import play.api.mvc.{Headers, Session}
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.Duration
@@ -57,14 +60,16 @@ trait UserFromFlowAuth extends AuthDataFromFlowAuthHeader {
       case Some(token) => {
         token match {
           case token: Authorization.Token => {
-
-            tokenClient.tokens.get(token = Some(token.token)).map(_.headOption.map(_.user)).recover {
-              case ex: Throwable => {
-                val msg = s"Error communicating with token service at ${tokenClient.baseUrl}: $ex"
-                throw new Exception(msg, ex)
+            val form = TokenAuthenticationForm(token = token.token)
+            tokenClient.tokens.postAuthentications(form).
+              map { t => selectUser(t) }.
+              recover {
+                case UnitResponse(404) => None
+                case ex: Throwable => {
+                  val msg = s"Error communicating with token service at ${tokenClient.baseUrl}: $ex"
+                  throw new Exception(msg, ex)
+                }
               }
-            }
-
           }
           case token: Authorization.JwtToken => {
             Future(
@@ -88,4 +93,15 @@ trait UserFromFlowAuth extends AuthDataFromFlowAuthHeader {
     }
   }
 
+  private[this] def selectUser(token: TokenReference): Option[UserReference] = {
+    token match {
+      case t: OrganizationTokenReference => Some(t.user)
+      case t: PartnerTokenReference => Some(t.user)
+      case TokenReferenceUndefinedType(other) => {
+        Logger.warn(s"TokenReferenceUndefinedType($other) - assuming no user")
+        None
+      }
+    }
+  }
+  
 }

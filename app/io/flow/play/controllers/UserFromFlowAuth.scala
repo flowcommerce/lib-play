@@ -95,7 +95,6 @@ trait UserFromFlowAuth extends AuthDataFromFlowAuthHeader {
 
   private[this] def selectUser(token: TokenReference): Option[UserReference] = {
     token match {
-      case t: LegacyTokenReference => Some(t.user)
       case t: OrganizationTokenReference => Some(t.user)
       case t: PartnerTokenReference => Some(t.user)
       case TokenReferenceUndefinedType(other) => {

@@ -82,8 +82,7 @@ trait AuthDataFromFlowAuthHeader  {
             )
           )
         }
-        case (role, env) => {
-          Logger.error(s"Flow auth data had an organization specified but missing role[$role] or environment[$env]")
+        case (_, _) => {
           None
         }
       }

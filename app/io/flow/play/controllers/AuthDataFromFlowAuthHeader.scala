@@ -97,46 +97,11 @@ trait AuthDataFromFlowAuthHeader  {
 
   private[this] def selectUser(token: TokenReference): Option[UserReference] = {
     token match {
-      case t: LegacyTokenReference => Some(t.user)
       case t: OrganizationTokenReference => Some(t.user)
       case t: PartnerTokenReference => Some(t.user)
       case TokenReferenceUndefinedType(other) => {
         Logger.warn(s"TokenReferenceUndefinedType($other) - assuming no user")
         None
-      }
-    }
-  }
-
-  private[this] def legacyUser(
-    session: Session,
-    headers: Headers,
-    path: String,
-    queryString: Map[String, Seq[String]]
-  ) (
-    implicit ec: ExecutionContext
-  ): Future[Option[UserReference]] = {
-    basicAuthorizationToken(headers) match {
-      case None => Future(None)
-      case Some(token) => {
-        token match {
-          case token: Authorization.Token => {
-            val form = TokenAuthenticationForm(token = token.token)
-            tokenClient.tokens.postAuthentications(form).
-              map { t => selectUser(t) }.
-              recover {
-                case UnitResponse(404) => None
-                case ex: Throwable => {
-                  val msg = s"Error communicating with token service at ${tokenClient.baseUrl}: $ex"
-                  throw new Exception(msg, ex)
-                }
-              }
-          }
-          case token: Authorization.JwtToken => {
-            Future(
-              Some(UserReference(token.userId))
-            )
-          }
-        }
       }
     }
   }

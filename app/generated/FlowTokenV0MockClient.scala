@@ -9,8 +9,52 @@ package io.flow.token.v0.mock {
 
     val baseUrl = "http://mock.localhost"
 
+    override def organizationTokens: MockOrganizationTokens = MockOrganizationTokensImpl
+    override def partnerTokens: MockPartnerTokens = MockPartnerTokensImpl
     override def tokens: MockTokens = MockTokensImpl
     override def tokenValidations: MockTokenValidations = MockTokenValidationsImpl
+
+  }
+
+  object MockOrganizationTokensImpl extends MockOrganizationTokens
+
+  trait MockOrganizationTokens extends io.flow.token.v0.OrganizationTokens {
+
+    /**
+     * Get all tokens for the specifed organization
+     */
+    def get(
+      organization: String,
+      id: _root_.scala.Option[Seq[String]] = None,
+      mine: _root_.scala.Option[Boolean] = None,
+      limit: Long = 25,
+      offset: Long = 0,
+      sort: String = "-created_at",
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.token.v0.models.OrganizationToken]] = scala.concurrent.Future {
+      Nil
+    }
+
+  }
+
+  object MockPartnerTokensImpl extends MockPartnerTokens
+
+  trait MockPartnerTokens extends io.flow.token.v0.PartnerTokens {
+
+    /**
+     * Get all tokens for the specifed partner
+     */
+    def get(
+      partner: String,
+      id: _root_.scala.Option[Seq[String]] = None,
+      mine: _root_.scala.Option[Boolean] = None,
+      limit: Long = 25,
+      offset: Long = 0,
+      sort: String = "-created_at",
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.token.v0.models.PartnerToken]] = scala.concurrent.Future {
+      Nil
+    }
 
   }
 
@@ -27,6 +71,7 @@ package io.flow.token.v0.mock {
       id: _root_.scala.Option[Seq[String]] = None,
       organization: _root_.scala.Option[String] = None,
       partner: _root_.scala.Option[String] = None,
+      mine: _root_.scala.Option[Boolean] = None,
       limit: Long = 25,
       offset: Long = 0,
       sort: String = "-created_at",

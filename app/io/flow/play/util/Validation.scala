@@ -1,6 +1,6 @@
 package io.flow.play.util
 
-import io.flow.error.v0.models.GenericError
+import io.flow.error.v0.models.{GenericError, GenericErrorCode}
 import play.api.libs.json.JsError
 
 object Validation {
@@ -23,6 +23,7 @@ object Validation {
 
   def errors(messages: Seq[String]): GenericError = {
     GenericError(
+      code = GenericErrorCode.GenericError,
       messages = messages
     )
   }

@@ -10,9 +10,55 @@ package io.flow.error.v0.models {
    * input. See messages for details.
    */
   case class GenericError(
-    code: String = "generic_error",
+    code: io.flow.error.v0.models.GenericErrorCode = io.flow.error.v0.models.GenericErrorCode.GenericError,
     messages: Seq[String]
   )
+
+  sealed trait GenericErrorCode
+
+  object GenericErrorCode {
+
+    /**
+     * Generic errors are the default type. The accompanying message will provide
+     * details on the failure.
+     */
+    case object GenericError extends GenericErrorCode { override def toString = "generic_error" }
+    /**
+     * A client error has occurred. This represents a misconfiguration of the client
+     */
+    case object ClientError extends GenericErrorCode { override def toString = "client_error" }
+    /**
+     * A server error has occurred. The Flow tech team is automatically notified of all
+     * server errors
+     */
+    case object ServerError extends GenericErrorCode { override def toString = "server_error" }
+
+    /**
+     * UNDEFINED captures values that are sent either in error or
+     * that were added by the server after this library was
+     * generated. We want to make it easy and obvious for users of
+     * this library to handle this case gracefully.
+     *
+     * We use all CAPS for the variable name to avoid collisions
+     * with the camel cased values above.
+     */
+    case class UNDEFINED(override val toString: String) extends GenericErrorCode
+
+    /**
+     * all returns a list of all the valid, known values. We use
+     * lower case to avoid collisions with the camel cased values
+     * above.
+     */
+    val all = Seq(GenericError, ClientError, ServerError)
+
+    private[this]
+    val byName = all.map(x => x.toString.toLowerCase -> x).toMap
+
+    def apply(value: String): GenericErrorCode = fromString(value).getOrElse(UNDEFINED(value))
+
+    def fromString(value: String): _root_.scala.Option[GenericErrorCode] = byName.get(value.toLowerCase)
+
+  }
 
 }
 
@@ -44,16 +90,46 @@ package io.flow.error.v0.models {
       }
     }
 
+    implicit val jsonReadsErrorGenericErrorCode = new play.api.libs.json.Reads[io.flow.error.v0.models.GenericErrorCode] {
+      def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[io.flow.error.v0.models.GenericErrorCode] = {
+        js match {
+          case v: play.api.libs.json.JsString => play.api.libs.json.JsSuccess(io.flow.error.v0.models.GenericErrorCode(v.value))
+          case _ => {
+            (js \ "value").validate[String] match {
+              case play.api.libs.json.JsSuccess(v, _) => play.api.libs.json.JsSuccess(io.flow.error.v0.models.GenericErrorCode(v))
+              case err: play.api.libs.json.JsError => err
+            }
+          }
+        }
+      }
+    }
+
+    def jsonWritesErrorGenericErrorCode(obj: io.flow.error.v0.models.GenericErrorCode) = {
+      play.api.libs.json.JsString(obj.toString)
+    }
+
+    def jsObjectGenericErrorCode(obj: io.flow.error.v0.models.GenericErrorCode) = {
+      play.api.libs.json.Json.obj("value" -> play.api.libs.json.JsString(obj.toString))
+    }
+
+    implicit def jsonWritesErrorGenericErrorCode: play.api.libs.json.Writes[GenericErrorCode] = {
+      new play.api.libs.json.Writes[io.flow.error.v0.models.GenericErrorCode] {
+        def writes(obj: io.flow.error.v0.models.GenericErrorCode) = {
+          jsonWritesErrorGenericErrorCode(obj)
+        }
+      }
+    }
+
     implicit def jsonReadsErrorGenericError: play.api.libs.json.Reads[GenericError] = {
       (
-        (__ \ "code").read[String] and
+        (__ \ "code").read[io.flow.error.v0.models.GenericErrorCode] and
         (__ \ "messages").read[Seq[String]]
       )(GenericError.apply _)
     }
 
     def jsObjectGenericError(obj: io.flow.error.v0.models.GenericError) = {
       play.api.libs.json.Json.obj(
-        "code" -> play.api.libs.json.JsString(obj.code),
+        "code" -> play.api.libs.json.JsString(obj.code.toString),
         "messages" -> play.api.libs.json.Json.toJson(obj.messages)
       )
     }
@@ -95,7 +171,16 @@ package io.flow.error.v0 {
       ISODateTimeFormat.yearMonthDay.parseLocalDate(_), _.toString, (key: String, e: _root_.java.lang.Exception) => s"Error parsing date $key. Example: 2014-04-29"
     )
 
+    // Enum: GenericErrorCode
+    private[this] val enumGenericErrorCodeNotFound = (key: String, e: _root_.java.lang.Exception) => s"Unrecognized $key, should be one of ${io.flow.error.v0.models.GenericErrorCode.all.mkString(", ")}"
 
+    implicit val pathBindableEnumGenericErrorCode = new PathBindable.Parsing[io.flow.error.v0.models.GenericErrorCode] (
+      GenericErrorCode.fromString(_).get, _.toString, enumGenericErrorCodeNotFound
+    )
+
+    implicit val queryStringBindableEnumGenericErrorCode = new QueryStringBindable.Parsing[io.flow.error.v0.models.GenericErrorCode](
+      GenericErrorCode.fromString(_).get, _.toString, enumGenericErrorCodeNotFound
+    )
 
   }
 

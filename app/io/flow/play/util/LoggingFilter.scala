@@ -21,7 +21,7 @@ class FlowLoggingFilter @javax.inject.Inject() (
   implicit ec: ExecutionContext,
   config: Config
 ) extends Filter {
-  val LoggedRequestMethodConfig = ""
+  val LoggedRequestMethodConfig = "play.http.filters.logging.methods"
   val DefaultLoggedRequestMethods = Seq("GET", "PATCH", "POST", "PUT", "DELETE", "OPTIONS")
 
   def apply(f: RequestHeader => Future[Result])(requestHeader: RequestHeader): Future[Result] = {

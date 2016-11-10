@@ -98,14 +98,14 @@ trait Config {
 case class ChainedConfig(configs: Seq[Config]) extends Config {
 
   override def optionalList(name: String): Option[Seq[String]] = {
-    get(name).map { text =>
-      text.split(",").map(_.trim)
-    }
+    configs.find { c =>
+      c.optionalList(name).isDefined
+    }.flatMap(_.optionalList(name))
   }
 
   override def get(name: String): Option[String] = {
     configs.find { c =>
-      !c.optionalString(name).isEmpty
+      c.optionalString(name).isDefined
     }.flatMap(_.optionalString(name))
   }
 
@@ -118,15 +118,11 @@ case class ChainedConfig(configs: Seq[Config]) extends Config {
 @javax.inject.Singleton
 case class DefaultConfig @javax.inject.Inject() (appConfig: ApplicationConfig) extends Config {
 
-  override def optionalList(name: String): Option[Seq[String]] = {
-    get(name).map { text =>
-      text.split(",").map(_.trim)
-    }
-  }
-
   private[this] val chain = ChainedConfig(
     Seq(EnvironmentConfig, PropertyConfig, appConfig)
   )
+
+  override def optionalList(name: String) = chain.optionalList(name)
 
   override def get(name: String) = chain.optionalString(name)
 

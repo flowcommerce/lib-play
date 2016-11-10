@@ -11,6 +11,13 @@ class ConfigSpec extends PlaySpec with OneAppPerSuite {
 
   def createTestId(): String = UUID.randomUUID.toString
 
+  "optionalList" in {
+    config.optionalList(createTestId())must be(None)
+
+    config.set("foo", Seq("a", "b", "c"))
+    config.optionalList("foo") must be(Some(Seq("a", "b", "c")))
+  }
+
   "optionalString" in {
     config.optionalString(createTestId())must be(None)
 

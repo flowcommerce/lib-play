@@ -10,6 +10,26 @@ Library supporting building REST APIs on play framework.
     play.modules.enabled += "io.flow.play.clients.TokenModule"
     play.modules.enabled += "io.flow.play.clients.UserModule"
 
+## Request Logging
+
+To enable request logging, add the following to your
+play application config:
+
+    play.http.filters=io.flow.play.util.LoggingFilter
+
+By default, all HTTP methods will be logged. To only
+log a specific subset of methods, add the following:
+
+    play.http.filters.logging.methods=["GET", "PUT"]
+
+## CORS
+
+A CORS request handler is provided. To enable, add the following
+to your play application config (instead of `LoggingFilter` above):
+
+    play.http.filters=io.flow.play.util.CorsWithLoggingFilter
+    play.filters.cors.allowedHttpMethods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+
 ## Global error handler for JSON APIs
 
 This error handler capture client and server errors, always
@@ -31,7 +51,7 @@ leaking information).
    -- Provides user(...) method to get an instance of the current
       user.
     -- (type: Option[User])
-    
+
   Identified Controller
     -- extends Anonymous
     -- requires a user to be present

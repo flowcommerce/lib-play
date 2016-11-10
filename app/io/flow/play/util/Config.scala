@@ -10,6 +10,10 @@ import scala.util.{Failure, Success, Try}
   */
 trait Config {
 
+  def optionalList(name: String): Option[Seq[String]]
+
+  def requiredList(name: String): Seq[String] = mustGet(name, optionalList(name))
+
   /**
     * Return the value for the configuration parameter with the specified name
     */
@@ -93,6 +97,12 @@ trait Config {
 
 case class ChainedConfig(configs: Seq[Config]) extends Config {
 
+  override def optionalList(name: String): Option[Seq[String]] = {
+    get(name).map { text =>
+      text.split(",").map(_.trim)
+    }
+  }
+
   override def get(name: String): Option[String] = {
     configs.find { c =>
       !c.optionalString(name).isEmpty
@@ -108,6 +118,12 @@ case class ChainedConfig(configs: Seq[Config]) extends Config {
 @javax.inject.Singleton
 case class DefaultConfig @javax.inject.Inject() (appConfig: ApplicationConfig) extends Config {
 
+  override def optionalList(name: String): Option[Seq[String]] = {
+    get(name).map { text =>
+      text.split(",").map(_.trim)
+    }
+  }
+
   private[this] val chain = ChainedConfig(
     Seq(EnvironmentConfig, PropertyConfig, appConfig)
   )
@@ -117,6 +133,12 @@ case class DefaultConfig @javax.inject.Inject() (appConfig: ApplicationConfig) e
 }
 
 object EnvironmentConfig extends Config {
+
+  override def optionalList(name: String): Option[Seq[String]] = {
+    get(name).map { text =>
+      text.split(",").map(_.trim)
+    }
+  }
 
   override def get(name: String): Option[String] = {
     sys.env.get(name).map(_.trim).map { value =>
@@ -134,6 +156,12 @@ object EnvironmentConfig extends Config {
 
 object PropertyConfig extends Config {
 
+  override def optionalList(name: String): Option[Seq[String]] = {
+    get(name).map { text =>
+      text.split(",").map(_.trim)
+    }
+  }
+
   override def get(name: String): Option[String] = {
     sys.props.get(name).map(_.trim).map { value =>
       value match {
@@ -150,6 +178,12 @@ object PropertyConfig extends Config {
 
 @javax.inject.Singleton
 case class ApplicationConfig @javax.inject.Inject() (configuration: Configuration) extends Config {
+
+  override def optionalList(name: String): Option[Seq[String]] = {
+    configuration.getStringSeq(name).map { list =>
+      list.map(_.trim)
+    }
+  }
 
   override def get(name: String): Option[String] = {
     configuration.getString(name).map(_.trim).map { value =>

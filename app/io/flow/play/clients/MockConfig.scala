@@ -7,8 +7,19 @@ case class MockConfig @javax.inject.Inject() (
   defaultConfig: DefaultConfig
 ) extends Config {
 
+  override def optionalList(name: String): Option[Seq[String]] = {
+    values.get(name) match {
+      case Some(v) => Some(v.asInstanceOf[Seq[String]])
+      case None => defaultConfig.optionalList(name)
+    }
+  }
+
+  def set(name: String, value: Seq[String]) {
+    values += (name -> value)
+  }
+
   val values = {
-    val d = scala.collection.mutable.Map[String, String]()
+    val d = scala.collection.mutable.Map[String, Any]()
     d += ("JWT_SALT" -> "test")
     d
   }
@@ -19,7 +30,7 @@ case class MockConfig @javax.inject.Inject() (
 
   override def get(name: String): Option[String] = {
     values.get(name) match {
-      case Some(v) => Some(v)
+      case Some(v) => Some(v.toString)
       case None => defaultConfig.get(name)
     }
   }

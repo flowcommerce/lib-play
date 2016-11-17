@@ -5,7 +5,7 @@ import org.joda.time.{DateTime, DateTimeZone}
 
 object IdGenerator {
 
-  val PrefixBlackList = Seq("ass", "bch", "bum", "but", "cum", "die", "dik", "fag", "kkk", "kok", "lik", "lsd", "psy", "pus", "sex", "suk", "tit")
+  val PrefixBlackList = Seq("ass", "bch", "bum", "but", "cum", "die", "dik", "fag", "kkk", "kok", "lik", "lsd", "psy", "pus", "sex", "sht", "suk", "tit")
 
   val PrefixLength = 3
   val Separator = "-"

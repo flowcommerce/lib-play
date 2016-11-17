@@ -5,7 +5,8 @@ import org.joda.time.{DateTime, DateTimeZone}
 
 object IdGenerator {
 
-  val PrefixBlackList = Seq("ass", "bch", "bum", "but", "cum", "die", "dik", "fag", "kkk", "kok", "lik", "lsd", "psy", "pus", "sex", "sht", "suk", "tit")
+  // Some from http://www.freewebheaders.com/full-list-of-bad-words-banned-by-google/
+  val PrefixBlackList = Seq("ass", "a2m", "a55", "bch", "bum", "but", "cok", "cox", "cum", "die", "dik", "fag", "fck", "fuk", "fux", "god", "jap", "kkk", "kok", "kum", "lik", "lsd", "nob", "omg", "psy", "pus", "sex", "sht", "suk", "tit", "xxx")
 
   val PrefixLength = 3
   val Separator = "-"

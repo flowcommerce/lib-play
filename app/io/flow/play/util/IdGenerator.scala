@@ -5,9 +5,6 @@ import org.joda.time.{DateTime, DateTimeZone}
 
 object IdGenerator {
 
-  // Some from http://www.freewebheaders.com/full-list-of-bad-words-banned-by-google/
-  val PrefixBlackList = Seq("ass", "a2m", "a55", "bch", "bum", "but", "cok", "cox", "cum", "die", "dik", "fag", "fck", "fuk", "fux", "god", "jap", "kkk", "kok", "kum", "lik", "lsd", "nob", "omg", "psy", "pus", "sex", "sht", "suk", "tit", "xxx")
-
   val PrefixLength = 3
   val Separator = "-"
 }
@@ -26,7 +23,7 @@ case class IdGenerator(
   assert(prefix.toLowerCase == prefix, s"prefix[$prefix] must be in lower case")
   assert(prefix.trim == prefix, s"prefix[$prefix] must be trimmed")
   assert(prefix.length == IdGenerator.PrefixLength, s"prefix[$prefix] must be ${IdGenerator.PrefixLength} characters long")
-  assert(!IdGenerator.PrefixBlackList.contains(prefix), s"prefix[$prefix] is on the black list and cannot be used")
+  assert(!BadWords.contains(prefix), s"prefix[$prefix] is on the black list and cannot be used")
 
   private[this] val idFormat = Seq("%s", "%s").mkString(IdGenerator.Separator)
 

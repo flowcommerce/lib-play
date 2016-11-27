@@ -58,4 +58,14 @@ class DateHelperSpec extends PlaySpec with OneAppPerSuite {
     DateHelper.consoleLongDateTime(None, "-") must equal("-")
   }
 
+  "currentYear" in {
+    DateHelper.currentYear >= 2016
+    DateHelper.currentYear <= (new DateTime()).getYear + 1
+  }
+
+  "copyrightYear" in {
+    val value = DateHelper.copyrightYears
+    Seq("2016", s"2016 - ${DateHelper.currentYear}").contains(value) mustBe(true)
+  }
+
 }

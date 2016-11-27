@@ -45,6 +45,8 @@ trait DateFormats {
   */
 object DateHelper extends DateFormats {
 
+  val CopyrightStartYear = 2016
+
   val EasternTimezone = DateTimeZone.forID("America/New_York")
   private[this] val Default = DateHelper(EasternTimezone)
 
@@ -95,6 +97,25 @@ object DateHelper extends DateFormats {
     zone: DateTimeZone = EasternTimezone
   ): String = {
     s"${dateTime.getYear}${prefixZero(dateTime.getMonthOfYear)}"
+  }
+
+  /**
+    * Returns the current year (e.g. 2016) in the default timezone
+    */
+  def currentYear: Int = {
+    (new DateTime()).withZone(EasternTimezone).getYear
+  }
+
+  /**
+    * Returns either '2016' or '2016 - 2017' intended to be used for displaying things
+    * like the Flow copy right years dynamically.
+    */
+  def copyrightYears: String = {
+    val current = currentYear
+    current > CopyrightStartYear match {
+      case true => s"$CopyrightStartYear - $current"
+      case false => CopyrightStartYear.toString
+    }
   }
 
 }

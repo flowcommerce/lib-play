@@ -68,7 +68,7 @@ trait ErrorHandler {
   def logUnhandledMessage[T](
     description: Any
   ) {
-    Logger.error(msg(s"got an unhandled message: $description"))
+    Logger.error(msg(s"FlowEventError unhandled message: $description"))
   }
 
   private[this] def msg(value: String) = {

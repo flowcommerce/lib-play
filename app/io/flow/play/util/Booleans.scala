@@ -12,7 +12,7 @@ object Booleans {
 
   /**
     * Parses the provided string as a boolean returning either a
-    * boolean value of none if the value is not recognized.
+    * boolean value or none if the value is not recognized.
     */
   def parse(value: String): Option[Boolean] = {
     val formatted = value.trim.toLowerCase

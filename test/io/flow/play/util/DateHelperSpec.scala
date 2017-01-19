@@ -68,4 +68,16 @@ class DateHelperSpec extends PlaySpec with OneAppPerSuite {
     Seq("2016", s"2016 - ${DateHelper.currentYear}").contains(value) mustBe(true)
   }
 
+  "implicit ordering" in {
+    import DateHelper._
+    val now = DateTime.now
+    val nowPlus1 = now.plusMinutes(1)
+    val nowPlus5 = now.plusMinutes(5)
+    val nowPlus10 = now.plusMinutes(10)
+
+    val datetimes = Seq(nowPlus10, nowPlus5, nowPlus1, now)
+
+    datetimes.sorted must equal(datetimes.reverse)
+  }
+
 }

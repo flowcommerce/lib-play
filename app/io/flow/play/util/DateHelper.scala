@@ -45,6 +45,9 @@ trait DateFormats {
   */
 object DateHelper extends DateFormats {
 
+  /** This implicit ordering allows us to called `.sorted` on a Seq[DateTime]. */
+  implicit def dateTimeOrdering: Ordering[DateTime] = Ordering.fromLessThan(_ isBefore _)
+
   val CopyrightStartYear = 2016
 
   val EasternTimezone = DateTimeZone.forID("America/New_York")

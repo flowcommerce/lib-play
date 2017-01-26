@@ -17,7 +17,7 @@ lazy val root = project
     libraryDependencies ++= Seq(
       ws,
       filters,
-      "com.jason-goodwin" %% "authentikat-jwt" % "0.4.3",
+      "com.jason-goodwin" %% "authentikat-jwt" % "0.4.5",
       "org.scalatestplus" %% "play" % "1.4.0" % "test"
     ),
     resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",

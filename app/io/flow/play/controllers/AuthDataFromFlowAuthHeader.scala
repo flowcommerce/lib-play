@@ -18,7 +18,7 @@ trait AuthDataFromFlowAuthHeader  {
 
   def jwtSalt: String = config.requiredString("JWT_SALT")
 
-  private[this] val DefaultAuthExpirationTimeSeconds = 120
+  private[this] val DefaultAuthExpirationTimeSeconds = 180
 
   private[this] lazy val authExpirationTimeSeconds = config.optionalInt("FLOW_AUTH_EXPIRATION_SECONDS").getOrElse(DefaultAuthExpirationTimeSeconds)
   

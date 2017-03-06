@@ -21,7 +21,7 @@ trait FlowControllerHelpers {
   def expanders: Seq[Expander] = Nil
   private[this] lazy val expandersResult = {
     val tmp = expanders
-    assert(!tmp.isEmpty, "You must have at least one expander when calling withExpansion")
+    assert(tmp.nonEmpty, "You must have at least one expander when calling withExpansion")
     tmp
   }
 
@@ -33,8 +33,8 @@ trait FlowControllerHelpers {
   def optionals[T](values: Option[Seq[T]]): Option[Seq[T]] = {
     values match {
       case None => None
-      case Some(values) => {
-        values match {
+      case Some(v) => {
+        v match {
           case Nil => None
           case ar => Some(ar)
         }
@@ -91,7 +91,7 @@ trait FlowControllerHelpers {
       contentType match {
         case Some("application/x-www-form-urlencoded") =>
           function(
-            body.asFormUrlEncoded.map(FormData.formDataToJson(_)).getOrElse(Json.obj())
+            body.asFormUrlEncoded.map(FormData.formDataToJson).getOrElse(Json.obj())
           )
         case Some("application/json") =>
           function(
@@ -166,7 +166,7 @@ trait FlowControllerHelpers {
       requestHeaders: Seq[(String, String)] = Nil
     ): T = {
       val res = expandersResult.filter(e => expand.getOrElse(Nil).contains(e.fieldName)).foldLeft(records) {
-        case (records, e) => Await.result(e.expand(records, requestHeaders = requestHeaders), Duration(5, "seconds"))
+        case (data, e) => Await.result(e.expand(data, requestHeaders = requestHeaders), Duration(5, "seconds"))
       }
 
       res match {

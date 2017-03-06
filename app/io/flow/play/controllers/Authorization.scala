@@ -1,6 +1,6 @@
 package io.flow.play.controllers
 
-import io.flow.play.util.{Config, EnvironmentConfig}
+import io.flow.play.util.Config
 import org.apache.commons.codec.binary.Base64
 
 import authentikat.jwt._
@@ -32,14 +32,14 @@ object Authorization {
       case "Basic" :: value :: Nil => {
         new String(Base64.decodeBase64(value.getBytes)).split(":").toList match {
           case Nil => None
-          case token :: rest => Some(Token(token))
+          case token :: _ => Some(Token(token))
         }
       }
 
       case "Bearer" :: value :: Nil => {
         value match {
-          case JsonWebToken(header, claimsSet, signature) if jwtIsValid(value) => createJwtToken(claimsSet)
-          case JsonWebToken(header, claimsSet, signature) =>
+          case JsonWebToken(_, claimsSet, _) if jwtIsValid(value) => createJwtToken(claimsSet)
+          case JsonWebToken(_, claimsSet, _) =>
             val tokenData = createJwtToken(claimsSet)
             Logger.warn(s"JWT Token for user[${tokenData.map(_.userId).getOrElse("unknown")}] was invalid, bad salt")
             None
@@ -53,8 +53,7 @@ object Authorization {
   private[this] def jwtIsValid(token: String): Boolean = JsonWebToken.validate(token, jwtSalt)
 
   private[this] def createJwtToken(claimsSet: JwtClaimsSetJValue): Option[JwtToken] =
-    claimsSet.asSimpleMap.toOption match {
-      case Some(claims) => claims.get("id").map(JwtToken)
-      case _ => None
+    claimsSet.asSimpleMap.toOption.flatMap { claims =>
+      claims.get("id").map(JwtToken)
     }
 }

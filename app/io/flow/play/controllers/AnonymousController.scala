@@ -1,10 +1,9 @@
 package io.flow.play.controllers
 
-import io.flow.play.clients.DefaultTokenClient
 import io.flow.play.util.AuthData
 import io.flow.common.v0.models.UserReference
 import io.flow.token.v0.interfaces.{Client => TokenClient}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 import play.api.mvc._
 
 /**
@@ -32,7 +31,7 @@ trait AnonymousController extends FlowControllerHelpers with AuthDataFromFlowAut
 
   object Anonymous extends ActionBuilder[AnonymousRequest] {
 
-    def invokeBlock[A](request: Request[A], block: (AnonymousRequest[A]) => Future[Result]) = {
+    def invokeBlock[A](request: Request[A], block: (AnonymousRequest[A]) => Future[Result]): Future[Result] = {
       block(
         new AnonymousRequest(
           auth = auth(request.headers),

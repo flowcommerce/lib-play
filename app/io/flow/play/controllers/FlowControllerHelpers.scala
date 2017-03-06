@@ -3,22 +3,25 @@ package io.flow.play.controllers
 import io.flow.play.util.{Expander, FormData, Validation}
 import play.api.libs.json.JsValue
 import play.api.mvc.Results._
-import play.api.mvc.{Result, AnyContent}
+import play.api.mvc.{AnyContent, Result}
+
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{Await, ExecutionContext, Future}
 import play.api.libs.json._
 import io.flow.error.v0.models.json._
-import scala.concurrent.ExecutionContext.Implicits.global
-
 
 trait FlowControllerHelpers {
 
   /**
     * Applications may override this variable to define applicable Expanders.
+    * Note this approach will be replaced by centralized expanding in the API
+    * proxy at some point.
+    *
     * For example:
     * override expanders = Seq(new io.flow.play.expanders.User("user", userClient))
-   */
+    */
   def expanders: Seq[Expander] = Nil
+
   private[this] lazy val expandersResult = {
     val tmp = expanders
     assert(tmp.nonEmpty, "You must have at least one expander when calling withExpansion")
@@ -59,6 +62,8 @@ trait FlowControllerHelpers {
       body: AnyContent
     ) (
       function: JsValue => Future[Result]
+    )(
+      implicit ec: ExecutionContext
     ): Future[Result] = {
       parse(
         contentType,
@@ -131,6 +136,8 @@ trait FlowControllerHelpers {
      requestHeaders: Seq[(String, String)] = Nil
    ) (
      function: JsValue => Future[Result]
+   ) (
+    implicit ec: ExecutionContext
    ): Future[Result] = {
       withExpansion(
         expand,
@@ -148,6 +155,8 @@ trait FlowControllerHelpers {
       requestHeaders: Seq[(String, String)] = Nil
      ) (
        function: JsValue => Result
+     ) (
+       implicit ec: ExecutionContext
      ): Result = {
       withExpansion(
         expand,
@@ -164,6 +173,8 @@ trait FlowControllerHelpers {
       function: JsValue => T,
       errorFunction: Result => T,
       requestHeaders: Seq[(String, String)] = Nil
+    ) (
+      implicit ec: ExecutionContext
     ): T = {
       val res = expandersResult.filter(e => expand.getOrElse(Nil).contains(e.fieldName)).foldLeft(records) {
         case (data, e) => Await.result(e.expand(data, requestHeaders = requestHeaders), Duration(5, "seconds"))

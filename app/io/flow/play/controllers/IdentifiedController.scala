@@ -19,12 +19,12 @@ trait IdentifiedController extends AnonymousController {
     val auth: AuthData,
     request: Request[A]
   ) extends WrappedRequest[A](request) {
-    val user = auth.user
+    val user: UserReference = auth.user
   }
 
   object Identified extends ActionBuilder[IdentifiedRequest] {
 
-    def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]) = {
+    def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]): Future[Result] = {
       auth(request.headers) match {
         case None => Future(
           unauthorized(request)

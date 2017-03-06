@@ -1,8 +1,9 @@
 package io.flow.play.controllers
 
-import io.flow.common.v0.models.{UserReference, User}
+import io.flow.common.v0.models.{Environment, UserReference}
 import io.flow.play.util.{AuthData, OrganizationAuthData}
 import play.api.mvc.Results.Unauthorized
+
 import scala.concurrent.Future
 import play.api.mvc._
 
@@ -21,14 +22,14 @@ trait IdentifiedOrgController extends AnonymousController {
     val orgAuth: OrganizationAuthData,
     request: Request[A]
   ) extends WrappedRequest[A](request) {
-    val user = auth.user
-    val organization = orgAuth.organization
-    val environment = orgAuth.environment
+    val user: UserReference = auth.user
+    val organization: String = orgAuth.organization
+    val environment: Environment = orgAuth.environment
   }
 
   object IdentifiedOrg extends ActionBuilder[IdentifiedOrgRequest] {
 
-    def invokeBlock[A](request: Request[A], block: (IdentifiedOrgRequest[A]) => Future[Result]) = {
+    def invokeBlock[A](request: Request[A], block: (IdentifiedOrgRequest[A]) => Future[Result]): Future[Result] = {
       auth(request.headers) match {
         case None => Future(
           unauthorized(request)

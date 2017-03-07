@@ -30,9 +30,10 @@ trait Config {
 
   def optionalPositiveLong(name: String): Option[Long] = optionalLong(name) match {
     case None => None
-    case Some(v) => v > 0 match {
-      case true => Some(v)
-      case false => sys.error(s"Configuration variable[$name] has invalid value[$v]: must be > 0")
+    case Some(v) => if (v > 0) {
+      Some(v)
+    } else {
+      sys.error(s"Configuration variable[$name] has invalid value[$v]: must be > 0")
     }
   }
 
@@ -41,7 +42,7 @@ trait Config {
   def optionalLong(name: String): Option[Long] = optionalString(name).map { value =>
     Try(value.toLong) match {
       case Success(v) => v
-      case Failure(ex) => {
+      case Failure(_) => {
         val msg = s"Configuration variable[$name] has invalid value[$value]: must be a long"
         Logger.error(msg)
         sys.error(msg)
@@ -54,9 +55,10 @@ trait Config {
 
   def optionalPositiveInt(name: String): Option[Int] = optionalInt(name) match {
     case None => None
-    case Some(v) => v > 0 match {
-      case true => Some(v)
-      case false => sys.error(s"Configuration variable[$name] has invalid value[$v]: must be > 0")
+    case Some(v) => if (v > 0) {
+      Some(v)
+    } else {
+      sys.error(s"Configuration variable[$name] has invalid value[$v]: must be > 0")
     }
   }
 
@@ -65,7 +67,7 @@ trait Config {
   def optionalInt(name: String): Option[Int] = optionalString(name).map { value =>
     Try(value.toInt) match {
       case Success(v) => v
-      case Failure(ex) => {
+      case Failure(_) => {
         val msg = s"Configuration variable[$name] has invalid value[$value]: must be an int"
         Logger.error(msg)
         sys.error(msg)
@@ -76,14 +78,10 @@ trait Config {
   def requiredBoolean(name: String): Boolean = mustGet(name, optionalBoolean(name))
 
   def optionalBoolean(name: String): Option[Boolean] = optionalString(name).map { value =>
-    value.toLowerCase match {
-      case "true" | "t" => true
-      case "false" | "f" => false
-      case other => {
-        val msg = s"Configuration variable[$name] has invalid value[$value]: must be true, t, false, or f"
-        Logger.error(msg)
-        sys.error(msg)
-      }
+    Booleans.parse(value).getOrElse {
+      val msg = s"Configuration variable[$name] has invalid value[$value]. Use true, t, false, or f"
+      Logger.error(msg)
+      sys.error(msg)
     }
   }
   
@@ -122,9 +120,9 @@ case class DefaultConfig @javax.inject.Inject() (appConfig: ApplicationConfig) e
     Seq(EnvironmentConfig, PropertyConfig, appConfig)
   )
 
-  override def optionalList(name: String) = chain.optionalList(name)
+  override def optionalList(name: String): Option[Seq[String]] = chain.optionalList(name)
 
-  override def get(name: String) = chain.optionalString(name)
+  override def get(name: String): Option[String] = chain.optionalString(name)
 
 }
 
@@ -137,15 +135,13 @@ object EnvironmentConfig extends Config {
   }
 
   override def get(name: String): Option[String] = {
-    sys.env.get(name).map(_.trim).map { value =>
-      value match {
-        case "" => {
-          val msg = s"Value for environment variable[$name] cannot be blank"
-          Logger.error(msg)
-          sys.error(msg)
-        }
-        case _ => value
+    sys.env.get(name).map(_.trim).map {
+      case "" => {
+        val msg = s"Value for environment variable[$name] cannot be blank"
+        Logger.error(msg)
+        sys.error(msg)
       }
+      case value => value
     }
   }
 }
@@ -159,15 +155,13 @@ object PropertyConfig extends Config {
   }
 
   override def get(name: String): Option[String] = {
-    sys.props.get(name).map(_.trim).map { value =>
-      value match {
-        case "" => {
-          val msg = s"Value for system property[$name] cannot be blank"
-          Logger.error(msg)
-          sys.error(msg)
-        }
-        case _ => value
+    sys.props.get(name).map(_.trim).map {
+      case "" => {
+        val msg = s"Value for system property[$name] cannot be blank"
+        Logger.error(msg)
+        sys.error(msg)
       }
+      case value => value
     }
   }
 }
@@ -182,15 +176,13 @@ case class ApplicationConfig @javax.inject.Inject() (configuration: Configuratio
   }
 
   override def get(name: String): Option[String] = {
-    configuration.getString(name).map(_.trim).map { value =>
-      value match {
-        case "" => {
-          val msg = s"Value for configuration parameter[$name] cannot be blank"
-          Logger.error(msg)
-          sys.error(msg)
-        }
-        case _ => value
+    configuration.getString(name).map(_.trim).map {
+      case "" => {
+        val msg = s"Value for configuration parameter[$name] cannot be blank"
+        Logger.error(msg)
+        sys.error(msg)
       }
+      case value => value
     }
   }
 }

@@ -137,7 +137,7 @@ case class AuthData(
     * jwt salt.
     */
   def jwt(salt: String): String = {
-    val claimsSet = JwtClaimsSet(toMap())
+    val claimsSet = JwtClaimsSet(toMap)
     JsonWebToken(header, claimsSet, salt)
   }
 

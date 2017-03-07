@@ -20,10 +20,12 @@ class AuthHeaders @Inject() (
   val FlowRequestId = "X-Flow-Request-Id"
   private[this] lazy val jwtSalt = config.requiredString("JWT_SALT")
 
-  def headers(auth: AuthData) = Seq(
-    AuthData.Header -> auth.jwt(jwtSalt),
-    FlowRequestId -> auth.requestId
-  )
+  def headers(auth: Auth) = {
+    Seq(
+      AuthData.Header -> auth.jwt(jwtSalt),
+      FlowRequestId -> auth.requestId
+    )
+  }
   
 }
 
@@ -92,62 +94,3 @@ object AuthData {
     prefix + UUID.randomUUID.toString.replaceAll("-", "")
   }
 }
-
-/**
-  * Represents the data securely authenticated by the API proxy
-  * server. All of our software should depend on data from this object
-  * when retrieved from the X-Flow-Auth header (as opposed, for
-  * example, to relying on the organization id from the URL path).
-  * 
-  * The API Proxy server validates this data, and also guarantees that
-  * the user is authorized to access information for the specified
-  * organization.
-  * 
-  * @param requestId In production, we set request id in the API Proxy, and it is
-  *        included as part of the auth header. Doing so allows us to trace a single
-  *        API request across all the service calls we make (assuming we propagate
-  *        the headers from auth data).
-  */
-case class AuthData(
-  requestId: String,
-  createdAt: DateTime,
-  user: UserReference,
-  organization: Option[OrganizationAuthData]
-) {
-
-  private[this] val header = JwtHeader("HS256")
-
-  /**
-    * Converts this auth data to a map containing only the keys with
-    * their values.
-    */
-  def toMap: Map[String, String] = {
-    Map(
-      "request_id" -> Some(requestId),
-      "created_at" -> Some(dateTime.print(createdAt)),
-      "user_id" -> Some(user.id),
-      "organization" -> organization.map(_.organization),
-      "role" -> organization.map(_.role.toString),
-      "environment" -> organization.map(_.environment.toString)
-    ).flatMap { case (key, value) => value.map { v => key -> v } }
-  }
-
-  /**
-    * Converts this auth data to a valid JWT string using the provided
-    * jwt salt.
-    */
-  def jwt(salt: String): String = {
-    val claimsSet = JwtClaimsSet(toMap)
-    JsonWebToken(header, claimsSet, salt)
-  }
-
-}
-
-/**
- * Represents authorization data for a given organization.
- */
-case class OrganizationAuthData(
-  organization: String,
-  role: Role,
-  environment: Environment
-)

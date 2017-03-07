@@ -1,6 +1,6 @@
 package io.flow.play.controllers
 
-import io.flow.common.v0.models.{UserReference, User}
+import io.flow.common.v0.models.UserReference
 import io.flow.play.util.AuthData
 import play.api.mvc.Results.Unauthorized
 import scala.concurrent.Future

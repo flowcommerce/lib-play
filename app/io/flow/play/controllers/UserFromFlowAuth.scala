@@ -7,7 +7,7 @@ import io.flow.token.v0.models._
 import java.util.UUID
 import org.joda.time.DateTime
 import play.api.Logger
-import play.api.mvc.{Headers, Session}
+import play.api.mvc.Headers
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.Duration
 

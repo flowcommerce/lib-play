@@ -9,7 +9,7 @@ import play.api.mvc._
 /**
   * Primarily a marker to indicate intention to make all actions in a
   * controller anonymous. Also includes a few helper methods to interact
-  * with users - intented to allow an anonymous action to succeed in cases
+  * with users - intended to allow an anonymous action to succeed in cases
   * where we may or may not have a user.
   */
 trait AnonymousController extends FlowControllerHelpers with AuthDataFromFlowAuthHeader {

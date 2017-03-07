@@ -12,7 +12,7 @@ class ConfigSpec extends PlaySpec with OneAppPerSuite {
   def createTestId(): String = UUID.randomUUID.toString
 
   "optionalList" in {
-    config.optionalList(createTestId())must be(None)
+    config.optionalList(createTestId()) must be(None)
 
     config.set("foo", Seq("a", "b", "c"))
     config.optionalList("foo") must be(Some(Seq("a", "b", "c")))
@@ -151,7 +151,7 @@ class ConfigSpec extends PlaySpec with OneAppPerSuite {
     config.set("foo", "other")
     intercept[RuntimeException] {
       config.optionalBoolean("foo")
-    }.getMessage must be("Configuration variable[foo] has invalid value[other]: must be true, t, false, or f")
+    }.getMessage must be("Configuration variable[foo] has invalid value[other]. Use true, t, false, or f")
     
   }
 

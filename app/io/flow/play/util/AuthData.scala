@@ -121,7 +121,7 @@ case class AuthData(
     * Converts this auth data to a map containing only the keys with
     * their values.
     */
-  def toMap(): Map[String, String] = {
+  def toMap: Map[String, String] = {
     Map(
       "request_id" -> Some(requestId),
       "created_at" -> Some(dateTime.print(createdAt)),
@@ -129,7 +129,7 @@ case class AuthData(
       "organization" -> organization.map(_.organization),
       "role" -> organization.map(_.role.toString),
       "environment" -> organization.map(_.environment.toString)
-    ).flatMap { case (key, value) => value.map { v => (key -> v)} }
+    ).flatMap { case (key, value) => value.map { v => key -> v } }
   }
 
   /**

@@ -20,12 +20,14 @@ trait AuthDataFromFlowAuthHeader  {
 
   private[this] val DefaultAuthExpirationTimeSeconds = 180
 
-  private[this] lazy val authExpirationTimeSeconds = config.optionalInt("FLOW_AUTH_EXPIRATION_SECONDS").getOrElse(DefaultAuthExpirationTimeSeconds)
+  private[this] lazy val authExpirationTimeSeconds = {
+    config.optionalInt("FLOW_AUTH_EXPIRATION_SECONDS").getOrElse(DefaultAuthExpirationTimeSeconds)
+  }
   
   def auth(headers: Headers) (
     implicit ec: ExecutionContext
   ): Option[AuthData] = {
-    headers.get(AuthData.Header).flatMap { parse(_) }
+    headers.get(AuthData.Header).flatMap { parse }
   }
 
   def parse(value: String): Option[AuthData] = {
@@ -90,16 +92,5 @@ trait AuthDataFromFlowAuthHeader  {
   import io.flow.token.v0.interfaces.{Client => TokenClient}
 
   def tokenClient: TokenClient
-
-  private[this] def selectUser(token: TokenReference): Option[UserReference] = {
-    token match {
-      case t: OrganizationTokenReference => Some(t.user)
-      case t: PartnerTokenReference => Some(t.user)
-      case TokenReferenceUndefinedType(other) => {
-        Logger.warn(s"TokenReferenceUndefinedType($other) - assuming no user")
-        None
-      }
-    }
-  }
 
 }

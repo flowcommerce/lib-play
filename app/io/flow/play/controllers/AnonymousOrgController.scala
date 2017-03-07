@@ -1,7 +1,8 @@
 package io.flow.play.controllers
 
-import io.flow.common.v0.models.{Environment, Role, UserReference}
-import io.flow.play.util.{AuthHeaders, OrganizationAuthData}
+import io.flow.common.v0.models.{Environment, UserReference}
+import io.flow.play.util.AuthData
+import io.flow.play.util.OrgData.AnonymousOrgData
 import play.api.mvc.Results.Unauthorized
 import play.api.mvc._
 
@@ -19,33 +20,42 @@ trait AnonymousOrgController extends AnonymousController {
   def unauthorized[A](request: Request[A]): Result = Unauthorized
 
   class AnonymousOrgRequest[A](
-    val auth: Option[AuthData],
-    val orgAuth: OrganizationAnonymousAuthData,
+    val auth: AuthData.AnonymousOrgAuth,
     request: Request[A]
   ) extends WrappedRequest[A](request) {
     val user: Option[UserReference] = auth.user
-    val organization: String = orgAuth.organization
-    val environment: Environment = orgAuth.environment
+    val organization: String = auth.organization.organization
+    val environment: Environment = auth.organization.environment
   }
 
   object AnonymousOrg extends ActionBuilder[AnonymousOrgRequest] {
 
     def invokeBlock[A](request: Request[A], block: (AnonymousOrgRequest[A]) => Future[Result]): Future[Result] = {
-      auth(request.headers) match {
-        case None => Future(
+      val authData = auth(request.headers).flatMap {
+        case _: AuthData.AnonymousAuth => None
+        case _: AuthData.IdentifiedAuth => None
+        case a: AuthData.AnonymousOrgAuth => Some(a)
+        case a: AuthData.IdentifiedOrgAuth => Some(
+          AuthData.AnonymousOrgAuth(
+            createdAt = a.createdAt,
+            requestId = a.requestId,
+            user = Some(a.user),
+            organization = AnonymousOrgData(
+              organization = a.orgData.organization,
+              environment = a.orgData.environment
+            )
+         )
+        )
+      }
+
+      authData match {
+        case None => Future (
           unauthorized(request)
         )
-        case Some(auth) => {
-          auth.organization match {
-            case None => Future (
-              unauthorized(request)
-            )
-            case Some(org) => {
-              block(
-                new AnonymousOrgRequest(auth, org, request)
-              )
-            }
-          }
+        case Some(ad) => {
+          block(
+            new AnonymousOrgRequest(ad, request)
+          )
         }
       }
     }

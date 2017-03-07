@@ -1,8 +1,9 @@
 package io.flow.play.controllers
 
 import io.flow.common.v0.models.UserReference
-import io.flow.play.util.AuthHeaders
+import io.flow.play.util.AuthData
 import play.api.mvc.Results.Unauthorized
+
 import scala.concurrent.Future
 import play.api.mvc._
 
@@ -16,7 +17,7 @@ trait IdentifiedController extends AnonymousController {
   def unauthorized[A](request: Request[A]): Result = Unauthorized
 
   class IdentifiedRequest[A](
-    val auth: AuthData,
+    val auth: AuthData.IdentifiedAuth,
     request: Request[A]
   ) extends WrappedRequest[A](request) {
     val user: UserReference = auth.user
@@ -25,13 +26,26 @@ trait IdentifiedController extends AnonymousController {
   object Identified extends ActionBuilder[IdentifiedRequest] {
 
     def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]): Future[Result] = {
-      auth(request.headers) match {
+      val authData = auth(request.headers).flatMap {
+        case _: AuthData.AnonymousAuth => None
+        case a: AuthData.IdentifiedAuth => Some(a)
+        case a: AuthData.AnonymousOrgAuth => None
+        case a: AuthData.IdentifiedOrgAuth => Some(
+          AuthData.IdentifiedAuth(
+            createdAt = a.createdAt,
+            requestId = a.requestId,
+            user = a.user
+          )
+        )
+      }
+
+      authData match {
         case None => Future(
           unauthorized(request)
         )
-        case Some(auth) => {
+        case Some(ad) => {
           block(
-            new IdentifiedRequest(auth, request)
+            new IdentifiedRequest(ad, request)
           )
         }
       }

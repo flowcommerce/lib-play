@@ -48,13 +48,17 @@ sealed trait AuthData {
     */
   def jwt(salt: String): String = {
     val all = Map(
-    "request_id" -> requestId,
-    "created_at" -> dateTime.print(createdAt)
+      "request_id" -> requestId,
+      "created_at" -> dateTime.print(createdAt)
     ) ++ childAttributes.flatMap { case (key, value) => value.map { v => key -> v } }
 
     val claimsSet = JwtClaimsSet(all)
     JsonWebToken(header, claimsSet, salt)
   }
+
+}
+
+object AuthDataParser {
 
   /**
     * Parses data in the map to an appropriate type of AuthData

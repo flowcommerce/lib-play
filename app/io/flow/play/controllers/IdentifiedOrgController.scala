@@ -30,27 +30,20 @@ trait IdentifiedOrgController extends AnonymousController {
 
     def invokeBlock[A](request: Request[A], block: (IdentifiedOrgRequest[A]) => Future[Result]): Future[Result] = {
       auth(request.headers) match {
-        case None => Future(
+        case None => Future.successful(
           unauthorized(request)
         )
 
         case Some(auth) => {
           auth match {
-            case None => Future.successful(
+            case orgAuth: AuthData.IdentifiedOrgAuth => {
+              block(
+                new IdentifiedOrgRequest(orgAuth, request)
+              )
+            }
+            case _ => Future.successful(
               unauthorized(request)
             )
-            case Some(ad) =>
-              ad match {
-                case orgAuth: AuthData.IdentifiedOrgAuth => {
-                  block(
-                    new IdentifiedOrgRequest(orgAuth, request)
-                  )
-                }
-                case _ => Future (
-                  unauthorized(request)
-                )
-              }
-            }
           }
         }
       }

@@ -30,7 +30,7 @@ trait AuthDataFromFlowAuthHeader  {
 
   def parse(value: String): Option[AuthData] = {
     value match {
-      case JsonWebToken(header, claimsSet, signature) if jwtIsValid(value) => parseJwtToken(claimsSet)
+      case JsonWebToken(_, claimsSet, _) if jwtIsValid(value) => parseJwtToken(claimsSet)
       case _ => None
     }
   }
@@ -47,23 +47,19 @@ trait AuthDataFromFlowAuthHeader  {
           }
 
           val createdAt = ISODateTimeFormat.dateTimeParser.parseDateTime(ts)
-          val expiration = (new DateTime()).plusSeconds(authExpirationTimeSeconds)
-          createdAt.isBefore(expiration) match {
-            case false => {
-              Logger.warn(s"Flow auth data is expired. CreatedAt[$createdAt] expiration[$expiration] userId[$userId]")
-              None
-            }
-
-            case true => {
-              Some(
-                AuthData(
-                  requestId = requestId,
-                  createdAt = createdAt,
-                  user = UserReference(userId),
-                  organization = orgAuthData(claims)
-                )
+          val expiration = DateTime.now.plusSeconds(authExpirationTimeSeconds)
+          if (createdAt.isBefore(expiration)) {
+            Some(
+              AuthData(
+                requestId = requestId,
+                createdAt = createdAt,
+                user = UserReference(userId),
+                organization = orgAuthData(claims)
               )
-            }
+            )
+          } else {
+            Logger.warn(s"Flow auth data is expired. CreatedAt[$createdAt] expiration[$expiration] userId[$userId]")
+            None
           }
         }
       }
@@ -103,18 +99,6 @@ trait AuthDataFromFlowAuthHeader  {
         Logger.warn(s"TokenReferenceUndefinedType($other) - assuming no user")
         None
       }
-    }
-  }
-
-  /**
-    * If present, parses the basic authorization header and returns
-    * its decoded value.
-    */
-  private[this] def basicAuthorizationToken(
-    headers: play.api.mvc.Headers
-  ): Option[Authorization] = {
-    headers.get("Authorization").flatMap { h =>
-      Authorization.get(h)
     }
   }
 

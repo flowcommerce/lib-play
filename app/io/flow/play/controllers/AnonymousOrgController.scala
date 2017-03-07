@@ -1,7 +1,7 @@
 package io.flow.play.controllers
 
 import io.flow.common.v0.models.{Environment, Role, UserReference}
-import io.flow.play.util.{AuthData, OrganizationAuthData}
+import io.flow.play.util.{AuthHeaders, OrganizationAuthData}
 import play.api.mvc.Results.Unauthorized
 import play.api.mvc._
 

@@ -2,14 +2,16 @@ package io.flow.play.controllers
 
 import authentikat.jwt.{JsonWebToken, JwtClaimsSetJValue}
 import io.flow.common.v0.models.{Environment, Role, UserReference}
-import io.flow.play.util.{AuthData, Config, OrganizationAuthData}
+import io.flow.play.util.{AuthData, AuthHeaders, Config, OrganizationAuthData}
 import io.flow.token.v0.errors.UnitResponse
 import io.flow.token.v0.models._
 import java.util.UUID
+
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import play.api.Logger
 import play.api.mvc.{Headers, Session}
+
 import scala.concurrent.{ExecutionContext, Future}
 
 trait AuthDataFromFlowAuthHeader  {
@@ -27,7 +29,7 @@ trait AuthDataFromFlowAuthHeader  {
   def auth(headers: Headers) (
     implicit ec: ExecutionContext
   ): Option[AuthData] = {
-    headers.get(AuthData.Header).flatMap { parse }
+    headers.get(AuthHeaders.Header).flatMap { parse }
   }
 
   def parse(value: String): Option[AuthData] = {
@@ -41,29 +43,9 @@ trait AuthDataFromFlowAuthHeader  {
 
   private[this] def parseJwtToken(claimsSet: JwtClaimsSetJValue): Option[AuthData] = {
     claimsSet.asSimpleMap.toOption.flatMap { claims =>
-      claims.get("user_id").flatMap { userId =>
-        claims.get("created_at").flatMap { ts =>
-          val requestId = claims.get("request_id").getOrElse {
-            Logger.warn("JWT Token did not have a request_id - generated a new request id")
-            "lib-play-" + UUID.randomUUID.toString
-          }
-
-          val createdAt = ISODateTimeFormat.dateTimeParser.parseDateTime(ts)
-          val expiration = DateTime.now.plusSeconds(authExpirationTimeSeconds)
-          if (createdAt.isBefore(expiration)) {
-            Some(
-              AuthData(
-                requestId = requestId,
-                createdAt = createdAt,
-                user = UserReference(userId),
-                organization = orgAuthData(claims)
-              )
-            )
-          } else {
-            Logger.warn(s"Flow auth data is expired. CreatedAt[$createdAt] expiration[$expiration] userId[$userId]")
-            None
-          }
-        }
+      AuthData.fromMap(claims).filter { auth =>
+        val expiration = DateTime.now.plusSeconds(authExpirationTimeSeconds)
+        auth.createdAt.isBefore(expiration)
       }
     }
   }

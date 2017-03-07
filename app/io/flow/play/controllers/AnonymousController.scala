@@ -1,6 +1,6 @@
 package io.flow.play.controllers
 
-import io.flow.play.util.AuthData
+import io.flow.play.util.AuthHeaders
 import io.flow.common.v0.models.UserReference
 import io.flow.token.v0.interfaces.{Client => TokenClient}
 import scala.concurrent.Future

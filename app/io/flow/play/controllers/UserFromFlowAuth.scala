@@ -1,7 +1,7 @@
 package io.flow.play.controllers
 
 import io.flow.common.v0.models.UserReference
-import io.flow.play.util.AuthData
+import io.flow.play.util.AuthHeaders
 import io.flow.token.v0.errors.UnitResponse
 import io.flow.token.v0.models._
 import java.util.UUID
@@ -33,7 +33,7 @@ trait UserFromFlowAuth extends AuthDataFromFlowAuthHeader {
           Duration(5, "seconds")
         ).map { u =>
           val requestId: String = headers.get("X-Flow-Request-Id").getOrElse("lib-play-depr-" + UUID.randomUUID.toString)
-          AuthData(
+          AuthHeaders(
             requestId = requestId,
             createdAt = new DateTime(),
             user = u,

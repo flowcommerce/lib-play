@@ -4,7 +4,7 @@ import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
 import io.flow.common.v0.models.{Environment, Role, UserReference}
 import io.flow.play.clients.MockConfig
 import io.flow.play.controllers.Authorization.{Token, JwtToken}
-import io.flow.play.util.{AuthData, OrganizationAuthData, Config}
+import io.flow.play.util.{AuthHeaders, OrganizationAuthData, Config}
 
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -32,7 +32,7 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
   "parse w/ user only" in {
     val ts = new DateTime()
     val user = UserReference("usr-20151006-1")
-    val data = AuthData(
+    val data = AuthHeaders(
       requestId = "test",
       createdAt = ts,
       user = user,
@@ -56,7 +56,7 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
       role = Role.Member,
       environment = Environment.Sandbox
     )
-    val data = AuthData(
+    val data = AuthHeaders(
       requestId = "test2",
       createdAt = ts,
       user = user,
@@ -75,7 +75,7 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
   "expired" in {
     val ts = (new DateTime()).plusMinutes(5)
     val user = UserReference("usr-20151006-1")
-    val data = AuthData(
+    val data = AuthHeaders(
       requestId = "test2",
       createdAt = ts,
       user = user,

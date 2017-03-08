@@ -131,13 +131,13 @@ object AuthDataMap {
       println(s"user[${user}] organizationId[$organizationId] environment[$environment] role[$role]")
 
       (user, organizationId, environment, role) match {
-        case (_, Some(o), Some(e), None) => AuthData.AnonymousOrgAuth(
-          createdAt, requestId, user = user, orgData = OrgData.AnonymousOrgData(organization = o, environment = e)
-        )
         case (Some(u), Some(o), Some(e), Some(r)) => AuthData.IdentifiedOrgAuth(
           createdAt, requestId, user = u, OrgData.IdentifiedOrgData(organization = o, environment = e, role = r)
         )
         case (Some(u), _, _, _) => AuthData.IdentifiedAuth(createdAt, requestId, user = u)
+        case (None, Some(o), Some(e), None) => AuthData.AnonymousOrgAuth(
+          createdAt, requestId, user = user, orgData = OrgData.AnonymousOrgData(organization = o, environment = e)
+        )
         case (None, _, _, _) => AuthData.AnonymousAuth(createdAt, requestId, user = user)
       }
     }

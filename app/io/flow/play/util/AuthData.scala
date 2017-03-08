@@ -128,8 +128,6 @@ object AuthDataMap {
         }
       }
 
-      println(s"user[${user}] organizationId[$organizationId] environment[$environment] role[$role]")
-
       (user, organizationId, environment, role) match {
         case (Some(u), Some(o), Some(e), Some(r)) => AuthData.IdentifiedOrgAuth(
           createdAt, requestId, user = u, OrgData.IdentifiedOrgData(organization = o, environment = e, role = r)

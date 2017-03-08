@@ -5,9 +5,10 @@ import io.flow.play.util.AuthData
 import io.flow.token.v0.errors.UnitResponse
 import io.flow.token.v0.models._
 import java.util.UUID
-import org.joda.time.DateTime
+
 import play.api.Logger
 import play.api.mvc.Headers
+
 import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.concurrent.duration.Duration
 
@@ -32,12 +33,9 @@ trait UserFromFlowAuth extends AuthDataFromFlowAuthHeader {
           legacyUser(headers),
           Duration(5, "seconds")
         ).map { u =>
-          val requestId: String = headers.get("X-Flow-Request-Id").getOrElse("lib-play-depr-" + UUID.randomUUID.toString)
-          AuthData(
-            requestId = requestId,
-            createdAt = new DateTime(),
-            user = u,
-            organization = None
+          AuthData.IdentifiedAuth(
+            requestId = headers.get("X-Flow-Request-Id").getOrElse("lib-play-depr-" + UUID.randomUUID.toString),
+            user = u
           )
         }
       }
@@ -46,11 +44,9 @@ trait UserFromFlowAuth extends AuthDataFromFlowAuthHeader {
 
   // Everything below will be removed after all applications are
   // upgraded to use X-Flow-Auth header.
-  import io.flow.token.v0.interfaces.{Client => TokenClient}
+  def tokenClient: io.flow.token.v0.interfaces.Client
 
-  def tokenClient: TokenClient
-
-  private[this] def legacyUser(
+    private[this] def legacyUser(
     headers: Headers
   ) (
     implicit ec: ExecutionContext

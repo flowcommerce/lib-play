@@ -1,18 +1,12 @@
 package io.flow.play.controllers
 
-import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
 import io.flow.common.v0.models.{Environment, Role, UserReference}
 import io.flow.play.clients.MockConfig
-import io.flow.play.controllers.Authorization.{Token, JwtToken}
-import io.flow.play.util.{AuthData, OrganizationAuthData, Config}
-
+import io.flow.play.util.OrgData.{AnonymousOrgData, IdentifiedOrgData}
+import io.flow.play.util.{AuthData, AuthHeaders, Config}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.test._
-import play.api.test.Helpers._
-
 import org.joda.time.DateTime
-import org.scalatest._
 import org.scalatestplus.play._
 
 class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
@@ -29,57 +23,77 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
     override def jwtSalt = salt
   }
 
-  "parse w/ user only" in {
+  "parse AuthData.AnonymousAuth w/ no user" in {
+    val ts = new DateTime()
+    val data = AuthData.AnonymousAuth(
+      requestId = "test",
+      createdAt = ts,
+      user = None
+    )
+
+    val result = testTrait.parse(data.jwt(salt)).getOrElse {
+      sys.error("Failed to parse")
+    }.asInstanceOf[AuthData.AnonymousAuth]
+    result.requestId must be("test")
+    result.createdAt must be(ts)
+    result.user must be(None)
+  }
+
+  "parse AuthData.IdentifiedOrgAuth" in {
     val ts = new DateTime()
     val user = UserReference("usr-20151006-1")
-    val data = AuthData(
+    val data = AuthData.IdentifiedOrgAuth(
       requestId = "test",
       createdAt = ts,
       user = user,
-      organization = None
+      orgData = IdentifiedOrgData(
+        organization = "demo",
+        environment = Environment.Sandbox,
+        role = Role.Member
+      )
     )
 
     val result = testTrait.parse(data.jwt(salt)).getOrElse {
       sys.error("Failed to parse")
-    }
+    }.asInstanceOf[AuthData.IdentifiedOrgAuth]
+
     result.requestId must be("test")
     result.createdAt must be(ts)
     result.user must be(user)
-    result.organization must be(None)
+    result.orgData.organization must be("demo")
+    result.orgData.environment must be(Environment.Sandbox)
+    result.orgData.role must be(Role.Member)
   }
 
-  "parse w/ user and organization" in {
+  "parse AuthData.AnonymousOrgAuth" in {
     val ts = new DateTime()
     val user = UserReference("usr-20151006-1")
-    val org = OrganizationAuthData(
-      organization = "flow-sandbox",
-      role = Role.Member,
-      environment = Environment.Sandbox
-    )
-    val data = AuthData(
-      requestId = "test2",
+    val data = AuthData.AnonymousOrgAuth(
+      requestId = "test",
       createdAt = ts,
-      user = user,
-      organization = Some(org)
+      user = Some(user),
+      orgData = AnonymousOrgData(
+        organization = "demo",
+        environment = Environment.Sandbox
+      )
     )
 
     val result = testTrait.parse(data.jwt(salt)).getOrElse {
       sys.error("Failed to parse")
-    }
-    result.requestId must be("test2")
+    }.asInstanceOf[AuthData.AnonymousOrgAuth]
+
+    result.requestId must be("test")
     result.createdAt must be(ts)
-    result.user must be(user)
-    result.organization must be(Some(org))
+    result.user must be(Some(user))
+    result.orgData.organization must be("demo")
+    result.orgData.environment must be(Environment.Sandbox)
   }
-  
+
   "expired" in {
-    val ts = (new DateTime()).plusMinutes(5)
-    val user = UserReference("usr-20151006-1")
-    val data = AuthData(
-      requestId = "test2",
-      createdAt = ts,
-      user = user,
-      organization = None
+    val data = AuthData.AnonymousAuth(
+      requestId = "test",
+      createdAt = DateTime.now.plusMinutes(5),
+      user = None
     )
 
     testTrait.parse(data.jwt(salt)) must be(None)

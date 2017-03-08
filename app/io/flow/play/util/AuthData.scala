@@ -9,7 +9,7 @@ import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.format.ISODateTimeFormat.dateTime
 import play.api.Logger
 
-private[util] case class AuthDataAllFields(
+case class AuthDataMap(
   requestId: String,
   createdAt: DateTime,
   user: Option[UserReference] = None,
@@ -20,12 +20,12 @@ private[util] case class AuthDataAllFields(
 
   def toMap: Map[String, String] = {
     Map(
-      "request_id" -> Some(requestId),
-      "created_at" -> Some(dateTime.print(createdAt)),
-      "user_id" -> user.map(_.id),
-      "organization" -> organization,
-      "environment" -> environment.map(_.toString),
-      "role" -> role.map(_.toString)
+      AuthDataMap.Fields.RequestId -> Some(requestId),
+      AuthDataMap.Fields.CreatedAt -> Some(dateTime.print(createdAt)),
+      AuthDataMap.Fields.UserId -> user.map(_.id),
+      AuthDataMap.Fields.Organization -> organization,
+      AuthDataMap.Fields.Environment -> environment.map(_.toString),
+      AuthDataMap.Fields.Role -> role.map(_.toString)
     ).flatMap { case (k, value) => value.map { v => k -> v } }
   }
 
@@ -42,7 +42,7 @@ private[util] case class AuthDataAllFields(
   * organization.
   */
 sealed trait AuthData {
-
+  
   private[this] val header = JwtHeader("HS256")
 
   /**
@@ -61,7 +61,7 @@ sealed trait AuthData {
   /**
     * Add specific data to assist in serialization to jwt map
     */
-  protected def decorate(base: AuthDataAllFields): AuthDataAllFields
+  protected def decorate(base: AuthDataMap): AuthDataMap
 
   /**
     * Converts this auth data to a valid JWT string using the provided
@@ -69,7 +69,7 @@ sealed trait AuthData {
     */
   def jwt(salt: String): String = {
     val all = decorate(
-      AuthDataAllFields(
+      AuthDataMap(
         requestId = requestId,
         createdAt = createdAt
       )
@@ -81,22 +81,32 @@ sealed trait AuthData {
 
 }
 
-object AuthDataParser {
+object AuthDataMap {
+
+  object Fields {
+    val RequestId = "request_id"
+    val CreatedAt = "created_at"
+    val UserId = "user_id"
+    val Organization = "organization"
+    val Environment = "environment"
+    val Role = "role"
+  }
 
   /**
     * Parses data in the map to an appropriate type of AuthData
     */
+  //noinspection GetGetOrElse
   def fromMap(data: Map[String, String]): Option[AuthData] = {
     data.get("created_at").map { ts =>
       val createdAt = ISODateTimeFormat.dateTimeParser.parseDateTime(ts)
-      val requestId = data.get("request_id").getOrElse {
+      val requestId = data.get(Fields.RequestId).getOrElse {
         Logger.warn("JWT Token did not have a request_id - generated a new request id")
         "lib-play-" + UUID.randomUUID.toString
       }
-      val user: Option[UserReference] = data.get("user_id").map(UserReference.apply)
-      val organizationId: Option[String] = data.get("organization")
+      val user: Option[UserReference] = data.get(Fields.UserId).map(UserReference.apply)
+      val organizationId: Option[String] = data.get(Fields.Organization)
 
-      val environment: Option[Environment] = data.get("environment").map(Environment.apply).flatMap { e =>
+      val environment: Option[Environment] = data.get(Fields.Environment).map(Environment.apply).flatMap { e =>
         e match {
           case Environment.UNDEFINED(other) => {
             Logger.warn(s"Unexpected Environment[$other] - ignoring")
@@ -107,7 +117,7 @@ object AuthDataParser {
         }
       }
 
-      val role: Option[Role] = data.get("role").map(Role.apply).flatMap { role =>
+      val role: Option[Role] = data.get(Fields.Role).map(Role.apply).flatMap { role =>
         role match {
           case Role.UNDEFINED(other) => {
             Logger.warn(s"Unexpected Role[$other] - ignoring")
@@ -119,6 +129,7 @@ object AuthDataParser {
       }
 
       println(s"user[${user}] organizationId[$organizationId] environment[$environment] role[$role]")
+
       (user, organizationId, environment, role) match {
         case (_, Some(o), Some(e), None) => AuthData.AnonymousOrgAuth(
           createdAt, requestId, user = user, orgData = OrgData.AnonymousOrgData(organization = o, environment = e)
@@ -141,7 +152,7 @@ object AuthData {
     user: Option[UserReference]
   ) extends AuthData {
 
-    override protected def decorate(base: AuthDataAllFields): AuthDataAllFields = {
+    override protected def decorate(base: AuthDataMap): AuthDataMap = {
       base.copy(
         user = user
       )
@@ -155,7 +166,7 @@ object AuthData {
     orgData: OrgData.AnonymousOrgData
   ) extends AuthData {
 
-    override protected def decorate(base: AuthDataAllFields): AuthDataAllFields = {
+    override protected def decorate(base: AuthDataMap): AuthDataMap = {
       base.copy(
         user = user,
         organization = Some(orgData.organization),
@@ -171,7 +182,7 @@ object AuthData {
     user: UserReference
   ) extends AuthData {
 
-    override protected def decorate(base: AuthDataAllFields): AuthDataAllFields = {
+    override protected def decorate(base: AuthDataMap): AuthDataMap = {
       base.copy(
         user = Some(user)
       )
@@ -186,7 +197,7 @@ object AuthData {
     orgData: OrgData.IdentifiedOrgData
   ) extends AuthData {
 
-    override protected def decorate(base: AuthDataAllFields): AuthDataAllFields = {
+    override protected def decorate(base: AuthDataMap): AuthDataMap = {
       base.copy(
         user = Some(user),
         organization = Some(orgData.organization),

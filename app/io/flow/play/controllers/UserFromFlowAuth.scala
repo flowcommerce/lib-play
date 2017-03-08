@@ -1,12 +1,11 @@
 package io.flow.play.controllers
 
 import io.flow.common.v0.models.UserReference
-import io.flow.play.util.{AuthData, AuthHeaders}
+import io.flow.play.util.AuthData
 import io.flow.token.v0.errors.UnitResponse
 import io.flow.token.v0.models._
 import java.util.UUID
 
-import org.joda.time.DateTime
 import play.api.Logger
 import play.api.mvc.Headers
 

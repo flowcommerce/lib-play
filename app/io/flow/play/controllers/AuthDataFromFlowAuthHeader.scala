@@ -35,7 +35,7 @@ trait AuthDataFromFlowAuthHeader  {
 
   private[this] def parseJwtToken(claimsSet: JwtClaimsSetJValue): Option[AuthData] = {
     claimsSet.asSimpleMap.toOption.flatMap { claims =>
-      AuthDataParser.fromMap(claims).filter { auth =>
+      AuthDataMap.fromMap(claims).filter { auth =>
         val expiration = DateTime.now.plusSeconds(authExpirationTimeSeconds)
         auth.createdAt.isBefore(expiration)
       }

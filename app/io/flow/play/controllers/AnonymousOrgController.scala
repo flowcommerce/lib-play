@@ -24,8 +24,8 @@ trait AnonymousOrgController extends AnonymousController {
     request: Request[A]
   ) extends WrappedRequest[A](request) {
     val user: Option[UserReference] = auth.user
-    val organization: String = auth.organization.organization
-    val environment: Environment = auth.organization.environment
+    val organization: String = auth.orgData.organization
+    val environment: Environment = auth.orgData.environment
   }
 
   object AnonymousOrg extends ActionBuilder[AnonymousOrgRequest] {
@@ -40,7 +40,7 @@ trait AnonymousOrgController extends AnonymousController {
             createdAt = a.createdAt,
             requestId = a.requestId,
             user = Some(a.user),
-            organization = AnonymousOrgData(
+            orgData = AnonymousOrgData(
               organization = a.orgData.organization,
               environment = a.orgData.environment
             )

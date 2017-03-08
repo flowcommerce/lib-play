@@ -9,6 +9,28 @@ import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.format.ISODateTimeFormat.dateTime
 import play.api.Logger
 
+private[util] case class AuthDataAllFields(
+  requestId: String,
+  createdAt: DateTime,
+  user: Option[UserReference] = None,
+  organization: Option[String] = None,
+  environment: Option[Environment] = None,
+  role: Option[Role] = None
+) {
+
+  def toMap: Map[String, String] = {
+    Map(
+      "request_id" -> Some(requestId),
+      "created_at" -> Some(dateTime.print(createdAt)),
+      "user_id" -> user.map(_.id),
+      "organization" -> organization,
+      "environment" -> environment.map(_.toString),
+      "role" -> role.map(_.toString)
+    ).flatMap { case (k, value) => value.map { v => k -> v } }
+  }
+
+}
+
 /**
   * Represents the data securely authenticated by the API proxy
   * server. All of our software should depend on data from this object
@@ -37,22 +59,23 @@ sealed trait AuthData {
   def requestId: String
 
   /**
-    * Converts this auth data to a map containing only the keys with
-    * non empty values.
+    * Add specific data to assist in serialization to jwt map
     */
-  protected def childAttributes: Map[String, Option[String]]
+  protected def decorate(base: AuthDataAllFields): AuthDataAllFields
 
   /**
     * Converts this auth data to a valid JWT string using the provided
     * jwt salt.
     */
   def jwt(salt: String): String = {
-    val all = Map(
-      "request_id" -> requestId,
-      "created_at" -> dateTime.print(createdAt)
-    ) ++ childAttributes.flatMap { case (key, value) => value.map { v => key -> v } }
+    val all = decorate(
+      AuthDataAllFields(
+        requestId = requestId,
+        createdAt = createdAt
+      )
+    )
 
-    val claimsSet = JwtClaimsSet(all)
+    val claimsSet = JwtClaimsSet(all.toMap)
     JsonWebToken(header, claimsSet, salt)
   }
 
@@ -71,9 +94,9 @@ object AuthDataParser {
         "lib-play-" + UUID.randomUUID.toString
       }
       val user: Option[UserReference] = data.get("user_id").map(UserReference.apply)
-      val organizationId: Option[String] = data.get("organization_id")
+      val organizationId: Option[String] = data.get("organization")
 
-      val environment: Option[Environment] = data.get("Environment").map(Environment.apply).flatMap { e =>
+      val environment: Option[Environment] = data.get("environment").map(Environment.apply).flatMap { e =>
         e match {
           case Environment.UNDEFINED(other) => {
             Logger.warn(s"Unexpected Environment[$other] - ignoring")
@@ -84,7 +107,7 @@ object AuthDataParser {
         }
       }
 
-      val role: Option[Role] = data.get("Role").map(Role.apply).flatMap { role =>
+      val role: Option[Role] = data.get("role").map(Role.apply).flatMap { role =>
         role match {
           case Role.UNDEFINED(other) => {
             Logger.warn(s"Unexpected Role[$other] - ignoring")
@@ -95,9 +118,10 @@ object AuthDataParser {
         }
       }
 
+      println(s"user[${user}] organizationId[$organizationId] environment[$environment] role[$role]")
       (user, organizationId, environment, role) match {
         case (_, Some(o), Some(e), None) => AuthData.AnonymousOrgAuth(
-          createdAt, requestId, user = user, organization = OrgData.AnonymousOrgData(organization = o, environment = e)
+          createdAt, requestId, user = user, orgData = OrgData.AnonymousOrgData(organization = o, environment = e)
         )
         case (Some(u), Some(o), Some(e), Some(r)) => AuthData.IdentifiedOrgAuth(
           createdAt, requestId, user = u, OrgData.IdentifiedOrgData(organization = o, environment = e, role = r)
@@ -117,9 +141,9 @@ object AuthData {
     user: Option[UserReference]
   ) extends AuthData {
 
-    override def childAttributes: Map[String, Option[String]] = {
-      Map(
-        "user_id" -> user.map(_.id)
+    override protected def decorate(base: AuthDataAllFields): AuthDataAllFields = {
+      base.copy(
+        user = user
       )
     }
   }
@@ -128,16 +152,17 @@ object AuthData {
     override val createdAt: DateTime = DateTime.now,
     override val requestId: String,
     user: Option[UserReference],
-    organization: OrgData.AnonymousOrgData
+    orgData: OrgData.AnonymousOrgData
   ) extends AuthData {
 
-    override def childAttributes: Map[String, Option[String]] = {
-      Map(
-        "user_id" -> user.map(_.id),
-        "organization" -> Some(organization.organization),
-        "environment" -> Some(organization.environment.toString)
+    override protected def decorate(base: AuthDataAllFields): AuthDataAllFields = {
+      base.copy(
+        user = user,
+        organization = Some(orgData.organization),
+        environment = Some(orgData.environment)
       )
     }
+
   }
 
   case class IdentifiedAuth(
@@ -146,11 +171,12 @@ object AuthData {
     user: UserReference
   ) extends AuthData {
 
-    override def childAttributes: Map[String, Option[String]] = {
-      Map(
-        "user_id" -> Some(user.id)
+    override protected def decorate(base: AuthDataAllFields): AuthDataAllFields = {
+      base.copy(
+        user = Some(user)
       )
     }
+
   }
 
   case class IdentifiedOrgAuth(
@@ -160,12 +186,12 @@ object AuthData {
     orgData: OrgData.IdentifiedOrgData
   ) extends AuthData {
 
-    override def childAttributes: Map[String, Option[String]] = {
-      Map(
-        "user_id" -> Some(user.id),
-        "organization" -> Some(orgData.organization),
-        "environment" -> Some(orgData.environment.toString),
-        "role" -> Some(orgData.role.toString)
+    override protected def decorate(base: AuthDataAllFields): AuthDataAllFields = {
+      base.copy(
+        user = Some(user),
+        organization = Some(orgData.organization),
+        environment = Some(orgData.environment),
+        role = Some(orgData.role)
       )
     }
   }

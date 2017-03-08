@@ -7,30 +7,25 @@ class AuthDataSpec extends FunSpec with Matchers {
 
   it("AuthData.user") {
     val id = "user-1"
-    val auth = AuthHeaders.user(UserReference(id), requestId = Some("test1"))
+    val auth = AuthHeaders.user(UserReference(id), requestId = "test1")
     auth.requestId should be("test1")
     auth.user.id should be(id)
-    auth.organization should be(None)
   }
 
   it("AuthData.organization defaults") {
     val auth = AuthHeaders.organization(UserReference("user-1"), "demo")
     auth.user.id should be("user-1")
-    auth.organization should be(
-      Some(
-        OrganizationAuthData("demo", Role.Member, Environment.Sandbox)
-      )
-    )
+    auth.orgData.organization should be("demo")
+    auth.orgData.environment should be(Environment.Sandbox)
+    auth.orgData.role should be(Role.Member)
   }
 
   it("AuthData.organization") {
     val auth = AuthHeaders.organization(UserReference("user-1"), "demo", Role.Admin, Environment.Production)
     auth.user.id should be("user-1")
-    auth.organization should be(
-      Some(
-        OrganizationAuthData("demo", Role.Admin, Environment.Production)
-      )
-    )
+    auth.orgData.organization should be("demo")
+    auth.orgData.environment should be(Environment.Production)
+    auth.orgData.role should be(Role.Admin)
   }
 
   it("AuthData.generateRequestId") {

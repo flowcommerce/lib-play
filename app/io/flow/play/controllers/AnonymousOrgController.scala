@@ -13,7 +13,7 @@ import scala.concurrent.Future
   * but allow for a user to be anonymous. Common example is a
   * user creating an order from a session on shopify.
   */
-trait AnonymousOrgController extends AnonymousController {
+trait AnonymousOrgController extends FlowControllerHelpers with AuthDataAnonymousOrgAuthFromFlowAuthHeader {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -31,24 +31,7 @@ trait AnonymousOrgController extends AnonymousController {
   object AnonymousOrg extends ActionBuilder[AnonymousOrgRequest] {
 
     def invokeBlock[A](request: Request[A], block: (AnonymousOrgRequest[A]) => Future[Result]): Future[Result] = {
-      val authData = auth(request.headers).flatMap {
-        case _: AuthData.AnonymousAuth => None
-        case _: AuthData.IdentifiedAuth => None
-        case a: AuthData.AnonymousOrgAuth => Some(a)
-        case a: AuthData.IdentifiedOrgAuth => Some(
-          AuthData.AnonymousOrgAuth(
-            createdAt = a.createdAt,
-            requestId = a.requestId,
-            user = Some(a.user),
-            orgData = AnonymousOrgData(
-              organization = a.orgData.organization,
-              environment = a.orgData.environment
-            )
-         )
-        )
-      }
-
-      authData match {
+      auth(request.headers) match {
         case None => Future (
           unauthorized(request)
         )

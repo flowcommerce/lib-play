@@ -10,7 +10,7 @@ import play.api.mvc._
 /**
   * Provides helpers for actions that require a user to be identified.
   */
-trait IdentifiedController extends AnonymousController {
+trait IdentifiedController extends FlowControllerHelpers with AuthDataIdentifiedAuthFromFlowAuthHeader {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -26,20 +26,7 @@ trait IdentifiedController extends AnonymousController {
   object Identified extends ActionBuilder[IdentifiedRequest] {
 
     def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]): Future[Result] = {
-      val authData = auth(request.headers).flatMap {
-        case _: AuthData.AnonymousAuth => None
-        case a: AuthData.IdentifiedAuth => Some(a)
-        case a: AuthData.AnonymousOrgAuth => None
-        case a: AuthData.IdentifiedOrgAuth => Some(
-          AuthData.IdentifiedAuth(
-            createdAt = a.createdAt,
-            requestId = a.requestId,
-            user = a.user
-          )
-        )
-      }
-
-      authData match {
+      auth(request.headers) match {
         case None => Future(
           unauthorized(request)
         )

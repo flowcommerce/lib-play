@@ -3,7 +3,7 @@ package io.flow.play.controllers
 import io.flow.common.v0.models.{Environment, Role, UserReference}
 import io.flow.play.clients.MockConfig
 import io.flow.play.util.OrgData.{AnonymousOrgData, IdentifiedOrgData}
-import io.flow.play.util.{AuthData, AuthHeaders, Config}
+import io.flow.play.util.{AuthData, Config}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import org.joda.time.DateTime
@@ -17,31 +17,60 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
   // TODO: Bind to the specific instance of mockConfig
   override lazy val app = new GuiceApplicationBuilder().bindings(bind[Config].to[MockConfig]).build()
 
-  private[this] val testTrait = new AuthDataFromFlowAuthHeader {
-    override def tokenClient = sys.error("Not supported")
-    override def config = mockConfig
-    override def jwtSalt = salt
-  }
+  private[this] val user = UserReference("usr-20151006-1")
 
   "parse AuthData.AnonymousAuth w/ no user" in {
-    val ts = new DateTime()
+    val testCase = new AuthDataAnonymousAuthFromFlowAuthHeader {
+      override def tokenClient = sys.error("Not supported")
+      override def config = mockConfig
+      override def jwtSalt = salt
+    }
+
+    val ts = DateTime.now
     val data = AuthData.AnonymousAuth(
       requestId = "test",
       createdAt = ts,
       user = None
     )
 
-    val result = testTrait.parse(data.jwt(salt)).getOrElse {
+    val result = testCase.parse(data.jwt(salt)).getOrElse {
       sys.error("Failed to parse")
-    }.asInstanceOf[AuthData.AnonymousAuth]
+    }
     result.requestId must be("test")
     result.createdAt must be(ts)
     result.user must be(None)
   }
 
+  "parse AuthData.AnonymousAuth w/ user" in {
+    val testCase = new AuthDataAnonymousAuthFromFlowAuthHeader {
+      override def tokenClient = sys.error("Not supported")
+      override def config = mockConfig
+      override def jwtSalt = salt
+    }
+
+    val ts = DateTime.now
+    val data = AuthData.AnonymousAuth(
+      requestId = "test",
+      createdAt = ts,
+      user = Some(user)
+    )
+
+    val result = testCase.parse(data.jwt(salt)).getOrElse {
+      sys.error("Failed to parse")
+    }
+    result.requestId must be("test")
+    result.createdAt must be(ts)
+    result.user must be(Some(user))
+  }
+
   "parse AuthData.IdentifiedOrgAuth" in {
-    val ts = new DateTime()
-    val user = UserReference("usr-20151006-1")
+    val testCase = new AuthDataIdentifiedOrgAuthFromFlowAuthHeader {
+      override def tokenClient = sys.error("Not supported")
+      override def config = mockConfig
+      override def jwtSalt = salt
+    }
+
+    val ts = DateTime.now
     val data = AuthData.IdentifiedOrgAuth(
       requestId = "test",
       createdAt = ts,
@@ -53,9 +82,9 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
       )
     )
 
-    val result = testTrait.parse(data.jwt(salt)).getOrElse {
+    val result = testCase.parse(data.jwt(salt)).getOrElse {
       sys.error("Failed to parse")
-    }.asInstanceOf[AuthData.IdentifiedOrgAuth]
+    }
 
     result.requestId must be("test")
     result.createdAt must be(ts)
@@ -66,8 +95,13 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
   }
 
   "parse AuthData.AnonymousOrgAuth" in {
-    val ts = new DateTime()
-    val user = UserReference("usr-20151006-1")
+    val testCase = new AuthDataAnonymousOrgAuthFromFlowAuthHeader {
+      override def tokenClient = sys.error("Not supported")
+      override def config = mockConfig
+      override def jwtSalt = salt
+    }
+
+    val ts = DateTime.now
     val data = AuthData.AnonymousOrgAuth(
       requestId = "test",
       createdAt = ts,
@@ -78,9 +112,9 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
       )
     )
 
-    val result = testTrait.parse(data.jwt(salt)).getOrElse {
+    val result = testCase.parse(data.jwt(salt)).getOrElse {
       sys.error("Failed to parse")
-    }.asInstanceOf[AuthData.AnonymousOrgAuth]
+    }
 
     result.requestId must be("test")
     result.createdAt must be(ts)
@@ -90,12 +124,22 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
   }
 
   "expired" in {
+    val testCase = new AuthDataAnonymousAuthFromFlowAuthHeader {
+      override def tokenClient = sys.error("Not supported")
+      override def config = mockConfig
+      override def jwtSalt = salt
+    }
+
     val data = AuthData.AnonymousAuth(
       requestId = "test",
-      createdAt = DateTime.now.plusMinutes(5),
+      createdAt = DateTime.now,
       user = None
     )
 
-    testTrait.parse(data.jwt(salt)) must be(None)
+    testCase.parse(data.jwt(salt)).isDefined must be(true)
+
+    testCase.parse(data.copy(
+      createdAt = DateTime.now.plusMinutes(5)
+    ).jwt(salt)) must be(None)
   }
 }

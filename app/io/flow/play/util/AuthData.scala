@@ -12,6 +12,7 @@ import play.api.Logger
 case class AuthDataMap(
   requestId: String,
   createdAt: DateTime,
+  session: Option[FlowSession],
   user: Option[UserReference] = None,
   organization: Option[String] = None,
   environment: Option[Environment] = None,
@@ -23,12 +24,27 @@ case class AuthDataMap(
       AuthDataMap.Fields.RequestId -> Some(requestId),
       AuthDataMap.Fields.CreatedAt -> Some(dateTime.print(createdAt)),
       AuthDataMap.Fields.UserId -> user.map(_.id),
+      AuthDataMap.Fields.Session -> session.map(_.id),
       AuthDataMap.Fields.Organization -> organization,
       AuthDataMap.Fields.Environment -> environment.map(_.toString),
       AuthDataMap.Fields.Role -> role.map(_.toString)
     ).flatMap { case (k, value) => value.map { v => k -> v } }
   }
 
+}
+
+/**
+  * Makes available key data from the flow session. These data
+  * come from the JWT Headers usually set by the API proxy. We
+  * do not make ALL session data available - but provide a base
+  * class here to expose more information over time as it becomes
+  * critical (as well as providing a strongly typed class to
+  * store the session id)
+  */
+case class FlowSession(
+  id: String
+) {
+  assert(id.startsWith("F51"), s"Flow session id must start with $id and not[${id.substring(0, 4)}]")
 }
 
 /**
@@ -59,6 +75,12 @@ sealed trait AuthData {
   def requestId: String
 
   /**
+    * If a valid session id was set as part of the request, the session information
+    * will be available here..
+    */
+  def session: Option[FlowSession]
+
+  /**
     * Add specific data to assist in serialization to jwt map
     */
   protected def decorate(base: AuthDataMap): AuthDataMap
@@ -71,7 +93,8 @@ sealed trait AuthData {
     val all = decorate(
       AuthDataMap(
         requestId = requestId,
-        createdAt = createdAt
+        createdAt = createdAt,
+        session = session
       )
     )
 
@@ -87,6 +110,7 @@ object AuthDataMap {
     val RequestId = "request_id"
     val CreatedAt = "created_at"
     val UserId = "user_id"
+    val Session = "session"
     val Organization = "organization"
     val Environment = "environment"
     val Role = "role"
@@ -100,6 +124,9 @@ object AuthDataMap {
       val requestId = data.get(Fields.RequestId).getOrElse {
         Logger.warn("JWT Token did not have a request_id - generated a new request id")
         "lib-play-" + UUID.randomUUID.toString
+      }
+      val session = data.get(Fields.Session).map { id =>
+        FlowSession(id = id)
       }
       val user: Option[UserReference] = data.get(Fields.UserId).map(UserReference.apply)
       val organizationId: Option[String] = data.get(Fields.Organization)
@@ -130,6 +157,7 @@ object AuthDataMap {
         AuthDataMap(
           createdAt = createdAt,
           requestId = requestId,
+          session = session,
           user = user,
           organization = organizationId,
           environment = environment,
@@ -145,6 +173,7 @@ object AuthData {
   case class AnonymousAuth(
     override val createdAt: DateTime = DateTime.now,
     override val requestId: String,
+    override val session: Option[FlowSession],
     user: Option[UserReference]
   ) extends AuthData {
 
@@ -158,12 +187,19 @@ object AuthData {
 
   object AnonymousAuth {
 
+    val Empty = AnonymousAuth(
+      requestId = AuthHeaders.generateRequestId("anonymousrequest"),
+      session = None,
+      user = None
+    )
+
     def fromMap(data: Map[String, String]): Option[AnonymousAuth] = {
       AuthDataMap.fromMap(data) { dm =>
         Some(
           AnonymousAuth(
             createdAt = dm.createdAt,
             requestId = dm.requestId,
+            session = dm.session,
             user = dm.user
           )
         )
@@ -175,6 +211,7 @@ object AuthData {
   case class AnonymousOrgAuth(
     override val createdAt: DateTime = DateTime.now,
     override val requestId: String,
+    override val session: Option[FlowSession],
     user: Option[UserReference],
     orgData: OrgData.AnonymousOrgData
   ) extends AuthData {
@@ -198,6 +235,7 @@ object AuthData {
               AnonymousOrgAuth(
                 createdAt = dm.createdAt,
                 requestId = dm.requestId,
+                session = dm.session,
                 user = dm.user,
                 orgData = OrgData.AnonymousOrgData(
                   organization = org,
@@ -215,6 +253,7 @@ object AuthData {
   case class IdentifiedAuth(
     override val createdAt: DateTime = DateTime.now,
     override val requestId: String,
+    override val session: Option[FlowSession],
     user: UserReference
   ) extends AuthData {
 
@@ -234,6 +273,7 @@ object AuthData {
           IdentifiedAuth(
             createdAt = dm.createdAt,
             requestId = dm.requestId,
+            session = dm.session,
             user = user
           )
         }
@@ -244,6 +284,7 @@ object AuthData {
   case class IdentifiedOrgAuth(
     override val createdAt: DateTime = DateTime.now,
     override val requestId: String,
+    override val session: Option[FlowSession],
     user: UserReference,
     orgData: OrgData.IdentifiedOrgData
   ) extends AuthData {
@@ -269,6 +310,7 @@ object AuthData {
               IdentifiedOrgAuth(
                 createdAt = dm.createdAt,
                 requestId = dm.requestId,
+                session = dm.session,
                 user = user,
                 orgData = OrgData.IdentifiedOrgData(
                   organization = org,

@@ -3,7 +3,7 @@ package io.flow.play.controllers
 import io.flow.common.v0.models.{Environment, Role, UserReference}
 import io.flow.play.clients.MockConfig
 import io.flow.play.util.OrgData.{AnonymousOrgData, IdentifiedOrgData}
-import io.flow.play.util.{AuthData, Config}
+import io.flow.play.util.{AuthData, Config, FlowSession}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import org.joda.time.DateTime
@@ -28,6 +28,7 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     val ts = DateTime.now
     val data = AuthData.AnonymousAuth(
       requestId = "test",
+      session = None,
       createdAt = ts,
       user = None
     )
@@ -37,6 +38,26 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     }
     result.requestId must be("test")
     result.createdAt must be(ts)
+    result.session must be(None)
+    result.user must be(None)
+  }
+
+  "parse AuthData.AnonymousAuth w/ no user and session" in {
+    val ts = DateTime.now
+    val session = FlowSession(id = "F51test")
+    val data = AuthData.AnonymousAuth(
+      requestId = "test",
+      session = Some(session),
+      createdAt = ts,
+      user = None
+    )
+
+    val result = controller.parse(data.jwt(salt))(AuthData.AnonymousAuth.fromMap).getOrElse {
+      sys.error("Failed to parse")
+    }
+    result.requestId must be("test")
+    result.createdAt must be(ts)
+    result.session must be(Some(session))
     result.user must be(None)
   }
 
@@ -44,6 +65,7 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     val ts = DateTime.now
     val data = AuthData.AnonymousAuth(
       requestId = "test",
+      session = None,
       createdAt = ts,
       user = Some(user)
     )
@@ -53,6 +75,7 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     }
     result.requestId must be("test")
     result.createdAt must be(ts)
+    result.session must be(None)
     result.user must be(Some(user))
   }
 
@@ -60,6 +83,7 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     val ts = DateTime.now
     val data = AuthData.IdentifiedOrgAuth(
       requestId = "test",
+      session = None,
       createdAt = ts,
       user = user,
       orgData = IdentifiedOrgData(
@@ -75,6 +99,7 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
 
     result.requestId must be("test")
     result.createdAt must be(ts)
+    result.session must be(None)
     result.user must be(user)
     result.orgData.organization must be("demo")
     result.orgData.environment must be(Environment.Sandbox)
@@ -85,6 +110,7 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     val ts = DateTime.now
     val data = AuthData.AnonymousOrgAuth(
       requestId = "test",
+      session = None,
       createdAt = ts,
       user = Some(user),
       orgData = AnonymousOrgData(
@@ -99,6 +125,7 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
 
     result.requestId must be("test")
     result.createdAt must be(ts)
+    result.session must be(None)
     result.user must be(Some(user))
     result.orgData.organization must be("demo")
     result.orgData.environment must be(Environment.Sandbox)
@@ -108,6 +135,7 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     val data = AuthData.AnonymousAuth(
       requestId = "test",
       createdAt = DateTime.now,
+      session = None,
       user = None
     )
 

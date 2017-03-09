@@ -93,10 +93,7 @@ trait FlowController extends FlowControllerHelpers {
     def invokeBlock[A](request: Request[A], block: (AnonymousRequest[A]) => Future[Result]): Future[Result] = {
       val ad = auth(request.headers)(AuthData.AnonymousAuth.fromMap).getOrElse {
         // Create an empty header here so at least requestId tracking can start
-        AuthData.AnonymousAuth(
-          requestId = AuthHeaders.generateRequestId("anonymousrequest"),
-          user = None
-        )
+        AuthData.AnonymousAuth.Empty
       }
 
       block(

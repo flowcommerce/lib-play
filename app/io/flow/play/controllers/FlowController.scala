@@ -83,8 +83,7 @@ trait FlowController extends FlowControllerHelpers {
   ): Option[T] = {
     claimsSet.asSimpleMap.toOption.flatMap { claims =>
       f(claims).filter { auth =>
-        val expiration = DateTime.now.plusSeconds(authExpirationTimeSeconds)
-        auth.createdAt.isBefore(expiration)
+        auth.createdAt.plusSeconds(authExpirationTimeSeconds).isAfterNow
       }
     }
   }

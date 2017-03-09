@@ -207,6 +207,7 @@ object AuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
       base.copy(
+        session = Some(session),
         organization = Some(orgData.organization),
         environment = Some(orgData.environment)
       )

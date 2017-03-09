@@ -64,7 +64,7 @@ object AuthHeaders {
       requestId = requestId,
       session = session,
       user = user,
-      orgData = OrgData.IdentifiedOrgData(
+      orgData = OrgData.Identified(
         organization = org,
         role = role,
         environment = environment

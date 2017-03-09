@@ -213,7 +213,7 @@ object AuthData {
     override val requestId: String,
     override val session: Option[FlowSession],
     user: Option[UserReference],
-    orgData: OrgData.AnonymousOrgData
+    orgData: OrgData.Anonymous
   ) extends AuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
@@ -237,7 +237,7 @@ object AuthData {
                 requestId = dm.requestId,
                 session = dm.session,
                 user = dm.user,
-                orgData = OrgData.AnonymousOrgData(
+                orgData = OrgData.Anonymous(
                   organization = org,
                   environment = env
                 )
@@ -281,12 +281,13 @@ object AuthData {
     }
 
   }
+
   case class IdentifiedOrgAuth(
     override val createdAt: DateTime = DateTime.now,
     override val requestId: String,
     override val session: Option[FlowSession],
     user: UserReference,
-    orgData: OrgData.IdentifiedOrgData
+    orgData: OrgData.Identified
   ) extends AuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
@@ -312,7 +313,7 @@ object AuthData {
                 requestId = dm.requestId,
                 session = dm.session,
                 user = user,
-                orgData = OrgData.IdentifiedOrgData(
+                orgData = OrgData.Identified(
                   organization = org,
                   environment = env,
                   role = role
@@ -335,12 +336,12 @@ sealed trait OrgData {
 
 object OrgData {
 
-  case class AnonymousOrgData(
+  case class Anonymous(
     override val organization: String,
     override val environment: Environment
   ) extends OrgData
 
-  case class IdentifiedOrgData(
+  case class Identified(
     override val organization: String,
     override val environment: Environment,
     role: Role

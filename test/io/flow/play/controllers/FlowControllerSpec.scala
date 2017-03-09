@@ -2,7 +2,7 @@ package io.flow.play.controllers
 
 import io.flow.common.v0.models.{Environment, Role, UserReference}
 import io.flow.play.clients.MockConfig
-import io.flow.play.util.OrgData.{AnonymousOrgData, IdentifiedOrgData}
+import io.flow.play.util.OrgData.{Anonymous, Identified}
 import io.flow.play.util.{AuthData, Config, FlowSession}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -86,7 +86,7 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
       session = None,
       createdAt = ts,
       user = user,
-      orgData = IdentifiedOrgData(
+      orgData = Identified(
         organization = "demo",
         environment = Environment.Sandbox,
         role = Role.Member
@@ -113,7 +113,7 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
       session = None,
       createdAt = ts,
       user = Some(user),
-      orgData = AnonymousOrgData(
+      orgData = Anonymous(
         organization = "demo",
         environment = Environment.Sandbox
       )

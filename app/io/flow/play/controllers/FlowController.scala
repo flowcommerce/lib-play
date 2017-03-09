@@ -35,7 +35,7 @@ trait FlowController extends FlowControllerHelpers {
     headers.get(AuthHeaders.Header).flatMap { v => parse(v)(f) }
   }
 
-  private[this] def parse[T <: AuthData](value: String)(
+  def parse[T <: AuthData](value: String)(
     f: Map[String, String] => Option[T]
   ): Option[T] = {
     value match {

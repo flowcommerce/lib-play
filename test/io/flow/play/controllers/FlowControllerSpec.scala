@@ -19,13 +19,12 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
 
   private[this] val user = UserReference("usr-20151006-1")
 
-  "parse AuthData.AnonymousAuth w/ no user" in {
-    val testCase = new AuthDataAnonymousAuthFromFlowAuthHeader {
-      override def tokenClient = sys.error("Not supported")
-      override def config = mockConfig
-      override def jwtSalt = salt
-    }
+  private[this] val controller = new FlowController {
+    override def config = mockConfig
+    override def jwtSalt = salt
+  }
 
+  "parse AuthData.AnonymousAuth w/ no user" in {
     val ts = DateTime.now
     val data = AuthData.AnonymousAuth(
       requestId = "test",
@@ -33,7 +32,7 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
       user = None
     )
 
-    val result = testCase.parse(data.jwt(salt)).getOrElse {
+    val result = controller.parse(data.jwt(salt))(AuthData.AnonymousAuth.fromMap).getOrElse {
       sys.error("Failed to parse")
     }
     result.requestId must be("test")
@@ -42,12 +41,6 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
   }
 
   "parse AuthData.AnonymousAuth w/ user" in {
-    val testCase = new AuthDataAnonymousAuthFromFlowAuthHeader {
-      override def tokenClient = sys.error("Not supported")
-      override def config = mockConfig
-      override def jwtSalt = salt
-    }
-
     val ts = DateTime.now
     val data = AuthData.AnonymousAuth(
       requestId = "test",
@@ -55,7 +48,7 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
       user = Some(user)
     )
 
-    val result = testCase.parse(data.jwt(salt)).getOrElse {
+    val result = controller.parse(data.jwt(salt))(AuthData.AnonymousAuth.fromMap).getOrElse {
       sys.error("Failed to parse")
     }
     result.requestId must be("test")
@@ -64,12 +57,6 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
   }
 
   "parse AuthData.IdentifiedOrgAuth" in {
-    val testCase = new AuthDataIdentifiedOrgAuthFromFlowAuthHeader {
-      override def tokenClient = sys.error("Not supported")
-      override def config = mockConfig
-      override def jwtSalt = salt
-    }
-
     val ts = DateTime.now
     val data = AuthData.IdentifiedOrgAuth(
       requestId = "test",
@@ -82,7 +69,7 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
       )
     )
 
-    val result = testCase.parse(data.jwt(salt)).getOrElse {
+    val result = controller.parse(data.jwt(salt))(AuthData.IdentifiedOrgAuth.fromMap).getOrElse {
       sys.error("Failed to parse")
     }
 
@@ -95,12 +82,6 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
   }
 
   "parse AuthData.AnonymousOrgAuth" in {
-    val testCase = new AuthDataAnonymousOrgAuthFromFlowAuthHeader {
-      override def tokenClient = sys.error("Not supported")
-      override def config = mockConfig
-      override def jwtSalt = salt
-    }
-
     val ts = DateTime.now
     val data = AuthData.AnonymousOrgAuth(
       requestId = "test",
@@ -112,7 +93,7 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
       )
     )
 
-    val result = testCase.parse(data.jwt(salt)).getOrElse {
+    val result = controller.parse(data.jwt(salt))(AuthData.AnonymousOrgAuth.fromMap).getOrElse {
       sys.error("Failed to parse")
     }
 
@@ -124,22 +105,16 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
   }
 
   "expired" in {
-    val testCase = new AuthDataAnonymousAuthFromFlowAuthHeader {
-      override def tokenClient = sys.error("Not supported")
-      override def config = mockConfig
-      override def jwtSalt = salt
-    }
-
     val data = AuthData.AnonymousAuth(
       requestId = "test",
       createdAt = DateTime.now,
       user = None
     )
 
-    testCase.parse(data.jwt(salt)).isDefined must be(true)
+    controller.parse(data.jwt(salt))(AuthData.AnonymousAuth.fromMap).isDefined must be(true)
 
-    testCase.parse(data.copy(
+    controller.parse(data.copy(
       createdAt = DateTime.now.plusMinutes(5)
-    ).jwt(salt)) must be(None)
+    ).jwt(salt))(AuthData.AnonymousAuth.fromMap) must be(None)
   }
 }

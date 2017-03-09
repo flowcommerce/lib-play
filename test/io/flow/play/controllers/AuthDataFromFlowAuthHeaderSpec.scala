@@ -139,7 +139,7 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
     testCase.parse(data.jwt(salt)).isDefined must be(true)
 
     testCase.parse(data.copy(
-      createdAt = DateTime.now.minusMinutes(5)
+      createdAt = DateTime.now.plusMinutes(5)
     ).jwt(salt)) must be(None)
   }
 }

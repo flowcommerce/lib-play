@@ -51,7 +51,6 @@ trait AuthDataFromFlowAuthHeader[T <: AuthData]  {
     claimsSet.asSimpleMap.toOption.flatMap { claims =>
       fromMap(claims).filter { auth =>
         val expiration = DateTime.now.plusSeconds(authExpirationTimeSeconds)
-        println(s"expiration[$expiration] createdAt[${auth.createdAt}]")
         auth.createdAt.isBefore(expiration)
       }
     }

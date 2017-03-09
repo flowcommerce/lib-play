@@ -139,7 +139,7 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
       user = None
     )
 
-    controller.parse(data.jwt(salt))(AuthData.AnonymousOrgAuth.fromMap).isDefined must be(true)
+    controller.parse(data.jwt(salt))(AuthData.AnonymousAuth.fromMap).isDefined must be(true)
 
     controller.parse(data.copy(
       createdAt = DateTime.now.minusMinutes(1)

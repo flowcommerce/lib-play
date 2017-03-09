@@ -2,7 +2,7 @@ package io.flow.play.controllers
 
 import io.flow.common.v0.models.{Environment, Role, UserReference}
 import io.flow.play.clients.MockConfig
-import io.flow.play.util.OrgData.{Anonymous, Identified}
+import io.flow.play.util.OrgData.{Session, Identified}
 import io.flow.play.util.{AuthData, Config, FlowSession}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -18,6 +18,7 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
   override lazy val app = new GuiceApplicationBuilder().bindings(bind[Config].to[MockConfig]).build()
 
   private[this] val user = UserReference("usr-20151006-1")
+  private[this] val session = FlowSession(id = "F51test")
 
   private[this] val controller = new FlowController {
     override def config = mockConfig
@@ -28,7 +29,6 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     val ts = DateTime.now
     val data = AuthData.AnonymousAuth(
       requestId = "test",
-      session = None,
       createdAt = ts,
       user = None
     )
@@ -38,16 +38,13 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     }
     result.requestId must be("test")
     result.createdAt must be(ts)
-    result.session must be(None)
     result.user must be(None)
   }
 
   "parse AuthData.AnonymousAuth w/ no user and session" in {
     val ts = DateTime.now
-    val session = FlowSession(id = "F51test")
     val data = AuthData.AnonymousAuth(
       requestId = "test",
-      session = Some(session),
       createdAt = ts,
       user = None
     )
@@ -57,7 +54,6 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     }
     result.requestId must be("test")
     result.createdAt must be(ts)
-    result.session must be(Some(session))
     result.user must be(None)
   }
 
@@ -65,7 +61,6 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     val ts = DateTime.now
     val data = AuthData.AnonymousAuth(
       requestId = "test",
-      session = None,
       createdAt = ts,
       user = Some(user)
     )
@@ -75,7 +70,6 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     }
     result.requestId must be("test")
     result.createdAt must be(ts)
-    result.session must be(None)
     result.user must be(Some(user))
   }
 
@@ -83,7 +77,6 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     val ts = DateTime.now
     val data = AuthData.IdentifiedOrgAuth(
       requestId = "test",
-      session = None,
       createdAt = ts,
       user = user,
       orgData = Identified(
@@ -99,34 +92,31 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
 
     result.requestId must be("test")
     result.createdAt must be(ts)
-    result.session must be(None)
     result.user must be(user)
     result.orgData.organization must be("demo")
     result.orgData.environment must be(Environment.Sandbox)
     result.orgData.role must be(Role.Member)
   }
 
-  "parse AuthData.AnonymousOrgAuth" in {
+  "parse AuthData.SessionOrgAuth" in {
     val ts = DateTime.now
-    val data = AuthData.AnonymousOrgAuth(
+    val data = AuthData.SessionOrgAuth(
       requestId = "test",
-      session = None,
+      session = session,
       createdAt = ts,
-      user = Some(user),
-      orgData = Anonymous(
+      orgData = Session(
         organization = "demo",
         environment = Environment.Sandbox
       )
     )
 
-    val result = controller.parse(data.jwt(salt))(AuthData.AnonymousOrgAuth.fromMap).getOrElse {
+    val result = controller.parse(data.jwt(salt))(AuthData.SessionOrgAuth.fromMap).getOrElse {
       sys.error("Failed to parse")
     }
 
     result.requestId must be("test")
     result.createdAt must be(ts)
-    result.session must be(None)
-    result.user must be(Some(user))
+    result.session must be(session)
     result.orgData.organization must be("demo")
     result.orgData.environment must be(Environment.Sandbox)
   }
@@ -135,7 +125,6 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     val data = AuthData.AnonymousAuth(
       requestId = "test",
       createdAt = DateTime.now,
-      session = None,
       user = None
     )
 

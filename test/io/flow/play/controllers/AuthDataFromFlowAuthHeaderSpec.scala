@@ -3,7 +3,7 @@ package io.flow.play.controllers
 import io.flow.common.v0.models.{Environment, Role, UserReference}
 import io.flow.play.clients.MockConfig
 import io.flow.play.util.OrgData.{AnonymousOrgData, IdentifiedOrgData}
-import io.flow.play.util.{AuthData, AuthHeaders, Config}
+import io.flow.play.util.{AuthData, Config}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import org.joda.time.DateTime

@@ -44,7 +44,7 @@ case class AuthDataMap(
 case class FlowSession(
   id: String
 ) {
-  assert(id.startsWith("F51"), s"Flow session id must start with $id and not[${id.substring(0, 4)}]")
+  assert(id.startsWith("F51"), s"Flow session id must start with 'F51' and not[${id.substring(0, 3)}]")
 }
 
 /**

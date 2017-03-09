@@ -132,10 +132,14 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
 
     val data = AuthData.AnonymousAuth(
       requestId = "test",
-      createdAt = DateTime.now.plusMinutes(5),
+      createdAt = DateTime.now,
       user = None
     )
 
-    testCase.parse(data.jwt(salt)) must be(None)
+    testCase.parse(data.jwt(salt)).isDefined must be(true)
+
+    testCase.parse(data.copy(
+      createdAt = DateTime.now.minusMinutes(5)
+    ).jwt(salt)) must be(None)
   }
 }

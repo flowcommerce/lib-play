@@ -34,13 +34,18 @@ trait AuthDataFromFlowAuthHeader[T <: AuthData]  {
   }
 
   def parse(value: String): Option[T] = {
+    println(s"value[$value]")
     value match {
       case JsonWebToken(_, claimsSet, _) if jwtIsValid(value) => parseJwtToken(claimsSet)
       case _ => None
     }
   }
 
-  private[this] def jwtIsValid(token: String): Boolean = JsonWebToken.validate(token, jwtSalt)
+  private[this] def jwtIsValid(token: String): Boolean = {
+    val v = JsonWebToken.validate(token, jwtSalt)
+    println(s" valid: $v")
+    v
+  }
 
   private[this] def parseJwtToken(claimsSet: JwtClaimsSetJValue): Option[T] = {
     claimsSet.asSimpleMap.toOption.flatMap { claims =>

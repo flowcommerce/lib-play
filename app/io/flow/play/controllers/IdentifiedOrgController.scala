@@ -11,13 +11,9 @@ import play.api.mvc._
   * Provides helpers for actions that require a user and an
   * organization to be identified.
   */
-trait IdentifiedOrgController extends FlowControllerHelpers with AuthDataFromFlowAuthHeader[AuthData.IdentifiedOrgAuth] {
+trait IdentifiedOrgController extends FlowControllerHelpers with AuthDataIdentifiedOrgAuthFromFlowAuthHeader {
 
   import scala.concurrent.ExecutionContext.Implicits.global
-
-  override protected def fromMap(data: Map[String, String]): Option[AuthData.IdentifiedOrgAuth] = {
-    AuthData.IdentifiedOrgAuth.fromMap(data)
-  }
 
   def unauthorized[A](request: Request[A]): Result = Unauthorized
 

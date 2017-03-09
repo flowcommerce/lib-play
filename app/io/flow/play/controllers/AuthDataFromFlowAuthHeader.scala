@@ -33,7 +33,7 @@ trait AuthDataFromFlowAuthHeader[T <: AuthData]  {
     headers.get(AuthHeaders.Header).flatMap { parse }
   }
 
-  private[this] def parse(value: String): Option[T] = {
+  def parse(value: String): Option[T] = {
     value match {
       case JsonWebToken(_, claimsSet, _) if jwtIsValid(value) => parseJwtToken(claimsSet)
       case _ => None
@@ -46,6 +46,7 @@ trait AuthDataFromFlowAuthHeader[T <: AuthData]  {
     claimsSet.asSimpleMap.toOption.flatMap { claims =>
       fromMap(claims).filter { auth =>
         val expiration = DateTime.now.plusSeconds(authExpirationTimeSeconds)
+        println(s"expiration[$expiration] createdAt[${auth.createdAt}]")
         auth.createdAt.isBefore(expiration)
       }
     }
@@ -54,5 +55,33 @@ trait AuthDataFromFlowAuthHeader[T <: AuthData]  {
 }
 
 trait AuthDataAnonymousAuthFromFlowAuthHeader extends AuthDataFromFlowAuthHeader[AuthData.AnonymousAuth] {
-  
+
+  override protected def fromMap(data: Map[String, String]): Option[AuthData.AnonymousAuth] = {
+    AuthData.AnonymousAuth.fromMap(data)
+  }
+
+}
+
+trait AuthDataIdentifiedAuthFromFlowAuthHeader extends AuthDataFromFlowAuthHeader[AuthData.IdentifiedAuth] {
+
+  override protected def fromMap(data: Map[String, String]): Option[AuthData.IdentifiedAuth] = {
+    AuthData.IdentifiedAuth.fromMap(data)
+  }
+
+}
+
+trait AuthDataIdentifiedOrgAuthFromFlowAuthHeader extends AuthDataFromFlowAuthHeader[AuthData.IdentifiedOrgAuth] {
+
+  override protected def fromMap(data: Map[String, String]): Option[AuthData.IdentifiedOrgAuth] = {
+    AuthData.IdentifiedOrgAuth.fromMap(data)
+  }
+
+}
+
+trait AuthDataAnonymousOrgAuthFromFlowAuthHeader extends AuthDataFromFlowAuthHeader[AuthData.AnonymousOrgAuth] {
+
+  override protected def fromMap(data: Map[String, String]): Option[AuthData.AnonymousOrgAuth] = {
+    AuthData.AnonymousOrgAuth.fromMap(data)
+  }
+
 }

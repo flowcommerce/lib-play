@@ -13,7 +13,7 @@ import play.api.mvc._
   * with users - intended to allow an anonymous action to succeed in cases
   * where we may or may not have a user.
   */
-trait AnonymousController extends FlowControllerHelpers with AuthDataFromFlowAuthHeader[AuthData.AnonymousAuth] {
+trait AnonymousController extends FlowControllerHelpers with AuthDataAnonymousAuthFromFlowAuthHeader {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -22,10 +22,6 @@ trait AnonymousController extends FlowControllerHelpers with AuthDataFromFlowAut
     * requests
     */
   def tokenClient: TokenClient
-
-  override protected def fromMap(data: Map[String, String]): Option[AuthData.AnonymousAuth] = {
-    AuthData.AnonymousAuth.fromMap(data)
-  }
 
   class AnonymousRequest[A](
     val auth: AuthData.AnonymousAuth,

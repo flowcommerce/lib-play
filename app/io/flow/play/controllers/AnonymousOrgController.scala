@@ -13,13 +13,9 @@ import scala.concurrent.Future
   * but allow for a user to be anonymous. Common example is a
   * user creating an order from a session on shopify.
   */
-trait AnonymousOrgController extends FlowControllerHelpers with AuthDataFromFlowAuthHeader[AuthData.AnonymousOrgAuth] {
+trait AnonymousOrgController extends FlowControllerHelpers with AuthDataAnonymousOrgAuthFromFlowAuthHeader {
 
   import scala.concurrent.ExecutionContext.Implicits.global
-
-  override protected def fromMap(data: Map[String, String]): Option[AuthData.AnonymousOrgAuth] = {
-    AuthData.AnonymousOrgAuth.fromMap(data)
-  }
 
   def unauthorized[A](request: Request[A]): Result = Unauthorized
 

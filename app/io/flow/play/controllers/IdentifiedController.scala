@@ -10,13 +10,9 @@ import play.api.mvc._
 /**
   * Provides helpers for actions that require a user to be identified.
   */
-trait IdentifiedController extends FlowControllerHelpers with AuthDataFromFlowAuthHeader[AuthData.IdentifiedAuth] {
+trait IdentifiedController extends FlowControllerHelpers with AuthDataIdentifiedAuthFromFlowAuthHeader {
 
   import scala.concurrent.ExecutionContext.Implicits.global
-
-  override protected def fromMap(data: Map[String, String]): Option[AuthData.IdentifiedAuth] = {
-    AuthData.IdentifiedAuth.fromMap(data)
-  }
 
   def unauthorized[A](request: Request[A]): Result = Unauthorized
 

@@ -11,9 +11,13 @@ import play.api.mvc._
   * Provides helpers for actions that require a user and an
   * organization to be identified.
   */
-trait IdentifiedOrgController extends AnonymousController {
+trait IdentifiedOrgController extends FlowControllerHelpers with AuthDataFromFlowAuthHeader[AuthData.IdentifiedOrgAuth] {
 
   import scala.concurrent.ExecutionContext.Implicits.global
+
+  override protected def fromMap(data: Map[String, String]): Option[AuthData.IdentifiedOrgAuth] = {
+    AuthData.IdentifiedOrgAuth.fromMap(data)
+  }
 
   def unauthorized[A](request: Request[A]): Result = Unauthorized
 
@@ -34,17 +38,10 @@ trait IdentifiedOrgController extends AnonymousController {
           unauthorized(request)
         )
 
-        case Some(auth) => {
-          auth match {
-            case orgAuth: AuthData.IdentifiedOrgAuth => {
-              block(
-                new IdentifiedOrgRequest(orgAuth, request)
-              )
-            }
-            case _ => Future.successful(
-              unauthorized(request)
-            )
-          }
+        case Some(ad) => {
+          block(
+            new IdentifiedOrgRequest(ad, request)
+          )
         }
       }
     }

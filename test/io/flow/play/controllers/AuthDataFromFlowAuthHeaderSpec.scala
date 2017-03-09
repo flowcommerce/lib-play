@@ -17,13 +17,15 @@ class AuthDataFromFlowAuthHeaderSpec extends PlaySpec with OneAppPerSuite {
   // TODO: Bind to the specific instance of mockConfig
   override lazy val app = new GuiceApplicationBuilder().bindings(bind[Config].to[MockConfig]).build()
 
-  private[this] val testTrait = new AuthDataFromFlowAuthHeader {
+  private[this] trait TestTrait[T] extends AuthDataFromFlowAuthHeader[T] {
     override def tokenClient = sys.error("Not supported")
     override def config = mockConfig
     override def jwtSalt = salt
   }
 
   "parse AuthData.AnonymousAuth w/ no user" in {
+    val testTrait = new TestTrait[AuthData.AnonymousAuth] {}
+
     val ts = new DateTime()
     val data = AuthData.AnonymousAuth(
       requestId = "test",

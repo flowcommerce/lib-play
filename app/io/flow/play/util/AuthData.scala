@@ -92,12 +92,10 @@ object AuthDataMap {
     val Role = "role"
   }
 
-  /**
-    * Parses data in the map to an appropriate type of AuthData
-    */
-  //noinspection GetGetOrElse
-  def fromMap(data: Map[String, String]): Option[AuthData] = {
-    data.get("created_at").map { ts =>
+  def fromMap[T <: AuthData](data: Map[String, String])(
+    f: AuthDataMap => Option[T]
+  ): Option[T] = {
+    data.get("created_at").flatMap { ts =>
       val createdAt = ISODateTimeFormat.dateTimeParser.parseDateTime(ts)
       val requestId = data.get(Fields.RequestId).getOrElse {
         Logger.warn("JWT Token did not have a request_id - generated a new request id")
@@ -128,16 +126,16 @@ object AuthDataMap {
         }
       }
 
-      (user, organizationId, environment, role) match {
-        case (Some(u), Some(o), Some(e), Some(r)) => AuthData.IdentifiedOrgAuth(
-          createdAt, requestId, user = u, OrgData.IdentifiedOrgData(organization = o, environment = e, role = r)
+      f(
+        AuthDataMap(
+          createdAt = createdAt,
+          requestId = requestId,
+          user = user,
+          organization = organizationId,
+          environment = environment,
+          role = role
         )
-        case (Some(u), _, _, _) => AuthData.IdentifiedAuth(createdAt, requestId, user = u)
-        case (None, Some(o), Some(e), None) => AuthData.AnonymousOrgAuth(
-          createdAt, requestId, user = user, orgData = OrgData.AnonymousOrgData(organization = o, environment = e)
-        )
-        case (None, _, _, _) => AuthData.AnonymousAuth(createdAt, requestId, user = user)
-      }
+      )
     }
   }
 }
@@ -155,6 +153,23 @@ object AuthData {
         user = user
       )
     }
+
+  }
+
+  object AnonymousAuth {
+
+    def fromMap(data: Map[String, String]): Option[AnonymousAuth] = {
+      AuthDataMap.fromMap(data) { dm =>
+        Some(
+          AnonymousAuth(
+            createdAt = dm.createdAt,
+            requestId = dm.requestId,
+            user = dm.user
+          )
+        )
+      }
+    }
+
   }
 
   case class AnonymousOrgAuth(
@@ -171,7 +186,30 @@ object AuthData {
         environment = Some(orgData.environment)
       )
     }
+  }
 
+  object AnonymousOrgAuth {
+
+    def fromMap(data: Map[String, String]): Option[AnonymousOrgAuth] = {
+      AuthDataMap.fromMap(data) { dm =>
+        (dm.organization, dm.environment) match {
+          case (Some(org), Some(env)) => {
+            Some(
+              AnonymousOrgAuth(
+                createdAt = dm.createdAt,
+                requestId = dm.requestId,
+                user = dm.user,
+                orgData = OrgData.AnonymousOrgData(
+                  organization = org,
+                  environment = env
+                )
+              )
+            )
+          }
+          case _ => None
+        }
+      }
+    }
   }
 
   case class IdentifiedAuth(
@@ -188,6 +226,21 @@ object AuthData {
 
   }
 
+  object IdentifiedAuth {
+
+    def fromMap(data: Map[String, String]): Option[IdentifiedAuth] = {
+      AuthDataMap.fromMap(data) { dm =>
+        dm.user.map { user =>
+          IdentifiedAuth(
+            createdAt = dm.createdAt,
+            requestId = dm.requestId,
+            user = user
+          )
+        }
+      }
+    }
+
+  }
   case class IdentifiedOrgAuth(
     override val createdAt: DateTime = DateTime.now,
     override val requestId: String,
@@ -204,6 +257,31 @@ object AuthData {
       )
     }
 
+  }
+
+  object IdentifiedOrgAuth {
+
+    def fromMap(data: Map[String, String]): Option[IdentifiedOrgAuth] = {
+      AuthDataMap.fromMap(data) { dm =>
+        (dm.user, dm.organization, dm.environment, dm.role) match {
+          case (Some(user), Some(org), Some(env), Some(role)) => {
+            Some(
+              IdentifiedOrgAuth(
+                createdAt = dm.createdAt,
+                requestId = dm.requestId,
+                user = user,
+                orgData = OrgData.IdentifiedOrgData(
+                  organization = org,
+                  environment = env,
+                  role = role
+                )
+              )
+            )
+          }
+          case _ => None
+        }
+      }
+    }
   }
 
 }

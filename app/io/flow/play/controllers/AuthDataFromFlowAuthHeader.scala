@@ -6,25 +6,34 @@ import org.joda.time.DateTime
 import play.api.mvc.Headers
 import scala.concurrent.ExecutionContext
 
-trait AuthDataFromFlowAuthHeader  {
+trait AuthDataFromFlowAuthHeader[T <: AuthData]  {
 
   def config: Config
+
+  // Remove after all applications are upgraded to use X-Flow-Auth header.
+  def tokenClient: io.flow.token.v0.interfaces.Client
+
+  /**
+    * Override this method to convert a map of incoming headers to
+    * the appropriate instance of AuthData
+    */
+  protected def fromMap(data: Map[String, String]): Option[T]
 
   def jwtSalt: String = config.requiredString("JWT_SALT")
 
   private[this] val DefaultAuthExpirationTimeSeconds = 180
 
   private[this] lazy val authExpirationTimeSeconds = {
-    config.optionalInt("FLOW_AUTH_EXPIRATION_SECONDS").getOrElse(DefaultAuthExpirationTimeSeconds)
+    config.optionalPositiveInt("FLOW_AUTH_EXPIRATION_SECONDS").getOrElse(DefaultAuthExpirationTimeSeconds)
   }
   
   def auth(headers: Headers) (
     implicit ec: ExecutionContext
-  ): Option[AuthData] = {
+  ): Option[T] = {
     headers.get(AuthHeaders.Header).flatMap { parse }
   }
 
-  def parse(value: String): Option[AuthData] = {
+  private[this] def parse(value: String): Option[T] = {
     value match {
       case JsonWebToken(_, claimsSet, _) if jwtIsValid(value) => parseJwtToken(claimsSet)
       case _ => None
@@ -33,17 +42,17 @@ trait AuthDataFromFlowAuthHeader  {
 
   private[this] def jwtIsValid(token: String): Boolean = JsonWebToken.validate(token, jwtSalt)
 
-  private[this] def parseJwtToken(claimsSet: JwtClaimsSetJValue): Option[AuthData] = {
+  private[this] def parseJwtToken(claimsSet: JwtClaimsSetJValue): Option[T] = {
     claimsSet.asSimpleMap.toOption.flatMap { claims =>
-      AuthDataMap.fromMap(claims).filter { auth =>
+      fromMap(claims).filter { auth =>
         val expiration = DateTime.now.plusSeconds(authExpirationTimeSeconds)
         auth.createdAt.isBefore(expiration)
       }
     }
   }
 
-  // Everything below will be removed after all applications are
-  // upgraded to use X-Flow-Auth header.
-  def tokenClient: io.flow.token.v0.interfaces.Client
+}
 
+trait AuthDataAnonymousAuthFromFlowAuthHeader extends AuthDataFromFlowAuthHeader[AuthData.AnonymousAuth] {
+  
 }

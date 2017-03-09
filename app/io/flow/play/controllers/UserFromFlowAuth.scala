@@ -1,7 +1,7 @@
 package io.flow.play.controllers
 
 import io.flow.common.v0.models.UserReference
-import io.flow.play.util.AuthData
+import io.flow.play.util.{AuthData, AuthHeaders}
 import io.flow.token.v0.errors.UnitResponse
 import io.flow.token.v0.models._
 import java.util.UUID
@@ -15,7 +15,7 @@ import scala.concurrent.duration.Duration
 /**
   * @deprecated Use AuthDataFromFlowAuthHeader
   */
-trait UserFromFlowAuth extends AuthDataFromFlowAuthHeader {
+trait UserFromFlowAuth extends AuthDataFromFlowAuthHeader[AuthData.IdentifiedAuth] {
 
   /**
     * Uses the x-flow-auth header if present; otherwise defaults to
@@ -25,7 +25,7 @@ trait UserFromFlowAuth extends AuthDataFromFlowAuthHeader {
     headers: Headers
   ) (
     implicit ec: ExecutionContext
-  ): Option[AuthData] = {
+  ): Option[AuthData.IdentifiedAuth] = {
     super.auth(headers) match {
       case Some(data) => Some(data)
       case None => {
@@ -34,7 +34,9 @@ trait UserFromFlowAuth extends AuthDataFromFlowAuthHeader {
           Duration(5, "seconds")
         ).map { u =>
           AuthData.IdentifiedAuth(
-            requestId = headers.get("X-Flow-Request-Id").getOrElse("lib-play-depr-" + UUID.randomUUID.toString),
+            requestId = headers.get("X-Flow-Request-Id").getOrElse(
+              AuthHeaders.generateRequestId("lib-play-depr")
+            ),
             user = u
           )
         }

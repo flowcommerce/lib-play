@@ -1,6 +1,6 @@
 package io.flow.play.controllers
 
-import io.flow.play.util.AuthData
+import io.flow.play.util.{AuthData, AuthHeaders}
 import io.flow.common.v0.models.UserReference
 import io.flow.token.v0.interfaces.{Client => TokenClient}
 
@@ -13,7 +13,7 @@ import play.api.mvc._
   * with users - intended to allow an anonymous action to succeed in cases
   * where we may or may not have a user.
   */
-trait AnonymousController extends FlowControllerHelpers with AuthDataFromFlowAuthHeader {
+trait AnonymousController extends FlowControllerHelpers with AuthDataFromFlowAuthHeader[AuthData.AnonymousAuth] {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -23,46 +23,32 @@ trait AnonymousController extends FlowControllerHelpers with AuthDataFromFlowAut
     */
   def tokenClient: TokenClient
 
+  override protected def fromMap(data: Map[String, String]): Option[AuthData.AnonymousAuth] = {
+    AuthData.AnonymousAuth.fromMap(data)
+  }
+
   class AnonymousRequest[A](
-    val auth: Option[AuthData.AnonymousAuth],
+    val auth: AuthData.AnonymousAuth,
     request: Request[A]
   ) extends WrappedRequest[A](request) {
-    val user: Option[UserReference] = auth.flatMap(_.user)
+    val user: Option[UserReference] = auth.user
   }
 
   object Anonymous extends ActionBuilder[AnonymousRequest] {
 
     def invokeBlock[A](request: Request[A], block: (AnonymousRequest[A]) => Future[Result]): Future[Result] = {
-      val authData = auth(request.headers).map {
-        case a: AuthData.AnonymousAuth => a
-        case a: AuthData.IdentifiedAuth => AuthData.AnonymousAuth(
-          createdAt = a.createdAt,
-          requestId = a.requestId,
-          user = Some(a.user)
-        )
-        case a: AuthData.AnonymousOrgAuth => AuthData.AnonymousAuth(
-          createdAt = a.createdAt,
-          requestId = a.requestId,
-          user = a.user
-        )
-        case a: AuthData.IdentifiedOrgAuth => AuthData.AnonymousAuth(
-          createdAt = a.createdAt,
-          requestId = a.requestId,
-          user = Some(a.user)
+      val ad = auth(request.headers).getOrElse {
+        AuthData.AnonymousAuth(
+          requestId = AuthHeaders.generateRequestId("anonymousrequest"),
+          user = None
         )
       }
 
       block(
-        new AnonymousRequest(
-          auth = authData,
-          request = request
-        )
+        new AnonymousRequest(ad, request)
       )
     }
 
   }
 
 }
-
-trait AnonymousRestController extends AnonymousController with UserFromFlowAuth
-

@@ -1,7 +1,7 @@
 package io.flow.play.controllers
 
 import authentikat.jwt.{JsonWebToken, JwtClaimsSetJValue}
-import io.flow.play.util.{AuthData, AuthHeaders, Config}
+import io.flow.play.util.{AuthData, AuthHeaders, Config, FlowSession}
 import io.flow.common.v0.models.{Environment, UserReference}
 import org.joda.time.DateTime
 import play.api.mvc.Results.Unauthorized
@@ -16,11 +16,11 @@ class AnonymousRequest[A](
   val user: Option[UserReference] = auth.user
 }
 
-class AnonymousOrgRequest[A](
-  val auth: AuthData.AnonymousOrgAuth,
+class SessionOrgRequest[A](
+  val auth: AuthData.SessionOrgAuth,
   request: Request[A]
 ) extends WrappedRequest[A](request) {
-  val user: Option[UserReference] = auth.user
+  val flowSession: FlowSession = auth.session
   val organization: String = auth.orgData.organization
   val environment: Environment = auth.orgData.environment
 }
@@ -103,16 +103,16 @@ trait FlowController extends FlowControllerHelpers {
 
   }
 
-  object AnonymousOrg extends ActionBuilder[AnonymousOrgRequest] {
+  object SessionOrg extends ActionBuilder[SessionOrgRequest] {
 
-    def invokeBlock[A](request: Request[A], block: (AnonymousOrgRequest[A]) => Future[Result]): Future[Result] = {
-      auth(request.headers)(AuthData.AnonymousOrgAuth.fromMap) match {
+    def invokeBlock[A](request: Request[A], block: (SessionOrgRequest[A]) => Future[Result]): Future[Result] = {
+      auth(request.headers)(AuthData.SessionOrgAuth.fromMap) match {
         case None => Future.successful (
           unauthorized(request)
         )
         case Some(ad) => {
           block(
-            new AnonymousOrgRequest(ad, request)
+            new SessionOrgRequest(ad, request)
           )
         }
       }

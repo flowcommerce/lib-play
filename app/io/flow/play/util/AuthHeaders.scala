@@ -42,7 +42,6 @@ object AuthHeaders {
   ): AuthData.IdentifiedAuth = {
     AuthData.IdentifiedAuth(
       requestId = requestId,
-      session = session,
       user = user
     )
   }
@@ -62,7 +61,6 @@ object AuthHeaders {
 ): AuthData.IdentifiedOrgAuth = {
     AuthData.IdentifiedOrgAuth(
       requestId = requestId,
-      session = session,
       user = user,
       orgData = OrgData.Identified(
         organization = org,

@@ -9,6 +9,38 @@ import play.api.mvc.Results.Unauthorized
 import scala.concurrent.Future
 import play.api.mvc._
 
+class AnonymousRequest[A](
+  val auth: AuthData.AnonymousAuth,
+  request: Request[A]
+) extends WrappedRequest[A](request) {
+  val user: Option[UserReference] = auth.user
+}
+
+class AnonymousOrgRequest[A](
+  val auth: AuthData.AnonymousOrgAuth,
+  request: Request[A]
+) extends WrappedRequest[A](request) {
+  val user: Option[UserReference] = auth.user
+  val organization: String = auth.orgData.organization
+  val environment: Environment = auth.orgData.environment
+}
+
+class IdentifiedRequest[A](
+  val auth: AuthData.IdentifiedAuth,
+  request: Request[A]
+) extends WrappedRequest[A](request) {
+  val user: UserReference = auth.user
+}
+
+class IdentifiedOrgRequest[A](
+  val auth: AuthData.IdentifiedOrgAuth,
+  request: Request[A]
+) extends WrappedRequest[A](request) {
+  val user: UserReference = auth.user
+  val organization: String = auth.orgData.organization
+  val environment: Environment = auth.orgData.environment
+}
+
 /**
   * Primarily a marker to indicate intention to make all actions in a
   * controller anonymous. Also includes a few helper methods to interact
@@ -57,13 +89,6 @@ trait FlowController extends FlowControllerHelpers {
     }
   }
 
-  class AnonymousRequest[A](
-    val auth: AuthData.AnonymousAuth,
-    request: Request[A]
-  ) extends WrappedRequest[A](request) {
-    val user: Option[UserReference] = auth.user
-  }
-
   object Anonymous extends ActionBuilder[AnonymousRequest] {
 
     def invokeBlock[A](request: Request[A], block: (AnonymousRequest[A]) => Future[Result]): Future[Result] = {
@@ -82,15 +107,6 @@ trait FlowController extends FlowControllerHelpers {
 
   }
 
-  class AnonymousOrgRequest[A](
-    val auth: AuthData.AnonymousOrgAuth,
-    request: Request[A]
-  ) extends WrappedRequest[A](request) {
-    val user: Option[UserReference] = auth.user
-    val organization: String = auth.orgData.organization
-    val environment: Environment = auth.orgData.environment
-  }
-
   object AnonymousOrg extends ActionBuilder[AnonymousOrgRequest] {
 
     def invokeBlock[A](request: Request[A], block: (AnonymousOrgRequest[A]) => Future[Result]): Future[Result] = {
@@ -107,13 +123,6 @@ trait FlowController extends FlowControllerHelpers {
     }
   }
 
-  class IdentifiedRequest[A](
-    val auth: AuthData.IdentifiedAuth,
-    request: Request[A]
-  ) extends WrappedRequest[A](request) {
-    val user: UserReference = auth.user
-  }
-
   object Identified extends ActionBuilder[IdentifiedRequest] {
 
     def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]): Future[Result] = {
@@ -128,15 +137,6 @@ trait FlowController extends FlowControllerHelpers {
         }
       }
     }
-  }
-
-  class IdentifiedOrgRequest[A](
-     val auth: AuthData.IdentifiedOrgAuth,
-     request: Request[A]
-  ) extends WrappedRequest[A](request) {
-    val user: UserReference = auth.user
-    val organization: String = auth.orgData.organization
-    val environment: Environment = auth.orgData.environment
   }
 
   object IdentifiedOrg extends ActionBuilder[IdentifiedOrgRequest] {

@@ -39,11 +39,13 @@ object AuthHeaders {
     */
   def user(
     user: UserReference,
-    requestId: String = generateRequestId()
+    requestId: String = generateRequestId(),
+    session: Option[FlowSession] = None
   ): AuthData.Identified = {
     AuthData.Identified(
       requestId = requestId,
-      user = user
+      user = user,
+      session = session
     )
   }
 
@@ -57,14 +59,16 @@ object AuthHeaders {
     org: String,
     role: Role = Role.Member,
     environment: Environment = Environment.Sandbox,
-    requestId: String = generateRequestId()
+    requestId: String = generateRequestId(),
+    session: Option[FlowSession] = None
 ): OrgAuthData.Identified = {
     OrgAuthData.Identified(
       requestId = requestId,
       user = user,
       organization = org,
       environment = environment,
-      role = role
+      role = role,
+      session = session
     )
   }
 

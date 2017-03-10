@@ -30,7 +30,8 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     val data = AuthData.Anonymous(
       requestId = "test",
       createdAt = ts,
-      user = None
+      user = None,
+      session = None
     )
 
     val result = controller.parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
@@ -39,6 +40,7 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     result.requestId must be("test")
     result.createdAt must be(ts)
     result.user must be(None)
+    result.session must be(None)
   }
 
   "parse AuthData.AnonymousAuth w/ no user and session" in {
@@ -46,7 +48,8 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     val data = AuthData.Anonymous(
       requestId = "test",
       createdAt = ts,
-      user = None
+      user = None,
+      session = Some(session)
     )
 
     val result = controller.parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
@@ -55,6 +58,7 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     result.requestId must be("test")
     result.createdAt must be(ts)
     result.user must be(None)
+    result.session must be(Some(session))
   }
 
   "parse AuthData.AnonymousAuth w/ user" in {
@@ -62,7 +66,8 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     val data = AuthData.Anonymous(
       requestId = "test",
       createdAt = ts,
-      user = Some(user)
+      user = Some(user),
+      session =  None
     )
 
     val result = controller.parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
@@ -71,6 +76,26 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     result.requestId must be("test")
     result.createdAt must be(ts)
     result.user must be(Some(user))
+    result.session must be(None)
+
+  }
+
+  "parse AuthData.AnonymousAuth w/ user and session" in {
+    val ts = DateTime.now
+    val data = AuthData.Anonymous(
+      requestId = "test",
+      createdAt = ts,
+      user = Some(user),
+      session =  Some(session)
+    )
+
+    val result = controller.parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
+      sys.error("Failed to parse")
+    }
+    result.requestId must be("test")
+    result.createdAt must be(ts)
+    result.user must be(Some(user))
+    result.session must be(Some(session))
   }
 
   "parse OrgAuthData.Identified" in {
@@ -81,7 +106,8 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
       user = user,
       organization = "demo",
       environment = Environment.Sandbox,
-      role = Role.Member
+      role = Role.Member,
+      session = None
     )
 
     val result = controller.parse(data.jwt(salt))(OrgAuthData.Identified.fromMap).getOrElse {
@@ -94,11 +120,37 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     result.organization must be("demo")
     result.environment must be(Environment.Sandbox)
     result.role must be(Role.Member)
+    result.session must be(None)
 
     // Confirm generic org parser works
     controller.parse(data.jwt(salt))(OrgAuthData.Org.fromMap).getOrElse {
       sys.error("Failed to parse")
     } must be(result)
+  }
+
+  "parse OrgAuthData.Identified w/ session" in {
+    val ts = DateTime.now
+    val data = OrgAuthData.Identified(
+      requestId = "test",
+      createdAt = ts,
+      user = user,
+      organization = "demo",
+      environment = Environment.Sandbox,
+      role = Role.Member,
+      session = Some(session)
+    )
+
+    val result = controller.parse(data.jwt(salt))(OrgAuthData.Identified.fromMap).getOrElse {
+      sys.error("Failed to parse")
+    }
+
+    result.requestId must be("test")
+    result.createdAt must be(ts)
+    result.user must be(user)
+    result.organization must be("demo")
+    result.environment must be(Environment.Sandbox)
+    result.role must be(Role.Member)
+    result.session must be(Some(session))
   }
 
   "parse OrgAuthData.Session" in {
@@ -131,7 +183,8 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     val data = AuthData.Anonymous(
       requestId = "test",
       createdAt = DateTime.now,
-      user = None
+      user = None,
+      session = None
     )
 
     controller.parse(data.jwt(salt))(AuthData.Anonymous.fromMap).isDefined must be(true)

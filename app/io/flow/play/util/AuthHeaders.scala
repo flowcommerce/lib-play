@@ -28,6 +28,8 @@ class AuthHeaders @Inject() (
 
 object AuthHeaders {
 
+  private[this] val random = Random()
+
   val Header = "X-Flow-Auth"
 
   /**
@@ -37,8 +39,7 @@ object AuthHeaders {
     */
   def user(
     user: UserReference,
-    requestId: String = generateRequestId(),
-    session: Option[FlowSession] = None
+    requestId: String = generateRequestId()
   ): AuthData.IdentifiedAuth = {
     AuthData.IdentifiedAuth(
       requestId = requestId,
@@ -56,8 +57,7 @@ object AuthHeaders {
     org: String,
     role: Role = Role.Member,
     environment: Environment = Environment.Sandbox,
-    requestId: String = generateRequestId(),
-    session: Option[FlowSession] = None
+    requestId: String = generateRequestId()
 ): AuthData.IdentifiedOrgAuth = {
     AuthData.IdentifiedOrgAuth(
       requestId = requestId,
@@ -67,6 +67,33 @@ object AuthHeaders {
         role = role,
         environment = environment
       )
+    )
+  }
+
+  /**
+    * Helper to create a valid session auth data
+    *
+    * @param requestId Will be created if not specified
+    */
+  def sessionOrg(
+    org: String,
+    environment: Environment = Environment.Sandbox,
+    requestId: String = generateRequestId(),
+    session: FlowSession = createFlowSession()
+  ): AuthData.SessionOrgAuth = {
+    AuthData.SessionOrgAuth(
+      requestId = requestId,
+      session = session,
+      orgData = OrgData.Session(
+        organization = org,
+        environment = environment
+      )
+    )
+  }
+
+  def createFlowSession(): FlowSession = {
+    FlowSession(
+      id = Constants.Prefixes.Session + random.alphaNumeric(36)
     )
   }
 
@@ -84,6 +111,7 @@ object AuthHeaders {
     *        no punctuation to make cut & paste easier.
     */
   def generateRequestId(prefix: String): String = {
-    prefix + UUID.randomUUID.toString.replaceAll("-", "")
+    prefix + random.alphaNumeric(36)
   }
+
 }

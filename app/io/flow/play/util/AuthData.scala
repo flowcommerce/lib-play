@@ -100,6 +100,11 @@ sealed trait AuthData {
 
 }
 
+sealed trait OrgAuthData extends AuthData {
+  def organization: String
+  def environment: Environment
+}
+
 object AuthDataMap {
 
   object Fields {
@@ -166,7 +171,7 @@ object AuthDataMap {
 
 object AuthData {
 
-  case class AnonymousAuth(
+  case class Anonymous(
     override val createdAt: DateTime = DateTime.now,
     override val requestId: String,
     user: Option[UserReference]
@@ -180,17 +185,17 @@ object AuthData {
 
   }
 
-  object AnonymousAuth {
+  object Anonymous {
 
-    val Empty = AnonymousAuth(
+    val Empty = Anonymous(
       requestId = AuthHeaders.generateRequestId("anonymousrequest"),
       user = None
     )
 
-    def fromMap(data: Map[String, String]): Option[AnonymousAuth] = {
+    def fromMap(data: Map[String, String]): Option[Anonymous] = {
       AuthDataMap.fromMap(data) { dm =>
         Some(
-          AnonymousAuth(
+          Anonymous(
             createdAt = dm.createdAt,
             requestId = dm.requestId,
             user = dm.user
@@ -201,47 +206,7 @@ object AuthData {
 
   }
 
-  case class SessionOrgAuth(
-    override val createdAt: DateTime = DateTime.now,
-    override val requestId: String,
-    session: FlowSession,
-    orgData: OrgData.Session
-  ) extends AuthData {
-
-    override protected def decorate(base: AuthDataMap): AuthDataMap = {
-      base.copy(
-        session = Some(session),
-        organization = Some(orgData.organization),
-        environment = Some(orgData.environment)
-      )
-    }
-  }
-
-  object SessionOrgAuth {
-
-    def fromMap(data: Map[String, String]): Option[SessionOrgAuth] = {
-      AuthDataMap.fromMap(data) { dm =>
-        (dm.organization, dm.environment) match {
-          case (Some(org), Some(env)) => {
-            dm.session.map { session =>
-              SessionOrgAuth(
-                createdAt = dm.createdAt,
-                requestId = dm.requestId,
-                session = session,
-                orgData = OrgData.Session(
-                  organization = org,
-                  environment = env
-                )
-              )
-            }
-          }
-          case _ => None
-        }
-      }
-    }
-  }
-
-  case class IdentifiedAuth(
+  case class Identified(
     override val createdAt: DateTime = DateTime.now,
     override val requestId: String,
     user: UserReference
@@ -255,12 +220,12 @@ object AuthData {
 
   }
 
-  object IdentifiedAuth {
+  object Identified {
 
-    def fromMap(data: Map[String, String]): Option[IdentifiedAuth] = {
+    def fromMap(data: Map[String, String]): Option[Identified] = {
       AuthDataMap.fromMap(data) { dm =>
         dm.user.map { user =>
-          IdentifiedAuth(
+          Identified(
             createdAt = dm.createdAt,
             requestId = dm.requestId,
             user = user
@@ -270,41 +235,83 @@ object AuthData {
     }
 
   }
+}
 
-  case class IdentifiedOrgAuth(
+object OrgAuthData {
+
+  case class Session(
     override val createdAt: DateTime = DateTime.now,
     override val requestId: String,
-    user: UserReference,
-    orgData: OrgData.Identified
-  ) extends AuthData {
+    override val organization: String,
+    override val environment: Environment,
+    session: FlowSession
+  ) extends OrgAuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
       base.copy(
+        organization = Some(organization),
+        environment = Some(environment),
+        session = Some(session)
+      )
+    }
+  }
+
+  object Session {
+
+    def fromMap(data: Map[String, String]): Option[Session] = {
+      AuthDataMap.fromMap(data) { dm =>
+        (dm.organization, dm.environment) match {
+          case (Some(org), Some(env)) => {
+            dm.session.map { session =>
+              Session(
+                createdAt = dm.createdAt,
+                requestId = dm.requestId,
+                session = session,
+                organization = org,
+                environment = env
+              )
+            }
+          }
+          case _ => None
+        }
+      }
+    }
+  }
+
+  case class Identified(
+    override val createdAt: DateTime = DateTime.now,
+    override val requestId: String,
+    override val organization: String,
+    override val environment: Environment,
+    user: UserReference,
+    role: Role
+  ) extends OrgAuthData {
+
+    override protected def decorate(base: AuthDataMap): AuthDataMap = {
+      base.copy(
+        organization = Some(organization),
+        environment = Some(environment),
         user = Some(user),
-        organization = Some(orgData.organization),
-        environment = Some(orgData.environment),
-        role = Some(orgData.role)
+        role = Some(role)
       )
     }
 
   }
 
-  object IdentifiedOrgAuth {
+  object Identified {
 
-    def fromMap(data: Map[String, String]): Option[IdentifiedOrgAuth] = {
+    def fromMap(data: Map[String, String]): Option[Identified] = {
       AuthDataMap.fromMap(data) { dm =>
         (dm.user, dm.organization, dm.environment, dm.role) match {
           case (Some(user), Some(org), Some(env), Some(role)) => {
             Some(
-              IdentifiedOrgAuth(
+              Identified(
                 createdAt = dm.createdAt,
                 requestId = dm.requestId,
                 user = user,
-                orgData = OrgData.Identified(
-                  organization = org,
-                  environment = env,
-                  role = role
-                )
+                organization = org,
+                environment = env,
+                role = role
               )
             )
           }
@@ -314,24 +321,17 @@ object AuthData {
     }
   }
 
-}
+  object Org {
 
-sealed trait OrgData {
-  def organization: String
-  def environment: Environment
-}
-
-object OrgData {
-
-  case class Session(
-    override val organization: String,
-    override val environment: Environment
-  ) extends OrgData
-
-  case class Identified(
-    override val organization: String,
-    override val environment: Environment,
-    role: Role
-  ) extends OrgData
+    /**
+      * Parses either an identified org or session org (or None)
+      */
+    def fromMap(data: Map[String, String]): Option[io.flow.play.util.OrgAuthData] = {
+      Identified.fromMap(data) match {
+        case None => Session.fromMap(data)
+        case Some(auth) => Some(auth)
+      }
+    }
+  }
 
 }

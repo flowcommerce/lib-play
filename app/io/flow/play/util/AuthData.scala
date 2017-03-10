@@ -174,12 +174,14 @@ object AuthData {
   case class Anonymous(
     override val createdAt: DateTime = DateTime.now,
     override val requestId: String,
-    user: Option[UserReference]
+    user: Option[UserReference],
+    session: Option[FlowSession]
   ) extends AuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
       base.copy(
-        user = user
+        user = user,
+        session = session
       )
     }
 
@@ -189,7 +191,8 @@ object AuthData {
 
     val Empty = Anonymous(
       requestId = AuthHeaders.generateRequestId("anonymousrequest"),
-      user = None
+      user = None,
+      session = None
     )
 
     def fromMap(data: Map[String, String]): Option[Anonymous] = {
@@ -198,7 +201,8 @@ object AuthData {
           Anonymous(
             createdAt = dm.createdAt,
             requestId = dm.requestId,
-            user = dm.user
+            user = dm.user,
+            session = dm.session
           )
         )
       }
@@ -209,12 +213,14 @@ object AuthData {
   case class Identified(
     override val createdAt: DateTime = DateTime.now,
     override val requestId: String,
-    user: UserReference
+    user: UserReference,
+    session: Option[FlowSession]
   ) extends AuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
       base.copy(
-        user = Some(user)
+        user = Some(user),
+        session = session
       )
     }
 
@@ -228,7 +234,8 @@ object AuthData {
           Identified(
             createdAt = dm.createdAt,
             requestId = dm.requestId,
-            user = user
+            user = user,
+            session = dm.session
           )
         }
       }
@@ -284,7 +291,8 @@ object OrgAuthData {
     override val organization: String,
     override val environment: Environment,
     user: UserReference,
-    role: Role
+    role: Role,
+    session: Option[FlowSession]
   ) extends OrgAuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
@@ -292,7 +300,8 @@ object OrgAuthData {
         organization = Some(organization),
         environment = Some(environment),
         user = Some(user),
-        role = Some(role)
+        role = Some(role),
+        session = session
       )
     }
 
@@ -311,7 +320,8 @@ object OrgAuthData {
                 user = user,
                 organization = org,
                 environment = env,
-                role = role
+                role = role,
+                session = dm.session
               )
             )
           }

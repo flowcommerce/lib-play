@@ -8,4 +8,8 @@ object Constants {
   val AnonymousUser = UserReference("usr-20151006-2")
   val DefaultTaxName = "VAT"
 
+  object Prefixes {
+    val Session = "F51"
+  }
+
 }

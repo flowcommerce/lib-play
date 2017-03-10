@@ -2,8 +2,8 @@ package io.flow.play.controllers
 
 import io.flow.common.v0.models.{Environment, Role, UserReference}
 import io.flow.play.clients.MockConfig
-import io.flow.play.util.OrgData.{Session, Identified}
-import io.flow.play.util.{AuthData, Config, FlowSession}
+import io.flow.play.util.OrgAuthData.Org
+import io.flow.play.util.{AuthData, Config, FlowSession, OrgAuthData}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import org.joda.time.DateTime
@@ -27,13 +27,13 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
 
   "parse AuthData.AnonymousAuth w/ no user" in {
     val ts = DateTime.now
-    val data = AuthData.AnonymousAuth(
+    val data = AuthData.Anonymous(
       requestId = "test",
       createdAt = ts,
       user = None
     )
 
-    val result = controller.parse(data.jwt(salt))(AuthData.AnonymousAuth.fromMap).getOrElse {
+    val result = controller.parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
       sys.error("Failed to parse")
     }
     result.requestId must be("test")
@@ -43,13 +43,13 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
 
   "parse AuthData.AnonymousAuth w/ no user and session" in {
     val ts = DateTime.now
-    val data = AuthData.AnonymousAuth(
+    val data = AuthData.Anonymous(
       requestId = "test",
       createdAt = ts,
       user = None
     )
 
-    val result = controller.parse(data.jwt(salt))(AuthData.AnonymousAuth.fromMap).getOrElse {
+    val result = controller.parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
       sys.error("Failed to parse")
     }
     result.requestId must be("test")
@@ -59,13 +59,13 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
 
   "parse AuthData.AnonymousAuth w/ user" in {
     val ts = DateTime.now
-    val data = AuthData.AnonymousAuth(
+    val data = AuthData.Anonymous(
       requestId = "test",
       createdAt = ts,
       user = Some(user)
     )
 
-    val result = controller.parse(data.jwt(salt))(AuthData.AnonymousAuth.fromMap).getOrElse {
+    val result = controller.parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
       sys.error("Failed to parse")
     }
     result.requestId must be("test")
@@ -73,70 +73,76 @@ class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
     result.user must be(Some(user))
   }
 
-  "parse AuthData.IdentifiedOrgAuth" in {
+  "parse OrgAuthData.Identified" in {
     val ts = DateTime.now
-    val data = AuthData.IdentifiedOrgAuth(
+    val data = OrgAuthData.Identified(
       requestId = "test",
       createdAt = ts,
       user = user,
-      orgData = Identified(
-        organization = "demo",
-        environment = Environment.Sandbox,
-        role = Role.Member
-      )
+      organization = "demo",
+      environment = Environment.Sandbox,
+      role = Role.Member
     )
 
-    val result = controller.parse(data.jwt(salt))(AuthData.IdentifiedOrgAuth.fromMap).getOrElse {
+    val result = controller.parse(data.jwt(salt))(OrgAuthData.Identified.fromMap).getOrElse {
       sys.error("Failed to parse")
     }
 
     result.requestId must be("test")
     result.createdAt must be(ts)
     result.user must be(user)
-    result.orgData.organization must be("demo")
-    result.orgData.environment must be(Environment.Sandbox)
-    result.orgData.role must be(Role.Member)
+    result.organization must be("demo")
+    result.environment must be(Environment.Sandbox)
+    result.role must be(Role.Member)
+
+    // Confirm generic org parser works
+    controller.parse(data.jwt(salt))(OrgAuthData.Org.fromMap).getOrElse {
+      sys.error("Failed to parse")
+    } must be(result)
   }
 
-  "parse AuthData.SessionOrgAuth" in {
+  "parse OrgAuthData.Session" in {
     val ts = DateTime.now
-    val data = AuthData.SessionOrgAuth(
+    val data = OrgAuthData.Session(
       requestId = "test",
       session = session,
       createdAt = ts,
-      orgData = Session(
-        organization = "demo",
-        environment = Environment.Sandbox
-      )
+      organization = "demo",
+      environment = Environment.Sandbox
     )
 
-    val result = controller.parse(data.jwt(salt))(AuthData.SessionOrgAuth.fromMap).getOrElse {
+    val result = controller.parse(data.jwt(salt))(OrgAuthData.Session.fromMap).getOrElse {
       sys.error("Failed to parse")
     }
 
     result.requestId must be("test")
     result.createdAt must be(ts)
     result.session must be(session)
-    result.orgData.organization must be("demo")
-    result.orgData.environment must be(Environment.Sandbox)
+    result.organization must be("demo")
+    result.environment must be(Environment.Sandbox)
+
+    // Confirm generic org parser works
+    controller.parse(data.jwt(salt))(OrgAuthData.Org.fromMap).getOrElse {
+      sys.error("Failed to parse")
+    } must be(result)
   }
 
   "expired" in {
-    val data = AuthData.AnonymousAuth(
+    val data = AuthData.Anonymous(
       requestId = "test",
       createdAt = DateTime.now,
       user = None
     )
 
-    controller.parse(data.jwt(salt))(AuthData.AnonymousAuth.fromMap).isDefined must be(true)
+    controller.parse(data.jwt(salt))(AuthData.Anonymous.fromMap).isDefined must be(true)
 
     controller.parse(data.copy(
       createdAt = DateTime.now.minusMinutes(1)
-    ).jwt(salt))(AuthData.AnonymousAuth.fromMap).isDefined must be(true)
+    ).jwt(salt))(AuthData.Anonymous.fromMap).isDefined must be(true)
 
     controller.parse(data.copy(
       createdAt = DateTime.now.minusMinutes(5)
-    ).jwt(salt))(AuthData.AnonymousAuth.fromMap).isDefined must be(false)
+    ).jwt(salt))(AuthData.Anonymous.fromMap).isDefined must be(false)
 
   }
 }

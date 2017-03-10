@@ -1,7 +1,7 @@
 package io.flow.play.controllers
 
 import authentikat.jwt.{JsonWebToken, JwtClaimsSetJValue}
-import io.flow.play.util.{AuthData, AuthHeaders, Config, FlowSession}
+import io.flow.play.util._
 import io.flow.common.v0.models.{Environment, UserReference}
 import org.joda.time.DateTime
 import play.api.mvc.Results.Unauthorized
@@ -10,35 +10,46 @@ import scala.concurrent.Future
 import play.api.mvc._
 
 class AnonymousRequest[A](
-  val auth: AuthData.AnonymousAuth,
+  val auth: AuthData.Anonymous,
   request: Request[A]
 ) extends WrappedRequest[A](request) {
   val user: Option[UserReference] = auth.user
 }
 
 class SessionOrgRequest[A](
-  val auth: AuthData.SessionOrgAuth,
+  val auth: OrgAuthData.Session,
   request: Request[A]
 ) extends WrappedRequest[A](request) {
   val flowSession: FlowSession = auth.session
-  val organization: String = auth.orgData.organization
-  val environment: Environment = auth.orgData.environment
+  val organization: String = auth.organization
+  val environment: Environment = auth.environment
 }
 
 class IdentifiedRequest[A](
-  val auth: AuthData.IdentifiedAuth,
+  val auth: AuthData.Identified,
   request: Request[A]
 ) extends WrappedRequest[A](request) {
   val user: UserReference = auth.user
 }
 
 class IdentifiedOrgRequest[A](
-  val auth: AuthData.IdentifiedOrgAuth,
+  val auth: OrgAuthData.Identified,
   request: Request[A]
 ) extends WrappedRequest[A](request) {
   val user: UserReference = auth.user
-  val organization: String = auth.orgData.organization
-  val environment: Environment = auth.orgData.environment
+  val organization: String = auth.organization
+  val environment: Environment = auth.environment
+}
+
+/**
+  * Any type of request that contains org data
+  */
+class OrgRequest[A](
+   val auth: OrgAuthData,
+   request: Request[A]
+) extends WrappedRequest[A](request) {
+  val organization: String = auth.organization
+  val environment: Environment = auth.environment
 }
 
 /**
@@ -91,9 +102,9 @@ trait FlowController extends FlowControllerHelpers {
   object Anonymous extends ActionBuilder[AnonymousRequest] {
 
     def invokeBlock[A](request: Request[A], block: (AnonymousRequest[A]) => Future[Result]): Future[Result] = {
-      val ad = auth(request.headers)(AuthData.AnonymousAuth.fromMap).getOrElse {
+      val ad = auth(request.headers)(AuthData.Anonymous.fromMap).getOrElse {
         // Create an empty header here so at least requestId tracking can start
-        AuthData.AnonymousAuth.Empty
+        AuthData.Anonymous.Empty
       }
 
       block(
@@ -106,7 +117,7 @@ trait FlowController extends FlowControllerHelpers {
   object SessionOrg extends ActionBuilder[SessionOrgRequest] {
 
     def invokeBlock[A](request: Request[A], block: (SessionOrgRequest[A]) => Future[Result]): Future[Result] = {
-      auth(request.headers)(AuthData.SessionOrgAuth.fromMap) match {
+      auth(request.headers)(OrgAuthData.Session.fromMap) match {
         case None => Future.successful (
           unauthorized(request)
         )
@@ -122,7 +133,7 @@ trait FlowController extends FlowControllerHelpers {
   object Identified extends ActionBuilder[IdentifiedRequest] {
 
     def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]): Future[Result] = {
-      auth(request.headers)(AuthData.IdentifiedAuth.fromMap) match {
+      auth(request.headers)(AuthData.Identified.fromMap) match {
         case None => Future.successful(
           unauthorized(request)
         )
@@ -138,7 +149,7 @@ trait FlowController extends FlowControllerHelpers {
   object IdentifiedOrg extends ActionBuilder[IdentifiedOrgRequest] {
 
     def invokeBlock[A](request: Request[A], block: (IdentifiedOrgRequest[A]) => Future[Result]): Future[Result] = {
-      auth(request.headers)(AuthData.IdentifiedOrgAuth.fromMap) match {
+      auth(request.headers)(OrgAuthData.Identified.fromMap) match {
         case None => Future.successful(
           unauthorized(request)
         )
@@ -146,6 +157,23 @@ trait FlowController extends FlowControllerHelpers {
         case Some(ad) => {
           block(
             new IdentifiedOrgRequest(ad, request)
+          )
+        }
+      }
+    }
+  }
+
+  object Org extends ActionBuilder[OrgRequest] {
+
+    def invokeBlock[A](request: Request[A], block: (OrgRequest[A]) => Future[Result]): Future[Result] = {
+      auth(request.headers)(OrgAuthData.Org.fromMap) match {
+        case None => Future.successful(
+          unauthorized(request)
+        )
+
+        case Some(ad) => {
+          block(
+            new OrgRequest(ad, request)
           )
         }
       }

@@ -26,10 +26,17 @@ class SessionOrgRequest[A](
 }
 
 class IdentifiedRequest[A](
-  val auth: AuthData.Identified,
+                            val auth: AuthData.Identified,
+                            request: Request[A]
+                          ) extends WrappedRequest[A](request) {
+  val user: UserReference = auth.user
+}
+
+class SessionRequest[A](
+  val auth: AuthData.Session,
   request: Request[A]
 ) extends WrappedRequest[A](request) {
-  val user: UserReference = auth.user
+  val flowSession: FlowSession = auth.session
 }
 
 class IdentifiedOrgRequest[A](
@@ -140,6 +147,22 @@ trait FlowController extends FlowControllerHelpers {
         case Some(ad) => {
           block(
             new IdentifiedRequest(ad, request)
+          )
+        }
+      }
+    }
+  }
+
+  object Session extends ActionBuilder[SessionRequest] {
+
+    def invokeBlock[A](request: Request[A], block: (SessionRequest[A]) => Future[Result]): Future[Result] = {
+      auth(request.headers)(AuthData.Session.fromMap) match {
+        case None => Future.successful(
+          unauthorized(request)
+        )
+        case Some(ad) => {
+          block(
+            new SessionRequest(ad, request)
           )
         }
       }

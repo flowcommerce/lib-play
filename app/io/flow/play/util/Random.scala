@@ -12,7 +12,7 @@ case class Random() {
   private[this] val Numbers = "0123456789"
   private[this] val Lower = "abcdefghijklmnopqrstuvwxyz"
   private[this] val LowerAndUpper = Lower + Lower.toUpperCase
-  private[this] val LowerAndUpperAndNumbers = LowerAndUpper + "0123456789"
+  private[this] val LowerAndUpperAndNumbers = LowerAndUpper + Numbers
   private[this] val NonAmbiguousLowerAndUpper = LowerAndUpper.split("").filter(!Ambiguous.contains(_)).mkString("")
   private[this] val NonAmbiguousLowerAndUpperAndNumbers = NonAmbiguousLowerAndUpper + "3479"
 
@@ -24,7 +24,7 @@ case class Random() {
     */
   def string(alphabet: String)(n: Int): String = {
     assert(n > 0, "n must be > 0")
-    Stream.continually(random.nextInt(alphabet.size)).map(alphabet).take(n).mkString
+    Stream.continually(random.nextInt(alphabet.length)).map(alphabet).take(n).mkString
   }
 
   /**
@@ -33,7 +33,7 @@ case class Random() {
     * 
     * @param n Length of random string to generate
     */
-  def lowercaseAlpha(n: Int) = {
+  def lowercaseAlpha(n: Int): String = {
     string(Lower)(n)
   }
 
@@ -43,7 +43,7 @@ case class Random() {
     * 
     * @param n Length of random string to generate
     */
-  def alpha(n: Int) = {
+  def alpha(n: Int): String = {
     string(LowerAndUpper)(n)
   }
 
@@ -60,10 +60,11 @@ case class Random() {
     * 
     * @param n Length of random string to generate
     */
-  def alphaNumeric(n: Int) = {
-    n == 1 match {
-      case true => alpha(1)
-      case false => alpha(1) + string(LowerAndUpperAndNumbers)(n - 1)
+  def alphaNumeric(n: Int): String = {
+    if (n == 1) {
+      alpha(1)
+    } else {
+      alpha(1) + string(LowerAndUpperAndNumbers)(n - 1)
     }
   }
 
@@ -79,10 +80,11 @@ case class Random() {
     * 
     * @param n Length of random string to generate
     */
-  def alphaNumericNonAmbiguous(n: Int) = {
-    n == 1 match {
-      case true => string(NonAmbiguousLowerAndUpper)(1)
-      case false => string(NonAmbiguousLowerAndUpper)(1) + string(NonAmbiguousLowerAndUpperAndNumbers)(n - 1)
+  def alphaNumericNonAmbiguous(n: Int): String = {
+    if (n == 1) {
+      string(NonAmbiguousLowerAndUpper)(1)
+    } else {
+      string(NonAmbiguousLowerAndUpper)(1) + string(NonAmbiguousLowerAndUpperAndNumbers)(n - 1)
     }
   }
 
@@ -92,9 +94,10 @@ case class Random() {
   @scala.annotation.tailrec
   final def positiveInt(): Int = {
     val value = random.nextInt
-    (value > 0) match {
-      case true => value
-      case false => positiveInt()
+    if (value > 0) {
+      value
+    } else {
+      positiveInt()
     }
   }
 
@@ -104,9 +107,10 @@ case class Random() {
   @scala.annotation.tailrec
   final def positiveLong(): Long = {
     val value = random.nextLong
-    (value > 0) match {
-      case true => value
-      case false => positiveLong()
+    if (value > 0) {
+      value
+    } else {
+      positiveLong()
     }
   }
 

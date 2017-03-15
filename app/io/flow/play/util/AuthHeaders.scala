@@ -50,7 +50,6 @@ object AuthHeaders {
   }
 
   def session(
-    user: UserReference,
     requestId: String = generateRequestId(),
     session: FlowSession = createFlowSession()
   ): AuthData.Session = {

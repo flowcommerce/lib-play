@@ -49,6 +49,16 @@ object AuthHeaders {
     )
   }
 
+  def session(
+    requestId: String = generateRequestId(),
+    session: FlowSession = createFlowSession()
+  ): AuthData.Session = {
+    AuthData.Session(
+      requestId = requestId,
+      session = session
+    )
+  }
+
   /**
     * Helper to create a valid auth data for this user and organization.
     *
@@ -77,7 +87,7 @@ object AuthHeaders {
     *
     * @param requestId Will be created if not specified
     */
-  def sessionOrg(
+  def organizationSession(
     org: String,
     environment: Environment = Environment.Sandbox,
     requestId: String = generateRequestId(),

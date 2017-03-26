@@ -242,6 +242,36 @@ object AuthData {
     }
 
   }
+
+  case class Session(
+    override val createdAt: DateTime = DateTime.now,
+    override val requestId: String,
+    session: FlowSession
+  ) extends AuthData {
+
+    override protected def decorate(base: AuthDataMap): AuthDataMap = {
+      base.copy(
+        session = Some(session)
+      )
+    }
+
+  }
+
+  object Session {
+
+    def fromMap(data: Map[String, String]): Option[Session] = {
+      AuthDataMap.fromMap(data) { dm =>
+        dm.session.map { session =>
+          Session(
+            createdAt = dm.createdAt,
+            requestId = dm.requestId,
+            session = session
+          )
+        }
+      }
+    }
+
+  }
 }
 
 object OrgAuthData {

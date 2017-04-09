@@ -33,7 +33,7 @@ trait Config {
     case Some(v) => if (v > 0) {
       Some(v)
     } else {
-      sys.error(s"Configuration variable[$name] has invalid value[$v]: must be > 0")
+      sys.error(s"FlowError Configuration variable[$name] has invalid value[$v]: must be > 0")
     }
   }
 
@@ -43,13 +43,13 @@ trait Config {
     Try(value.toLong) match {
       case Success(v) => v
       case Failure(_) => {
-        val msg = s"Configuration variable[$name] has invalid value[$value]: must be a long"
+        val msg = s"FlowError Configuration variable[$name] has invalid value[$value]: must be a long"
         Logger.error(msg)
         sys.error(msg)
       }
     }
   }
-  
+
 
   def requiredPositiveInt(name: String): Int = mustGet(name, optionalPositiveInt(name))
 
@@ -58,7 +58,7 @@ trait Config {
     case Some(v) => if (v > 0) {
       Some(v)
     } else {
-      sys.error(s"Configuration variable[$name] has invalid value[$v]: must be > 0")
+      sys.error(s"FlowError Configuration variable[$name] has invalid value[$v]: must be > 0")
     }
   }
 
@@ -68,26 +68,26 @@ trait Config {
     Try(value.toInt) match {
       case Success(v) => v
       case Failure(_) => {
-        val msg = s"Configuration variable[$name] has invalid value[$value]: must be an int"
+        val msg = s"FlowError Configuration variable[$name] has invalid value[$value]: must be an int"
         Logger.error(msg)
         sys.error(msg)
       }
     }
   }
-  
+
   def requiredBoolean(name: String): Boolean = mustGet(name, optionalBoolean(name))
 
   def optionalBoolean(name: String): Option[Boolean] = optionalString(name).map { value =>
     Booleans.parse(value).getOrElse {
-      val msg = s"Configuration variable[$name] has invalid value[$value]. Use true, t, false, or f"
+      val msg = s"FlowError Configuration variable[$name] has invalid value[$value]. Use true, t, false, or f"
       Logger.error(msg)
       sys.error(msg)
     }
   }
-  
+
   private[this] def mustGet[T](name: String, value: Option[T]): T = {
     value.getOrElse {
-      sys.error(s"Configuration variable[$name] is required")
+      sys.error(s"FlowError Configuration variable[$name] is required")
     }
   }
 
@@ -137,7 +137,7 @@ object EnvironmentConfig extends Config {
   override def get(name: String): Option[String] = {
     sys.env.get(name).map(_.trim).map {
       case "" => {
-        val msg = s"Value for environment variable[$name] cannot be blank"
+        val msg = s"FlowError Value for environment variable[$name] cannot be blank"
         Logger.error(msg)
         sys.error(msg)
       }
@@ -157,7 +157,7 @@ object PropertyConfig extends Config {
   override def get(name: String): Option[String] = {
     sys.props.get(name).map(_.trim).map {
       case "" => {
-        val msg = s"Value for system property[$name] cannot be blank"
+        val msg = s"FlowError Value for system property[$name] cannot be blank"
         Logger.error(msg)
         sys.error(msg)
       }
@@ -178,7 +178,7 @@ case class ApplicationConfig @javax.inject.Inject() (configuration: Configuratio
   override def get(name: String): Option[String] = {
     configuration.getString(name).map(_.trim).map {
       case "" => {
-        val msg = s"Value for configuration parameter[$name] cannot be blank"
+        val msg = s"FlowError Value for configuration parameter[$name] cannot be blank"
         Logger.error(msg)
         sys.error(msg)
       }

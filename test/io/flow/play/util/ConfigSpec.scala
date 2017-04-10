@@ -39,7 +39,7 @@ class ConfigSpec extends PlaySpec with OneAppPerSuite {
 
     intercept[RuntimeException] {
       config.requiredString("foo")
-    }.getMessage must be("Configuration variable[foo] is required")
+    }.getMessage must be("FlowError Configuration variable[foo] is required")
 
     config.set("foo", "value")
     config.requiredString("foo") must be("value")
@@ -54,8 +54,8 @@ class ConfigSpec extends PlaySpec with OneAppPerSuite {
     config.set("foo", "other")
     intercept[RuntimeException] {
       config.optionalInt("foo")
-    }.getMessage must be("Configuration variable[foo] has invalid value[other]: must be an int")
-    
+    }.getMessage must be("FlowError Configuration variable[foo] has invalid value[other]: must be an int")
+
   }
 
   "optionalPositiveInt" in {
@@ -67,26 +67,26 @@ class ConfigSpec extends PlaySpec with OneAppPerSuite {
     config.set("foo", "0")
     intercept[RuntimeException] {
       config.optionalPositiveInt("foo")
-    }.getMessage must be("Configuration variable[foo] has invalid value[0]: must be > 0")
-    
+    }.getMessage must be("FlowError Configuration variable[foo] has invalid value[0]: must be > 0")
+
     config.set("foo", "other")
     intercept[RuntimeException] {
       config.optionalPositiveInt("foo")
-    }.getMessage must be("Configuration variable[foo] has invalid value[other]: must be an int")
+    }.getMessage must be("FlowError Configuration variable[foo] has invalid value[other]: must be an int")
   }
 
   "requiredPositiveInt" in {
     val name = createTestId()
     intercept[RuntimeException] {
       config.requiredPositiveInt(name)
-    }.getMessage must be(s"Configuration variable[$name] is required")
+    }.getMessage must be(s"FlowError Configuration variable[$name] is required")
   }
 
   "requiredInt" in {
     val name = createTestId()
     intercept[RuntimeException] {
       config.requiredInt(name)
-    }.getMessage must be(s"Configuration variable[$name] is required")
+    }.getMessage must be(s"FlowError Configuration variable[$name] is required")
   }
 
   "optionalLong" in {
@@ -98,15 +98,15 @@ class ConfigSpec extends PlaySpec with OneAppPerSuite {
     config.set("foo", "other")
     intercept[RuntimeException] {
       config.optionalLong("foo")
-    }.getMessage must be("Configuration variable[foo] has invalid value[other]: must be a long")
-    
+    }.getMessage must be("FlowError Configuration variable[foo] has invalid value[other]: must be a long")
+
   }
 
   "requiredLong" in {
     val name = createTestId()
     intercept[RuntimeException] {
       config.requiredLong(name)
-    }.getMessage must be(s"Configuration variable[$name] is required")
+    }.getMessage must be(s"FlowError Configuration variable[$name] is required")
   }
 
   "optionalPositiveLong" in {
@@ -118,19 +118,19 @@ class ConfigSpec extends PlaySpec with OneAppPerSuite {
     config.set("foo", "0")
     intercept[RuntimeException] {
       config.optionalPositiveLong("foo")
-    }.getMessage must be("Configuration variable[foo] has invalid value[0]: must be > 0")
-    
+    }.getMessage must be("FlowError Configuration variable[foo] has invalid value[0]: must be > 0")
+
     config.set("foo", "other")
     intercept[RuntimeException] {
       config.optionalPositiveLong("foo")
-    }.getMessage must be("Configuration variable[foo] has invalid value[other]: must be a long")
+    }.getMessage must be("FlowError Configuration variable[foo] has invalid value[other]: must be a long")
   }
 
   "requiredPositiveLong" in {
     val name = createTestId()
     intercept[RuntimeException] {
       config.requiredPositiveLong(name)
-    }.getMessage must be(s"Configuration variable[$name] is required")
+    }.getMessage must be(s"FlowError Configuration variable[$name] is required")
   }
 
   "optionalBoolean" in {
@@ -151,15 +151,15 @@ class ConfigSpec extends PlaySpec with OneAppPerSuite {
     config.set("foo", "other")
     intercept[RuntimeException] {
       config.optionalBoolean("foo")
-    }.getMessage must be("Configuration variable[foo] has invalid value[other]. Use true, t, false, or f")
-    
+    }.getMessage must be("FlowError Configuration variable[foo] has invalid value[other]. Use true, t, false, or f")
+
   }
 
   "requiredBoolean" in {
     val name = createTestId()
     intercept[RuntimeException] {
       config.requiredBoolean(name)
-    }.getMessage must be(s"Configuration variable[$name] is required")
+    }.getMessage must be(s"FlowError Configuration variable[$name] is required")
   }
-  
+
 }

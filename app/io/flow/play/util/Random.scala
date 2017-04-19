@@ -6,7 +6,7 @@ package io.flow.play.util
   */
 case class Random() {
 
-  private[this] val random = new java.security.SecureRandom
+  private[this] val random = java.security.SecureRandom.getInstanceStrong
 
   private[this] val Ambiguous = "B8G6I1l0OoQDS5Z2".split("")
   private[this] val Numbers = "0123456789"

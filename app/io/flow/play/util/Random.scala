@@ -28,6 +28,15 @@ case class Random() {
   }
 
   /**
+    * Generate a random string using only numbers
+    *
+    * @param n length of random numeric string to generate
+    */
+  def numeric(n: Int) = {
+    string(Numbers)(n)
+  }
+
+  /**
     * Generate a random string of length n using only a-z (lower case
     * alphabet letters)
     * 

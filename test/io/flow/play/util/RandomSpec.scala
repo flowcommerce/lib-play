@@ -39,6 +39,13 @@ class RandomSpec extends FunSpec with Matchers {
     }
   }
 
+  it("numeric") {
+    validate(
+      "1234567890",
+      1.to(100).map { i => random.numeric(Length) }
+    )
+  }
+
   it("lowercaseAlpha") {
     validate(
       "abcdefghijklmnopqrstuvwxyz",

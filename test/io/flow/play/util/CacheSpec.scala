@@ -7,7 +7,7 @@ import org.scalatest.time.{Seconds, Span}
 
 import scala.concurrent.duration._
 
-class CacheSpec extends PlaySpec with OneAppPerSuite /*with Helpers*/ {
+class CacheSpec extends PlaySpec with OneAppPerSuite {
 
   private[this] case class TestCache() extends Cache[String, String] {
 

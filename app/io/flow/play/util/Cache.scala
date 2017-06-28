@@ -54,8 +54,14 @@ trait Cache[K, V] {
 
         case Failure(ex) => {
           val msg = s"FlowError for Cache[${this.getClass.getName}] key[$key]: ${ex.getMessage}"
-          Logger.error(msg, ex)
-          sys.error(msg)
+          if (cache.containsKey(key)) {
+            Logger.warn(msg, ex)
+            assert(cache.get(key).isExpired)
+            cache.get(key).value // return old value
+          } else {
+            Logger.error(msg, ex)
+            sys.error(msg)
+          }
         }
       }
     }

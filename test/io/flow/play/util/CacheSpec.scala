@@ -10,15 +10,19 @@ import scala.concurrent.duration._
 class CacheSpec extends PlaySpec with OneAppPerSuite {
 
   private[this] case class TestCache() extends Cache[String, String] {
-
     private[this] val data = scala.collection.mutable.Map[String, String]()
     var numberRefreshes: Int = 0
+    var refreshShouldFail = false
 
     override val duration: FiniteDuration = FiniteDuration(1, SECONDS)
 
     override def refresh(key: String): String = {
-      numberRefreshes += 1
-      data.getOrElse(key, sys.error("Missing test data for key[$key]"))
+      if (refreshShouldFail) {
+        throw new Exception("test refresh() failing on purpose")
+      } else {
+        numberRefreshes += 1
+        data.getOrElse(key, sys.error("Missing test data for key[$key]"))
+      }
     }
 
     def add(key: String, value: String): Unit = {
@@ -55,6 +59,20 @@ class CacheSpec extends PlaySpec with OneAppPerSuite {
 
     cache.get("a") must equal("apple")
     cache.get("p") must equal("pear")
+  }
+
+  "failed refresh handled gracefully" in {
+    val cache = TestCache()
+    cache.add("a", "apple")
+    cache.get("a") must equal("apple")
+
+    cache.refreshShouldFail = true
+    cache.add("a", "not apple")
+
+    Thread.sleep(2000)
+
+    // failing refresh should return old value
+    cache.get("a") must equal("apple")
   }
 
 }

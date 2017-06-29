@@ -1,15 +1,14 @@
 package io.flow.play.util
 
-import io.flow.play.util.Cache
 import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import org.scalatest.concurrent.Eventually.{eventually, timeout}
 import org.scalatest.time.{Seconds, Span}
 
 import scala.concurrent.duration._
 
-class CacheSpec extends PlaySpec with OneAppPerSuite {
+class CacheWithFallbackToStaleDataSpec extends PlaySpec with OneAppPerSuite {
 
-  private[this] case class TestCache() extends Cache[String, String] {
+  private[this] case class TestCacheWithFallbackToStaleData() extends CacheWithFallbackToStaleData[String, String] {
     private[this] val data = scala.collection.mutable.Map[String, String]()
     var numberRefreshes: Int = 0
     var refreshShouldFail = false
@@ -37,7 +36,7 @@ class CacheSpec extends PlaySpec with OneAppPerSuite {
   }
 
   "cached values are served" in {
-    val cache = TestCache()
+    val cache = TestCacheWithFallbackToStaleData()
     cache.add("a", "apple")
 
     // Test cache hit
@@ -53,7 +52,7 @@ class CacheSpec extends PlaySpec with OneAppPerSuite {
   }
 
   "supports multiple keys" in {
-    val cache = TestCache()
+    val cache = TestCacheWithFallbackToStaleData()
     cache.add("a", "apple")
     cache.add("p", "pear")
 
@@ -62,7 +61,7 @@ class CacheSpec extends PlaySpec with OneAppPerSuite {
   }
 
   "failed refresh handled gracefully" in {
-    val cache = TestCache()
+    val cache = TestCacheWithFallbackToStaleData()
     cache.add("a", "apple")
     cache.get("a") must equal("apple")
 

@@ -42,40 +42,43 @@ trait CacheWithFallbackToStaleData[K, V] {
       case Some(entry) if !entry.isExpired => entry.value
 
       case Some(staleEntry) => {
-        Try {
-          doRefresh(key)
-        } match {
-          case Success(refreshedEntry) => refreshedEntry.value
-          case Failure(ex) => {
-            Logger.warn(s"Cache[${this.getClass.getName}] key[$key]: Falling back to stale data as refresh failed with: ${ex.getMessage}", ex)
-            staleEntry.value
-          }
+        doRefresh(key) { ex =>
+          Logger.warn(s"Cache[${this.getClass.getName}] key[$key]: Falling back to stale data as refresh failed with: ${ex.getMessage}", ex)
+          staleEntry.value
         }
       }
 
       case None => {
-        Try {
-          doRefresh(key)
-        } match {
-          case Success(refreshedEntry) => refreshedEntry.value
-          case Failure(ex) => {
-            val msg = s"FlowError for Cache[${this.getClass.getName}] key[$key]: ${ex.getMessage}"
-            Logger.error(msg, ex)
-            sys.error(msg)
-          }
+        doRefresh(key) { ex =>
+          val msg = s"FlowError for Cache[${this.getClass.getName}] key[$key]: ${ex.getMessage}"
+          Logger.error(msg, ex)
+          sys.error(msg)
         }
       }
-
     }
   }
 
-  private[this] def doRefresh(key: K): CacheEntry[V] = {
-    val entry = CacheEntry(
-      refresh(key),
-      expiresAt = DateTime.now.plusSeconds(duration.toSeconds.toInt)
-    )
-    cache.put(key, entry)
-    entry
+  private[this] def doRefresh(key: K)(
+    failureFunction: Throwable => V
+  ): V = {
+    Try {
+      refresh(key)
+    } match {
+      case Success(value) => {
+        cache.put(
+          key,
+          CacheEntry(
+            value = value,
+            expiresAt = DateTime.now.plusSeconds(duration.toSeconds.toInt)
+          )
+        )
+        value
+      }
+
+      case Failure(ex) => {
+        failureFunction(ex)
+      }
+    }
   }
 
 }

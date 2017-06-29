@@ -37,34 +37,42 @@ trait Cache[K, V] {
   }
 
   def get(key: K): V = {
-    Option(cache.get(key)).filterNot(_.isExpired).map(_.value).getOrElse {
-      Try {
-        refresh(key)
-      } match {
-        case Success(v) => {
+
+    def doRefresh(entry: Option[CacheEntry[V]]): V = {
+      Try(refresh(key)) match {
+        // if refresh() succeeds, store it in the cache and return the value
+        case Success(newVal) => {
           cache.put(
             key,
             CacheEntry(
-              v,
+              newVal,
               expiresAt = DateTime.now.plusSeconds(duration.toSeconds.toInt)
             )
           )
-          v
+          newVal
         }
 
+        // if refresh fails, return the old value or die
         case Failure(ex) => {
           val msg = s"FlowError for Cache[${this.getClass.getName}] key[$key]: ${ex.getMessage}"
-          if (cache.containsKey(key)) {
-            Logger.warn(msg, ex)
-            assert(cache.get(key).isExpired)
-            cache.get(key).value // return old value
-          } else {
-            Logger.error(msg, ex)
-            sys.error(msg)
+          entry match {
+            case Some(e) =>
+              Logger.warn(msg, ex)
+              assert(e.isExpired)
+              e.value // return old value
+            case None =>
+              Logger.error(msg, ex)
+              sys.error(msg)
           }
         }
       }
     }
+
+    Option(cache.get(key)) match {
+      case Some(entry) if !entry.isExpired => entry.value
+      case opt => doRefresh(opt)
+    }
+
   }
 
 }

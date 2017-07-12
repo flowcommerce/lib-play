@@ -3,6 +3,7 @@ package io.flow.play.util
 import sys.process._
 import java.net.URL
 import java.io.File
+import scala.language.postfixOps
 
 object Urls {
 

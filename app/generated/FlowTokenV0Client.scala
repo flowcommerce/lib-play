@@ -19,7 +19,7 @@ package io.flow.token.v0.models {
 
     case class UNDEFINED(override val toString: String) extends TokenDiscriminator
 
-    val all: List[TokenDiscriminator] = List(OrganizationToken, PartnerToken)
+    val all: scala.List[TokenDiscriminator] = scala.List(OrganizationToken, PartnerToken)
 
     private[this] val byName: Map[String, TokenDiscriminator] = all.map(x => x.toString.toLowerCase -> x).toMap
 
@@ -43,7 +43,7 @@ package io.flow.token.v0.models {
 
     case class UNDEFINED(override val toString: String) extends TokenFormDiscriminator
 
-    val all: List[TokenFormDiscriminator] = List(OrganizationTokenForm, PartnerTokenForm)
+    val all: scala.List[TokenFormDiscriminator] = scala.List(OrganizationTokenForm, PartnerTokenForm)
 
     private[this] val byName: Map[String, TokenFormDiscriminator] = all.map(x => x.toString.toLowerCase -> x).toMap
 
@@ -67,7 +67,7 @@ package io.flow.token.v0.models {
 
     case class UNDEFINED(override val toString: String) extends TokenReferenceDiscriminator
 
-    val all: List[TokenReferenceDiscriminator] = List(OrganizationTokenReference, PartnerTokenReference)
+    val all: scala.List[TokenReferenceDiscriminator] = scala.List(OrganizationTokenReference, PartnerTokenReference)
 
     private[this] val byName: Map[String, TokenReferenceDiscriminator] = all.map(x => x.toString.toLowerCase -> x).toMap
 

@@ -9,22 +9,31 @@ import scala.concurrent.duration._
 class CacheWithFallbackToStaleDataSpec extends PlaySpec with OneAppPerSuite {
 
   private[this] case class TestCacheWithFallbackToStaleData() extends CacheWithFallbackToStaleData[String, String] {
+
     private[this] val data = scala.collection.mutable.Map[String, String]()
+    private[this] val nextValues = scala.collection.mutable.Map[String, String]()
     var numberRefreshes: Int = 0
     var refreshShouldFail = false
 
     override val duration: FiniteDuration = FiniteDuration(1, SECONDS)
 
     override def refresh(key: String): String = {
-      if (refreshShouldFail) {
-        throw new Exception("test refresh() failing on purpose")
-      } else {
+      if (!refreshShouldFail) {
         numberRefreshes += 1
-        data.getOrElse(key, sys.error("Missing test data for key[$key]"))
+        data += key -> nextValues.getOrElse(
+          key,
+          data.getOrElse(key, sys.error("Missing test data for key[$key]"))
+        )
       }
+
+      data.getOrElse(key, sys.error("Missing test data for key[$key]"))
     }
 
-    def add(key: String, value: String): Unit = {
+    def setNextValue(key: String, value: String): Unit = {
+      nextValues += (key -> value)
+    }
+
+    def set(key: String, value: String): Unit = {
       data += (key -> value)
     }
   }
@@ -37,7 +46,7 @@ class CacheWithFallbackToStaleDataSpec extends PlaySpec with OneAppPerSuite {
 
   "cached values are served" in {
     val cache = TestCacheWithFallbackToStaleData()
-    cache.add("a", "apple")
+    cache.set("a", "apple")
 
     // Test cache hit
     cache.get("a") must equal("apple")
@@ -53,8 +62,8 @@ class CacheWithFallbackToStaleDataSpec extends PlaySpec with OneAppPerSuite {
 
   "supports multiple keys" in {
     val cache = TestCacheWithFallbackToStaleData()
-    cache.add("a", "apple")
-    cache.add("p", "pear")
+    cache.set("a", "apple")
+    cache.set("p", "pear")
 
     cache.get("a") must equal("apple")
     cache.get("p") must equal("pear")
@@ -62,16 +71,38 @@ class CacheWithFallbackToStaleDataSpec extends PlaySpec with OneAppPerSuite {
 
   "failed refresh handled gracefully" in {
     val cache = TestCacheWithFallbackToStaleData()
-    cache.add("a", "apple")
+    cache.set("a", "apple")
     cache.get("a") must equal("apple")
 
     cache.refreshShouldFail = true
-    cache.add("a", "not apple")
+    cache.setNextValue("a", "not apple")
 
     Thread.sleep(2000)
 
     // failing refresh should return old value
     cache.get("a") must equal("apple")
+  }
+
+  "flushed key serves stale data if refresh fails" in {
+    val cache = TestCacheWithFallbackToStaleData()
+    cache.set("a", "apple")
+    cache.flush("a")
+
+    cache.refreshShouldFail = true
+    cache.setNextValue("a", "foo")
+
+    // failing refresh should return old value
+    cache.get("a") must equal("apple")
+  }
+
+  "flushed key is immediately refreshed" in {
+    val cache = TestCacheWithFallbackToStaleData()
+    cache.set("a", "apple")
+    cache.setNextValue("a", "foo")
+    cache.flush("a")
+
+    // failing refresh should return old value
+    cache.get("a") must equal("foo")
   }
 
 }

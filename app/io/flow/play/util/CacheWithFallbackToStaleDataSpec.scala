@@ -33,8 +33,17 @@ trait CacheWithFallbackToStaleData[K, V] {
 
   def refresh(key: K): V
 
+  /**
+    * Marks the specified key as expired. On next access, will attempt to refresh. Note that
+    * if refresh fails, we will continue to return the stale data.
+    */
   def flush(key: K): Unit = {
-    cache.remove(key)
+    Option(cache.get(key)) match {
+      case Some(entry) if !entry.isExpired => {
+        cache.put(key, entry.copy(expiresAt = DateTime.now))
+      }
+      case _ => // no-op
+    }
   }
 
   def get(key: K): V = {

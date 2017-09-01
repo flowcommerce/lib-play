@@ -21,7 +21,6 @@ lazy val root = project
       "com.github.ben-manes.caffeine" % "caffeine" % "2.5.5",
       "com.github.ben-manes.caffeine" % "guava" % "2.5.5",
       "com.ning" % "async-http-client" % "1.9.40",
-      "com.typesafe.play" %% "play-ahc-ws-standalone" % "1.0.1",
       "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.1" % "test"
     ),
     resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
@@ -42,4 +41,16 @@ publishTo := {
   } else {
     Some("Artifactory Realm" at s"$host/libs-release-local")
   }
+}
+
+val meta = """META.INF(.)*""".r
+test in assembly := {}
+assemblyMergeStrategy in assembly := {
+  case meta(_) => MergeStrategy.discard
+  case ("play/reference-overrides.conf") => MergeStrategy.concat
+  case ("reference.conf") => MergeStrategy.concat
+  case s if s.startsWith("play/api/libs/ws") => MergeStrategy.first
+  case x =>
+    val oldStrategy = (assemblyMergeStrategy in assembly).value
+    oldStrategy(x)
 }

@@ -493,7 +493,16 @@ package io.flow.registry.v0.models {
 
 
 package io.flow.registry.v0 {
-  import com.ning.http.client.{AsyncCompletionHandler, AsyncHttpClient, AsyncHttpClientConfig, Realm, Request, RequestBuilder, Response}
+  import java.util.concurrent.TimeUnit
+
+  import com.github.benmanes.caffeine.cache.Caffeine
+  import com.google.common.base.Ticker
+  import com.ning.http.client.Realm.RealmBuilder
+  import common.WsStandaloneClient
+  import play.api.libs.ws.ahc.cache.{CachingAsyncHttpClient, _}
+  import play.shaded.ahc.org.asynchttpclient._
+
+  import scala.concurrent.{ExecutionContext, Future}
 
   object Constants {
 
@@ -510,7 +519,7 @@ package io.flow.registry.v0 {
     auth: scala.Option[io.flow.registry.v0.Authorization] = None,
     defaultHeaders: Seq[(String, String)] = Nil,
     asyncHttpClient: AsyncHttpClient = Client.defaultAsyncHttpClient
-  ) extends interfaces.Client {
+  ) extends interfaces.Client with WsStandaloneClient {
     import org.slf4j.{Logger, LoggerFactory}
     import io.flow.common.v0.models.json._
     import io.flow.error.v0.models.json._
@@ -783,9 +792,7 @@ package io.flow.registry.v0 {
       auth.fold(builder) {
         case Authorization.Basic(username, passwordOpt) => {
           builder.setRealm(
-            new Realm.RealmBuilder()
-              .setPrincipal(username)
-              .setPassword(passwordOpt.getOrElse(""))
+            new Realm.Builder(username, passwordOpt.getOrElse(""))
               .setUsePreemptiveAuth(true)
               .setScheme(Realm.AuthScheme.BASIC)
               .build()
@@ -801,7 +808,7 @@ package io.flow.registry.v0 {
       queryParameters: Seq[(String, String)] = Nil,
       requestHeaders: Seq[(String, String)] = Nil,
       body: Option[play.api.libs.json.JsValue] = None
-    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[com.ning.http.client.Response] = {
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[play.shaded.ahc.org.asynchttpclient.Response] = {
       val allHeaders = body match {
         case None => requestHeaders
         case Some(_) => _withJsonContentType(requestHeaders)
@@ -821,10 +828,10 @@ package io.flow.registry.v0 {
       val finalRequest = requestWithParamsAndBody.build()
       _logRequest(finalRequest)
 
-      val result = scala.concurrent.Promise[com.ning.http.client.Response]()
+      val result = scala.concurrent.Promise[play.shaded.ahc.org.asynchttpclient.Response]()
       asyncHttpClient.executeRequest(finalRequest,
         new AsyncCompletionHandler[Unit]() {
-          override def onCompleted(r: com.ning.http.client.Response) = result.success(r)
+          override def onCompleted(r: play.shaded.ahc.org.asynchttpclient.Response) = result.success(r)
           override def onThrowable(t: Throwable) = result.failure(t)
         }
       )
@@ -845,21 +852,30 @@ package io.flow.registry.v0 {
   }
 
   object Client {
+    implicit val ec = ExecutionContext.fromExecutor(java.util.concurrent.Executors.newCachedThreadPool())
 
-    private lazy val defaultAsyncHttpClient = {
-      new AsyncHttpClient(
-        new AsyncHttpClientConfig.Builder()
-          .setExecutorService(java.util.concurrent.Executors.newCachedThreadPool())
-          .build()
-      )
+    class CaffeineHttpCache extends Cache {
+      val underlying = Caffeine.newBuilder()
+        .ticker(com.github.benmanes.caffeine.cache.Ticker.systemTicker())
+        .expireAfterWrite(365, TimeUnit.DAYS)
+        .build[EffectiveURIKey, ResponseEntry]()
+
+      override def remove(key: EffectiveURIKey): Future[Unit] = Future(underlying.invalidate(key))
+      override def put(key: EffectiveURIKey, entry: ResponseEntry): Future[Unit] = Future(underlying.put(key, entry))
+      override def get(key: EffectiveURIKey): Future[Option[ResponseEntry]] = Future(Option(underlying.getIfPresent(key)))
+      override def close(): Unit = underlying.cleanUp()
     }
+    val cache = new CaffeineHttpCache
+
+    private lazy val defaultAsyncHttpClient = new CachingAsyncHttpClient(new DefaultAsyncHttpClient(), new AhcHttpCache(cache))
+
 
     def parseJson[T](
       className: String,
-      r: _root_.com.ning.http.client.Response,
+      r: play.shaded.ahc.org.asynchttpclient.Response,
       f: (play.api.libs.json.JsValue => play.api.libs.json.JsResult[T])
     ): T = {
-      f(play.api.libs.json.Json.parse(r.getResponseBody("UTF-8"))) match {
+      f(play.api.libs.json.Json.parse(r.getResponseBodyAsBytes)) match {
         case play.api.libs.json.JsSuccess(x, _) => x
         case play.api.libs.json.JsError(errors) => {
           throw io.flow.registry.v0.errors.FailedRequest(r.getStatusCode, s"Invalid json for class[" + className + "]: " + errors.mkString(" "), requestUri = Some(r.getUri.toJavaNetURI))
@@ -1045,9 +1061,9 @@ package io.flow.registry.v0 {
     import io.flow.registry.v0.models.json._
 
     case class GenericErrorResponse(
-      response: _root_.com.ning.http.client.Response,
+      response: play.shaded.ahc.org.asynchttpclient.Response,
       message: Option[String] = None
-    ) extends Exception(message.getOrElse(response.getStatusCode + ": " + response.getResponseBody("UTF-8"))){
+    ) extends Exception(message.getOrElse(response.getStatusCode + ": " + response.getResponseBodyAsBytes)){
       lazy val genericError = _root_.io.flow.registry.v0.Client.parseJson("io.flow.error.v0.models.GenericError", response, _.validate[io.flow.error.v0.models.GenericError])
     }
 

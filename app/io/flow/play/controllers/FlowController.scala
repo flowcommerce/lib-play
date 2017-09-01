@@ -3,23 +3,22 @@ package io.flow.play.controllers
 import authentikat.jwt.{JsonWebToken, JwtClaimsSetJValue}
 import io.flow.play.util._
 import io.flow.common.v0.models.{Environment, UserReference}
-import org.joda.time.DateTime
 import play.api.mvc.Results.Unauthorized
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import play.api.mvc._
 
 class AnonymousRequest[A](
-  val auth: AuthData.Anonymous,
-  request: Request[A]
-) extends WrappedRequest[A](request) {
+                           val auth: AuthData.Anonymous,
+                           request: Request[A]
+                         ) extends WrappedRequest[A](request) {
   val user: Option[UserReference] = auth.user
 }
 
 class SessionOrgRequest[A](
-  val auth: OrgAuthData.Session,
-  request: Request[A]
-) extends WrappedRequest[A](request) {
+                            val auth: OrgAuthData.Session,
+                            request: Request[A]
+                          ) extends WrappedRequest[A](request) {
   val flowSession: FlowSession = auth.session
   val organization: String = auth.organization
   val environment: Environment = auth.environment
@@ -33,16 +32,16 @@ class IdentifiedRequest[A](
 }
 
 class SessionRequest[A](
-  val auth: AuthData.Session,
-  request: Request[A]
-) extends WrappedRequest[A](request) {
+                         val auth: AuthData.Session,
+                         request: Request[A]
+                       ) extends WrappedRequest[A](request) {
   val flowSession: FlowSession = auth.session
 }
 
 class IdentifiedOrgRequest[A](
-  val auth: OrgAuthData.Identified,
-  request: Request[A]
-) extends WrappedRequest[A](request) {
+                               val auth: OrgAuthData.Identified,
+                               request: Request[A]
+                             ) extends WrappedRequest[A](request) {
   val user: UserReference = auth.user
   val organization: String = auth.organization
   val environment: Environment = auth.environment
@@ -52,9 +51,9 @@ class IdentifiedOrgRequest[A](
   * Any type of request that contains org data
   */
 class OrgRequest[A](
-   val auth: OrgAuthData,
-   request: Request[A]
-) extends WrappedRequest[A](request) {
+                     val auth: OrgAuthData,
+                     request: Request[A]
+                   ) extends WrappedRequest[A](request) {
   val organization: String = auth.organization
   val environment: Environment = auth.environment
 }
@@ -106,7 +105,12 @@ trait FlowController extends FlowControllerHelpers {
     }
   }
 
-  object Anonymous extends ActionBuilder[AnonymousRequest] {
+  object Anonymous {
+    def apply[B](implicit ec: ExecutionContext, bodyParser: BodyParser[B]) = new Anonymous[B]
+  }
+
+  class Anonymous[B](implicit ec: ExecutionContext,
+                             bodyParser: BodyParser[B]) extends ActionBuilder[AnonymousRequest, B] {
 
     def invokeBlock[A](request: Request[A], block: (AnonymousRequest[A]) => Future[Result]): Future[Result] = {
       val ad = auth(request.headers)(AuthData.Anonymous.fromMap).getOrElse {
@@ -119,13 +123,22 @@ trait FlowController extends FlowControllerHelpers {
       )
     }
 
+    override def parser: BodyParser[B] = bodyParser
+
+    override protected def executionContext: ExecutionContext = ec
+
   }
 
-  object SessionOrg extends ActionBuilder[SessionOrgRequest] {
+  object SessionOrg {
+    def apply[B](implicit ec: ExecutionContext, bodyParser: BodyParser[B]) = new SessionOrg[B]
+  }
+
+  class SessionOrg[B](implicit ec: ExecutionContext,
+                      bodyParser: BodyParser[B]) extends ActionBuilder[SessionOrgRequest, B] {
 
     def invokeBlock[A](request: Request[A], block: (SessionOrgRequest[A]) => Future[Result]): Future[Result] = {
       auth(request.headers)(OrgAuthData.Session.fromMap) match {
-        case None => Future.successful (
+        case None => Future.successful(
           unauthorized(request)
         )
         case Some(ad) => {
@@ -135,9 +148,19 @@ trait FlowController extends FlowControllerHelpers {
         }
       }
     }
+
+    override def parser: BodyParser[B] = bodyParser
+
+    override protected def executionContext: ExecutionContext = ec
+
   }
 
-  object Identified extends ActionBuilder[IdentifiedRequest] {
+  object Identified {
+    def apply[B](implicit ec: ExecutionContext, bodyParser: BodyParser[B]) = new Identified[B]
+  }
+
+  class Identified[B](implicit ec: ExecutionContext,
+                      bodyParser: BodyParser[B]) extends ActionBuilder[IdentifiedRequest, B] {
 
     def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]): Future[Result] = {
       auth(request.headers)(AuthData.Identified.fromMap) match {
@@ -151,9 +174,18 @@ trait FlowController extends FlowControllerHelpers {
         }
       }
     }
+
+    override def parser: BodyParser[B] = bodyParser
+
+    override protected def executionContext: ExecutionContext = ec
   }
 
-  object Session extends ActionBuilder[SessionRequest] {
+  object Session {
+    def apply[B](implicit ec: ExecutionContext, bodyParser: BodyParser[B]) = new Session[B]
+  }
+
+  class Session[B](implicit ec: ExecutionContext,
+                   bodyParser: BodyParser[B]) extends ActionBuilder[SessionRequest, B] {
 
     def invokeBlock[A](request: Request[A], block: (SessionRequest[A]) => Future[Result]): Future[Result] = {
       auth(request.headers)(AuthData.Session.fromMap) match {
@@ -167,9 +199,18 @@ trait FlowController extends FlowControllerHelpers {
         }
       }
     }
+
+    override def parser: BodyParser[B] = bodyParser
+
+    override protected def executionContext: ExecutionContext = ec
   }
 
-  object IdentifiedOrg extends ActionBuilder[IdentifiedOrgRequest] {
+  object IdentifiedOrg {
+    def apply[B](implicit ec: ExecutionContext, bodyParser: BodyParser[B]) = new IdentifiedOrg[B]
+  }
+
+  class IdentifiedOrg[B](implicit ec: ExecutionContext,
+                         bodyParser: BodyParser[B]) extends ActionBuilder[IdentifiedOrgRequest, B] {
 
     def invokeBlock[A](request: Request[A], block: (IdentifiedOrgRequest[A]) => Future[Result]): Future[Result] = {
       auth(request.headers)(OrgAuthData.Identified.fromMap) match {
@@ -184,9 +225,17 @@ trait FlowController extends FlowControllerHelpers {
         }
       }
     }
+
+    override def parser: BodyParser[B] = bodyParser
+
+    override protected def executionContext: ExecutionContext = ec
   }
 
-  object Org extends ActionBuilder[OrgRequest] {
+  object Org {
+    def apply[B](implicit ec: ExecutionContext, bodyParser: BodyParser[B]) = new Org[B]
+  }
+
+  class Org[B](implicit ec: ExecutionContext, bodyParser: BodyParser[B]) extends ActionBuilder[OrgRequest, B] {
 
     def invokeBlock[A](request: Request[A], block: (OrgRequest[A]) => Future[Result]): Future[Result] = {
       auth(request.headers)(OrgAuthData.Org.fromMap) match {
@@ -201,5 +250,10 @@ trait FlowController extends FlowControllerHelpers {
         }
       }
     }
+
+    override def parser: BodyParser[B] = bodyParser
+
+    override protected def executionContext: ExecutionContext = ec
   }
+
 }

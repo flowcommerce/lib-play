@@ -345,6 +345,9 @@ package io.flow.user.v0 {
 
 package io.flow.user.v0 {
 
+  import common.WsStandaloneClient
+  import play.api.libs.ws.ahc.AhcWSComponents
+
   object Constants {
 
     val Namespace = "io.flow.user.v0"
@@ -358,10 +361,12 @@ package io.flow.user.v0 {
     val baseUrl: String,
     auth: scala.Option[io.flow.user.v0.Authorization] = None,
     defaultHeaders: Seq[(String, String)] = Nil
-  ) extends interfaces.Client {
+  ) extends interfaces.Client with WsStandaloneClient {
     import io.flow.common.v0.models.json._
     import io.flow.error.v0.models.json._
     import io.flow.user.v0.models.json._
+    import play.api.libs.ws.JsonBodyReadables._
+    import play.api.libs.ws.JsonBodyWritables._
 
     private[this] val logger = play.api.Logger("io.flow.user.v0.Client")
 
@@ -558,9 +563,9 @@ package io.flow.user.v0 {
     }
 
     def _requestHolder(path: String): play.api.libs.ws.WSRequest = {
-      import play.api.Play.current
+//      import play.api.Play.current
 
-      val holder = play.api.libs.ws.WS.url(baseUrl + path).withHeaders(
+      val holder = wsClient.url(baseUrl + path).withHttpHeaders(
         "User-Agent" -> Constants.UserAgent,
         "X-Apidoc-Version" -> Constants.Version,
         "X-Apidoc-Version-Major" -> Constants.VersionMajor.toString

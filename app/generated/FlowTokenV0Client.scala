@@ -543,6 +543,9 @@ package io.flow.token.v0 {
 
 package io.flow.token.v0 {
 
+  import common.WsStandaloneClient
+  import play.api.libs.ws.ahc.AhcWSComponents
+
   object Constants {
 
     val BaseUrl = "https://token.api.flow.io"
@@ -557,10 +560,12 @@ package io.flow.token.v0 {
     val baseUrl: String = "https://token.api.flow.io",
     auth: scala.Option[io.flow.token.v0.Authorization] = None,
     defaultHeaders: Seq[(String, String)] = Nil
-  ) extends interfaces.Client {
+  ) extends interfaces.Client with WsStandaloneClient {
     import io.flow.common.v0.models.json._
     import io.flow.error.v0.models.json._
     import io.flow.token.v0.models.json._
+    import play.api.libs.ws.JsonBodyReadables._
+    import play.api.libs.ws.JsonBodyWritables._
 
     private[this] val logger = play.api.Logger("io.flow.token.v0.Client")
 
@@ -755,11 +760,11 @@ package io.flow.token.v0 {
     def _requestHolder(path: String): play.api.libs.ws.WSRequest = {
       import play.api.Play.current
 
-      val holder = play.api.libs.ws.WS.url(baseUrl + path).withHeaders(
+      val holder = wsClient.url(baseUrl + path).withHttpHeaders(
         "User-Agent" -> Constants.UserAgent,
         "X-Apidoc-Version" -> Constants.Version,
         "X-Apidoc-Version-Major" -> Constants.VersionMajor.toString
-      ).withHeaders(defaultHeaders : _*)
+      ).withHttpHeaders(defaultHeaders : _*)
       auth.fold(holder) {
         case Authorization.Basic(username, password) => {
           holder.withAuth(username, password.getOrElse(""), play.api.libs.ws.WSAuthScheme.BASIC)

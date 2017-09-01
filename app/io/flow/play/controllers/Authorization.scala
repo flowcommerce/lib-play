@@ -2,9 +2,8 @@ package io.flow.play.controllers
 
 import io.flow.play.util.Config
 import org.apache.commons.codec.binary.Base64
-
 import authentikat.jwt._
-import play.api.Logger
+import play.api.{Application, Logger}
 
 trait Authorization
 

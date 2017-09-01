@@ -1,21 +1,18 @@
 package io.flow.play.controllers
 
+import com.typesafe.config.ConfigFactory
 import io.flow.common.v0.models.{Environment, Role, UserReference}
 import io.flow.play.clients.MockConfig
-import io.flow.play.util.{AuthData, Config, FlowSession, OrgAuthData}
-import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
+import io.flow.play.util._
 import org.joda.time.DateTime
 import org.scalatestplus.play._
-import play.api.Application
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.Configuration
 
-class FlowControllerSpec extends PlaySpec with OneAppPerSuite {
+class FlowControllerSpec extends PlaySpec with GuiceOneAppPerSuite {
 
-  private[this] lazy val mockConfig = play.api.Play.current.injector.instanceOf[MockConfig]
+  private[this] lazy val mockConfig = MockConfig(DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty()))))
   private[this] lazy val salt = "test"
-
-  // TODO: Bind to the specific instance of mockConfig
-  override lazy val app: Application = new GuiceApplicationBuilder().bindings(bind[Config].to[MockConfig]).build()
 
   private[this] val user = UserReference("usr-20151006-1")
   private[this] val session = FlowSession(id = "F51test")

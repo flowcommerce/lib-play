@@ -1,5 +1,7 @@
 package io.flow.play.controllers
 
+import javax.inject.Inject
+
 import io.flow.play.util.Config
 import org.apache.commons.codec.binary.Base64
 import authentikat.jwt._
@@ -7,13 +9,12 @@ import play.api.{Application, Logger}
 
 trait Authorization
 
-object Authorization {
+case class JwtToken(userId: String) extends Authorization
+case class Token(token: String) extends Authorization
 
-  case class Token(token: String) extends Authorization
-  case class JwtToken(userId: String) extends Authorization
+class AuthorizationImpl @Inject() (config: Config) {
 
   private[this] lazy val jwtSalt = {
-    val config = play.api.Play.current.injector.instanceOf[Config]
     config.requiredString("JWT_SALT")
   }
 

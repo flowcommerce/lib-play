@@ -132,7 +132,8 @@ trait FlowController extends FlowControllerHelpers {
   }
 
   object Anonymous {
-    def apply(implicit ec: ExecutionContext) = new Anonymous
+    implicit lazy val ec: ExecutionContext = implicitly[ExecutionContext]
+    def apply = new Anonymous
   }
 
   class Anonymous(implicit ec: ExecutionContext) extends FlowAction[AnonymousRequest] {
@@ -175,7 +176,8 @@ trait FlowController extends FlowControllerHelpers {
   }
 
   object SessionOrg {
-    def apply(implicit ec: ExecutionContext) = new SessionOrg
+    implicit lazy val ec: ExecutionContext = implicitly[ExecutionContext]
+    def apply = new SessionOrg
   }
 
   class SessionOrg(implicit ec: ExecutionContext) extends FlowAction[SessionOrgRequest] {
@@ -220,7 +222,8 @@ trait FlowController extends FlowControllerHelpers {
   }
 
   object Identified {
-    def apply(implicit ec: ExecutionContext) = new Identified
+    implicit lazy val ec: ExecutionContext = implicitly[ExecutionContext]
+    def apply = new Identified
   }
 
   class Identified(implicit ec: ExecutionContext) extends FlowAction[IdentifiedRequest] {
@@ -265,7 +268,8 @@ trait FlowController extends FlowControllerHelpers {
   }
 
   object Session {
-    def apply(implicit ec: ExecutionContext) = new Session
+    implicit lazy val ec: ExecutionContext = implicitly[ExecutionContext]
+    def apply = new Session
   }
 
   class Session(implicit ec: ExecutionContext) extends FlowAction[SessionRequest]{
@@ -313,7 +317,8 @@ trait FlowController extends FlowControllerHelpers {
   }
 
   object IdentifiedOrg {
-    def apply(implicit ec: ExecutionContext) = new IdentifiedOrg
+    implicit lazy val ec: ExecutionContext = implicitly[ExecutionContext]
+    def apply = new IdentifiedOrg
   }
 
   class IdentifiedOrg(implicit ec: ExecutionContext) extends FlowAction[IdentifiedOrgRequest] {
@@ -359,7 +364,8 @@ trait FlowController extends FlowControllerHelpers {
   }
 
   object Org {
-    def apply(implicit ec: ExecutionContext) = new Org
+    implicit lazy val ec: ExecutionContext = implicitly[ExecutionContext]
+    def apply = new Org
   }
 
   class Org(implicit ec: ExecutionContext) extends FlowAction[OrgRequest] {

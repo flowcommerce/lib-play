@@ -8,7 +8,7 @@ scalaVersion in ThisBuild := "2.12.3"
 
 crossScalaVersions := Seq("2.12.3")
 
-version := "0.3.32"
+version := "0.4.0-SNAPSHOT"
 
 lazy val root = project
   .in(file("."))
@@ -26,6 +26,8 @@ lazy val root = project
     resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
     resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
     resolvers += "Artifactory" at "https://flow.artifactoryonline.com/flow/libs-release/",
+    resolvers += "Artifactory-Snapshots-Local" at "https://flow.artifactoryonline.com/flow/libs-snapshot-local/",
+    resolvers += "Artifactory-Releases-Local" at "https://flow.artifactoryonline.com/flow/libs-release-local/",
     credentials += Credentials(
       "Artifactory Realm",
       "flow.artifactoryonline.com",
@@ -41,16 +43,4 @@ publishTo := {
   } else {
     Some("Artifactory Realm" at s"$host/libs-release-local")
   }
-}
-
-val meta = """META.INF(.)*""".r
-test in assembly := {}
-assemblyMergeStrategy in assembly := {
-  case meta(_) => MergeStrategy.discard
-  case ("play/reference-overrides.conf") => MergeStrategy.concat
-  case ("reference.conf") => MergeStrategy.concat
-  case s if s.startsWith("play/api/libs/ws") => MergeStrategy.first
-  case x =>
-    val oldStrategy = (assemblyMergeStrategy in assembly).value
-    oldStrategy(x)
 }

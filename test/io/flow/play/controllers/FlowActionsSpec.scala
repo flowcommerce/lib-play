@@ -8,8 +8,9 @@ import org.joda.time.DateTime
 import org.scalatestplus.play._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
+import FlowActions._
 
-class FlowControllerSpec extends PlaySpec with GuiceOneAppPerSuite {
+class FlowActionsSpec extends PlaySpec with GuiceOneAppPerSuite {
 
   private[this] lazy val mockConfig = MockConfig(DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty()))))
   private[this] lazy val salt = "test"
@@ -17,10 +18,9 @@ class FlowControllerSpec extends PlaySpec with GuiceOneAppPerSuite {
   private[this] val user = UserReference("usr-20151006-1")
   private[this] val session = FlowSession(id = "F51test")
 
-  private[this] val controller = new FlowController {
-    override def config: MockConfig = mockConfig
-    override def jwtSalt: String = salt
-  }
+  def config: MockConfig = mockConfig
+
+  def jwtSalt: String = salt
 
   "parse AuthData.AnonymousAuth w/ no user" in {
     val data = AuthData.Anonymous(
@@ -29,7 +29,7 @@ class FlowControllerSpec extends PlaySpec with GuiceOneAppPerSuite {
       session = None
     )
 
-    controller.parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
+    parse(config)(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
       sys.error("Failed to parse")
     } must be(data)
   }
@@ -41,7 +41,7 @@ class FlowControllerSpec extends PlaySpec with GuiceOneAppPerSuite {
       session = Some(session)
     )
 
-    controller.parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
+    parse(config)(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
       sys.error("Failed to parse")
     } must be(data)
   }
@@ -50,10 +50,10 @@ class FlowControllerSpec extends PlaySpec with GuiceOneAppPerSuite {
     val data = AuthData.Anonymous(
       requestId = "test",
       user = Some(user),
-      session =  None
+      session = None
     )
 
-    controller.parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
+    parse(config)(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
       sys.error("Failed to parse")
     } must be(data)
   }
@@ -62,10 +62,10 @@ class FlowControllerSpec extends PlaySpec with GuiceOneAppPerSuite {
     val data = AuthData.Anonymous(
       requestId = "test",
       user = Some(user),
-      session =  Some(session)
+      session = Some(session)
     )
 
-    controller.parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
+    parse(config)(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
       sys.error("Failed to parse")
     } must be(data)
   }
@@ -73,10 +73,10 @@ class FlowControllerSpec extends PlaySpec with GuiceOneAppPerSuite {
   "parse AuthData.SessionAuth" in {
     val data = AuthData.Session(
       requestId = "test",
-      session =  session
+      session = session
     )
 
-    controller.parse(data.jwt(salt))(AuthData.Session.fromMap).getOrElse {
+    parse(config)(data.jwt(salt))(AuthData.Session.fromMap).getOrElse {
       sys.error("Failed to parse")
     } must be(data)
   }
@@ -91,12 +91,12 @@ class FlowControllerSpec extends PlaySpec with GuiceOneAppPerSuite {
       session = None
     )
 
-    controller.parse(data.jwt(salt))(OrgAuthData.Identified.fromMap).getOrElse {
+    parse(config)(data.jwt(salt))(OrgAuthData.Identified.fromMap).getOrElse {
       sys.error("Failed to parse")
     } must be(data)
 
     // Confirm generic org parser works
-    controller.parse(data.jwt(salt))(OrgAuthData.Org.fromMap).getOrElse {
+    parse(config)(data.jwt(salt))(OrgAuthData.Org.fromMap).getOrElse {
       sys.error("Failed to parse")
     } must be(data)
   }
@@ -111,7 +111,7 @@ class FlowControllerSpec extends PlaySpec with GuiceOneAppPerSuite {
       session = Some(session)
     )
 
-    controller.parse(data.jwt(salt))(OrgAuthData.Identified.fromMap).getOrElse {
+    parse(config)(data.jwt(salt))(OrgAuthData.Identified.fromMap).getOrElse {
       sys.error("Failed to parse")
     } must be(data)
   }
@@ -124,12 +124,12 @@ class FlowControllerSpec extends PlaySpec with GuiceOneAppPerSuite {
       environment = Environment.Sandbox
     )
 
-    controller.parse(data.jwt(salt))(OrgAuthData.Session.fromMap).getOrElse {
+    parse(config)(data.jwt(salt))(OrgAuthData.Session.fromMap).getOrElse {
       sys.error("Failed to parse")
     } must be(data)
 
     // Confirm generic org parser works
-    controller.parse(data.jwt(salt))(OrgAuthData.Org.fromMap).getOrElse {
+    parse(config)(data.jwt(salt))(OrgAuthData.Org.fromMap).getOrElse {
       sys.error("Failed to parse")
     } must be(data)
   }
@@ -141,13 +141,13 @@ class FlowControllerSpec extends PlaySpec with GuiceOneAppPerSuite {
       session = None
     )
 
-    controller.parse(data.jwt(salt))(AuthData.Anonymous.fromMap).isDefined must be(true)
+    parse(config)(data.jwt(salt))(AuthData.Anonymous.fromMap).isDefined must be(true)
 
-    controller.parse(data.copy(
+    parse(config)(data.copy(
       createdAt = DateTime.now.minusMinutes(1)
     ).jwt(salt))(AuthData.Anonymous.fromMap).isDefined must be(true)
 
-    controller.parse(data.copy(
+    parse(config)(data.copy(
       createdAt = DateTime.now.minusMinutes(5)
     ).jwt(salt))(AuthData.Anonymous.fromMap).isDefined must be(false)
 

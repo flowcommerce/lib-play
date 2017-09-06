@@ -21,6 +21,7 @@ lazy val root = project
       "com.github.ben-manes.caffeine" % "caffeine" % "2.5.5",
       "com.github.ben-manes.caffeine" % "guava" % "2.5.5",
       "com.ning" % "async-http-client" % "1.9.40",
+      "play-circe" %% "play-circe" % "2608.3",
       "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.1" % "test"
     ),
     resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
@@ -28,6 +29,7 @@ lazy val root = project
     resolvers += "Artifactory" at "https://flow.artifactoryonline.com/flow/libs-release/",
     resolvers += "Artifactory-Snapshots-Local" at "https://flow.artifactoryonline.com/flow/libs-snapshot-local/",
     resolvers += "Artifactory-Releases-Local" at "https://flow.artifactoryonline.com/flow/libs-release-local/",
+    resolvers += "Bintary JCenter" at "http://jcenter.bintray.com",
     credentials += Credentials(
       "Artifactory Realm",
       "flow.artifactoryonline.com",

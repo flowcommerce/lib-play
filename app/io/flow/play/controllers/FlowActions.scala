@@ -105,59 +105,63 @@ trait FlowActionInvokeBlockHelper {
 }
 
 
-// ANONYMOUS ACTION BUILDER - TODO: Add for all *Action
-
-trait AnonymousActionBuilder extends ActionBuilder[AnonymousRequest, AnyContent]
-
-object AnonymousActionBuilder {
-  def apply(parser: BodyParser[AnyContent])(config: Config)(implicit ec: ExecutionContext): AnonymousActionBuilder =
-    new AnonymousActionBuilderImpl(parser)(config)
-}
-
-class ActionBuilderImpl[B](val parser: BodyParser[B])
-                          (implicit val executionContext: ExecutionContext)
-  extends ActionBuilder[Request, B] {
-  def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]) = block(request)
-}
-
-class AnonymousActionBuilderImpl(val parser: BodyParser[AnyContent])
-                                (override val config: Config)
-                                (implicit val executionContext: ExecutionContext) extends AnonymousActionBuilder with FlowActionInvokeBlockHelper {
-  @Inject def this(parser: BodyParsers.Default)(config: Config)
-                  (implicit ec: ExecutionContext) = this(parser: BodyParser[AnyContent])(config: Config)
-
-  override def invokeBlock[A](request: Request[A], block: (AnonymousRequest[A]) => Future[Result]): Future[Result] = {
-    val ad = auth(request.headers)(AuthData.Anonymous.fromMap).getOrElse {
-      // Create an empty header here so at least requestId tracking can start
-      AuthData.Anonymous.Empty
-    }
-
-    block(
-      new AnonymousRequest(ad, request)
-    )
-  }
-}
-
-
-// FLOW WIRE UP
-//done
-trait FlowBaseControllerHelpers  {
-  protected def flowControllerComponents: FlowControllerComponents
-}
-
-//TODO: add *Action
-trait FlowController extends FlowBaseControllerHelpers with BaseController {
-  def IdentifiedAction: ActionBuilder[IdentifiedRequest, AnyContent] = flowControllerComponents.identifiedActionBuilder
-  def AnonymousAction: ActionBuilder[AnonymousRequest, AnyContent] = flowControllerComponents.anonymousActionBuilder
-}
-
-//TODO: add *Action
-trait FlowControllerComponents {
-  def anonymousActionBuilder: ActionBuilder[AnonymousRequest, AnyContent]
-  def identifiedActionBuilder: ActionBuilder[IdentifiedRequest, AnyContent]
-}
-
-
+//// ANONYMOUS ACTION BUILDER - TODO: Add for all *Action
+//
+//trait AnonymousActionBuilder extends ActionBuilder[AnonymousRequest, AnyContent]
+//
+//object AnonymousActionBuilder {
+//  def apply(parser: BodyParser[AnyContent], config: Config)
+//           (implicit ec: ExecutionContext): AnonymousActionBuilder =
+//    new AnonymousActionBuilderImpl(parser, config)
+//}
+//
+//class ActionBuilderImpl[B](val parser: BodyParser[B])
+//                          (implicit val executionContext: ExecutionContext)
+//  extends ActionBuilder[Request, B] {
+//  def invokeBlock[A](request: Request[A], block: (Request[A]) => Future[Result]) = block(request)
+//}
+//
+//
+//class AnonymousActionBuilderImpl @Inject() (val parser: BodyParser[AnyContent], val config: Config)
+//                                (implicit val executionContext: ExecutionContext) extends AnonymousActionBuilder with FlowActionInvokeBlockHelper {
+////  @Inject def this(parser: BodyParsers.Default, config: Config)
+////                  (implicit ec: ExecutionContext) = this(parser: BodyParser[AnyContent], config: Config)
+//
+//  override def invokeBlock[A](request: Request[A], block: (AnonymousRequest[A]) => Future[Result]): Future[Result] = {
+//    val ad = auth(request.headers)(AuthData.Anonymous.fromMap).getOrElse {
+//      // Create an empty header here so at least requestId tracking can start
+//      AuthData.Anonymous.Empty
+//    }
+//
+//    block(
+//      new AnonymousRequest(ad, request)
+//    )
+//  }
+//}
+//
+//
+//// FLOW WIRE UP
+////done
+//trait FlowBaseControllerHelpers  {
+//  protected def flowControllerComponents: FlowControllerComponents
+//}
+//
+////TODO: add *Action
+////trait FlowController extends FlowBaseControllerHelpers with BaseController {
+////  def AnonymousAction: ActionBuilder[AnonymousRequest, AnyContent] = flowControllerComponents.anonymousActionBuilder
+////}
+//
+////TODO: add *Action
+//trait FlowControllerComponents {
+//  def anonymousActionBuilder: AnonymousActionBuilder
+//}
+//
+//
+//
+//abstract class FlowAbstractController(val cc: ControllerComponents,
+//                                      val fcc: FlowControllerComponents) extends AbstractController(cc) {
+//  def AnonymousAction: ActionBuilder[AnonymousRequest, AnyContent] = fcc.anonymousActionBuilder
+//}
 
 // WIRE UP HELPERS
 

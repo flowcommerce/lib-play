@@ -57,6 +57,7 @@ class FlowControllerComponentsModule extends Module {
       bind[FlowControllerComponents].to[FlowDefaultControllerComponents],
       bind[AnonymousDefaultActionBuilder].to[AnonymousDefaultActionBuilderImpl],
       bind[IdentifiedDefaultActionBuilder].to[IdentifiedDefaultActionBuilderImpl],
+      bind[SessionDefaultActionBuilder].to[SessionDefaultActionBuilderImpl],
       bind[OrgDefaultActionBuilder].to[OrgDefaultActionBuilderImpl],
       bind[IdentifiedOrgDefaultActionBuilder].to[IdentifiedOrgDefaultActionBuilderImpl],
       bind[SessionOrgDefaultActionBuilder].to[SessionOrgDefaultActionBuilderImpl]

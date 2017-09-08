@@ -22,7 +22,7 @@ import play.api.{Configuration, Environment}
     in base.conf
       play.modules.enabled += "io.flow.play.controllers.FlowControllerComponentsModule"
 */
-trait FlowController extends BaseController with BaseControllerHelpers {
+trait FlowController extends BaseController with BaseControllerHelpers with FlowControllerHelpers {
   protected def flowControllerComponents: FlowControllerComponents
 
   def Anonymous: AnonymousActionBuilder[AnonymousRequest, AnyContent] = flowControllerComponents.anonymousActionBuilder

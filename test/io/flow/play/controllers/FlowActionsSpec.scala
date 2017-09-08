@@ -115,14 +115,6 @@ class FlowActionsSpec extends PlaySpec with GuiceOneAppPerSuite with FlowActionI
     } must be(data)
   }
 
-
-
-  val input: String = "some input"
-
-  def function(str: String): Int = str.length
-
-  function(input) must equal(function(input))
-
   "parse OrgAuthData.Session" in {
     val data = OrgAuthData.Session(
       requestId = "test",

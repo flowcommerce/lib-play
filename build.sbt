@@ -8,7 +8,7 @@ scalaVersion in ThisBuild := "2.12.3"
 
 crossScalaVersions := Seq("2.12.3")
 
-version := "0.4.2-SNAPSHOT"
+version := "0.4.0"
 
 lazy val root = project
   .in(file("."))
@@ -27,8 +27,6 @@ lazy val root = project
     resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
     resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
     resolvers += "Artifactory" at "https://flow.artifactoryonline.com/flow/libs-release/",
-    resolvers += "Artifactory-Snapshots-Local" at "https://flow.artifactoryonline.com/flow/libs-snapshot-local/",
-    resolvers += "Artifactory-Releases-Local" at "https://flow.artifactoryonline.com/flow/libs-release-local/",
     resolvers += "Bintary JCenter" at "http://jcenter.bintray.com",
     credentials += Credentials(
       "Artifactory Realm",

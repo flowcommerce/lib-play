@@ -29,10 +29,10 @@ trait FlowControllerHelpers {
   }
 
   /**
-   * Even if not specified, play router passed in Some(Nil) as opposed
-   * to None. Here we return None if there is no list or the list is
-   * empty.
-   */
+    * Even if not specified, play router passed in Some(Nil) as opposed
+    * to None. Here we return None if there is no list or the list is
+    * empty.
+    */
   def optionals[T](values: Option[Seq[T]]): Option[Seq[T]] = {
     values match {
       case None => None
@@ -58,13 +58,13 @@ trait FlowControllerHelpers {
   object JsValue {
 
     def async(
-      contentType: Option[String],
-      body: AnyContent
-    ) (
-      function: JsValue => Future[Result]
-    )(
-      implicit ec: ExecutionContext
-    ): Future[Result] = {
+               contentType: Option[String],
+               body: AnyContent
+             ) (
+               function: JsValue => Future[Result]
+             )(
+               implicit ec: ExecutionContext
+             ): Future[Result] = {
       parse(
         contentType,
         body,
@@ -74,11 +74,11 @@ trait FlowControllerHelpers {
     }
 
     def sync(
-      contentType: Option[String],
-      body: AnyContent
-    ) (
-      function: JsValue => Result
-    ): Result = {
+              contentType: Option[String],
+              body: AnyContent
+            ) (
+              function: JsValue => Result
+            ): Result = {
       parse(
         contentType,
         body,
@@ -88,11 +88,11 @@ trait FlowControllerHelpers {
     }
 
     private[this] def parse[T](
-      contentType: Option[String],
-      body: AnyContent,
-      function: JsValue => T,
-      errorFunction: Result => T
-    ): T = {
+                                contentType: Option[String],
+                                body: AnyContent,
+                                function: JsValue => T,
+                                errorFunction: Result => T
+                              ): T = {
       contentType match {
         case Some("application/x-www-form-urlencoded") =>
           function(
@@ -131,14 +131,14 @@ trait FlowControllerHelpers {
 
   object Expansion {
     def async(
-     expand: Option[Seq[String]],
-     records: Seq[JsValue],
-     requestHeaders: Seq[(String, String)] = Nil
-   ) (
-     function: JsValue => Future[Result]
-   ) (
-    implicit ec: ExecutionContext
-   ): Future[Result] = {
+               expand: Option[Seq[String]],
+               records: Seq[JsValue],
+               requestHeaders: Seq[(String, String)] = Nil
+             ) (
+               function: JsValue => Future[Result]
+             ) (
+               implicit ec: ExecutionContext
+             ): Future[Result] = {
       withExpansion(
         expand,
         records,
@@ -150,14 +150,14 @@ trait FlowControllerHelpers {
     }
 
     def sync(
-      expand: Option[Seq[String]],
-      records: Seq[JsValue],
-      requestHeaders: Seq[(String, String)] = Nil
-     ) (
-       function: JsValue => Result
-     ) (
-       implicit ec: ExecutionContext
-     ): Result = {
+              expand: Option[Seq[String]],
+              records: Seq[JsValue],
+              requestHeaders: Seq[(String, String)] = Nil
+            ) (
+              function: JsValue => Result
+            ) (
+              implicit ec: ExecutionContext
+            ): Result = {
       withExpansion(
         expand,
         records,
@@ -168,14 +168,14 @@ trait FlowControllerHelpers {
     }
 
     private[this] def withExpansion[T](
-      expand: Option[Seq[String]],
-      records: Seq[JsValue],
-      function: JsValue => T,
-      errorFunction: Result => T,
-      requestHeaders: Seq[(String, String)] = Nil
-    ) (
-      implicit ec: ExecutionContext
-    ): T = {
+                                        expand: Option[Seq[String]],
+                                        records: Seq[JsValue],
+                                        function: JsValue => T,
+                                        errorFunction: Result => T,
+                                        requestHeaders: Seq[(String, String)] = Nil
+                                      ) (
+                                        implicit ec: ExecutionContext
+                                      ): T = {
       val res = expandersResult.filter(e => expand.getOrElse(Nil).contains(e.fieldName)).foldLeft(records) {
         case (data, e) => Await.result(e.expand(data, requestHeaders = requestHeaders), Duration(5, "seconds"))
       }

@@ -1,5 +1,7 @@
 package io.flow.play.clients
 
+import play.api.libs.ws.WSClient
+
 /**
   * Gets an instance of the token client. Note that we cannot declare
   * a dependency on registry here as registry requires token to
@@ -8,6 +10,6 @@ package io.flow.play.clients
   * and production.
   */
 @javax.inject.Singleton
-class DefaultTokenClient @javax.inject.Inject() () extends io.flow.token.v0.Client(
+class DefaultTokenClient @javax.inject.Inject() (ws: WSClient) extends io.flow.token.v0.Client(ws,
   RegistryConstants.host("token", 6151)
 )

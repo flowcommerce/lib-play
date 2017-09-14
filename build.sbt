@@ -21,7 +21,7 @@ lazy val root = project
       "com.github.ben-manes.caffeine" % "caffeine" % "2.5.5",
       "com.github.ben-manes.caffeine" % "guava" % "2.5.5",
       "com.ning" % "async-http-client" % "1.9.40",
-      "play-circe" %% "play-circe" % "2608.3",
+      "play-circe" %% "play-circe" % "2608.4",
       "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.1" % "test"
     ),
     resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",

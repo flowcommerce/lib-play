@@ -22,7 +22,7 @@ lazy val root = project
       "com.github.ben-manes.caffeine" % "guava" % "2.5.5",
       "com.ning" % "async-http-client" % "1.9.40",
       "play-circe" %% "play-circe" % "2608.4",
-      "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.1" % "test"
+      "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % "test"
     ),
     resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
     resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",

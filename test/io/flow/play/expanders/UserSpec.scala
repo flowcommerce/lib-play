@@ -1,22 +1,25 @@
 package io.flow.play.expanders
 
-import com.typesafe.config.ConfigFactory
-import io.flow.common.v0.models.json._
 import io.flow.common.v0.{models => common}
-import io.flow.play.clients.{MockConfig, MockUserClient}
-import io.flow.play.util.{ApplicationConfig, DefaultConfig, IdGenerator}
+import io.flow.common.v0.models.json._
+import io.flow.play.clients.MockUserClient
+import io.flow.play.util.IdGenerator
+import io.flow.user.v0.interfaces.{Client => UserClient}
+import io.flow.user.v0.models.json._
+
 import org.scalatestplus.play._
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.Configuration
+
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
+import play.api.test._
 import play.api.test.Helpers._
 
-class UserSpec extends PlaySpec with GuiceOneAppPerSuite {
+class UserSpec extends PlaySpec with OneAppPerSuite {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  private[this] lazy val mockConfig = MockConfig(DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty()))))
-  lazy val client: MockUserClient = new MockUserClient
+  lazy val client: MockUserClient = play.api.Play.current.injector.instanceOf[UserClient].asInstanceOf[MockUserClient]
 
   def toReference(user: common.User) = common.UserReference(id = user.id)
 
@@ -27,6 +30,10 @@ class UserSpec extends PlaySpec with GuiceOneAppPerSuite {
       name = common.Name(first = Some("John"), last = Some("Smith"))
     )
   }
+
+
+  // TODO: Bind to the specific client instance
+  override lazy val app = new GuiceApplicationBuilder().bindings(bind[UserClient].to[MockUserClient]).build()
 
   "expand" should {
     "return expanded user when user exists" in {

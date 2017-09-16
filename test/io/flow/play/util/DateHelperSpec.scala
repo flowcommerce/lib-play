@@ -3,9 +3,8 @@ package io.flow.play.util
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat.dateTimeParser
 import org.scalatestplus.play._
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
-class DateHelperSpec extends PlaySpec with GuiceOneAppPerSuite {
+class DateHelperSpec extends PlaySpec with OneAppPerSuite {
 
   val jan1 = dateTimeParser.parseDateTime("2016-01-01T08:26:18.794-05:00")
 

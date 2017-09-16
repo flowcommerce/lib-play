@@ -3,13 +3,14 @@ package io.flow.play.controllers
 import io.flow.healthcheck.v0.models.Healthcheck
 import io.flow.healthcheck.v0.models.json._
 
+import play.api._
 import play.api.mvc._
 import play.api.libs.json._
 
-trait Healthchecks extends BaseController {
+trait Healthchecks extends Controller {
 
-  def getInternalAndHealthcheck = Action { _ =>
-    Ok(Json.toJson(Healthcheck(status = status())))
+  def getInternalAndHealthcheck() = Action { request =>
+    Ok(Json.toJson(Healthcheck(status = status)))
   }
 
   def status(): String = "healthy"

@@ -1,9 +1,7 @@
 package io.flow.play.util
 
-import akka.stream.Materializer
 import play.api.Logger
 import play.api.mvc._
-
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.http.HttpFilters
 
@@ -20,10 +18,9 @@ class LoggingFilter @javax.inject.Inject() (loggingFilter: FlowLoggingFilter) ex
 }
 
 class FlowLoggingFilter @javax.inject.Inject() (
-  implicit ec: ExecutionContext,
-  m: Materializer,
-  config: Config
-) extends Filter {
+                                                 implicit ec: ExecutionContext,
+                                                 config: Config
+                                               ) extends Filter {
   val LoggedRequestMethodConfig = "play.http.filters.logging.methods"
   val DefaultLoggedRequestMethods = Seq("GET", "PATCH", "POST", "PUT", "DELETE", "OPTIONS")
 
@@ -55,6 +52,4 @@ class FlowLoggingFilter @javax.inject.Inject() (
       result
     }
   }
-
-  override implicit def mat: Materializer = m
 }

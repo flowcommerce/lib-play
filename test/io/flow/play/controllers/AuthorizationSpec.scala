@@ -1,21 +1,29 @@
 package io.flow.play.controllers
 
 import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
-import com.typesafe.config.ConfigFactory
 import io.flow.play.clients.MockConfig
-import io.flow.play.util.{ApplicationConfig, DefaultConfig}
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.Configuration
+import io.flow.play.controllers.Authorization.{Token, JwtToken}
+import io.flow.play.util.Config
+
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.test._
+import play.api.test.Helpers._
+
+import org.scalatest._
 import org.scalatestplus.play._
 
-class AuthorizationSpec extends PlaySpec with GuiceOneAppPerSuite {
+class AuthorizationSpec extends PlaySpec with OneAppPerSuite {
 
-  private[this] lazy val mockConfig = MockConfig(DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty()))))
+  private[this] lazy val mockConfig = play.api.Play.current.injector.instanceOf[MockConfig]
+
+  // TODO: Bind to the specific instance of mockConfig
+  override lazy val app = new GuiceApplicationBuilder().bindings(bind[Config].to[MockConfig]).build()
 
   def createJWTHeader(
-    userId: String,
-    salt: String = mockConfig.requiredString("JWT_SALT")
-  ): String = {
+                       userId: String,
+                       salt: String = mockConfig.requiredString("JWT_SALT")
+                     ): String = {
     val header = JwtHeader("HS256")
     val claimsSet = JwtClaimsSet(Map("id" -> userId))
     val token = JsonWebToken(header, claimsSet, salt)
@@ -26,7 +34,7 @@ class AuthorizationSpec extends PlaySpec with GuiceOneAppPerSuite {
     "Basic should decode a basic auth header" in {
       val headerValue = "Basic YWRtaW46"
 
-      new AuthorizationImpl(mockConfig).get(headerValue).map { authToken =>
+      Authorization.get(headerValue).map { authToken =>
         authToken match {
           case Token(token) => token must be("admin")
           case _ => fail("Did not parse a Token, got a different type instead.")
@@ -38,7 +46,7 @@ class AuthorizationSpec extends PlaySpec with GuiceOneAppPerSuite {
       val userId = "usr-20160130-1"
       val headerValue = createJWTHeader(userId = userId)
 
-      new AuthorizationImpl(mockConfig).get(headerValue).map { authToken =>
+      Authorization.get(headerValue).map { authToken =>
         authToken match {
           case JwtToken(id) => id must be(userId)
           case _ => fail("Did not parse a JwtToken, got a different type instead.")
@@ -50,7 +58,7 @@ class AuthorizationSpec extends PlaySpec with GuiceOneAppPerSuite {
       val userId = "usr-20160130-1"
       val headerValue = createJWTHeader(userId = userId, salt = "a different salt")
 
-      new AuthorizationImpl(mockConfig).get(headerValue) match {
+      Authorization.get(headerValue) match {
         case None => {
           // all good
         }

@@ -2,15 +2,12 @@ package io.flow.play.util
 
 import io.flow.play.clients.MockConfig
 import java.util.UUID
-
-import com.typesafe.config.ConfigFactory
+import org.scalatest._
 import org.scalatestplus.play._
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.Configuration
 
-class ConfigSpec extends PlaySpec with GuiceOneAppPerSuite {
+class ConfigSpec extends PlaySpec with OneAppPerSuite {
 
-  private[this] lazy val config = MockConfig(DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty()))))
+  private[this] lazy val config = play.api.Play.current.injector.instanceOf[MockConfig]
 
   def createTestId(): String = UUID.randomUUID.toString
 

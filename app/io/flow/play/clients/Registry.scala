@@ -63,7 +63,31 @@ object RegistryConstants {
     * production environment.
     */
   def productionHost(applicationId: String): String = {
-    s"https://${applicationId}.${ProductionDomain}"
+    applicationId match {
+      case "catalog" | "catalog-internal" => "http://catalog-ecs-lb-519666120.us-east-1.elb.amazonaws.com"
+      case "currency" | "currency-internal" => "http://currency-ecs-lb-1301586341.us-east-1.elb.amazonaws.com"
+      case "experience" | "experience-internal" => "http://experience-ecs-lb-1425116727.us-east-1.elb.amazonaws.com"
+      case "feed" => "http://feed-ecs-lb-1719812647.us-east-1.elb.amazonaws.com"
+      case "fulfillment" => "http://fulfillment-ecs-lb-1642242699.us-east-1.elb.amazonaws.com"
+      case "harmonization" | "harmonization-internal" => "http://harmonization-ecs-lb-1352523357.us-east-1.elb.amazonaws.com"
+      case "inventory" => "http://inventory-ecs-lb-1682339944.us-east-1.elb.amazonaws.com"
+      case "label" => "http://label-ecs-lb-597579401.us-east-1.elb.amazonaws.com"
+      case "link" => "http://link-ecs-lb-1695921088.us-east-1.elb.amazonaws.com"
+      case "location" => "http://location-ecs-lb-2135010142.us-east-1.elb.amazonaws.com"
+      case "organization" => "http://organization-ecs-lb-1913224564.us-east-1.elb.amazonaws.com"
+      case "reference" => "http://reference-ecs-lb-201984511.us-east-1.elb.amazonaws.com"
+      case "return" => "http://return-ecs-lb-1138236127.us-east-1.elb.amazonaws.com"
+      case "search" | "search-internal" => "http://search-ecs-lb-352649111.us-east-1.elb.amazonaws.com"
+      case "session" => "http://session-ecs-lb-434518215.us-east-1.elb.amazonaws.com"
+      case "tracking" => "http://tracking-ecs-lb-435314595.us-east-1.elb.amazonaws.com"
+      case "webhook" => "http://webhook-ecs-lb-1423393803.us-east-1.elb.amazonaws.com"
+      case "content-internal" => "http://content-ecs-lb-1011654654.us-east-1.elb.amazonaws.com"
+      case "partner-internal" => "http://partner-ecs-lb-1525744535.us-east-1.elb.amazonaws.com"
+      case "ratecard" => "http://ratecard-ecs-lb-694765969.us-east-1.elb.amazonaws.com"
+      case "screen" => "http://screen-ecs-lb-407447298.us-east-1.elb.amazonaws.com"
+      case "shopify-internal" => "http://shopify-ecs-lb-2077752963.us-east-1.elb.amazonaws.com"
+      case _ => s"https://${applicationId}.${ProductionDomain}"
+    }
   }
 
   def developmentHost(applicationId: String, port: Long): String = {

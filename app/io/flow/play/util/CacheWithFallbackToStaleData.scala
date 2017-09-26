@@ -40,7 +40,7 @@ trait CacheWithFallbackToStaleData[K, V] {
   def flush(key: K): Unit = {
     Option(cache.get(key)) match {
       case Some(entry) if !entry.isExpired => {
-        cache.put(key, entry.copy(expiresAt = DateTime.now))
+        cache.put(key, entry.copy(expiresAt = DateTime.now.minusSeconds(1)))
       }
       case _ => // no-op
     }
@@ -52,7 +52,7 @@ trait CacheWithFallbackToStaleData[K, V] {
 
       case Some(staleEntry) => {
         doRefresh(key) { ex =>
-          Logger.warn(s"Cache[${this.getClass.getName}] key[$key]: Falling back to stale data as refresh failed with: ${ex.getMessage}", ex)
+          Logger.warn(s"FlowError: Cache[${this.getClass.getName}] key[$key]: Falling back to stale data as refresh failed with: ${ex.getMessage}", ex)
           staleEntry.value
         }
       }

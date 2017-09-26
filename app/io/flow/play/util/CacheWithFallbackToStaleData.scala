@@ -40,7 +40,7 @@ trait CacheWithFallbackToStaleData[K, V] {
   def flush(key: K): Unit = {
     Option(cache.get(key)) match {
       case Some(entry) if !entry.isExpired => {
-        cache.put(key, entry.copy(expiresAt = DateTime.now))
+        cache.put(key, entry.copy(expiresAt = DateTime.now.minusSeconds(1)))
       }
       case _ => // no-op
     }

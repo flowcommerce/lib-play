@@ -105,4 +105,14 @@ class CacheWithFallbackToStaleDataSpec extends PlaySpec with OneAppPerSuite {
     cache.get("a") must equal("foo")
   }
 
+  "flushing key triggers refresh" in {
+    val cache = TestCacheWithFallbackToStaleData()
+    cache.setNextValue("a", "apple")
+    cache.get("a") must equal("apple")
+    cache.setNextValue("a", "foo")
+    cache.get("a") must not equal("foo")
+    cache.flush("a")
+    cache.get("a") must equal("foo")
+  }
+
 }

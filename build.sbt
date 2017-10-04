@@ -1,6 +1,6 @@
 import play.sbt.PlayScala._
 
-name := "lib-play"
+name := "lib-play-play-2.6"
 
 organization := "io.flow"
 
@@ -9,7 +9,7 @@ scalaVersion in ThisBuild := "2.12.3"
 crossScalaVersions := Seq("2.11.11", "2.12.3")
 
 
-version := "0.4.6_play26"
+version := "0.4.6"
 
 
 lazy val root = project

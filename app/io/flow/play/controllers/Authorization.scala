@@ -1,20 +1,20 @@
 package io.flow.play.controllers
 
+import javax.inject.Inject
+
 import io.flow.play.util.Config
 import org.apache.commons.codec.binary.Base64
-
 import authentikat.jwt._
-import play.api.Logger
+import play.api.{Application, Logger}
 
 trait Authorization
 
-object Authorization {
+case class JwtToken(userId: String) extends Authorization
+case class Token(token: String) extends Authorization
 
-  case class Token(token: String) extends Authorization
-  case class JwtToken(userId: String) extends Authorization
+class AuthorizationImpl @Inject() (config: Config) {
 
   private[this] lazy val jwtSalt = {
-    val config = play.api.Play.current.injector.instanceOf[Config]
     config.requiredString("JWT_SALT")
   }
 
@@ -26,7 +26,7 @@ object Authorization {
     * Parses the actual authorization header value. Acceptable types are:
     * - Basic - the API Token for the user.
     * - Bearer - the JWT Token for the user with that contains an id field representing the user id in the database
-    */
+   */
   def get(headerValue: String): Option[Authorization] = {
     headerValue.split(" ").toList match {
       case "Basic" :: value :: Nil => {

@@ -1,14 +1,16 @@
-import play.PlayImport.PlayKeys._
+import play.sbt.PlayScala._
 
 name := "lib-play"
 
 organization := "io.flow"
 
-scalaVersion in ThisBuild := "2.11.11"
+scalaVersion in ThisBuild := "2.12.3"
 
-crossScalaVersions := Seq("2.11.11")
+crossScalaVersions := Seq("2.11.11", "2.12.3")
 
-version := "0.4.6"
+
+version := "0.4.6_play26"
+
 
 lazy val root = project
   .in(file("."))
@@ -17,12 +19,17 @@ lazy val root = project
     libraryDependencies ++= Seq(
       ws,
       filters,
-      "com.jason-goodwin" %% "authentikat-jwt" % "0.4.3",
-      "org.scalatestplus" %% "play" % "1.4.0" % "test"
+      "com.jason-goodwin" %% "authentikat-jwt" % "0.4.5",
+      "com.github.ben-manes.caffeine" % "caffeine" % "2.5.5",
+      "com.github.ben-manes.caffeine" % "guava" % "2.5.5",
+      "com.ning" % "async-http-client" % "1.9.40",
+      "play-circe" %% "play-circe" % "2608.4",
+      "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % "test"
     ),
     resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
     resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
     resolvers += "Artifactory" at "https://flow.artifactoryonline.com/flow/libs-release/",
+    resolvers += "Bintary JCenter" at "http://jcenter.bintray.com",
     credentials += Credentials(
       "Artifactory Realm",
       "flow.artifactoryonline.com",

@@ -1,5 +1,7 @@
 package io.flow.play.util
 
+import java.util.function.BiFunction
+
 import org.joda.time.DateTime
 import play.api.Logger
 
@@ -37,56 +39,56 @@ trait CacheWithFallbackToStaleData[K, V] {
     * Marks the specified key as expired. On next access, will attempt to refresh. Note that
     * if refresh fails, we will continue to return the stale data.
     */
-  def flush(key: K): Unit = {
-    Option(cache.get(key)) match {
-      case Some(entry) if !entry.isExpired => {
-        cache.put(key, entry.copy(expiresAt = DateTime.now.minusSeconds(1)))
-      }
-      case _ => // no-op
-    }
-  }
+  def flush(key: K): Unit =
+    cache.computeIfPresent(key, new BiFunction[K, CacheEntry[V], CacheEntry[V]] {
+      override def apply(k: K, entry: CacheEntry[V]): CacheEntry[V] = entry.copy(expiresAt = DateTime.now.minusMillis(1))
+    })
 
   def get(key: K): V = {
-    Option(cache.get(key)) match {
-      case Some(entry) if !entry.isExpired => entry.value
-
-      case Some(staleEntry) => {
-        doRefresh(key) { ex =>
-          Logger.warn(s"FlowError: Cache[${this.getClass.getName}] key[$key]: Falling back to stale data as refresh failed with: ${ex.getMessage}", ex)
-          staleEntry.value
+    // try to do a quick get first
+    val finalEntry = Option(cache.get(key)) match {
+      case Some(retrievedEntry) =>
+        if (!retrievedEntry.isExpired) retrievedEntry
+        else {
+          // atomically compute a new entry, to avoid calling "refresh" multiple times
+          cache.compute(key, new BiFunction[K, CacheEntry[V], CacheEntry[V]] {
+            override def apply(k: K, currentEntry: CacheEntry[V]): CacheEntry[V] = {
+              Option(currentEntry) match {
+                // check again as this value may have been updated by a concurrent call
+                case Some(foundEntry) =>
+                  if (!foundEntry.isExpired) foundEntry
+                  else doGetEntry(k)(failureFromRefresh(k, foundEntry, _))
+                case None => doGetEntry(k)(failureFromEmpty(k, _))
+              }
+            }
+          })
         }
-      }
-
-      case None => {
-        doRefresh(key) { ex =>
-          val msg = s"FlowError for Cache[${this.getClass.getName}] key[$key]: ${ex.getMessage}"
-          Logger.error(msg, ex)
-          sys.error(msg)
-        }
-      }
+      // compute if absent as this value may have been updated by a concurrent call
+      case None => cache.computeIfAbsent(key, new java.util.function.Function[K, CacheEntry[V]] {
+        override def apply(k: K): CacheEntry[V] = doGetEntry(k)(failureFromEmpty(k, _))
+      })
     }
+    finalEntry.value
   }
 
-  private[this] def doRefresh(key: K)(
-    failureFunction: Throwable => V
-  ): V = {
-    Try {
-      refresh(key)
-    } match {
-      case Success(value) => {
-        cache.put(
-          key,
-          CacheEntry(
-            value = value,
-            expiresAt = DateTime.now.plusSeconds(duration.toSeconds.toInt)
-          )
-        )
-        value
-      }
+  private[this] def failureFromEmpty(key: K, ex: Throwable): CacheEntry[V] = {
+    val msg = s"FlowError for Cache[${this.getClass.getName}] key[$key]: ${ex.getMessage}"
+    Logger.error(msg, ex)
+    sys.error(msg)
+  }
 
-      case Failure(ex) => {
-        failureFunction(ex)
-      }
+  private[this] def failureFromRefresh(key: K, currentEntry: CacheEntry[V], ex: Throwable): CacheEntry[V] = {
+    Logger.warn(s"FlowError: Cache[${this.getClass.getName}] key[$key]: Falling back to stale data " +
+      s"as refresh failed with: ${ex.getMessage}", ex)
+    currentEntry
+  }
+
+  private[this] def doGetEntry(key: K)(
+    failureFunction: Throwable => CacheEntry[V]
+  ): CacheEntry[V] = {
+    Try(refresh(key)) match {
+      case Success(value) => CacheEntry(value = value, expiresAt = DateTime.now.plusSeconds(duration.toSeconds.toInt))
+      case Failure(ex) => failureFunction(ex)
     }
   }
 

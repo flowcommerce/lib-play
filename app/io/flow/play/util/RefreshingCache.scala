@@ -51,17 +51,17 @@ object RefreshingCache {
 
   def apply[K, V](scheduler: Scheduler, retrieveExecutionContext: ExecutionContext, reloadPeriod: FiniteDuration,
                   retrieveAll: () => Map[K,V], maxAttempts: Int = 3): RefreshingCache[K, V] = {
-    val scheduler_ = scheduler
-    val retrieveExecutionContext_ = retrieveExecutionContext
-    val reloadPeriod_ = reloadPeriod
-    val retrieveAll_ = retrieveAll
-    val maxAttempts_ = maxAttempts
+    val schedulerOuter = scheduler
+    val retrieveExecutionContextOuter = retrieveExecutionContext
+    val reloadPeriodOuter = reloadPeriod
+    val retrieveAllOuter = retrieveAll
+    val maxAttemptsOuter = maxAttempts
     new RefreshingCache[K, V]() {
-      override def scheduler: Scheduler = scheduler_
-      override def retrieveExecutionContext: ExecutionContext = retrieveExecutionContext_
-      override def reloadPeriod: FiniteDuration = reloadPeriod_
-      override def retrieveAll: Map[K, V] = retrieveAll_()
-      override def maxAttempts: Int = maxAttempts_
+      override def scheduler: Scheduler = schedulerOuter
+      override def retrieveExecutionContext: ExecutionContext = retrieveExecutionContextOuter
+      override def reloadPeriod: FiniteDuration = reloadPeriodOuter
+      override def retrieveAll: Map[K, V] = retrieveAllOuter()
+      override def maxAttempts: Int = maxAttemptsOuter
     }
   }
 

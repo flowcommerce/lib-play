@@ -1,6 +1,5 @@
 package io.flow.play.util
 
-import akka.actor.Scheduler
 import org.mockito.Mockito
 import org.scalatest.concurrent.Eventually
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
@@ -14,19 +13,8 @@ import scala.concurrent.duration._
 class RefreshingCacheSpec extends FlatSpec with OneAppPerSuite with Matchers with OptionValues with MockitoSugar
   with Eventually {
 
-  def createCache[K, V](reloadPeriod: FiniteDuration, retrieveAll: () => Map[K, V], maxAttempts: Int = 1)
-  : RefreshingCache[K, V] = {
-    val reloadPeriod_ = reloadPeriod
-    val retrieveAll_ = retrieveAll
-    val maxAttempts_ = maxAttempts
-    new RefreshingCache[K, V]() {
-      override def scheduler: Scheduler = app.actorSystem.scheduler
-      override def retrieveExecutionContext = Implicits.global
-      override def reloadPeriod = reloadPeriod_
-      override def retrieveAll = retrieveAll_()
-      override def maxAttempts: Int = maxAttempts_
-    }
-  }
+  def createCache[K, V](reloadPeriod: FiniteDuration, retrieveAll: () => Map[K, V], maxAttempts: Int = 1): RefreshingCache[K, V] =
+    RefreshingCache(app.actorSystem.scheduler, Implicits.global, reloadPeriod, retrieveAll, maxAttempts)
 
   "RefreshingCache" should "load and get" in {
     val cache = createCache[String, Int](1.minute, () => Map("1" -> 1, "2" -> 2))
@@ -34,6 +22,7 @@ class RefreshingCacheSpec extends FlatSpec with OneAppPerSuite with Matchers wit
     cache.get("1").value shouldBe 1
     cache.get("2").value shouldBe 2
     cache.get("3") shouldBe None
+    cache.asMap shouldBe Map("1" -> 1, "2" -> 2)
   }
 
   it should "fail to initialize if retrieve fails at startup" in {
@@ -53,12 +42,14 @@ class RefreshingCacheSpec extends FlatSpec with OneAppPerSuite with Matchers wit
     cache.get("2").value shouldBe 2
     cache.get("3") shouldBe None
     cache.get("4") shouldBe None
+    cache.asMap shouldBe Map("1" -> 1, "2" -> 2)
 
     eventually(Timeout(100.millis)) {
       cache.get("1") shouldBe None
       cache.get("2") shouldBe None
       cache.get("3").value shouldBe 3
       cache.get("4").value shouldBe 4
+      cache.asMap shouldBe Map("3" -> 3, "4" -> 4)
     }
   }
 

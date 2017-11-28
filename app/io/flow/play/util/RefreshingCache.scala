@@ -22,8 +22,9 @@ trait RefreshingCache[K, V] {
   def maxAttempts: Int = 3
 
   def get(key: K): Option[V] = Option(cache.get(key))
+  def asMap: Map[K, V] = cache.asScala.toMap
 
-  // load blocking and fail if the retrieval is not successful after 3 attempts
+  // load blocking and fail if the retrieval is not successful after maxAttempts
   doLoadRetry(1, maxAttempts).get
   // schedule subsequent reloads
   scheduler.schedule(reloadPeriod, reloadPeriod)(doLoadRetryRecover(1, maxAttempts))(retrieveExecutionContext)
@@ -36,13 +37,32 @@ trait RefreshingCache[K, V] {
       }
   }
 
-  private def doLoadRetry(attempts: Int, maxAttempts: Int): Try[Unit] = {
+  private def doLoadRetry(attempts: Int, maxAttempts: Int): Try[Unit] =
     Try(retrieveAll)
       .map(all => cache = new ConcurrentHashMap[K, V](all.asJava))
       .recoverWith { case ex if attempts < maxAttempts =>
         Logger.warn(s"Failed refreshing cache at attempt $attempts/$maxAttempts. Trying again...", ex)
         doLoadRetry(attempts + 1, maxAttempts)
       }
+
+}
+
+object RefreshingCache {
+
+  def apply[K, V](scheduler: Scheduler, retrieveExecutionContext: ExecutionContext, reloadPeriod: FiniteDuration,
+                  retrieveAll: () => Map[K,V], maxAttempts: Int = 3): RefreshingCache[K, V] = {
+    val scheduler_ = scheduler
+    val retrieveExecutionContext_ = retrieveExecutionContext
+    val reloadPeriod_ = reloadPeriod
+    val retrieveAll_ = retrieveAll
+    val maxAttempts_ = maxAttempts
+    new RefreshingCache[K, V]() {
+      override def scheduler: Scheduler = scheduler_
+      override def retrieveExecutionContext: ExecutionContext = retrieveExecutionContext_
+      override def reloadPeriod: FiniteDuration = reloadPeriod_
+      override def retrieveAll: Map[K, V] = retrieveAll_()
+      override def maxAttempts: Int = maxAttempts_
+    }
   }
 
 }

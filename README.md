@@ -24,6 +24,8 @@ log a specific subset of methods, add the following:
 
 ## Logging
 
+Make sure you have `version: 1.4` in `.delta`
+
 If you include lib-play and get rid of your service's `conf/logback.xml`, your
 service will start logging in JSON, which can be processed using Sumo. To avoid
 printing JSON when running tests, you should add

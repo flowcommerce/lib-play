@@ -18,7 +18,8 @@ lazy val root = project
       ws,
       filters,
       "com.jason-goodwin" %% "authentikat-jwt" % "0.4.3",
-      "org.scalatestplus" %% "play" % "1.4.0" % "test"
+      "org.scalatestplus" %% "play" % "1.4.0" % "test",
+      "net.logstash.logback" % "logstash-logback-encoder" % "4.6"
     ),
     resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
     resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",

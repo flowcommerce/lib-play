@@ -21,6 +21,7 @@ lazy val root = project
       "org.scalatestplus" %% "play" % "1.4.0" % "test",
       "net.logstash.logback" % "logstash-logback-encoder" % "4.6"
     ),
+    javaOptions in Test += "-Dlogger.resource=logback-test.xml",
     resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
     resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
     resolvers += "Artifactory" at "https://flow.artifactoryonline.com/flow/libs-release/",

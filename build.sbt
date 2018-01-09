@@ -20,6 +20,7 @@ lazy val root = project
       specs2 % Test,
       "com.jason-goodwin" %% "authentikat-jwt" % "0.4.5",
       "com.ning" % "async-http-client" % "1.9.40",
+      "net.logstash.logback" % "logstash-logback-encoder" % "4.11",
       "io.flow" %% "lib-test-utils" % "0.0.3" % Test
     ),
     resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",

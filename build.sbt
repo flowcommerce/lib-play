@@ -1,4 +1,4 @@
-import play.PlayImport.PlayKeys._
+import play.sbt.PlayScala._
 
 name := "lib-play"
 
@@ -6,7 +6,7 @@ organization := "io.flow"
 
 scalaVersion in ThisBuild := "2.11.12"
 
-crossScalaVersions := Seq("2.11.12")
+crossScalaVersions := Seq("2.11.12", "2.12.4")
 
 version := "0.4.15"
 
@@ -17,8 +17,9 @@ lazy val root = project
     libraryDependencies ++= Seq(
       ws,
       filters,
-      "com.jason-goodwin" %% "authentikat-jwt" % "0.4.3",
-      "org.scalatestplus" %% "play" % "1.4.0" % "test"
+      "com.jason-goodwin" %% "authentikat-jwt" % "0.4.5",
+      "com.ning" % "async-http-client" % "1.9.40",
+      "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % "test"
     ),
     resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
     resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",

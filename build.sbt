@@ -23,6 +23,7 @@ lazy val root = project
       "net.logstash.logback" % "logstash-logback-encoder" % "4.11",
       "io.flow" %% "lib-test-utils" % "0.0.3" % Test
     ),
+    javaOptions in Test += "-Dlogger.resource=logback-test.xml",
     resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
     resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
     resolvers += "Artifactory" at "https://flow.artifactoryonline.com/flow/libs-release/",

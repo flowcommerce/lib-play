@@ -8,7 +8,7 @@ scalaVersion in ThisBuild := "2.11.12"
 
 crossScalaVersions := Seq("2.11.12", "2.12.4")
 
-version := "0.4.18"
+version := "0.4.18-play26"
 
 lazy val root = project
   .in(file("."))
@@ -32,8 +32,6 @@ lazy val root = project
       System.getenv("ARTIFACTORY_PASSWORD")
     )
   )
-
-publishArtifact in (Test, packageBin) := true
 
 publishTo := {
   val host = "https://flow.artifactoryonline.com/flow"

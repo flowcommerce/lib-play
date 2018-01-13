@@ -14,15 +14,15 @@ case class Random() {
   /**
     * Generate a random string of length n from the given alphabet
     *
-    * @param alphabet The complete set of
+    * @param characters The complete set of characters we can choose from
     * @param n Length of random string to generate
     */
-  def string(alphabet: String)(n: Int): String = {
+  private[this] def string(characters: List[String])(n: Int): String = {
     assert(n > 0, "n must be > 0")
     val s = new StringBuilder(n)
     var i = n
     while (i > 0) {
-      s.append(alphabet(random.nextInt(alphabet.length)))
+      s.append(characters(random.nextInt(characters.length)))
       i -= 1
     }
     s.toString()
@@ -125,12 +125,12 @@ case class Random() {
 
 object Random {
 
-  private val Ambiguous = "B8G6I1l0OoQDS5Z2".split("")
-  private val Numbers = "0123456789"
-  private val Lower = "abcdefghijklmnopqrstuvwxyz"
-  private val LowerAndUpper = Lower + Lower.toUpperCase
-  private val LowerAndUpperAndNumbers = LowerAndUpper + Numbers
-  private val NonAmbiguousLowerAndUpper = LowerAndUpper.split("").filter(!Ambiguous.contains(_)).mkString("")
-  private val NonAmbiguousLowerAndUpperAndNumbers = NonAmbiguousLowerAndUpper + "3479"
+  private val Ambiguous: List[String] = "B8G6I1l0OoQDS5Z2".split("").toList
+  private val Numbers: List[String] = "0123456789".split("").toList
+  private val Lower: List[String] = "abcdefghijklmnopqrstuvwxyz".split("").toList
+  private val LowerAndUpper: List[String] = Lower ++ Lower.map(_.toUpperCase)
+  private val LowerAndUpperAndNumbers: List[String] = LowerAndUpper ++ Numbers
+  private val NonAmbiguousLowerAndUpper: List[String] = LowerAndUpper.filterNot(Ambiguous.contains)
+  private val NonAmbiguousLowerAndUpperAndNumbers: List[String] = NonAmbiguousLowerAndUpper ++ "3479".split("").toList
 
 }

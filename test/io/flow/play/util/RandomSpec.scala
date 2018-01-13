@@ -83,9 +83,9 @@ class RandomSpec extends FunSpec with Matchers {
     values.forall { i => i > 0 } should be(true)
   }
 
-  it("string requires positive n") {
+  it("requires positive n") {
     intercept[AssertionError] {
-      random.string("a")(0)
+      random.alpha(0)
     }.getMessage should be("assertion failed: n must be > 0")
   }
 

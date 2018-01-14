@@ -98,12 +98,28 @@ case class Random() {
   /**
     * Generate a random positive int
     */
-  final def positiveInt(): Int = random.nextInt() & Int.MaxValue
+  @scala.annotation.tailrec
+  final def positiveInt(): Int = {
+    val value = random.nextInt()
+    if (value > 0) {
+      value
+    } else {
+      positiveInt()
+    }
+  }
 
   /**
     * Generate a random positive long
     */
-  final def positiveLong(): Long = random.nextLong() & Long.MaxValue
+  @scala.annotation.tailrec
+  final def positiveLong(): Long = {
+    val value = random.nextLong
+    if (value > 0) {
+      value
+    } else {
+      positiveLong()
+    }
+  }
 
 }
 

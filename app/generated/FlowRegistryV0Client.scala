@@ -176,6 +176,19 @@ package io.flow.registry.v0.models {
       }
     }
 
+    private[v0] implicit val jsonReadsJodaLocalDate = __.read[String].map { str =>
+      import org.joda.time.format.ISODateTimeFormat.dateParser
+      dateParser.parseLocalDate(str)
+    }
+
+    private[v0] implicit val jsonWritesJodaLocalDate = new Writes[org.joda.time.LocalDate] {
+      def writes(x: org.joda.time.LocalDate) = {
+        import org.joda.time.format.ISODateTimeFormat.date
+        val str = date.print(x)
+        JsString(str)
+      }
+    }
+
     implicit def jsonReadsRegistryApplication: play.api.libs.json.Reads[Application] = {
       (
         (__ \ "id").read[String] and

@@ -1,13 +1,12 @@
 package io.flow.play.util
 
-import org.scalatest.{Matchers, FunSpec}
 import play.api.libs.json._
 
 
-class FormDataSpec extends FunSpec with Matchers {
+class FormDataSpec extends LibPlaySpec {
   val fdHelper = FormData
 
-  describe("formDataToJson") {
+  "formDataToJson" must {
 
     val data: Map[String, Seq[String]] = Map(
       "email" -> Seq("test@flow.io"),
@@ -20,56 +19,56 @@ class FormDataSpec extends FunSpec with Matchers {
       "yikes" -> Seq("yes", "no"),
       "port" -> Seq("9999"))
 
-    it("returns JsValue") {
+    "returns JsValue" in {
       fdHelper.formDataToJson(data) match {
         case res: JsValue => assert(true)
         case _ => assert(false)
       }
     }
 
-    it("creates simple json object") {
+    "creates simple json object" in {
       (fdHelper.formDataToJson(data) \ "email").validate[String] match {
-        case JsSuccess(succ,_) => succ should be("test@flow.io")
+        case JsSuccess(succ,_) => succ must be("test@flow.io")
         case JsError(_) => assert(false)
       }
     }
 
-    it("creates complex json object") {
+    "creates complex json object" in {
       (fdHelper.formDataToJson(data) \ "name" \ "first").validate[String] match {
-        case JsSuccess(succ,_) => succ should be("mike")
+        case JsSuccess(succ,_) => succ must be("mike")
         case JsError(_) => assert(false)
       }
 
       (fdHelper.formDataToJson(data) \ "name" \ "last").validate[String] match {
-        case JsSuccess(succ,_) => succ should be("roth")
+        case JsSuccess(succ,_) => succ must be("roth")
         case JsError(_) => assert(false)
       }
     }
 
-    it("converts numerical value to number") {
+    "converts numerical value to number" in {
       (fdHelper.formDataToJson(data) \ "port").validate[JsNumber] match {
-        case JsSuccess(succ,_) => succ should be(JsNumber(9999))
+        case JsSuccess(succ,_) => succ must be(JsNumber(9999))
         case JsError(_) => assert(false)
       }
     }
 
-    it("creates simple array json object") {
+    "creates simple array json object" in {
       (fdHelper.formDataToJson(data) \ "tags").validate[Seq[String]] match {
-        case JsSuccess(succ,_) => succ should be(Seq("foo", "bar"))
+        case JsSuccess(succ,_) => succ must be(Seq("foo", "bar"))
         case JsError(_) => assert(false)
       }
     }
 
-    it("creates complex array json object") {
+    "creates complex array json object" in {
       (fdHelper.formDataToJson(data) \ "arr").validate[Seq[JsValue]] match {
         case JsSuccess(succ,_) => assert((succ.head \ "arr2").toOption.isDefined)
         case JsError(_) => assert(false)
       }
     }
 
-    it("takes first instance of non-array key") {
+    "takes first instance of non-array key" in {
       (fdHelper.formDataToJson(data) \ "yikes").validate[String] match {
-        case JsSuccess(succ,_) => succ should be("yes")
+        case JsSuccess(succ,_) => succ must be("yes")
         case JsError(_) => assert(false)
       }
     }

@@ -9,7 +9,7 @@ import org.scalatestplus.play._
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
 
-class FlowActionsSpec extends PlaySpec with GuiceOneAppPerSuite with FlowActionInvokeBlockHelper {
+class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
 
   private[this] lazy val mockConfig = MockConfig(DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty()))))
   private[this] lazy val salt = "test"

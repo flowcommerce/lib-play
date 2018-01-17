@@ -4,14 +4,11 @@ import com.typesafe.config.ConfigFactory
 import io.flow.common.v0.models.json._
 import io.flow.common.v0.{models => common}
 import io.flow.play.clients.{MockConfig, MockUserClient}
-import io.flow.play.util.{ApplicationConfig, DefaultConfig, IdGenerator}
-import org.scalatestplus.play._
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import io.flow.play.util.{ApplicationConfig, DefaultConfig, IdGenerator, LibPlaySpec}
 import play.api.Configuration
 import play.api.libs.json.Json
-import play.api.test.Helpers._
 
-class UserSpec extends PlaySpec with GuiceOneAppPerSuite {
+class UserSpec extends LibPlaySpec {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 

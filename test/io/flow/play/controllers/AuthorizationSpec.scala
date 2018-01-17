@@ -3,12 +3,10 @@ package io.flow.play.controllers
 import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
 import com.typesafe.config.ConfigFactory
 import io.flow.play.clients.MockConfig
-import io.flow.play.util.{ApplicationConfig, DefaultConfig}
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import io.flow.play.util.{ApplicationConfig, DefaultConfig, LibPlaySpec}
 import play.api.Configuration
-import org.scalatestplus.play._
 
-class AuthorizationSpec extends PlaySpec with GuiceOneAppPerSuite {
+class AuthorizationSpec extends LibPlaySpec {
 
   private[this] lazy val mockConfig = MockConfig(DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty()))))
 

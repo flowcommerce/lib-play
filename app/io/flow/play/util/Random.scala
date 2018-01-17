@@ -66,7 +66,7 @@ case class Random() {
       alpha(1)
     } else {
       val s = new StringBuilder(n)
-      s.append( alpha(1))
+      s.append(alpha(1))
       s.append(string(LowerAndUpperAndNumbers)(n - 1))
       s.toString()
     }

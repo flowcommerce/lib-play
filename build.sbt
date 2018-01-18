@@ -1,6 +1,6 @@
 import play.sbt.PlayScala._
 
-name := "lib-play"
+name := "lib-play-play26"
 
 organization := "io.flow"
 

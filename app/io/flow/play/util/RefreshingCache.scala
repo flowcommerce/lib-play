@@ -59,7 +59,7 @@ trait RefreshingCache[K, V] {
     val retrieved = doLoadRetry(1, maxAttempts) match {
       case Success(data) => data
       case Failure(ex) =>
-        Logger.warn(s"Failed initializing cache after $maxAttempts attempts", ex)
+        Logger.warn(s"Failed initializing cache after $maxAttempts attempt${if (maxAttempts > 1) "s" else ""}.", ex)
         throw ex
     }
     new AtomicReference(retrieved)
@@ -69,8 +69,9 @@ trait RefreshingCache[K, V] {
   scheduler.schedule(reloadInterval, reloadInterval) {
     doLoadRetry(1, maxAttempts) match {
       case Success(data) => cache.set(data)
-      case Failure(ex) => Logger.warn(s"Failed refreshing cache after $maxAttempts attempts. " +
-        s"Will try again in $reloadInterval", ex)
+      case Failure(ex) =>
+        Logger.warn(s"Failed refreshing cache after $maxAttempts attempt${if (maxAttempts > 1) "s" else ""}. " +
+          s"Will try again in $reloadInterval", ex)
     }
   }(retrieveExecutionContext)
 

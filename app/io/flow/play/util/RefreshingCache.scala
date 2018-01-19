@@ -1,14 +1,13 @@
 package io.flow.play.util
 
-import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicReference
 
 import akka.actor.Scheduler
 import play.api.Logger
 
-import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.FiniteDuration
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 /**
   * Cache to store data in bulk.
@@ -20,9 +19,6 @@ import scala.util.Try
   * cache that has never been initialized.
   */
 trait RefreshingCache[K, V] {
-
-  @volatile
-  private[this] var cache: ConcurrentHashMap[K, V] = new ConcurrentHashMap()
 
   /**
     * The scheduler to use to schedule the [[retrieveAll]] function every [[reloadInterval]] period.
@@ -50,30 +46,36 @@ trait RefreshingCache[K, V] {
     * Maximum number of attempts to retrieve the data.
     * If the [[retrieveAll]] function fails [[maxAttempts]] times in a row, the cache will not refresh and will retry
     * to retrieve data after [[reloadInterval]].
-    * 
+    *
     * Default: 3
     */
   def maxAttempts: Int = 3
   
-  def get(key: K): Option[V] = Option(cache.get(key))
-  def asMap: Map[K, V] = cache.asScala.toMap
+  def get(key: K): Option[V] = cache.get().get(key)
+  def asMap: Map[K, V] = cache.get()
 
   // load blocking and fail if the retrieval is not successful after maxAttempts
-  doLoadRetry(1, maxAttempts).get
-  // schedule subsequent reloads
-  scheduler.schedule(reloadInterval, reloadInterval)(doLoadRetryRecover(1, maxAttempts))(retrieveExecutionContext)
-
-  private def doLoadRetryRecover(attempts: Int, maxAttempts: Int): Try[Unit] = {
-    doLoadRetry(attempts, maxAttempts)
-      .recover { case ex =>
-        Logger.warn(s"Failed refreshing cache at final attempt $attempts/$maxAttempts. " +
-          s"Will try again in $reloadInterval", ex)
-      }
+  private[this] val cache: AtomicReference[Map[K, V]] = {
+    val retrieved = doLoadRetry(1, maxAttempts) match {
+      case Success(data) => data
+      case Failure(ex) =>
+        Logger.warn(s"Failed initializing cache after $maxAttempts attempts", ex)
+        throw ex
+    }
+    new AtomicReference(retrieved)
   }
 
-  private def doLoadRetry(attempts: Int, maxAttempts: Int): Try[Unit] =
+  // schedule subsequent reloads
+  scheduler.schedule(reloadInterval, reloadInterval) {
+    doLoadRetry(1, maxAttempts) match {
+      case Success(data) => cache.set(data)
+      case Failure(ex) => Logger.warn(s"Failed refreshing cache after $maxAttempts attempts. " +
+        s"Will try again in $reloadInterval", ex)
+    }
+  }(retrieveExecutionContext)
+
+  private def doLoadRetry(attempts: Int, maxAttempts: Int): Try[Map[K, V]] =
     Try(retrieveAll)
-      .map(all => cache = new ConcurrentHashMap[K, V](all.asJava))
       .recoverWith { case ex if attempts < maxAttempts =>
         Logger.warn(s"Failed refreshing cache at attempt $attempts/$maxAttempts. Trying again...", ex)
         doLoadRetry(attempts + 1, maxAttempts)

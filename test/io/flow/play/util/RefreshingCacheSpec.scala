@@ -13,16 +13,13 @@ import scala.concurrent.duration._
 class RefreshingCacheSpec extends FlatSpec with OneAppPerSuite with Matchers with OptionValues with MockitoSugar
   with Eventually {
 
-  def createCache[K, V](reloadPeriod: FiniteDuration, retrieveAll: () => Map[K, V], maxAttempts: Int = 1): RefreshingCache[K, V] =
-    RefreshingCache(app.actorSystem.scheduler, Implicits.global, reloadPeriod, retrieveAll, maxAttempts)
+  def createCache[K, V](reloadPeriod: FiniteDuration, retrieve: () => Map[K, V], maxAttempts: Int = 1): RefreshingCache[Map[K, V]] =
+    RefreshingCache(app.actorSystem.scheduler, Implicits.global, reloadPeriod, retrieve, maxAttempts)
 
   "RefreshingCache" should "load and get" in {
-    val cache = createCache[String, Int](1.minute, () => Map("1" -> 1, "2" -> 2))
+    val cache = createCache[String, Int](1.minute, () => Map("1" -> 1))
 
-    cache.get("1").value shouldBe 1
-    cache.get("2").value shouldBe 2
-    cache.get("3") shouldBe None
-    cache.asMap shouldBe Map("1" -> 1, "2" -> 2)
+    cache.get shouldBe Map("1" -> 1)
   }
 
   it should "fail to initialize if retrieve fails at startup" in {
@@ -33,41 +30,29 @@ class RefreshingCacheSpec extends FlatSpec with OneAppPerSuite with Matchers wit
   it should "refresh data" in {
     val retrieve = mock[() => Map[String, Int]]
     Mockito.when(retrieve.apply())
-      .thenReturn(Map("1" -> 1, "2" -> 2))
-      .thenReturn(Map("3" -> 3, "4" -> 4))
+      .thenReturn(Map("1" -> 1))
+      .thenReturn(Map("2" -> 2))
 
     val cache = createCache(50.millis, retrieve)
 
-    cache.get("1").value shouldBe 1
-    cache.get("2").value shouldBe 2
-    cache.get("3") shouldBe None
-    cache.get("4") shouldBe None
-    cache.asMap shouldBe Map("1" -> 1, "2" -> 2)
-
+    cache.get shouldBe Map("1" -> 1)
     eventually(Timeout(100.millis)) {
-      cache.get("1") shouldBe None
-      cache.get("2") shouldBe None
-      cache.get("3").value shouldBe 3
-      cache.get("4").value shouldBe 4
-      cache.asMap shouldBe Map("3" -> 3, "4" -> 4)
+      cache.get shouldBe Map("2" -> 2)
+
     }
   }
 
   it should "return old data if retrieve fails" in {
     val retrieve = mock[() => Map[String, Int]]
     Mockito.when(retrieve.apply())
-      .thenReturn(Map("1" -> 1, "2" -> 2))
+      .thenReturn(Map("2" -> 2))
       .thenThrow(new IllegalStateException("boom"))
 
     val cache = createCache(10.millis, retrieve)
 
-    cache.get("1").value shouldBe 1
-    cache.get("2").value shouldBe 2
-
+    cache.get shouldBe Map("2" -> 2)
     Thread.sleep(50)
-
-    cache.get("1").value shouldBe 1
-    cache.get("2").value shouldBe 2
+    cache.get shouldBe Map("2" -> 2)
   }
 
   it should "retry to retrieve" in {
@@ -79,14 +64,9 @@ class RefreshingCacheSpec extends FlatSpec with OneAppPerSuite with Matchers wit
 
     val cache = createCache(50.millis, retrieve, maxAttempts = 3)
 
-    cache.get("1").value shouldBe 1
-    cache.get("2").value shouldBe 2
-
+    cache.get shouldBe Map("1" -> 1, "2" -> 2)
     eventually(Timeout(80.millis)) {
-      cache.get("1") shouldBe None
-      cache.get("2") shouldBe None
-      cache.get("3").value shouldBe 3
-      cache.get("4").value shouldBe 4
+      cache.get shouldBe Map("3" -> 3, "4" -> 4)
     }
   }
 

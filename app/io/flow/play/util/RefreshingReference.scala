@@ -31,7 +31,7 @@ trait RefreshingReference[T] {
   def retrieveExecutionContext: ExecutionContext
 
   /**
-    * Amount
+    * Interval between refreshes
     */
   def reloadInterval: FiniteDuration
 

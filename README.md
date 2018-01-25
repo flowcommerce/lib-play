@@ -22,6 +22,32 @@ log a specific subset of methods, add the following:
 
     play.http.filters.logging.methods=["GET", "PUT"]
 
+## Logging
+
+If you include lib-play and get rid of your service's `conf/logback.xml`, your
+service will start logging in JSON, which can be processed using Sumo. To avoid
+printing JSON when running tests, you should add
+
+```sbt
+javaOptions in Test += "-Dlogger.resource=logback-test.xml"
+```
+
+to your `build.sbt` inside `.settings(...)`.
+
+To log structured fields:
+
+```scala
+import io.flow.play.util.Logger
+import io.flow.play.util.LoggingUtil.append
+
+class MyController extends FlowController with Logger {
+  def index = Action {
+    // logger comes from Logger trait
+    logger.info(append(organization -> "your-sandbox"), "doing stuff")
+  }
+}
+```
+
 ## CORS
 
 A CORS request handler is provided. To enable, add the following

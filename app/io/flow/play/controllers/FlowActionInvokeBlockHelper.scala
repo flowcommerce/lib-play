@@ -17,8 +17,8 @@ trait FlowActionInvokeBlockHelper {
   def jwtSalt: String = config.requiredString("JWT_SALT")
 
   val `X-Flow-Mock-Api` = "X-Flow-Mock-Api"
-  val `X-Flow-Mock-Api-Token` = "X-Flow-Mock-Api-Token"
-  def mockApiToken: String = config.requiredString("MOCK_API_SECRET")
+  val `X-Flow-Mock-Api-Secret` = "X-Flow-Mock-Api-Secret"
+  def mockApiSecret: String = config.requiredString("MOCK_API_SECRET")
 
   protected val DefaultAuthExpirationTimeSeconds = 180
 
@@ -27,9 +27,8 @@ trait FlowActionInvokeBlockHelper {
 
   protected def mockApi(headers: Headers): Option[Result] =
     for {
-      xFlowMockApiTokenHeaderValues <- headers.get(`X-Flow-Mock-Api-Token`)
-      mockApiToken <- xFlowMockApiTokenHeaderValues.headOption
-      canMock = mockApiToken == mockApiToken
+      secretFromHeader <- headers.get(`X-Flow-Mock-Api-Secret`)
+      canMock = mockApiSecret == secretFromHeader
       mockApi <- if (canMock) headers.get(`X-Flow-Mock-Api`).map(Json.parse(_).as[MockApi]) else None
       result <- Option(Result(
         ResponseHeader(status = mockApi.response.httpStatusCode),

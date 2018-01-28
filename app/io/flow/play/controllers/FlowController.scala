@@ -86,7 +86,9 @@ class AnonymousActionBuilderImpl[B](val parser: BodyParser[B], val config: Confi
       // Create an empty header here so at least requestId tracking can start
       AuthData.Anonymous.Empty
     }
-    block(new AnonymousRequest(ad, request))
+    mockApi(request.headers)
+      .map(Future.successful)
+      .getOrElse(block(new AnonymousRequest(ad, request)))
   }
 }
 
@@ -109,7 +111,9 @@ class IdentifiedActionBuilderImpl[B](val parser: BodyParser[B], val config: Conf
   override def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]): Future[Result] =
     auth(request.headers)(AuthData.Identified.fromMap) match {
       case None => Future.successful(unauthorized(request))
-      case Some(ad) => block(new IdentifiedRequest(ad, request))
+      case Some(ad) => mockApi(request.headers)
+        .map(Future.successful)
+        .getOrElse(block(new IdentifiedRequest(ad, request)))
   }
 }
 
@@ -132,7 +136,9 @@ class SessionActionBuilderImpl[B](val parser: BodyParser[B], val config: Config)
   def invokeBlock[A](request: Request[A], block: (SessionRequest[A]) => Future[Result]): Future[Result] =
     auth(request.headers)(AuthData.Session.fromMap) match {
       case None => Future.successful(unauthorized(request))
-      case Some(ad) => block(new SessionRequest(ad, request))
+      case Some(ad) => mockApi(request.headers)
+        .map(Future.successful)
+        .getOrElse(block(new SessionRequest(ad, request)))
   }
 }
 
@@ -155,7 +161,9 @@ class OrgActionBuilderImpl[B](val parser: BodyParser[B], val config: Config)(imp
   def invokeBlock[A](request: Request[A], block: (OrgRequest[A]) => Future[Result]): Future[Result] =
     auth(request.headers)(OrgAuthData.Org.fromMap) match {
       case None => Future.successful(unauthorized(request))
-      case Some(ad) => block(new OrgRequest(ad, request))
+      case Some(ad) => mockApi(request.headers)
+        .map(Future.successful)
+        .getOrElse(block(new OrgRequest(ad, request)))
   }
 }
 
@@ -178,7 +186,9 @@ class IdentifiedOrgActionBuilderImpl[B](val parser: BodyParser[B], val config: C
   def invokeBlock[A](request: Request[A], block: (IdentifiedOrgRequest[A]) => Future[Result]): Future[Result] =
     auth(request.headers)(OrgAuthData.Identified.fromMap) match {
       case None => Future.successful(unauthorized(request))
-      case Some(ad) => block(new IdentifiedOrgRequest(ad, request))
+      case Some(ad) => mockApi(request.headers)
+        .map(Future.successful)
+        .getOrElse(block(new IdentifiedOrgRequest(ad, request)))
   }
 }
 
@@ -201,6 +211,8 @@ class SessionOrgActionBuilderImpl[B](val parser: BodyParser[B], val config: Conf
   def invokeBlock[A](request: Request[A], block: (SessionOrgRequest[A]) => Future[Result]): Future[Result] =
     auth(request.headers)(OrgAuthData.Session.fromMap) match {
       case None => Future.successful (unauthorized(request))
-      case Some(ad) => block(new SessionOrgRequest(ad, request))
+      case Some(ad) => mockApi(request.headers)
+        .map(Future.successful)
+        .getOrElse(block(new SessionOrgRequest(ad, request)))
   }
 }

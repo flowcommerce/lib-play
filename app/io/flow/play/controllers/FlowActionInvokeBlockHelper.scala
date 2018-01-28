@@ -1,9 +1,13 @@
 package io.flow.play.controllers
 
+import akka.util.ByteString
 import authentikat.jwt.{JsonWebToken, JwtClaimsSetJValue}
+import io.flow.api.mocker.v0.models.MockApi
+import io.flow.api.mocker.v0.models.json._
 import io.flow.play.util.{AuthData, AuthHeaders, Config}
-import play.api.mvc.{Headers, Request, Result}
+import play.api.libs.json.Json
 import play.api.mvc.Results.Unauthorized
+import play.api.mvc.{Headers, Request, ResponseHeader, Result}
 
 trait FlowActionInvokeBlockHelper {
   def config: Config
@@ -12,10 +16,26 @@ trait FlowActionInvokeBlockHelper {
 
   def jwtSalt: String = config.requiredString("JWT_SALT")
 
+  val `X-Flow-Mock-Api` = "X-Flow-Mock-Api"
+  val `X-Flow-Mock-Api-Token` = "X-Flow-Mock-Api-Token"
+  def mockApiToken: String = config.requiredString("MOCK_API_SECRET")
+
   protected val DefaultAuthExpirationTimeSeconds = 180
 
   protected lazy val authExpirationTimeSeconds: Int =
     config.optionalPositiveInt("FLOW_AUTH_EXPIRATION_SECONDS").getOrElse(DefaultAuthExpirationTimeSeconds)
+
+  protected def mockApi(headers: Headers): Option[Result] =
+    for {
+      xFlowMockApiTokenHeaderValues <- headers.get(`X-Flow-Mock-Api-Token`)
+      mockApiToken <- xFlowMockApiTokenHeaderValues.headOption
+      canMock = mockApiToken == mockApiToken
+      mockApi <- if (canMock) headers.get(`X-Flow-Mock-Api`).map(Json.parse(_).as[MockApi]) else None
+      result <- Option(Result(
+        ResponseHeader(status = mockApi.response.httpStatusCode),
+        play.api.http.HttpEntity.Strict(ByteString(mockApi.response.body.toString),Option(mockApi.response.contentType))
+      ))
+    } yield result
 
   protected def auth[T <: AuthData](headers: Headers)(f: Map[String, String] => Option[T]): Option[T] =
     headers.get(AuthHeaders.Header).flatMap { v => parse(v)(f) }

@@ -16,7 +16,7 @@ trait FlowActionInvokeBlockHelper {
 
   def jwtSalt: String = config.requiredString("JWT_SALT")
 
-  val `X-Flow-Mock-Api` = "X-Flow-Mock-Api"
+  val `X-Flow-Mock-Api-Response` = "X-Flow-Mock-Api-Response"
   val `X-Flow-Mock-Api-Secret` = "X-Flow-Mock-Api-Secret"
   def mockApiSecret: String = config.requiredString("MOCK_API_SECRET")
 
@@ -29,7 +29,7 @@ trait FlowActionInvokeBlockHelper {
     for {
       secretFromHeader <- headers.get(`X-Flow-Mock-Api-Secret`)
       canMock = mockApiSecret == secretFromHeader
-      mockApiResponse <- if (canMock) headers.get(`X-Flow-Mock-Api`).map(Json.parse(_).as[MockApiResponse]) else None
+      mockApiResponse <- if (canMock) headers.get(`X-Flow-Mock-Api-Response`).map(Json.parse(_).as[MockApiResponse]) else None
       result <- Option(Result(
         ResponseHeader(status = mockApiResponse.httpStatusCode),
         play.api.http.HttpEntity.Strict(ByteString(mockApiResponse.body.toString),Option(mockApiResponse.contentType))

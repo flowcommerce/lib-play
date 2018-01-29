@@ -2,7 +2,7 @@ package io.flow.play.controllers
 
 import akka.util.ByteString
 import authentikat.jwt.{JsonWebToken, JwtClaimsSetJValue}
-import io.flow.api.mocker.v0.models.MockApi
+import io.flow.api.mocker.v0.models.MockApiResponse
 import io.flow.api.mocker.v0.models.json._
 import io.flow.play.util.{AuthData, AuthHeaders, Config}
 import play.api.libs.json.Json
@@ -29,10 +29,10 @@ trait FlowActionInvokeBlockHelper {
     for {
       secretFromHeader <- headers.get(`X-Flow-Mock-Api-Secret`)
       canMock = mockApiSecret == secretFromHeader
-      mockApi <- if (canMock) headers.get(`X-Flow-Mock-Api`).map(Json.parse(_).as[MockApi]) else None
+      mockApiResponse <- if (canMock) headers.get(`X-Flow-Mock-Api`).map(Json.parse(_).as[MockApiResponse]) else None
       result <- Option(Result(
-        ResponseHeader(status = mockApi.response.httpStatusCode),
-        play.api.http.HttpEntity.Strict(ByteString(mockApi.response.body.toString),Option(mockApi.response.contentType))
+        ResponseHeader(status = mockApiResponse.httpStatusCode),
+        play.api.http.HttpEntity.Strict(ByteString(mockApiResponse.body.toString),Option(mockApiResponse.contentType))
       ))
     } yield result
 

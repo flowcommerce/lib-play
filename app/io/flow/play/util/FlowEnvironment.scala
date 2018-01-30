@@ -4,6 +4,8 @@ sealed trait FlowEnvironment
 
 object FlowEnvironment {
 
+  def Current = new FlowEnvironmentProvider().current
+
   case object Development extends FlowEnvironment { override def toString = "development" }
   case object Production extends FlowEnvironment { override def toString = "production" }
 

@@ -1,6 +1,6 @@
 package io.flow.play.clients
 
-import io.flow.play.util.FlowEnvironmentFetcher
+import io.flow.play.util.FlowEnvironmentProvider
 import play.api.libs.ws.WSClient
 
 /**
@@ -12,8 +12,8 @@ import play.api.libs.ws.WSClient
   */
 @javax.inject.Singleton
 class DefaultTokenClient @javax.inject.Inject() (
-  flowEnvironmentFetcher: FlowEnvironmentFetcher,
+  flowEnvironmentProvider: FlowEnvironmentProvider,
   ws: WSClient
 ) extends io.flow.token.v0.Client(ws,
-  RegistryConstants.host(flowEnvironmentFetcher.current, "token", 6151)
+  RegistryConstants.host(flowEnvironmentProvider.current, "token", 6151)
 )

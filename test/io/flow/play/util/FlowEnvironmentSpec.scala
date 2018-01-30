@@ -8,12 +8,12 @@ class FlowEnvironmentSpec extends LibPlaySpec {
   }
 
   "current is defined" in {
-    val fetcher = app.injector.instanceOf[FlowEnvironmentFetcher]
+    val fetcher = app.injector.instanceOf[FlowEnvironmentProvider]
     FlowEnvironment.all.contains(fetcher.current) must be(true)
   }
 
   "parse" in {
-    val fetcher = app.injector.instanceOf[FlowEnvironmentFetcher]
+    val fetcher = app.injector.instanceOf[FlowEnvironmentProvider]
     fetcher.parse("test", "development") must be(FlowEnvironment.Development)
     fetcher.parse("test", "production") must be(FlowEnvironment.Production)
     intercept[Throwable] {

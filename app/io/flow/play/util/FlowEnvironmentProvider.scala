@@ -26,17 +26,17 @@ package io.flow.play.util
   * 
   * To get the current environment:
   * 
-  *     import io.flow.play.util.FlowEnvironmentFetcher
+  *     import io.flow.play.util.FlowEnvironmentProvider
   *     class YourClass @javax.inject.Inject() (
-  *       flowEnvironmentFetcher: FlowEnvironmentFetcher
+  *       flowEnvironmentProvider: FlowEnvironmentProvider
   *     ) {
-  *       flowEnvironmentFetcher.current match {
+  *       flowEnvironmentProvider.current match {
   *         case FlowEnvironment.Development => ...
   *         case FlowEnvironment.Production => ...
   *       }
   *     }
   */
-class FlowEnvironmentFetcher() {
+class FlowEnvironmentProvider() {
 
   val current: FlowEnvironment = {
     EnvironmentConfig.optionalString("FLOW_ENV") match {

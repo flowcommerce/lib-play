@@ -19,7 +19,7 @@ import scala.concurrent.Future
   * reference an error to a specific point in the log.
   */
 class ErrorHandler @Inject() (
-  flowEnvironmentFetcher: FlowEnvironmentFetcher
+  flowEnvironmentProvider: FlowEnvironmentProvider
 ) extends HttpErrorHandler {
 
   private[this] val idGenerator = IdGenerator("err")
@@ -43,7 +43,7 @@ class ErrorHandler @Inject() (
     val errorId = idGenerator.randomId().replaceAll("-", "")
     Logger.error(s"FlowError [$errorId] ${request.method} ${request.path} $requestId: ${exception.getMessage}", exception)
 
-    val msg = flowEnvironmentFetcher.current match {
+    val msg = flowEnvironmentProvider.current match {
       case FlowEnvironment.Development => s"A server error has occurred (#$errorId) for requestId($requestId). Additional info for development environment: $exception"
       case FlowEnvironment.Production => s"A server error has occurred (#$errorId)"
     }

@@ -2,7 +2,7 @@ package io.flow.play.clients
 
 import javax.inject.Inject
 
-import io.flow.play.util.{Config, DefaultConfig, FlowEnvironment, FlowEnvironmentFetcher}
+import io.flow.play.util.{Config, DefaultConfig, FlowEnvironment, FlowEnvironmentProvider}
 import io.flow.token.v0.interfaces.{Client => TokenClient}
 import io.flow.user.v0.interfaces.{Client => UserClient}
 import play.api.{Configuration, Environment, Mode}
@@ -20,13 +20,13 @@ class ConfigModule extends Module {
 }
 
 class RegistryModule @Inject() (
-  flowEnvironmentFetcher: FlowEnvironmentFetcher
+  flowEnvironmentProvider: FlowEnvironmentProvider
 ) extends Module {
 
   def bindings(env: Environment, conf: Configuration): Seq[Binding[Registry]] = {
     env.mode match {
       case Mode.Prod | Mode.Dev => {
-        flowEnvironmentFetcher.current match {
+        flowEnvironmentProvider.current match {
           case FlowEnvironment.Production => Seq(
             bind[Registry].to[ProductionRegistry]
           )

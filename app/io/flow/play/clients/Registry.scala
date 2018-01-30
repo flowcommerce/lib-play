@@ -1,6 +1,6 @@
 package io.flow.play.clients
 
-import io.flow.play.util.{Config, EnvironmentConfig, FlowEnvironment, PropertyConfig}
+import io.flow.play.util.{Config, FlowEnvironment}
 import io.flow.registry.v0.Client
 import io.flow.registry.v0.errors.UnitResponse
 import io.flow.registry.v0.models.Application
@@ -10,10 +10,10 @@ import scala.concurrent.duration.Duration
 
 /**
   * This class implements service discovery for flow based on the
-  * environment in which we are in. In production, hostnames are build
+  * environment in which we are in. In production, host names are built
   * using convention (e.g. 'user' => 'user.api.flow.io'). In
-  * development, hostnames are built by querying the registry for port
-  * mappings.
+  * development, host names are built by querying the registry for
+  * port mappings.
   * 
   * Example:
   *
@@ -33,26 +33,12 @@ object RegistryConstants {
 
   val ProductionDomain = "api.flow.io"
 
-  val WorkstationHostVariableName = "WORKSTATION_HOST"
-
-  val DefaultWorkstationHost = "ws"
+  val DefaultDevelopmentHost = "localhost"
 
   /**
     * Defaults to the workstation host
     */
-  private[this] lazy val devHost: String = workstationHost
-
-  /**
-    * The resolved name of the host used in workstation
-    */
-  private[this] lazy val workstationHost: String = {
-    EnvironmentConfig.optionalString(WorkstationHostVariableName).getOrElse {
-      PropertyConfig.optionalString(WorkstationHostVariableName).getOrElse {
-        Logger.info(s"[${getClass.getName}] defaulting workstationHost to '$DefaultWorkstationHost' (can override via env var[$WorkstationHostVariableName])")
-        DefaultWorkstationHost
-      }
-    }
-  }
+  private[this] lazy val devHost: String = DefaultDevelopmentHost
 
   def log(env: String, applicationId: String, message: String) {
     Logger.info(s"[${getClass.getName} $env] app[$applicationId] $message")
@@ -68,10 +54,6 @@ object RegistryConstants {
 
   def developmentHost(applicationId: String, port: Long): String = {
     s"http://$devHost:$port"
-  }
-
-  def workstationHost(applicationId: String, port: Long): String = {
-    s"http://$workstationHost:$port"
   }
 
   def host(

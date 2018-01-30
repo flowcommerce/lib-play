@@ -18,7 +18,7 @@ class FlowEnvironmentSpec extends LibPlaySpec {
     fetcher.parse("test", "production") must be(FlowEnvironment.Production)
     intercept[Throwable] {
       fetcher.parse("test", "other")
-    }.getMessage must be("Value[other] from test[FLOW_ENV] is invalid. Valid values are: development, production, workstation")
+    }.getMessage must be("Value[other] from test[FLOW_ENV] is invalid. Valid values are: development, production")
   }
 
 }

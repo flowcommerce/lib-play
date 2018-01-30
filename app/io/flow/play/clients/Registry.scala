@@ -1,19 +1,19 @@
 package io.flow.play.clients
 
-import io.flow.play.util.{Config, EnvironmentConfig, FlowEnvironment, PropertyConfig}
-import io.flow.registry.v0.{Authorization, Client}
+import io.flow.play.util.{Config, FlowEnvironment}
+import io.flow.registry.v0.Client
 import io.flow.registry.v0.errors.UnitResponse
 import io.flow.registry.v0.models.Application
 import play.api.Logger
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 /**
   * This class implements service discovery for flow based on the
-  * environment in which we are in. In production, hostnames are build
+  * environment in which we are in. In production, host names are built
   * using convention (e.g. 'user' => 'user.api.flow.io'). In
-  * development, hostnames are built by querying the registry for port
-  * mappings.
+  * development, host names are built by querying the registry for
+  * port mappings.
   * 
   * Example:
   *
@@ -33,26 +33,12 @@ object RegistryConstants {
 
   val ProductionDomain = "api.flow.io"
 
-  val WorkstationHostVariableName = "WORKSTATION_HOST"
-
-  val DefaultWorkstationHost = "ws"
+  val DefaultDevelopmentHost = "localhost"
 
   /**
     * Defaults to the workstation host
     */
-  private[this] lazy val devHost: String = workstationHost
-
-  /**
-    * The resolved name of the host used in workstation
-    */
-  private[this] lazy val workstationHost: String = {
-    EnvironmentConfig.optionalString(WorkstationHostVariableName).getOrElse {
-      PropertyConfig.optionalString(WorkstationHostVariableName).getOrElse {
-        Logger.info(s"[${getClass.getName}] defaulting workstationHost to '$DefaultWorkstationHost' (can override via env var[$WorkstationHostVariableName])")
-        DefaultWorkstationHost
-      }
-    }
-  }
+  private[this] lazy val devHost: String = DefaultDevelopmentHost
 
   def log(env: String, applicationId: String, message: String) {
     Logger.info(s"[${getClass.getName} $env] app[$applicationId] $message")
@@ -70,15 +56,14 @@ object RegistryConstants {
     s"http://$devHost:$port"
   }
 
-  def workstationHost(applicationId: String, port: Long): String = {
-    s"http://$workstationHost:$port"
-  }
-
-  def host(applicationId: String, port: Long) = {
-    FlowEnvironment.Current match {
+  def host(
+    flowEnvironment: FlowEnvironment,
+    applicationId: String,
+    port: Long
+  ): String = {
+    flowEnvironment match {
       case FlowEnvironment.Production => productionHost(applicationId)
       case FlowEnvironment.Development => developmentHost(applicationId, port)
-      case FlowEnvironment.Workstation => workstationHost(applicationId, port)
     }
   }
 
@@ -89,7 +74,7 @@ object RegistryConstants {
   */
 class ProductionRegistry() extends Registry {
 
-  override def host(applicationId: String) = {
+  override def host(applicationId: String): String = {
     val host = RegistryConstants.productionHost(applicationId)
     RegistryConstants.log("Production", applicationId, s"Host[$host]")
     host
@@ -105,7 +90,7 @@ class DevelopmentRegistry @javax.inject.Inject() (
 
   private[this] lazy val RegistryHost: String = {
     val applicationId = "registry"
-    val varName = overriddeVariableName(applicationId)
+    val varName = overriddenVariableName(applicationId)
 
     overridden(applicationId) match {
       case Some(host) => {
@@ -124,7 +109,7 @@ class DevelopmentRegistry @javax.inject.Inject() (
   private[this] lazy val client = new Client(RegistryHost)
 
   override def host(applicationId: String): String = {
-    val varName = overriddeVariableName(applicationId)
+    val varName = overriddenVariableName(applicationId)
 
     overridden(applicationId) match {
       case Some(host) => {
@@ -162,15 +147,15 @@ class DevelopmentRegistry @javax.inject.Inject() (
     * Allows user to set an environment variable to specify the
     * specific host for an application. If found, we use this value as
     * the host for that service. Ex: USER_HOST=http://localhost:6021
-    * 
+    *
     * Ex:
     *   USER_HOST="http://localhost:6021" sbt
     */
   protected def overridden(applicationId: String): Option[String] = {
-    config.optionalString(overriddeVariableName(applicationId))
+    config.optionalString(overriddenVariableName(applicationId))
   }
 
-  protected def overriddeVariableName(applicationId: String): String = {
+  protected def overriddenVariableName(applicationId: String): String = {
     s"${applicationId.toUpperCase}_HOST"
   }
 }

@@ -1,25 +1,24 @@
 package io.flow.play.util
 
-import org.scalatest.{FunSpec, Matchers}
+class FlowEnvironmentSpec extends LibPlaySpec {
 
-class FlowEnvironmentSpec extends FunSpec with Matchers {
-
-  it("fromString") {
-    FlowEnvironment.fromString("development") should be(Some(FlowEnvironment.Development))
-    FlowEnvironment.fromString("production") should be(Some(FlowEnvironment.Production))
-    FlowEnvironment.fromString("workstation") should be(Some(FlowEnvironment.Workstation))
+  "fromString" in {
+    FlowEnvironment.fromString("development") must be(Some(FlowEnvironment.Development))
+    FlowEnvironment.fromString("production") must be(Some(FlowEnvironment.Production))
   }
 
-  it("Current is defined") {
-    FlowEnvironment.all.contains(FlowEnvironment.Current) should be(true)
+  "current is defined" in {
+    val fetcher = app.injector.instanceOf[FlowEnvironmentProvider]
+    FlowEnvironment.all.contains(fetcher.current) must be(true)
   }
 
-  it("parse") {
-    FlowEnvironment.parse("test", "development") should be(FlowEnvironment.Development)
-    FlowEnvironment.parse("test", "production") should be(FlowEnvironment.Production)
+  "parse" in {
+    val fetcher = app.injector.instanceOf[FlowEnvironmentProvider]
+    fetcher.parse("test", "development") must be(FlowEnvironment.Development)
+    fetcher.parse("test", "production") must be(FlowEnvironment.Production)
     intercept[Throwable] {
-      FlowEnvironment.parse("test", "other")
-    }.getMessage should be("Value[other] from test[FLOW_ENV] is invalid. Valid values are: development, production, workstation")
+      fetcher.parse("test", "other")
+    }.getMessage must be("Value[other] from test[FLOW_ENV] is invalid. Valid values are: development, production")
   }
 
 }

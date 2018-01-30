@@ -1,57 +1,55 @@
 package io.flow.play.util
 
-import org.scalatest.{FunSpec, Matchers}
-
-class IdGeneratorSpec extends FunSpec with Matchers {
+class IdGeneratorSpec extends LibPlaySpec {
 
   private[this] val MinimumRandomLength = 16
 
-  it("prefix must be 3 characters") {
+ "prefix must be 3 characters"in {
     intercept[AssertionError] {
       IdGenerator("fo")
-    }.getMessage should be("assertion failed: prefix[fo] must be 3 characters long")
+    }.getMessage must be("assertion failed: prefix[fo] must be 3 characters long")
   }
 
-  it("prefix must be lower case") {
+ "prefix must be lower case"in {
     intercept[AssertionError] {
       IdGenerator("FOO")
-    }.getMessage should be("assertion failed: prefix[FOO] must be in lower case")
+    }.getMessage must be("assertion failed: prefix[FOO] must be in lower case")
   }
 
-  it("prefix must be trimmed") {
+ "prefix must be trimmed"in {
     intercept[AssertionError] {
       IdGenerator("  foo  ")
-    }.getMessage should be("assertion failed: prefix[  foo  ] must be trimmed")
+    }.getMessage must be("assertion failed: prefix[  foo  ] must be trimmed")
   }
 
-  it("prefix is not on black list") {
+ "prefix is not on black list"in {
     intercept[AssertionError] {
       IdGenerator("ass")
-    }.getMessage should be("assertion failed: prefix[ass] is on the black list and cannot be used")
+    }.getMessage must be("assertion failed: prefix[ass] is on the black list and cannot be used")
   }
 
-  it("randomId must start with prefix") {
+ "randomId must start with prefix"in {
     val generator = IdGenerator("tst")
     val id = generator.randomId()
-    id.startsWith("tst-") should be(true)
+    id.startsWith("tst-") must be(true)
   }
 
-  it("randomId") {
+ "randomId"in {
     val generator = IdGenerator("tst")
     val num = 10000
     val ids = 1.to(num).map { _ => generator.randomId() }
-    ids.size should be(num)
-    ids.distinct.size should be(ids.size)
-    ids.foreach { _.length should be >=(MinimumRandomLength) }
+    ids.size must be(num)
+    ids.distinct.size must be(ids.size)
+    ids.foreach { _.length must be >=(MinimumRandomLength) }
   }
 
-  it("format") {
+ "format"in {
     val generator = IdGenerator("tst")
     val id = generator.randomId()
     id.split("-").toList match {
       case prefix :: uuid :: Nil => {
-        prefix should be("tst")
-        uuid.length should be(32)
+        prefix must be("tst")
+        uuid.length must be(32)
       }
       case other => {
         sys.error("Expected one dash")

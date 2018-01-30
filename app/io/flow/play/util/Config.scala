@@ -169,14 +169,14 @@ object PropertyConfig extends Config {
 @javax.inject.Singleton
 case class ApplicationConfig @javax.inject.Inject() (configuration: Configuration) extends Config {
 
-  override def optionalList(name: String): Option[Seq[String]] = {
-    configuration.getStringSeq(name).map { list =>
+   override def optionalList(name: String): Option[Seq[String]] = {
+    configuration.getOptional[Seq[String]](name).map { list =>
       list.map(_.trim)
     }
   }
 
   override def get(name: String): Option[String] = {
-    configuration.getString(name).map(_.trim).map {
+    configuration.getOptional[String](name).map(_.trim).map {
       case "" => {
         val msg = s"FlowError Value for configuration parameter[$name] cannot be blank"
         Logger.error(msg)

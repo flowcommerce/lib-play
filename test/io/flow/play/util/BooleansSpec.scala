@@ -1,30 +1,28 @@
 package io.flow.play.util
 
-import org.scalatest.{FunSpec, Matchers}
+class BooleansSpec extends LibPlaySpec {
 
-class BooleansSpec extends FunSpec with Matchers {
+  "parse" in {
+    Booleans.parse("") must be(None)
+    Booleans.parse("  ") must be(None)
+    Booleans.parse(" Foo ") must be(None)
 
-  it("parse") {
-    Booleans.parse("") should be(None)
-    Booleans.parse("  ") should be(None)
-    Booleans.parse(" Foo ") should be(None)
+    Booleans.parse(" t ") must be(Some(true))
+    Booleans.parse(" TRUE ") must be(Some(true))
 
-    Booleans.parse(" t ") should be(Some(true))
-    Booleans.parse(" TRUE ") should be(Some(true))
-
-    Booleans.parse(" f ") should be(Some(false))
-    Booleans.parse(" FALSE ") should be(Some(false))
+    Booleans.parse(" f ") must be(Some(false))
+    Booleans.parse(" FALSE ") must be(Some(false))
   }
 
-  it("parses true values") {
+  "parses true values" in {
     Booleans.TrueValues.foreach { v =>
-      Booleans.parse(v) should be(Some(true))
+      Booleans.parse(v) must be(Some(true))
     }
   }
 
-  it("parses false values") {
+  "parses false values" in {
     Booleans.FalseValues.foreach { v =>
-      Booleans.parse(v) should be(Some(false))
+      Booleans.parse(v) must be(Some(false))
     }
   }
 

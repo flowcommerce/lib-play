@@ -1,11 +1,11 @@
 package io.flow.play.clients
 
 import io.flow.play.util.{Config, EnvironmentConfig, FlowEnvironment, PropertyConfig}
-import io.flow.registry.v0.{Authorization, Client}
+import io.flow.registry.v0.Client
 import io.flow.registry.v0.errors.UnitResponse
 import io.flow.registry.v0.models.Application
 import play.api.Logger
-import scala.concurrent.{Await, ExecutionContext, Future}
+import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 /**
@@ -74,11 +74,14 @@ object RegistryConstants {
     s"http://$workstationHost:$port"
   }
 
-  def host(applicationId: String, port: Long) = {
-    FlowEnvironment.Current match {
+  def host(
+    flowEnvironment: FlowEnvironment,
+    applicationId: String,
+    port: Long
+  ): String = {
+    flowEnvironment match {
       case FlowEnvironment.Production => productionHost(applicationId)
       case FlowEnvironment.Development => developmentHost(applicationId, port)
-      case FlowEnvironment.Workstation => workstationHost(applicationId, port)
     }
   }
 
@@ -89,7 +92,7 @@ object RegistryConstants {
   */
 class ProductionRegistry() extends Registry {
 
-  override def host(applicationId: String) = {
+  override def host(applicationId: String): String = {
     val host = RegistryConstants.productionHost(applicationId)
     RegistryConstants.log("Production", applicationId, s"Host[$host]")
     host

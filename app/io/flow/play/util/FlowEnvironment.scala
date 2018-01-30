@@ -4,8 +4,6 @@ sealed trait FlowEnvironment
 
 object FlowEnvironment {
 
-  def Current = new FlowEnvironmentProvider().current
-
   case object Development extends FlowEnvironment { override def toString = "development" }
   case object Production extends FlowEnvironment { override def toString = "production" }
 
@@ -14,5 +12,7 @@ object FlowEnvironment {
   private[this] val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
   def fromString(value: String): Option[FlowEnvironment] = byName.get(value.toLowerCase)
+
+  val Current = new FlowEnvironmentProvider().current
 
 }

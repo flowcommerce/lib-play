@@ -90,7 +90,7 @@ class DevelopmentRegistry @javax.inject.Inject() (
 
   private[this] lazy val RegistryHost: String = {
     val applicationId = "registry"
-    val varName = overriddeVariableName(applicationId)
+    val varName = overriddenVariableName(applicationId)
 
     overridden(applicationId) match {
       case Some(host) => {
@@ -109,7 +109,7 @@ class DevelopmentRegistry @javax.inject.Inject() (
   private[this] lazy val client = new Client(RegistryHost)
 
   override def host(applicationId: String): String = {
-    val varName = overriddeVariableName(applicationId)
+    val varName = overriddenVariableName(applicationId)
 
     overridden(applicationId) match {
       case Some(host) => {
@@ -147,15 +147,15 @@ class DevelopmentRegistry @javax.inject.Inject() (
     * Allows user to set an environment variable to specify the
     * specific host for an application. If found, we use this value as
     * the host for that service. Ex: USER_HOST=http://localhost:6021
-    * 
+    *
     * Ex:
     *   USER_HOST="http://localhost:6021" sbt
     */
   protected def overridden(applicationId: String): Option[String] = {
-    config.optionalString(overriddeVariableName(applicationId))
+    config.optionalString(overriddenVariableName(applicationId))
   }
 
-  protected def overriddeVariableName(applicationId: String): String = {
+  protected def overriddenVariableName(applicationId: String): String = {
     s"${applicationId.toUpperCase}_HOST"
   }
 }

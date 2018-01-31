@@ -1,5 +1,9 @@
 code:
   flow:
+    api-mocker:
+      version: latest
+      generators:
+        play_2_6_client: "app/generated"
     common:
       version: latest
       generators:

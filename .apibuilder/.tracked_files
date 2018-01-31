@@ -1,5 +1,8 @@
 ---
 flow:
+  api-mocker:
+    play_2_6_client:
+    - "/Users/alex/src/flow/lib-play/app/generated/FlowApiMockerV0Client.scala"
   common:
     play_2_6_client:
     - "/Users/alex/src/flow/lib-play/app/generated/FlowCommonV0Client.scala"

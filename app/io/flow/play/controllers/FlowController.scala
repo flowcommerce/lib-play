@@ -1,14 +1,16 @@
 package io.flow.play.controllers
 
-import scala.language.higherKinds
 import javax.inject.Inject
 
-import io.flow.play.util.{AuthData, Config, OrgAuthData}
+import io.flow.common.v0.models.UserReference
+import io.flow.play.util.{AuthData, AuthHeaders, Config, OrgAuthData}
+import play.api.inject.Module
 import play.api.mvc._
+import play.api.{Configuration, Environment}
 
 import scala.concurrent.{ExecutionContext, Future}
-import play.api.inject.Module
-import play.api.{Configuration, Environment}
+import scala.language.higherKinds
+
 
 /*
   USAGE:
@@ -31,6 +33,8 @@ trait FlowController extends BaseController with BaseControllerHelpers with Flow
   def Org: OrgActionBuilder[OrgRequest, AnyContent] = flowControllerComponents.orgActionBuilder
   def IdentifiedOrg: IdentifiedOrgActionBuilder[IdentifiedOrgRequest, AnyContent] = flowControllerComponents.identifiedOrgActionBuilder
   def SessionOrg: SessionOrgActionBuilder[SessionOrgRequest, AnyContent] = flowControllerComponents.sessionOrgActionBuilder
+  def IdentifiedCookie: IdentifiedCookieActionBuilder[IdentifiedRequest, AnyContent] = flowControllerComponents.identifiedCookieActionBuilder
+
 }
 
 trait FlowControllerComponents {
@@ -40,15 +44,18 @@ trait FlowControllerComponents {
   def orgActionBuilder: OrgActionBuilder[OrgRequest, AnyContent]
   def identifiedOrgActionBuilder: IdentifiedOrgActionBuilder[IdentifiedOrgRequest, AnyContent]
   def sessionOrgActionBuilder: SessionOrgActionBuilder[SessionOrgRequest, AnyContent]
+  def identifiedCookieActionBuilder: IdentifiedCookieActionBuilder[IdentifiedRequest, AnyContent]
 }
 
 case class FlowDefaultControllerComponents @Inject() (
-   anonymousActionBuilder: AnonymousDefaultActionBuilder,
-   identifiedActionBuilder: IdentifiedDefaultActionBuilder,
-   sessionActionBuilder: SessionDefaultActionBuilder,
-   orgActionBuilder: OrgDefaultActionBuilder,
-   identifiedOrgActionBuilder: IdentifiedOrgDefaultActionBuilder,
-   sessionOrgActionBuilder: SessionOrgDefaultActionBuilder) extends FlowControllerComponents
+  anonymousActionBuilder: AnonymousDefaultActionBuilder,
+  identifiedActionBuilder: IdentifiedDefaultActionBuilder,
+  sessionActionBuilder: SessionDefaultActionBuilder,
+  orgActionBuilder: OrgDefaultActionBuilder,
+  identifiedOrgActionBuilder: IdentifiedOrgDefaultActionBuilder,
+  sessionOrgActionBuilder: SessionOrgDefaultActionBuilder,
+  identifiedCookieActionBuilder: IdentifiedCookieDefaultActionBuilder
+) extends FlowControllerComponents
 
 // DI
 class FlowControllerComponentsModule extends Module {
@@ -60,7 +67,8 @@ class FlowControllerComponentsModule extends Module {
       bind[SessionDefaultActionBuilder].to[SessionDefaultActionBuilderImpl],
       bind[OrgDefaultActionBuilder].to[OrgDefaultActionBuilderImpl],
       bind[IdentifiedOrgDefaultActionBuilder].to[IdentifiedOrgDefaultActionBuilderImpl],
-      bind[SessionOrgDefaultActionBuilder].to[SessionOrgDefaultActionBuilderImpl]
+      bind[SessionOrgDefaultActionBuilder].to[SessionOrgDefaultActionBuilderImpl],
+      bind[IdentifiedCookieDefaultActionBuilder].to[IdentifiedCookieDefaultActionBuilderImpl]
     )
   }
 }
@@ -203,4 +211,39 @@ class SessionOrgActionBuilderImpl[B](val parser: BodyParser[B], val config: Conf
       case None => Future.successful (unauthorized(request))
       case Some(ad) => block(new SessionOrgRequest(ad, request))
   }
+}
+
+// IdentifiedCookie
+trait IdentifiedCookieActionBuilder[+R[_], B] extends ActionBuilder[R, B]
+
+trait IdentifiedCookieDefaultActionBuilder extends IdentifiedCookieActionBuilder[IdentifiedRequest, AnyContent]
+object IdentifiedCookieDefaultActionBuilder {
+  def apply(parser: BodyParser[AnyContent], config: Config)(implicit ec: ExecutionContext): IdentifiedCookieDefaultActionBuilder =
+    new IdentifiedCookieDefaultActionBuilderImpl(parser, config)
+}
+
+class IdentifiedCookieDefaultActionBuilderImpl(parser: BodyParser[AnyContent], config: Config)(implicit ec: ExecutionContext)
+  extends IdentifiedCookieActionBuilderImpl(parser, config) with IdentifiedCookieDefaultActionBuilder {
+  @Inject def this(parser: BodyParsers.Default, config: Config)(implicit ec: ExecutionContext) = this(parser: BodyParser[AnyContent], config: Config)
+}
+
+class IdentifiedCookieActionBuilderImpl[B](val parser: BodyParser[B], val config: Config)(implicit val executionContext: ExecutionContext)
+  extends IdentifiedCookieActionBuilder[IdentifiedRequest, B] with FlowActionInvokeBlockHelper {
+  def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]): Future[Result] =
+    request.session.get(IdentifiedCookie.UserKey) match {
+      case None => Future.successful(unauthorized(request))
+      case Some(userId) =>
+        val auth = AuthHeaders.user(UserReference(id = userId))
+        block(new IdentifiedRequest(auth, request))
+    }
+}
+
+object IdentifiedCookie {
+
+  val UserKey = "user_id"
+
+  implicit class ResultWithUser(val result: Result) extends AnyVal {
+    def withIdentifiedCookieUser(user: UserReference) = result.withSession(UserKey -> user.id.toString)
+  }
+
 }

@@ -16,12 +16,6 @@ class FlowControllerSpec extends FlowPlaySpec {
       .bindings(new ConfigModule)
       .build()
 
-  class FlowControllerImpl @Inject() (
-    val config: Config,
-    val flowControllerComponents: FlowControllerComponents,
-    val controllerComponents: ControllerComponents
-  ) extends FlowController {}
-
   "FlowController" should {
 
     "be instantiated" in {
@@ -33,3 +27,9 @@ class FlowControllerSpec extends FlowPlaySpec {
   }
 
 }
+
+class FlowControllerImpl @Inject() (
+  val config: Config,
+  val flowControllerComponents: FlowControllerComponents,
+  val controllerComponents: ControllerComponents
+) extends FlowController {}

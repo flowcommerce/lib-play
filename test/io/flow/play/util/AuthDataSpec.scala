@@ -3,36 +3,36 @@ package io.flow.play.util
 import io.flow.common.v0.models.{Environment, Role, UserReference}
 import org.scalatest.{FunSpec, Matchers}
 
-class AuthDataSpec extends FunSpec with Matchers {
+class AuthDataSpec extends LibPlaySpec {
 
-  it("AuthData.user") {
+  "AuthData.user" in {
     val id = "user-1"
     val auth = AuthHeaders.user(UserReference(id), requestId = "test1")
-    auth.requestId should be("test1")
-    auth.user.id should be(id)
+    auth.requestId must be("test1")
+    auth.user.id must be(id)
   }
 
-  it("AuthData.organization defaults") {
+  "AuthData.organization defaults" in {
     val auth = AuthHeaders.organization(UserReference("user-1"), "demo")
-    auth.user.id should be("user-1")
-    auth.organization should be("demo")
-    auth.environment should be(Environment.Sandbox)
-    auth.role should be(Role.Member)
+    auth.user.id must be("user-1")
+    auth.organization must be("demo")
+    auth.environment must be(Environment.Sandbox)
+    auth.role must be(Role.Member)
   }
 
-  it("AuthData.organization") {
+  "AuthData.organization" in {
     val auth = AuthHeaders.organization(UserReference("user-1"), "demo", Role.Admin, Environment.Production)
-    auth.user.id should be("user-1")
-    auth.organization should be("demo")
-    auth.environment should be(Environment.Production)
-    auth.role should be(Role.Admin)
+    auth.user.id must be("user-1")
+    auth.organization must be("demo")
+    auth.environment must be(Environment.Production)
+    auth.role must be(Role.Admin)
   }
 
-  it("AuthData.generateRequestId") {
-    AuthHeaders.generateRequestId("foo").startsWith("foo") should be(true)
+  "AuthData.generateRequestId" in {
+    AuthHeaders.generateRequestId("foo").startsWith("foo") must be(true)
 
     val all = 1.to(100).map { _ => AuthHeaders.generateRequestId("foo") }
-    all.distinct.size should be(100)
+    all.distinct.size must be(100)
   }
 
 }

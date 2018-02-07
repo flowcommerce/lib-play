@@ -1,12 +1,11 @@
 package io.flow.play.util
 
-import org.scalatestplus.play.{OneAppPerSuite, PlaySpec}
 import org.scalatest.concurrent.Eventually.{eventually, timeout}
 import org.scalatest.time.{Seconds, Span}
 
 import scala.concurrent.duration._
 
-class CacheWithFallbackToStaleDataSpec extends PlaySpec with OneAppPerSuite {
+class CacheWithFallbackToStaleDataSpec extends LibPlaySpec {
 
   private[this] case class TestCacheWithFallbackToStaleData() extends CacheWithFallbackToStaleData[String, String] {
 

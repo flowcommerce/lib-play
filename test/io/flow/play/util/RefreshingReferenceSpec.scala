@@ -3,14 +3,14 @@ package io.flow.play.util
 import org.mockito.Mockito
 import org.scalatest.concurrent.Eventually
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FlatSpec, Matchers, OptionValues}
-import org.scalatestplus.play.OneAppPerSuite
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.duration._
 
-class RefreshingReferenceSpec extends FlatSpec with OneAppPerSuite with Matchers with OptionValues with MockitoSugar
+class RefreshingReferenceSpec extends FlatSpec with GuiceOneAppPerSuite with Matchers with OptionValues with MockitoSugar
   with Eventually {
 
   def createCache[K, V](reloadPeriod: FiniteDuration, retrieve: () => Map[K, V], maxAttempts: Int = 1): RefreshingReference[Map[K, V]] =

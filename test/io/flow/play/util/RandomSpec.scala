@@ -1,16 +1,14 @@
 package io.flow.play.util
 
-import org.scalatest.{FunSpec, Matchers}
-
-class RandomSpec extends FunSpec with Matchers {
+class RandomSpec extends LibPlaySpec {
 
   private[this] val random = Random()
   private[this] val Length = 100
 
   def validate(alphabet: String, values: Seq[String]) {
     val letters = alphabet.split("")
-    values.distinct.size should be(values.size)
-    values.forall { _.size == Length } should be(true)
+    values.distinct.size must be(values.size)
+    values.forall { _.size == Length } must be(true)
 
     values.foreach { v =>
       v.split("").find { l => !letters.contains(l) } match {
@@ -35,25 +33,25 @@ class RandomSpec extends FunSpec with Matchers {
     val numbers = "0123456789".split("")
     val found = values.filter { v => numbers.contains(v.substring(0, 1)) }
     if (!found.isEmpty) {
-      sys.error("Value should not have started with a number: " + values.mkString(", "))
+      sys.error("Value must not have started with a number: " + values.mkString(", "))
     }
   }
 
-  it("lowercaseAlpha") {
+  "lowercaseAlpha" in {
     validate(
       "abcdefghijklmnopqrstuvwxyz",
       1.to(100).map { i => random.lowercaseAlpha(Length) }
     )
   }
 
-  it("alpha") {
+  "alpha" in {
     validate(
       "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
       1.to(100).map { i => random.alpha(Length) }
     )
   }
 
-  it("alphaNumeric") {
+  "alphaNumeric" in {
     val values = 1.to(100).map { i => random.alphaNumeric(Length) }
     validate(
       s"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
@@ -62,7 +60,7 @@ class RandomSpec extends FunSpec with Matchers {
     validateDoesNotStartWithNumber(values)
   }
 
-  it("alphaNumericNonAmbiguous") {
+  "alphaNumericNonAmbiguous" in {
     val values = 1.to(100).map { i => random.alphaNumericNonAmbiguous(Length) }
     validate(
       s"abcdefghijkmnpqrstuvwxyzACEFHJKLMNPRTUVWXY3479",
@@ -71,22 +69,22 @@ class RandomSpec extends FunSpec with Matchers {
     validateDoesNotStartWithNumber(values)
   }
 
-  it("positiveInt") {
+  "positiveInt" in {
     val values = 1.to(100).map { i => random.positiveInt() }
-    values.distinct.size should be(values.size)
-    values.forall { i => i > 0 } should be(true)
+    values.distinct.size must be(values.size)
+    values.forall { i => i > 0 } must be(true)
   }
 
-  it("positiveLong") {
+  "positiveLong" in {
     val values = 1.to(100).map { i => random.positiveLong() }
-    values.distinct.size should be(values.size)
-    values.forall { i => i > 0 } should be(true)
+    values.distinct.size must be(values.size)
+    values.forall { i => i > 0 } must be(true)
   }
 
-  it("string requires positive n") {
+  "string requires positive n" in {
     intercept[AssertionError] {
       random.string("a")(0)
-    }.getMessage should be("assertion failed: n must be > 0")
+    }.getMessage must be("assertion failed: n must be > 0")
   }
 
 }

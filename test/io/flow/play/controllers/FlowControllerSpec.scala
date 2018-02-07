@@ -32,4 +32,4 @@ class FlowControllerImpl @Inject() (
   val config: Config,
   val flowControllerComponents: FlowControllerComponents,
   val controllerComponents: ControllerComponents
-) extends FlowController {}
+) extends FlowController

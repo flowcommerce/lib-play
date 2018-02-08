@@ -1,6 +1,6 @@
 import play.sbt.PlayScala._
 
-name := "lib-play-with-mockable-actions"
+name := "lib-play-play26"
 
 organization := "io.flow"
 
@@ -8,7 +8,7 @@ scalaVersion in ThisBuild := "2.12.4"
 
 crossScalaVersions := Seq("2.11.12", "2.12.4")
 
-version := "0.4.41"
+version := "0.4.42"
 
 lazy val root = project
   .in(file("."))

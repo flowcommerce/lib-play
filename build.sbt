@@ -1,6 +1,6 @@
 import play.sbt.PlayScala._
 
-name := "lib-play-play26"
+name := "lib-play-with-mockable-actions"
 
 organization := "io.flow"
 

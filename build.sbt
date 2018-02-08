@@ -8,7 +8,7 @@ scalaVersion in ThisBuild := "2.12.4"
 
 crossScalaVersions := Seq("2.11.12", "2.12.4")
 
-version := "0.4.29-ben-logging"
+version := "0.4.41-ben-logging"
 
 lazy val root = project
   .in(file("."))
@@ -17,11 +17,12 @@ lazy val root = project
     libraryDependencies ++= Seq(
       ws,
       filters,
+      guice,
       specs2 % Test,
       "com.jason-goodwin" %% "authentikat-jwt" % "0.4.5",
       "com.ning" % "async-http-client" % "1.9.40",
       "net.logstash.logback" % "logstash-logback-encoder" % "4.11",
-      "io.flow" %% "lib-test-utils" % "0.0.3" % Test
+      "io.flow" %% "lib-test-utils" % "0.0.6" % Test
     ),
     javaOptions in Test += "-Dlogger.resource=logback-test.xml",
     resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",

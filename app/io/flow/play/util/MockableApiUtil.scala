@@ -19,6 +19,37 @@ import io.flow.apibuilder.api.mocker.v0.models.json._
 
 object MockableApiUtil {
 
+  /*
+    Examples of adding mocks to generated client request
+
+    // USAGE: SINGLE MOCK
+    val response: YourResponseType =
+        Await.result(
+          identifiedOrgClient(org).foo.post(
+            organization = organization,
+            number = order.number,
+
+            // For matched request, respond with <mocked> response
+            requestHeaders = MatchFlowRequest(PUT, "/:organization/orders/:number/foo/bar") -> RespondWith(OK, io.flow.your.type.v0.mock.Factories.makeYourType())
+
+          ), DefaultDuration)
+
+    // USAGE: MULTIPLE MOCKS
+    val response: YourResponseType =
+        Await.result(
+          identifiedOrgClient(org).foo.post(
+            organization = organization,
+            number = order.number,
+
+            // For each matched request, respond with <mocked> response
+            requestHeaders = Map[MatchRequest, RespondWithJson](
+              MatchFlowRequest(PUT, "/:organization/orders/:number/foo/bar") -> RespondWith(OK, io.flow.your.type.v0.mock.Factories.makeYourType()),
+              MatchGenericRequest(PUT, "http://external.api.com/external/path") -> RespondWith(OK, SomeExternalApiResponse("test"))
+            )
+
+          ), DefaultDuration)
+ */
+
   // naming things
   val `X-Mock-Api-Secret` = "X-Mock-Api-Secret"
   val `X-Mock-Apis` = "X-Mock-Apis"
@@ -144,6 +175,12 @@ object MockableApiUtil {
         .map(secret => (`X-Mock-Api-Secret`, secret))
         .getOrElse((`X-Mock-Api-Secret`, s"FlowAlertError $MOCK_API_SECRET environment setting was not found")),
       (`X-Mock-Apis`, serializeMockedApis(mockedApis))
+    )
+  }
+  implicit def tuppleToTupple[T](t: (MatchRequest, RespondWith[T]) )
+    (implicit w: Writes[T], m: Manifest[T]): Seq[(String, String)] = {
+    Map(
+      t._1 -> RespondWithJson(t._2.status, Json.toJson(t._2.body))
     )
   }
 

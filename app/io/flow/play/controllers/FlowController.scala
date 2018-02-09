@@ -25,65 +25,38 @@ trait FlowController extends BaseController with BaseControllerHelpers with Flow
   protected def flowControllerComponents: FlowControllerComponents
 
   def Anonymous: AnonymousActionBuilder = flowControllerComponents.anonymousActionBuilder
-
   def Identified: IdentifiedActionBuilder = flowControllerComponents.identifiedActionBuilder
-
   def Session: SessionActionBuilder = flowControllerComponents.sessionActionBuilder
-
   def Org: OrgActionBuilder = flowControllerComponents.orgActionBuilder
-
   def IdentifiedOrg: IdentifiedOrgActionBuilder = flowControllerComponents.identifiedOrgActionBuilder
-
   def SessionOrg: SessionOrgActionBuilder = flowControllerComponents.sessionOrgActionBuilder
-
   def IdentifiedCookie: IdentifiedCookieActionBuilder = flowControllerComponents.identifiedCookieActionBuilder
 
-
   def MockableAnonymous: MockableAnonymousActionBuilder = flowControllerComponents.mockableAnonymousActionBuilder
-
   def MockableIdentified: MockableIdentifiedActionBuilder = flowControllerComponents.mockableIdentifiedActionBuilder
-
   def MockableSession: MockableSessionActionBuilder = flowControllerComponents.mockableSessionActionBuilder
-
   def MockableOrg: MockableOrgActionBuilder = flowControllerComponents.mockableOrgActionBuilder
-
   def MockableIdentifiedOrg: MockableIdentifiedOrgActionBuilder = flowControllerComponents.mockableIdentifiedOrgActionBuilder
-
   def MockableSessionOrg: MockableSessionOrgActionBuilder = flowControllerComponents.mockableSessionOrgActionBuilder
-
   def MockableIdentifiedCookie: MockableIdentifiedCookieActionBuilder = flowControllerComponents.mockableIdentifiedCookieActionBuilder
-
 }
 
 @ImplementedBy(classOf[FlowDefaultControllerComponents])
 trait FlowControllerComponents {
   def anonymousActionBuilder: AnonymousActionBuilder
-
   def identifiedActionBuilder: IdentifiedActionBuilder
-
   def sessionActionBuilder: SessionActionBuilder
-
   def orgActionBuilder: OrgActionBuilder
-
   def identifiedOrgActionBuilder: IdentifiedOrgActionBuilder
-
   def sessionOrgActionBuilder: SessionOrgActionBuilder
-
   def identifiedCookieActionBuilder: IdentifiedCookieActionBuilder
 
-
   def mockableAnonymousActionBuilder: MockableAnonymousActionBuilder
-
   def mockableIdentifiedActionBuilder: MockableIdentifiedActionBuilder
-
   def mockableSessionActionBuilder: MockableSessionActionBuilder
-
   def mockableOrgActionBuilder: MockableOrgActionBuilder
-
   def mockableIdentifiedOrgActionBuilder: MockableIdentifiedOrgActionBuilder
-
   def mockableSessionOrgActionBuilder: MockableSessionOrgActionBuilder
-
   def mockableIdentifiedCookieActionBuilder: MockableIdentifiedCookieActionBuilder
 }
 

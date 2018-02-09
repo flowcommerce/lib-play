@@ -22,6 +22,10 @@ object MockableApiUtil {
   /*
     Examples of adding mocks to generated client request
 
+    import play.api.http.HttpVerbs._
+    import play.api.http.Status._
+    import io.flow.play.util.MockableApiUtil._
+
     // USAGE: SINGLE MOCK
     val response: YourResponseType =
         Await.result(

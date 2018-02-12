@@ -52,7 +52,9 @@ trait RefreshingReference[T] {
   def maxAttempts: Int = 3
 
   /**
-    * Forces the cache to refresh. Returns true if cache is successfully refreshed and false otherwise
+    * Forces the cache to refresh. If successful, the cache is refreshed with the latest data, otherwise the cache is not refreshed.
+    *
+    * @return true if cache is successfully refreshed and false otherwise
     */
   def forceRefresh(): Boolean = {
     doLoadRetry(1, maxAttempts) match {

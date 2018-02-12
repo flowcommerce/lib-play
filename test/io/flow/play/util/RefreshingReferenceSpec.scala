@@ -70,4 +70,16 @@ class RefreshingReferenceSpec extends FlatSpec with GuiceOneAppPerSuite with Mat
     }
   }
 
+  it should "force the cache to refresh" in {
+    val retrieve = mock[() => Map[String, Int]]
+    Mockito.when(retrieve.apply())
+      .thenReturn(Map("1" -> 1))
+      .thenReturn(Map("2" -> 2))
+
+    val cache = createCache(1.days, retrieve)
+    cache.get shouldBe Map("1" -> 1)
+    cache.forceRefresh()
+    cache.get shouldBe Map("2" -> 2)
+  }
+
 }

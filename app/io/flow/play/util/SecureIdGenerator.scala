@@ -34,11 +34,11 @@ case class SecureIdGenerator(
   assert(!BadWords.contains(prefix), s"prefix[$prefix] is on the black list and cannot be used")
 
 
-  private[this] val TokenLength = 64 - prefix.length
+  private[this] val tokenLength = 64 - prefix.length
   private[this] val random = Random()
 
   def randomId(): String = {
-    prefix + random.alphaNumeric(TokenLength)
+    prefix + random.alphaNumeric(tokenLength)
   }
 
 }

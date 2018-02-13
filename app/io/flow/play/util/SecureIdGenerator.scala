@@ -17,7 +17,7 @@ object SecureIdGenerator {
   * section at the bottom of the document so others are aware.
   *
   * @param prefix Global prefix to identify the type of resource for which you
-  *         are generating an ID. Must be 3 characters, uppercase.
+  *         are generating an ID. Must be 3-6 characters, uppercase.
   */
 case class SecureIdGenerator(
   prefix: String

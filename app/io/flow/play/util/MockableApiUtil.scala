@@ -16,6 +16,7 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
 import scala.util.Try
 import io.flow.apibuilder.api.mocker.v0.models.json._
+import play.api.Logger
 
 object MockableApiUtil {
 
@@ -66,6 +67,7 @@ object MockableApiUtil {
     val headers = request.headers.toMap
     val method = request.method.toUpperCase
     val url = request.uri
+    Logger.info(s"### lib-play - withMockableApis - Match on Request / method / $method / url / $url / header[X-Mock-Apis] / ${headers.get(`X-Mock-Apis`)}")
     maybeMockApiResponse(method, url, headers)
       .map {
         mockApiResponse =>

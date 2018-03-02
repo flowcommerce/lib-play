@@ -79,12 +79,6 @@ case class FlowDefaultControllerComponents @Inject()(
 
 ) extends FlowControllerComponents
 
-// Used to be DI
-@deprecated("This module does not do anything any more. Please remove it from your bindings.", since = "0.4.39")
-class FlowControllerComponentsModule extends Module {
-  def bindings(env: Environment, conf: Configuration): Seq[Binding[_]] = Seq.empty[Binding[_]]
-}
-
 // Anonymous
 class AnonymousActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[AnonymousRequest, AnyContent] with FlowActionInvokeBlockHelper {

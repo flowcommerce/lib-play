@@ -6,22 +6,39 @@ import com.google.inject.ImplementedBy
 import io.flow.common.v0.models.UserReference
 import io.flow.play.util.MockableApiUtil._
 import io.flow.play.util.{AuthData, AuthHeaders, Config, OrgAuthData}
-import play.api.inject.{Binding, Module}
 import play.api.mvc._
-import play.api.{Configuration, Environment}
 
 import scala.concurrent.{ExecutionContext, Future}
+
+trait InjectedFlowController extends InjectedController {
+  private[this] var _flowControllerComponents: FlowControllerComponents = _
+
+  protected def flowControllerComponents: FlowControllerComponents =
+    if (_flowControllerComponents == null) fallbackFlowControllerComponents else _flowControllerComponents
+
+  /**
+    * Call this method to set the [[FlowControllerComponents]] instance.
+    */
+  @Inject
+  def setFlowControllerComponents(components: FlowControllerComponents): Unit = {
+    _flowControllerComponents = components
+  }
+  /**
+    * Defines fallback components to use in case setFlowControllerComponents has not been called.
+    */
+  protected def fallbackFlowControllerComponents: FlowControllerComponents = {
+    throw new NoSuchElementException(
+      "FlowControllerComponents not set! Call setFlowControllerComponents or create the instance with dependency injection.")
+  }
+}
 
 /*
   USAGE:
   --------------------------------------------------------------
-  1) Extend play controller with FlowController
-  2) In controller's constructor provide the following for DI
-      val config: Config,
-      val controllerComponents: ControllerComponents,
-      val flowControllerComponents: FlowControllerComponents
+  1) Just extend your Play controller with FlowController
+  2) Profit!
 */
-trait FlowController extends BaseController with BaseControllerHelpers with FlowControllerHelpers {
+trait FlowController extends InjectedFlowController with FlowControllerHelpers {
   protected def flowControllerComponents: FlowControllerComponents
 
   def Anonymous: AnonymousActionBuilder = flowControllerComponents.anonymousActionBuilder

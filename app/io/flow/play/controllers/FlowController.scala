@@ -10,35 +10,17 @@ import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait InjectedFlowController extends InjectedController {
-  private[this] var _flowControllerComponents: FlowControllerComponents = _
-
-  protected def flowControllerComponents: FlowControllerComponents =
-    if (_flowControllerComponents == null) fallbackFlowControllerComponents else _flowControllerComponents
-
-  /**
-    * Call this method to set the [[FlowControllerComponents]] instance.
-    */
-  @Inject
-  def setFlowControllerComponents(components: FlowControllerComponents): Unit = {
-    _flowControllerComponents = components
-  }
-  /**
-    * Defines fallback components to use in case setFlowControllerComponents has not been called.
-    */
-  protected def fallbackFlowControllerComponents: FlowControllerComponents = {
-    throw new NoSuchElementException(
-      "FlowControllerComponents not set! Call setFlowControllerComponents or create the instance with dependency injection.")
-  }
-}
-
-/*
+/**
   USAGE:
   --------------------------------------------------------------
-  1) Just extend your Play controller with FlowController
-  2) Profit!
+  1) Extend play controller with FlowController
+  2) In controller's constructor provide the following for DI
+      val controllerComponents: ControllerComponents,
+      val flowControllerComponents: FlowControllerComponents
+
+  If you want the components to be set automatically by DI, you can extend [[InjectedFlowController]] instead.
 */
-trait FlowController extends InjectedFlowController with FlowControllerHelpers {
+trait FlowController extends BaseController with FlowControllerHelpers {
   protected def flowControllerComponents: FlowControllerComponents
 
   def Anonymous: AnonymousActionBuilder = flowControllerComponents.anonymousActionBuilder

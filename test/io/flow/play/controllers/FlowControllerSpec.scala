@@ -3,7 +3,6 @@ package io.flow.play.controllers
 import javax.inject.Inject
 
 import io.flow.play.clients.ConfigModule
-import io.flow.play.util.Config
 import io.flow.test.utils.FlowPlaySpec
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -22,6 +21,7 @@ class FlowControllerSpec extends FlowPlaySpec {
       val controller = init[FlowControllerImpl]
       controller must not be null
       controller.flowControllerComponents must not be null
+      controller.controllerComponents must not be null
     }
 
   }
@@ -30,7 +30,6 @@ class FlowControllerSpec extends FlowPlaySpec {
 
 // Mimic usual controller
 class FlowControllerImpl @Inject() (
-  val config: Config,
   val flowControllerComponents: FlowControllerComponents,
   val controllerComponents: ControllerComponents
 ) extends FlowController

@@ -6,22 +6,21 @@ import com.google.inject.ImplementedBy
 import io.flow.common.v0.models.UserReference
 import io.flow.play.util.MockableApiUtil._
 import io.flow.play.util.{AuthData, AuthHeaders, Config, OrgAuthData}
-import play.api.inject.{Binding, Module}
 import play.api.mvc._
-import play.api.{Configuration, Environment}
 
 import scala.concurrent.{ExecutionContext, Future}
 
-/*
+/**
   USAGE:
   --------------------------------------------------------------
   1) Extend play controller with FlowController
   2) In controller's constructor provide the following for DI
-      val config: Config,
       val controllerComponents: ControllerComponents,
       val flowControllerComponents: FlowControllerComponents
+
+  If you want the components to be set automatically by DI, you can extend [[InjectedFlowController]] instead.
 */
-trait FlowController extends BaseController with BaseControllerHelpers with FlowControllerHelpers {
+trait FlowController extends BaseController with FlowControllerHelpers {
   protected def flowControllerComponents: FlowControllerComponents
 
   def Anonymous: AnonymousActionBuilder = flowControllerComponents.anonymousActionBuilder

@@ -51,6 +51,22 @@ trait RefreshingReference[T] {
     */
   def maxAttempts: Int = 3
 
+  /**
+    * Forces the cache to refresh. If successful, the cache is refreshed with the latest data, otherwise the cache is not refreshed.
+    *
+    * @return true if cache is successfully refreshed and false otherwise
+    */
+  def forceRefresh(): Boolean = {
+    doLoadRetry(1, maxAttempts) match {
+      case Success(data) =>
+        cache.set(data)
+        true
+      case Failure(ex) =>
+        Logger.warn(s"Failed initializing cache after $maxAttempts attempt${if (maxAttempts > 1) "s" else ""}.", ex)
+        false
+    }
+  }
+
   def get: T = cache.get()
 
   // load blocking and fail if the retrieval is not successful after maxAttempts

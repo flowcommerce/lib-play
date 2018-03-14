@@ -57,33 +57,37 @@ object DateHelper extends DateFormats {
   val FilenameDateTimeFormatter = DateTimeFormat.forPattern("yyyyMMdd.HHmmss.SSS")
 
   val EasternTimezone = DateTimeZone.forID("America/New_York")
-  private[this] val Default = DateHelper(EasternTimezone)
 
-  override def mmmDdYyyy(dateTime: DateTime) = Default.mmmDdYyyy(dateTime)
+  def apply(dateTime: DateTime): DateHelper = {
+    DateHelper(dateTime.getZone)
+  }
+  
+  override def mmmDdYyyy(dateTime: DateTime) = DateHelper(dateTime).mmmDdYyyy(dateTime)
 
-  override def shortDate(dateTime: DateTime) = Default.shortDate(dateTime)
+  override def shortDate(dateTime: DateTime) = DateHelper(dateTime).shortDate(dateTime)
 
-  override def shortDateTime(dateTime: DateTime) = Default.shortDateTime(dateTime)
+  override def shortDateTime(dateTime: DateTime) = DateHelper(dateTime).shortDateTime(dateTime)
 
-  override def longDate(dateTime: DateTime) = Default.longDate(dateTime)
+  override def longDate(dateTime: DateTime) = DateHelper(dateTime).longDate(dateTime)
 
-  override def longDateTime(dateTime: DateTime) = Default.longDateTime(dateTime)
+  override def longDateTime(dateTime: DateTime) = DateHelper(dateTime).longDateTime(dateTime)
 
-  override def consoleLongDateTime(dateTime: DateTime) = Default.consoleLongDateTime(dateTime)
+  override def consoleLongDateTime(dateTime: DateTime) = DateHelper(dateTime).consoleLongDateTime(dateTime)
 
   /**
     * Returns a filename friendly datetime string
     * The returned string respects the timezone of the datetime and is not part of the string itself
     */
-  override def filenameDateTime(dateTime: DateTime): String = DateHelper(dateTime.getZone).filenameDateTime(dateTime)
+  override def filenameDateTime(dateTime: DateTime): String = DateHelper(dateTime).filenameDateTime(dateTime)
 
   /**
     * Turns "1" into "01", leaves "12" as "12"
     */
   def prefixZero(value: Int): String = {
-    (value < 10) match {
-      case true => s"0$value"
-      case false => value.toString
+    if (value > 0 && value < 10) {
+      s"0$value"
+    } else {
+      value.toString
     }
   }
 

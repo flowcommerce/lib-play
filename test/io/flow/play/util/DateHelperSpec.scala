@@ -6,7 +6,9 @@ import org.scalatest.{MustMatchers, WordSpec}
 
 class DateHelperSpec extends WordSpec with MustMatchers {
 
-  val jan1 = dateTimeParser.parseDateTime("2016-01-01T08:26:18.794-05:00")
+  private[this] val jan1 = dateTimeParser.
+    parseDateTime("2016-01-01T08:26:18.794-05:00").
+    withZone(DateHelper.EasternTimezone)
 
   "yyyymm" in {
     DateHelper.yyyymm(jan1) must equal("201601")

@@ -74,7 +74,7 @@ class DateHelperSpec extends WordSpec with MustMatchers {
     DateHelper.filenameDateTime(dtNy) mustBe "20160101.082618.794"
     DateHelper.filenameDateTime(dtUtc) mustBe "20160101.132618.794"
 
-    DateHelper.filenameDateTime(Some(jan1), "-") mustBe "20160101.082618.794"
+    DateHelper.filenameDateTime(Some(jan1.withZone(DateTimeZone.forID("America/New_York"))), "-") mustBe "20160101.082618.794"
     DateHelper.filenameDateTime(None) mustBe "N/A"
     DateHelper.filenameDateTime(None, "-") mustBe "-"
   }

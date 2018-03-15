@@ -8,7 +8,6 @@ import io.flow.play.util.{AuthData, AuthHeaders, Config, OrgAuthData}
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.language.higherKinds
 
 /**
   USAGE:

@@ -24,11 +24,9 @@ class AuthorizationSpec extends LibPlaySpec {
     "Basic should decode a basic auth header" in {
       val headerValue = "Basic YWRtaW46"
 
-      new AuthorizationImpl(mockConfig).get(headerValue).map { authToken =>
-        authToken match {
-          case Token(token) => token must be("admin")
-          case _ => fail("Did not parse a Token, got a different type instead.")
-        }
+      new AuthorizationImpl(mockConfig).get(headerValue).map {
+        case Token(token) => token must be("admin")
+        case _ => fail("Did not parse a Token, got a different type instead.")
       }.getOrElse(fail("Could not parse token!"))
     }
 

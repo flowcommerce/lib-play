@@ -1,11 +1,9 @@
 package io.flow.play.expanders
 
-import com.typesafe.config.ConfigFactory
 import io.flow.common.v0.models.json._
 import io.flow.common.v0.{models => common}
-import io.flow.play.clients.{MockConfig, MockUserClient}
-import io.flow.play.util.{ApplicationConfig, DefaultConfig, IdGenerator, LibPlaySpec}
-import play.api.Configuration
+import io.flow.play.clients.MockUserClient
+import io.flow.play.util.{IdGenerator, LibPlaySpec}
 import play.api.libs.json.Json
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 
@@ -13,7 +11,6 @@ class UserSpec extends LibPlaySpec with FutureAwaits with DefaultAwaitTimeout {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 
-  private[this] lazy val mockConfig = MockConfig(DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty()))))
   lazy val client: MockUserClient = new MockUserClient
 
   def toReference(user: common.User) = common.UserReference(id = user.id)

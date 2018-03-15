@@ -58,7 +58,7 @@ class DateHelperSpec extends WordSpec with MustMatchers {
   }
 
   "implicit ordering" in {
-    import DateHelper._
+    import DateHelper.Implicits._
 
     val now = DateTime.now
     val nowPlus1 = now.plusMinutes(1)

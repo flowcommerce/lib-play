@@ -5,10 +5,12 @@ import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 
 object DateHelper {
 
-  /** This implicit ordering allows us to called `.sorted` on a Seq[DateTime]. */
-  implicit def dateTimeOrdering: Ordering[DateTime] = Ordering.fromLessThan(_ isBefore _)
+  object Implicits {
+    /** This implicit ordering allows us to called `.sorted` on a Seq[DateTime]. */
+    implicit def dateTimeOrdering: Ordering[DateTime] = Ordering.fromLessThan(_ isBefore _)
+  }
 
-  val CopyrightStartYear:  Int = 2016
+  val CopyrightStartYear: Int = 2016
 
   val EasternTimezone: DateTimeZone = DateTimeZone.forID("America/New_York")
 

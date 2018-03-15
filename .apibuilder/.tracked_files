@@ -2,30 +2,30 @@
 flow:
   common:
     play_2_6_client:
-    - "/Users/alex/src/flow/gitcheckouts_for_upgrade/flowcommerce/lib-play/app/generated/FlowCommonV0Client.scala"
+    - app/generated/FlowCommonV0Client.scala
     play_2_6_mock_client:
-    - "/Users/alex/src/flow/gitcheckouts_for_upgrade/flowcommerce/lib-play/app/generated/FlowCommonV0MockClient.scala"
+    - app/generated/FlowCommonV0MockClient.scala
   error:
     play_2_x_json:
-    - "/Users/alex/src/flow/gitcheckouts_for_upgrade/flowcommerce/lib-play/app/generated/FlowErrorV0Models.scala"
+    - app/generated/FlowErrorV0Models.scala
   registry:
     ning_1_9_client:
-    - "/Users/alex/src/flow/gitcheckouts_for_upgrade/flowcommerce/lib-play/app/generated/FlowRegistryV0Client.scala"
+    - app/generated/FlowRegistryV0Client.scala
   healthcheck:
     play_2_6_client:
-    - "/Users/alex/src/flow/gitcheckouts_for_upgrade/flowcommerce/lib-play/app/generated/FlowHealthcheckV0Client.scala"
+    - app/generated/FlowHealthcheckV0Client.scala
     play_2_6_mock_client:
-    - "/Users/alex/src/flow/gitcheckouts_for_upgrade/flowcommerce/lib-play/app/generated/FlowHealthcheckV0MockClient.scala"
+    - app/generated/FlowHealthcheckV0MockClient.scala
   token:
     play_2_6_client:
-    - "/Users/alex/src/flow/gitcheckouts_for_upgrade/flowcommerce/lib-play/app/generated/FlowTokenV0Client.scala"
+    - app/generated/FlowTokenV0Client.scala
     play_2_6_mock_client:
-    - "/Users/alex/src/flow/gitcheckouts_for_upgrade/flowcommerce/lib-play/app/generated/FlowTokenV0MockClient.scala"
+    - app/generated/FlowTokenV0MockClient.scala
   user:
     play_2_6_client:
-    - "/Users/alex/src/flow/gitcheckouts_for_upgrade/flowcommerce/lib-play/app/generated/FlowUserV0Client.scala"
+    - app/generated/FlowUserV0Client.scala
     play_2_6_mock_client:
-    - "/Users/alex/src/flow/gitcheckouts_for_upgrade/flowcommerce/lib-play/app/generated/FlowUserV0MockClient.scala"
+    - app/generated/FlowUserV0MockClient.scala
   apibuilder-api-mocker:
     play_2_6_client:
-    - "/Users/alex/src/flow/gitcheckouts_for_upgrade/flowcommerce/lib-play/app/generated/FlowApibuilderApiMockerV0Client.scala"
+    - app/generated/FlowApibuilderApiMockerV0Client.scala

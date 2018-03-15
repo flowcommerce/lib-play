@@ -1,18 +1,13 @@
 package io.flow.play.util
 
 import io.flow.play.clients.MockConfig
-import java.util.UUID
 
 import com.typesafe.config.ConfigFactory
-import org.scalatestplus.play._
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
 
 class ConfigSpec extends LibPlaySpec {
 
   private[this] lazy val config = MockConfig(DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty()))))
-
-  override def createTestId(): String = UUID.randomUUID.toString
 
   "optionalList" in {
     config.optionalList(createTestId()) must be(None)

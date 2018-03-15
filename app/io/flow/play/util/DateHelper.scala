@@ -48,11 +48,6 @@ object DateHelper {
       CopyrightStartYear.toString
     }
   }
-}
-
-case class DateHelper(
-  dateTime: DateTime
-) {
 
   private[this] val filenameDateTimeFormatter: DateTimeFormatter = DateTimeFormat.
     forPattern("yyyyMMdd.HHmmss.SSS")
@@ -60,35 +55,35 @@ case class DateHelper(
   private[this] val TimeFormat: DateTimeFormatter = DateTimeFormat.
     forPattern("HH:mm:ss z")
 
-  def mmmDdYyyy(): String = {
+  def mmmDdYyyy(dateTime: DateTime):  String = {
     DateTimeFormat.forPattern("MMM").print(dateTime) + " " +
       DateHelper.trimLeadingZero(DateTimeFormat.forPattern("dd").print(dateTime)) + ", " +
       DateTimeFormat.forPattern("YYYY").print(dateTime)
   }
 
-  def shortDate(): String = {
+  def shortDate(dateTime: DateTime):  String = {
     DateTimeFormat.shortDate.print(dateTime)
   }
 
-  def shortDateTime(): String = {
-    shortDate() + " " + TimeFormat.print(dateTime)
+  def shortDateTime(dateTime: DateTime):  String = {
+    shortDate(dateTime) + " " + TimeFormat.print(dateTime)
   }
 
-  def longDate(): String = {
+  def longDate(dateTime: DateTime):  String = {
     DateTimeFormat.forPattern("MMMM").print(dateTime) + " " +
       DateHelper.trimLeadingZero(DateTimeFormat.forPattern("dd").print(dateTime)) + ", " +
       DateTimeFormat.forPattern("YYYY").print(dateTime)
   }
 
-  def longDateTime(): String = {
-    longDate() + " " + TimeFormat.print(dateTime)
+  def longDateTime(dateTime: DateTime):  String = {
+    longDate(dateTime) + " " + TimeFormat.print(dateTime)
   }
 
-  def consoleLongDateTime(): String = {
+  def consoleLongDateTime(dateTime: DateTime):  String = {
     DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss z").print(dateTime)
   }
 
-  def filenameDateTime(): String = {
+  def filenameDateTime(dateTime: DateTime):  String = {
     filenameDateTimeFormatter.print(dateTime)
   }
 
@@ -96,7 +91,7 @@ case class DateHelper(
     * Returns the specified date (defaults to now) as a string like
     * "201509"
     */
-  def yyyymm(): String = {
+  def yyyymm(dateTime: DateTime):  String = {
     s"${dateTime.getYear}${DateHelper.prefixZero(dateTime.getMonthOfYear)}"
   }
 
@@ -104,8 +99,8 @@ case class DateHelper(
     * Returns the specified date (defaults to now) as a string like
     * "201509"
     */
-  def yyyymmdd(): String = {
-    yyyymm() + DateHelper.prefixZero(dateTime.getDayOfMonth)
+  def yyyymmdd(dateTime: DateTime):  String = {
+    yyyymm(dateTime) + DateHelper.prefixZero(dateTime.getDayOfMonth)
   }
 
 }

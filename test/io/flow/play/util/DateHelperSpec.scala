@@ -11,35 +11,35 @@ class DateHelperSpec extends WordSpec with MustMatchers {
   
 
   "yyyymm" in {
-    DateHelper(jan1Eastern).yyyymm() must equal("201601")
+    DateHelper.yyyymm(jan1Eastern) must equal("201601")
   }
 
   "yyyymmdd" in {
-    DateHelper(jan1Eastern).yyyymmdd() must equal("20160101")
+    DateHelper.yyyymmdd(jan1Eastern) must equal("20160101")
   }
 
   "mmmDdYyyy" in {
-    DateHelper(jan1Eastern).mmmDdYyyy() must equal("Jan 1, 2016")
+    DateHelper.mmmDdYyyy(jan1Eastern) must equal("Jan 1, 2016")
   }
 
   "shortDate" in {
-    DateHelper(jan1Eastern).shortDate() must equal("1/1/16")
+    DateHelper.shortDate(jan1Eastern) must equal("1/1/16")
   }
 
   "shortDateTime" in {
-    DateHelper(jan1Eastern).shortDateTime() must equal("1/1/16 08:26:18 EST")
+    DateHelper.shortDateTime(jan1Eastern) must equal("1/1/16 08:26:18 EST")
   }
 
   "longDate" in {
-    DateHelper(jan1Eastern).longDate() must equal("January 1, 2016")
+    DateHelper.longDate(jan1Eastern) must equal("January 1, 2016")
   }
 
   "longDateTime" in {
-    DateHelper(jan1Eastern).longDateTime() must equal("January 1, 2016 08:26:18 EST")
+    DateHelper.longDateTime(jan1Eastern) must equal("January 1, 2016 08:26:18 EST")
   }
 
   "consoleLongDateTime" in {
-    DateHelper(jan1Eastern).consoleLongDateTime() must equal("2016-01-01 08:26:18 EST")
+    DateHelper.consoleLongDateTime(jan1Eastern) must equal("2016-01-01 08:26:18 EST")
   }
 
   "currentYear" in {
@@ -53,8 +53,8 @@ class DateHelperSpec extends WordSpec with MustMatchers {
   }
 
   "filenameDateTime" in {
-    DateHelper(jan1.withZone(DateTimeZone.forID("America/New_York"))).filenameDateTime() mustBe "20160101.082618.794"
-    DateHelper(jan1.withZone(DateTimeZone.UTC)).filenameDateTime() mustBe "20160101.132618.794"
+    DateHelper.filenameDateTime(jan1.withZone(DateTimeZone.forID("America/New_York"))) mustBe "20160101.082618.794"
+    DateHelper.filenameDateTime(jan1.withZone(DateTimeZone.UTC)) mustBe "20160101.132618.794"
   }
 
   "implicit ordering" in {

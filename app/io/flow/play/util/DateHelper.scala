@@ -1,84 +1,19 @@
 package io.flow.play.util
 
+import io.flow.play.util.DateHelper.{CopyrightStartYear, EasternTimezone}
 import org.joda.time.{DateTime, DateTimeZone}
-import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 
-/**
-  * Standardized date formats used across Flow
-  */
-trait DateFormats {
+object DateHelper {
 
-  def mmmDdYyyy(dateTime: DateTime): String
-  def mmmDdYyyy(dateTime: Option[DateTime], default: String = "N/A"): String = {
-    dateTime.map(mmmDdYyyy(_)).getOrElse(default)
-  }
-
-  def shortDate(dateTime: DateTime): String
-  def shortDate(dateTime: Option[DateTime], default: String = "N/A"): String = {
-    dateTime.map(shortDate(_)).getOrElse(default)
-  }
-
-  def shortDateTime(dateTime: DateTime): String
-  def shortDateTime(dateTime: Option[DateTime], default: String = "N/A"): String = {
-    dateTime.map(shortDateTime(_)).getOrElse(default)
-  }
-
-  def longDate(dateTime: DateTime): String
-  def longDate(dateTime: Option[DateTime], default: String = "N/A"): String = {
-    dateTime.map(longDate(_)).getOrElse(default)
-  }
-
-  def longDateTime(dateTime: DateTime): String
-  def longDateTime(dateTime: Option[DateTime], default: String = "N/A"): String = {
-    dateTime.map(longDateTime(_)).getOrElse(default)
-  }
-
-  def consoleLongDateTime(dateTime: DateTime): String
-  def consoleLongDateTime(dateTime: Option[DateTime], default: String = "N/A"): String = {
-    dateTime.map(consoleLongDateTime(_)).getOrElse(default)
-  }
-
-  def filenameDateTime(dateTime: DateTime): String
-  def filenameDateTime(dateTime: Option[DateTime], default: String = "N/A"): String =
-    dateTime.map(filenameDateTime).getOrElse(default)
-
-}
-
-/**
-  * Default date helpers assume eastern time.
-  */
-object DateHelper extends DateFormats {
+  def apply(dateTime: DateTime): DateHelper = DateHelper(dateTime.getZone)
 
   /** This implicit ordering allows us to called `.sorted` on a Seq[DateTime]. */
   implicit def dateTimeOrdering: Ordering[DateTime] = Ordering.fromLessThan(_ isBefore _)
 
-  val CopyrightStartYear = 2016
+  val CopyrightStartYear:  Int = 2016
 
-  val FilenameDateTimeFormatter = DateTimeFormat.forPattern("yyyyMMdd.HHmmss.SSS")
-
-  val EasternTimezone = DateTimeZone.forID("America/New_York")
-
-  def apply(dateTime: DateTime): DateHelper = {
-    DateHelper(dateTime.getZone)
-  }
-  
-  override def mmmDdYyyy(dateTime: DateTime) = DateHelper(dateTime).mmmDdYyyy(dateTime)
-
-  override def shortDate(dateTime: DateTime) = DateHelper(dateTime).shortDate(dateTime)
-
-  override def shortDateTime(dateTime: DateTime) = DateHelper(dateTime).shortDateTime(dateTime)
-
-  override def longDate(dateTime: DateTime) = DateHelper(dateTime).longDate(dateTime)
-
-  override def longDateTime(dateTime: DateTime) = DateHelper(dateTime).longDateTime(dateTime)
-
-  override def consoleLongDateTime(dateTime: DateTime) = DateHelper(dateTime).consoleLongDateTime(dateTime)
-
-  /**
-    * Returns a filename friendly datetime string
-    * The returned string respects the timezone of the datetime and is not part of the string itself
-    */
-  override def filenameDateTime(dateTime: DateTime): String = DateHelper(dateTime).filenameDateTime(dateTime)
+  val EasternTimezone: DateTimeZone = DateTimeZone.forID("America/New_York")
 
   /**
     * Turns "1" into "01", leaves "12" as "12"
@@ -94,53 +29,15 @@ object DateHelper extends DateFormats {
   def trimLeadingZero(value: String): String = {
     value.stripPrefix("0")
   }
-
-  /**
-    * Returns the specified date (defaults to now) as a string like
-    * "20150919"
-    */
-  def yyyymmdd(
-    dateTime: DateTime = new DateTime(),
-    zone: DateTimeZone = EasternTimezone
-  ): String = {
-    yyyymm(dateTime, zone) + prefixZero(dateTime.getDayOfMonth)
-  }
-
-  /**
-    * Returns the specified date (defaults to now) as a string like
-    * "201509"
-    */
-  def yyyymm(
-    dateTime: DateTime = new DateTime(),
-    zone: DateTimeZone = EasternTimezone
-  ): String = {
-    s"${dateTime.getYear}${prefixZero(dateTime.getMonthOfYear)}"
-  }
-
-  /**
-    * Returns the current year (e.g. 2016) in the default timezone
-    */
-  def currentYear: Int = {
-    (new DateTime()).withZone(EasternTimezone).getYear
-  }
-
-  /**
-    * Returns either '2016' or '2016 - 2017' intended to be used for displaying things
-    * like the Flow copy right years dynamically.
-    */
-  def copyrightYears: String = {
-    val current = currentYear
-    current > CopyrightStartYear match {
-      case true => s"$CopyrightStartYear - $current"
-      case false => CopyrightStartYear.toString
-    }
-  }
-
 }
 
 case class DateHelper(
   timezone: DateTimeZone
-) extends DateFormats {
+) {
+
+  private[this] val filenameDateTimeFormatter: DateTimeFormatter = DateTimeFormat.
+    forPattern("yyyyMMdd.HHmmss.SSS").
+    withZone(timezone)
 
   def mmmDdYyyy(dateTime: DateTime): String = {
     DateTimeFormat.forPattern("MMM").withZone(timezone).print(dateTime) + " " +
@@ -180,7 +77,27 @@ case class DateHelper(
     DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss z").withZone(timezone).print(dateTime)
   }
 
-  override def filenameDateTime(dateTime: DateTime): String =
-    DateHelper.FilenameDateTimeFormatter.withZone(timezone).print(dateTime)
+  def filenameDateTime(dateTime: DateTime): String = {
+    filenameDateTimeFormatter.print(dateTime)
+  }
 
+  /**
+    * Returns the current year (e.g. 2016) in the default timezone
+    */
+  def currentYear: Int = {
+    DateTime.now.withZone(EasternTimezone).getYear
+  }
+
+  /**
+    * Returns either '2016' or '2016 - 2017' intended to be used for displaying things
+    * like the Flow copy right years dynamically.
+    */
+  def copyrightYears: String = {
+    val current = currentYear
+    if (current > CopyrightStartYear) {
+      s"$CopyrightStartYear - $current"
+    } else {
+      CopyrightStartYear.toString
+    }
+  }
 }

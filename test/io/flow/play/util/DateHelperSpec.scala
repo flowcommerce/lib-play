@@ -62,7 +62,7 @@ class DateHelperSpec extends WordSpec with MustMatchers {
 
   "currentYear" in {
     DateHelper.currentYear >= 2016
-    DateHelper.currentYear <= (new DateTime()).getYear + 1
+    DateHelper.currentYear <= DateTime.now.getYear + 1
   }
 
   "copyrightYear" in {
@@ -73,12 +73,8 @@ class DateHelperSpec extends WordSpec with MustMatchers {
   "filenameDateTime" in {
     val dtNy = jan1.withZone(DateTimeZone.forID("America/New_York"))
     val dtUtc = jan1.withZone(DateTimeZone.UTC)
-    DateHelper.filenameDateTime(dtNy) mustBe "20160101.082618.794"
-    DateHelper.filenameDateTime(dtUtc) mustBe "20160101.132618.794"
-
-    DateHelper.filenameDateTime(Some(jan1.withZone(DateTimeZone.forID("America/New_York"))), "-") mustBe "20160101.082618.794"
-    DateHelper.filenameDateTime(None) mustBe "N/A"
-    DateHelper.filenameDateTime(None, "-") mustBe "-"
+    DateHelper(dtNy).filenameDateTime mustBe "20160101.082618.794"
+    DateHelper(dtUtc).filenameDateTime mustBe "20160101.132618.794"
   }
 
   "implicit ordering" in {

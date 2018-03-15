@@ -41,34 +41,46 @@ case class DateHelper(
 
   def mmmDdYyyy(dateTime: DateTime): String = {
     DateTimeFormat.forPattern("MMM").withZone(timezone).print(dateTime) + " " +
-    DateHelper.trimLeadingZero(DateTimeFormat.forPattern("dd").withZone(timezone).print(dateTime)) + ", " +
-    DateTimeFormat.forPattern("YYYY").withZone(timezone).print(dateTime)
+      DateHelper.trimLeadingZero(DateTimeFormat.forPattern("dd").withZone(timezone).print(dateTime)) + ", " +
+      DateTimeFormat.forPattern("YYYY").withZone(timezone).print(dateTime)
   }
 
-  def shortDate(
-    dateTime: DateTime
-  ): String = {
+  def mmmDdYyyy(dateTime: Option[DateTime], default: String = "N/A"): String = {
+    dateTime.map(mmmDdYyyy).getOrElse(default)
+  }
+
+  def shortDate(dateTime: DateTime): String = {
     DateTimeFormat.shortDate.withZone(timezone).print(dateTime)
   }
 
-  def shortDateTime(
-    dateTime: DateTime
-  ): String = {
-    shortDate(dateTime) + " " + DateTimeFormat.forPattern("HH:mm:ss z").withZone(timezone).print(dateTime)
-  }
-  
-  def longDate(
-    dateTime: DateTime
-  ): String = {
-    DateTimeFormat.forPattern("MMMM").withZone(timezone).print(dateTime) + " " +
-    DateHelper.trimLeadingZero(DateTimeFormat.forPattern("dd").withZone(timezone).print(dateTime)) + ", " +
-    DateTimeFormat.forPattern("YYYY").withZone(timezone).print(dateTime)
+  def shortDate(dateTime: Option[DateTime], default: String = "N/A"): String = {
+    dateTime.map(shortDate).getOrElse(default)
   }
 
-  def longDateTime(
-    dateTime: DateTime
-  ): String = {
+  def shortDateTime(dateTime: DateTime): String = {
+    shortDate(dateTime) + " " + DateTimeFormat.forPattern("HH:mm:ss z").withZone(timezone).print(dateTime)
+  }
+
+  def shortDateTime(dateTime: Option[DateTime], default: String = "N/A"): String = {
+    dateTime.map(shortDateTime).getOrElse(default)
+  }
+
+  def longDate(dateTime: DateTime): String = {
+    DateTimeFormat.forPattern("MMMM").withZone(timezone).print(dateTime) + " " +
+      DateHelper.trimLeadingZero(DateTimeFormat.forPattern("dd").withZone(timezone).print(dateTime)) + ", " +
+      DateTimeFormat.forPattern("YYYY").withZone(timezone).print(dateTime)
+  }
+
+  def longDate(dateTime: Option[DateTime], default: String = "N/A"): String = {
+    dateTime.map(longDate).getOrElse(default)
+  }
+
+  def longDateTime(dateTime: DateTime): String = {
     longDate(dateTime) + " " + DateTimeFormat.forPattern("HH:mm:ss z").withZone(timezone).print(dateTime)
+  }
+
+  def longDateTime(dateTime: Option[DateTime], default: String = "N/A"): String = {
+    dateTime.map(longDateTime).getOrElse(default)
   }
 
   def consoleLongDateTime(
@@ -77,8 +89,36 @@ case class DateHelper(
     DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss z").withZone(timezone).print(dateTime)
   }
 
+  def consoleLongDateTime(
+    dateTime: Option[DateTime], default: String = "N/A"
+  ): String = {
+    dateTime.map(consoleLongDateTime).getOrElse(default)
+  }
+
   def filenameDateTime(dateTime: DateTime): String = {
     filenameDateTimeFormatter.print(dateTime)
+  }
+
+  /**
+    * Returns the specified date (defaults to now) as a string like
+    * "20150919"
+    */
+  def yyyymmdd(
+    dateTime: DateTime = new DateTime(),
+    zone: DateTimeZone = EasternTimezone
+  ): String = {
+    yyyymm(dateTime, zone) + DateHelper.prefixZero(dateTime.getDayOfMonth)
+  }
+
+  /**
+    * Returns the specified date (defaults to now) as a string like
+    * "201509"
+    */
+  def yyyymm(
+    dateTime: DateTime = new DateTime(),
+    zone: DateTimeZone = EasternTimezone
+  ): String = {
+    s"${dateTime.getYear}${DateHelper.prefixZero(dateTime.getMonthOfYear)}"
   }
 
   /**

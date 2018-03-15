@@ -24,8 +24,11 @@ class FlowLoggingFilter @javax.inject.Inject() (
   m: Materializer,
   config: Config
 ) extends Filter {
-  val LoggedRequestMethodConfig = "play.http.filters.logging.methods"
-  val DefaultLoggedRequestMethods = Seq("GET", "PATCH", "POST", "PUT", "DELETE", "OPTIONS")
+
+  private val LoggedRequestMethodConfig = "play.http.filters.logging.methods"
+  private val DefaultLoggedRequestMethods = Seq("GET", "PATCH", "POST", "PUT", "DELETE", "OPTIONS", "HEAD")
+
+  private val loggedRequestMethods = config.optionalList(LoggedRequestMethodConfig).getOrElse(DefaultLoggedRequestMethods).toSet
 
   def apply(f: RequestHeader => Future[Result])(requestHeader: RequestHeader): Future[Result] = {
     val startTime = System.currentTimeMillis
@@ -34,7 +37,7 @@ class FlowLoggingFilter @javax.inject.Inject() (
         * If user defined a list of methods that produce logs, then use that
         * Otherwise default to list defined here, which is everything
         */
-      if (config.optionalList(LoggedRequestMethodConfig).getOrElse(DefaultLoggedRequestMethods).contains(requestHeader.method)) {
+      if (loggedRequestMethods.contains(requestHeader.method)) {
         val endTime = System.currentTimeMillis
         val requestTime = endTime - startTime
         val headerMap = requestHeader.headers.toMap

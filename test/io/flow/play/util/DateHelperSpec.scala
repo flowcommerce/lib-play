@@ -7,71 +7,54 @@ import org.scalatest.{MustMatchers, WordSpec}
 class DateHelperSpec extends WordSpec with MustMatchers {
 
   private[this] val jan1 = dateTimeParser.parseDateTime("2016-01-01T08:26:18.794-05:00")
+  private[this] val jan1Eastern = jan1.withZone(DateHelper.EasternTimezone)
   
 
   "yyyymm" in {
-    DateHelper(DateHelper.EasternTimezone).yyyymm(jan1) must equal("201601")
+    DateHelper(jan1Eastern).yyyymm() must equal("201601")
   }
 
   "yyyymmdd" in {
-    DateHelper(DateHelper.EasternTimezone).yyyymmdd(jan1) must equal("20160101")
+    DateHelper(jan1Eastern).yyyymmdd() must equal("20160101")
   }
 
   "mmmDdYyyy" in {
-    DateHelper(DateHelper.EasternTimezone).mmmDdYyyy(jan1) must equal("Jan 1, 2016")
-    DateHelper(DateHelper.EasternTimezone).mmmDdYyyy(Some(jan1), "-") must equal("Jan 1, 2016")
-    DateHelper(DateHelper.EasternTimezone).mmmDdYyyy(None) must equal("N/A")
-    DateHelper(DateHelper.EasternTimezone).mmmDdYyyy(None, "-") must equal("-")
+    DateHelper(jan1Eastern).mmmDdYyyy() must equal("Jan 1, 2016")
   }
 
   "shortDate" in {
-    DateHelper(DateHelper.EasternTimezone).shortDate(jan1) must equal("1/1/16")
-    DateHelper(DateHelper.EasternTimezone).shortDate(Some(jan1), "-") must equal("1/1/16")
-    DateHelper(DateHelper.EasternTimezone).shortDate(None) must equal("N/A")
-    DateHelper(DateHelper.EasternTimezone).shortDate(None, "-") must equal("-")
+    DateHelper(jan1Eastern).shortDate() must equal("1/1/16")
   }
 
   "shortDateTime" in {
-    DateHelper(DateHelper.EasternTimezone).shortDateTime(jan1) must equal("1/1/16 08:26:18 EST")
-    DateHelper(DateHelper.EasternTimezone).shortDateTime(Some(jan1), "-") must equal("1/1/16 08:26:18 EST")
-    DateHelper(DateHelper.EasternTimezone).shortDateTime(None) must equal("N/A")
-    DateHelper(DateHelper.EasternTimezone).shortDateTime(None, "-") must equal("-")
+    DateHelper(jan1Eastern).shortDateTime() must equal("1/1/16 08:26:18 EST")
   }
 
   "longDate" in {
-    DateHelper(DateHelper.EasternTimezone).longDate(jan1) must equal("January 1, 2016")
-    DateHelper(DateHelper.EasternTimezone).longDate(Some(jan1), "-") must equal("January 1, 2016")
-    DateHelper(DateHelper.EasternTimezone).longDate(None) must equal("N/A")
-    DateHelper(DateHelper.EasternTimezone).longDate(None, "-") must equal("-")
+    DateHelper(jan1Eastern).longDate() must equal("January 1, 2016")
   }
 
   "longDateTime" in {
-    DateHelper(DateHelper.EasternTimezone).longDateTime(jan1) must equal("January 1, 2016 08:26:18 EST")
-    DateHelper(DateHelper.EasternTimezone).longDateTime(Some(jan1), "-") must equal("January 1, 2016 08:26:18 EST")
-    DateHelper(DateHelper.EasternTimezone).longDateTime(None) must equal("N/A")
-    DateHelper(DateHelper.EasternTimezone).longDateTime(None, "-") must equal("-")
+    DateHelper(jan1Eastern).longDateTime() must equal("January 1, 2016 08:26:18 EST")
   }
 
   "consoleLongDateTime" in {
-    DateHelper(DateHelper.EasternTimezone).consoleLongDateTime(jan1) must equal("2016-01-01 08:26:18 EST")
-    DateHelper(DateHelper.EasternTimezone).consoleLongDateTime(Some(jan1), "-") must equal("2016-01-01 08:26:18 EST")
-    DateHelper(DateHelper.EasternTimezone).consoleLongDateTime(None) must equal("N/A")
-    DateHelper(DateHelper.EasternTimezone).consoleLongDateTime(None, "-") must equal("-")
+    DateHelper(jan1Eastern).consoleLongDateTime() must equal("2016-01-01 08:26:18 EST")
   }
 
   "currentYear" in {
-    DateHelper(DateHelper.EasternTimezone).currentYear >= 2016
-    DateHelper(DateHelper.EasternTimezone).currentYear <= DateTime.now.getYear + 1
+    DateHelper.currentYear >= 2016
+    DateHelper.currentYear <= DateTime.now.getYear + 1
   }
 
   "copyrightYear" in {
-    val value = DateHelper(DateHelper.EasternTimezone).copyrightYears
-    Seq("2016", s"2016 - ${DateHelper(DateHelper.EasternTimezone).currentYear}").contains(value) mustBe(true)
+    val value = DateHelper.copyrightYears
+    Seq("2016", s"2016 - ${DateHelper.currentYear}").contains(value) mustBe(true)
   }
 
   "filenameDateTime" in {
-    DateHelper(DateTimeZone.forID("America/New_York")).filenameDateTime(jan1) mustBe "20160101.082618.794"
-    DateHelper(DateTimeZone.UTC).filenameDateTime(jan1) mustBe "20160101.132618.794"
+    DateHelper(jan1.withZone(DateTimeZone.forID("America/New_York"))).filenameDateTime() mustBe "20160101.082618.794"
+    DateHelper(jan1.withZone(DateTimeZone.UTC)).filenameDateTime() mustBe "20160101.132618.794"
   }
 
   "implicit ordering" in {

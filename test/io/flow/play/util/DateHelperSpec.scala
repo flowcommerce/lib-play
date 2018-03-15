@@ -6,40 +6,38 @@ import org.scalatest.{MustMatchers, WordSpec}
 
 class DateHelperSpec extends WordSpec with MustMatchers {
 
-  private[this] val jan1 = dateTimeParser.parseDateTime("2016-01-01T08:26:18.794-05:00")
-  private[this] val jan1Eastern = jan1.withZone(DateHelper.EasternTimezone)
-  
+  private[this] val jan1 = dateTimeParser.parseDateTime("2016-01-01T08:26:18.794-05:00").withZone(DateHelper.EasternTimezone)
 
   "yyyymm" in {
-    DateHelper.yyyymm(jan1Eastern) must equal("201601")
+    DateHelper.yyyymm(jan1) must equal("201601")
   }
 
   "yyyymmdd" in {
-    DateHelper.yyyymmdd(jan1Eastern) must equal("20160101")
+    DateHelper.yyyymmdd(jan1) must equal("20160101")
   }
 
   "mmmDdYyyy" in {
-    DateHelper.mmmDdYyyy(jan1Eastern) must equal("Jan 1, 2016")
+    DateHelper.mmmDdYyyy(jan1) must equal("Jan 1, 2016")
   }
 
   "shortDate" in {
-    DateHelper.shortDate(jan1Eastern) must equal("1/1/16")
+    DateHelper.shortDate(jan1) must equal("1/1/16")
   }
 
   "shortDateTime" in {
-    DateHelper.shortDateTime(jan1Eastern) must equal("1/1/16 08:26:18 EST")
+    DateHelper.shortDateTime(jan1) must equal("1/1/16 08:26:18 EST")
   }
 
   "longDate" in {
-    DateHelper.longDate(jan1Eastern) must equal("January 1, 2016")
+    DateHelper.longDate(jan1) must equal("January 1, 2016")
   }
 
   "longDateTime" in {
-    DateHelper.longDateTime(jan1Eastern) must equal("January 1, 2016 08:26:18 EST")
+    DateHelper.longDateTime(jan1) must equal("January 1, 2016 08:26:18 EST")
   }
 
   "consoleLongDateTime" in {
-    DateHelper.consoleLongDateTime(jan1Eastern) must equal("2016-01-01 08:26:18 EST")
+    DateHelper.consoleLongDateTime(jan1) must equal("2016-01-01 08:26:18 EST")
   }
 
   "currentYear" in {

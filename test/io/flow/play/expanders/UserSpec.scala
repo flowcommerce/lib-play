@@ -7,8 +7,9 @@ import io.flow.play.clients.{MockConfig, MockUserClient}
 import io.flow.play.util.{ApplicationConfig, DefaultConfig, IdGenerator, LibPlaySpec}
 import play.api.Configuration
 import play.api.libs.json.Json
+import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 
-class UserSpec extends LibPlaySpec {
+class UserSpec extends LibPlaySpec with FutureAwaits with DefaultAwaitTimeout {
 
   import scala.concurrent.ExecutionContext.Implicits.global
 

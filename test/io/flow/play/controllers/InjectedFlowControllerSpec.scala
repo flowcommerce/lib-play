@@ -1,11 +1,12 @@
 package io.flow.play.controllers
 
 import io.flow.play.clients.ConfigModule
-import io.flow.test.utils.FlowPlaySpec
+import org.scalatestplus.play.PlaySpec
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
 
-class InjectedFlowControllerSpec extends FlowPlaySpec {
+class InjectedFlowControllerSpec extends PlaySpec with GuiceOneServerPerSuite {
 
   override def fakeApplication(): Application =
     new GuiceApplicationBuilder()
@@ -15,7 +16,7 @@ class InjectedFlowControllerSpec extends FlowPlaySpec {
   "InjectedFlowController" should {
 
     "be instantiated" in {
-      val controller = init[InjectedFlowControllerImpl]
+      val controller = app.injector.instanceOf[InjectedFlowControllerImpl]
       controller must not be null
       controller.Anonymous must not be null
       controller.Action must not be null

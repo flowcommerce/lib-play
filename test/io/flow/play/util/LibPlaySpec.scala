@@ -1,9 +1,10 @@
 package io.flow.play.util
 
-import io.flow.test.utils.FlowPlaySpec
+import java.util.UUID
 
-trait LibPlaySpec extends FlowPlaySpec {
+import org.scalatestplus.play.PlaySpec
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
-//  lazy val config: Config = init[Config]
-//  override val authHeaders: AuthHeaders = init[AuthHeaders]
+trait LibPlaySpec extends PlaySpec with GuiceOneAppPerSuite {
+  def createTestId(): String = UUID.randomUUID.toString
 }

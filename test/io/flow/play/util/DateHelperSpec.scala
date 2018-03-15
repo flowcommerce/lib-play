@@ -1,11 +1,10 @@
 package io.flow.play.util
 
-import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat.dateTimeParser
-import org.scalatestplus.play._
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import org.joda.time.{DateTime, DateTimeZone}
+import org.scalatest.{MustMatchers, WordSpec}
 
-class DateHelperSpec extends LibPlaySpec {
+class DateHelperSpec extends WordSpec with MustMatchers {
 
   val jan1 = dateTimeParser.parseDateTime("2016-01-01T08:26:18.794-05:00")
 
@@ -67,6 +66,17 @@ class DateHelperSpec extends LibPlaySpec {
   "copyrightYear" in {
     val value = DateHelper.copyrightYears
     Seq("2016", s"2016 - ${DateHelper.currentYear}").contains(value) mustBe(true)
+  }
+
+  "filenameDateTime" in {
+    val dtNy = jan1.withZone(DateTimeZone.forID("America/New_York"))
+    val dtUtc = jan1.withZone(DateTimeZone.UTC)
+    DateHelper.filenameDateTime(dtNy) mustBe "20160101.082618.794"
+    DateHelper.filenameDateTime(dtUtc) mustBe "20160101.132618.794"
+
+    DateHelper.filenameDateTime(Some(jan1.withZone(DateTimeZone.forID("America/New_York"))), "-") mustBe "20160101.082618.794"
+    DateHelper.filenameDateTime(None) mustBe "N/A"
+    DateHelper.filenameDateTime(None, "-") mustBe "-"
   }
 
   "implicit ordering" in {

@@ -38,6 +38,10 @@ trait DateFormats {
     dateTime.map(consoleLongDateTime(_)).getOrElse(default)
   }
 
+  def filenameDateTime(dateTime: DateTime): String
+  def filenameDateTime(dateTime: Option[DateTime], default: String = "N/A"): String =
+    dateTime.map(filenameDateTime).getOrElse(default)
+
 }
 
 /**
@@ -49,6 +53,8 @@ object DateHelper extends DateFormats {
   implicit def dateTimeOrdering: Ordering[DateTime] = Ordering.fromLessThan(_ isBefore _)
 
   val CopyrightStartYear = 2016
+
+  val FilenameDateTimeFormatter = DateTimeFormat.forPattern("yyyyMMdd.HHmmss.SSS")
 
   val EasternTimezone = DateTimeZone.forID("America/New_York")
   private[this] val Default = DateHelper(EasternTimezone)
@@ -65,6 +71,11 @@ object DateHelper extends DateFormats {
 
   override def consoleLongDateTime(dateTime: DateTime) = Default.consoleLongDateTime(dateTime)
 
+  /**
+    * Returns a filename friendly datetime string
+    * The returned string respects the timezone of the datetime and is not part of the string itself
+    */
+  override def filenameDateTime(dateTime: DateTime): String = DateHelper(dateTime.getZone).filenameDateTime(dateTime)
 
   /**
     * Turns "1" into "01", leaves "12" as "12"
@@ -164,5 +175,8 @@ case class DateHelper(
   ): String = {
     DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss z").withZone(timezone).print(dateTime)
   }
+
+  override def filenameDateTime(dateTime: DateTime): String =
+    DateHelper.FilenameDateTimeFormatter.withZone(timezone).print(dateTime)
 
 }

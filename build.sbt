@@ -21,10 +21,10 @@ lazy val root = project
       specs2 % Test,
       "com.jason-goodwin" %% "authentikat-jwt" % "0.4.5",
       "com.ning" % "async-http-client" % "1.9.40",
-      "com.typesafe.play" %% "play-test" % "2.6.11" % Test,
+      "com.typesafe.play" %% "play-test" % "2.6.12" % Test,
       "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test,
-      "org.specs2" %% "specs2-core" % "4.0.2" % Test,
-      "com.typesafe.play" %% "play-specs2" % "2.6.11" % Test
+      "org.specs2" %% "specs2-core" % "4.0.3" % Test,
+      "com.typesafe.play" %% "play-specs2" % "2.6.12" % Test
     ),
     resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",
     resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",

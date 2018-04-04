@@ -99,7 +99,6 @@ class ProductionRegistry() extends Registry {
 
 @javax.inject.Singleton
 class DevelopmentRegistry @javax.inject.Inject() (
-  app: play.api.Application,
   config: Config
 ) extends Registry {
 

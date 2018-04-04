@@ -1,7 +1,7 @@
 package io.flow.play.clients
 
 import io.flow.play.util.{Config, EnvironmentConfig, FlowEnvironment, PropertyConfig}
-import io.flow.registry.v0.{Authorization, Client}
+import io.flow.registry.v0.Client
 import io.flow.registry.v0.errors.UnitResponse
 import io.flow.registry.v0.models.Application
 import play.api.Logger

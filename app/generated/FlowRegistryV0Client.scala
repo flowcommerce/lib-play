@@ -546,8 +546,8 @@ package io.flow.registry.v0 {
         service: _root_.scala.Option[Seq[String]] = None,
         prefix: _root_.scala.Option[String] = None,
         q: _root_.scala.Option[String] = None,
-        limit: Long = 25,
-        offset: Long = 0,
+        limit: Long = 25L,
+        offset: Long = 0L,
         sort: String = "-created_at",
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.registry.v0.models.Application]] = {
@@ -571,8 +571,8 @@ package io.flow.registry.v0 {
       override def getVersions(
         id: _root_.scala.Option[Seq[String]] = None,
         application: _root_.scala.Option[Seq[String]] = None,
-        limit: Long = 25,
-        offset: Long = 0,
+        limit: Long = 25L,
+        offset: Long = 0L,
         sort: String = "journal_timestamp",
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.registry.v0.models.ApplicationVersion]] = {
@@ -685,8 +685,8 @@ package io.flow.registry.v0 {
     object Services extends Services {
       override def get(
         id: _root_.scala.Option[Seq[String]] = None,
-        limit: Long = 25,
-        offset: Long = 0,
+        limit: Long = 25L,
+        offset: Long = 0L,
         sort: String = "-created_at",
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.registry.v0.models.Service]] = {
@@ -706,8 +706,8 @@ package io.flow.registry.v0 {
       override def getVersions(
         id: _root_.scala.Option[Seq[String]] = None,
         service: _root_.scala.Option[Seq[String]] = None,
-        limit: Long = 25,
-        offset: Long = 0,
+        limit: Long = 25L,
+        offset: Long = 0L,
         sort: String = "journal_timestamp",
         requestHeaders: Seq[(String, String)] = Nil
       )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.registry.v0.models.ServiceVersion]] = {
@@ -923,8 +923,8 @@ package io.flow.registry.v0 {
       service: _root_.scala.Option[Seq[String]] = None,
       prefix: _root_.scala.Option[String] = None,
       q: _root_.scala.Option[String] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       sort: String = "-created_at",
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.registry.v0.models.Application]]
@@ -937,8 +937,8 @@ package io.flow.registry.v0 {
     def getVersions(
       id: _root_.scala.Option[Seq[String]] = None,
       application: _root_.scala.Option[Seq[String]] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       sort: String = "journal_timestamp",
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.registry.v0.models.ApplicationVersion]]
@@ -1008,8 +1008,8 @@ package io.flow.registry.v0 {
      */
     def get(
       id: _root_.scala.Option[Seq[String]] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       sort: String = "-created_at",
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.registry.v0.models.Service]]
@@ -1022,8 +1022,8 @@ package io.flow.registry.v0 {
     def getVersions(
       id: _root_.scala.Option[Seq[String]] = None,
       service: _root_.scala.Option[Seq[String]] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       sort: String = "journal_timestamp",
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.registry.v0.models.ServiceVersion]]

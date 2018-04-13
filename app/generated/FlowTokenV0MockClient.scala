@@ -29,8 +29,8 @@ package io.flow.token.v0.mock {
       organization: String,
       id: _root_.scala.Option[Seq[String]] = None,
       mine: _root_.scala.Option[Boolean] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       sort: String = "-created_at",
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.token.v0.models.OrganizationToken]] = scala.concurrent.Future.successful {
@@ -63,8 +63,8 @@ package io.flow.token.v0.mock {
       partner: String,
       id: _root_.scala.Option[Seq[String]] = None,
       mine: _root_.scala.Option[Boolean] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       sort: String = "-created_at",
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.token.v0.models.PartnerToken]] = scala.concurrent.Future.successful {
@@ -102,8 +102,8 @@ package io.flow.token.v0.mock {
       organization: _root_.scala.Option[String] = None,
       partner: _root_.scala.Option[String] = None,
       mine: _root_.scala.Option[Boolean] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       sort: String = "-created_at",
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.token.v0.models.Token]] = scala.concurrent.Future.successful {

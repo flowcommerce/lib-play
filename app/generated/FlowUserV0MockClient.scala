@@ -45,8 +45,8 @@ package io.flow.user.v0.mock {
       id: _root_.scala.Option[Seq[String]] = None,
       email: _root_.scala.Option[String] = None,
       status: _root_.scala.Option[io.flow.common.v0.models.UserStatus] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       sort: String = "-created_at",
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.common.v0.models.User]] = scala.concurrent.Future.successful {
@@ -61,8 +61,8 @@ package io.flow.user.v0.mock {
     def getVersions(
       id: _root_.scala.Option[Seq[String]] = None,
       userId: _root_.scala.Option[Seq[String]] = None,
-      limit: Long = 25,
-      offset: Long = 0,
+      limit: Long = 25L,
+      offset: Long = 0L,
       sort: String = "journal_timestamp",
       requestHeaders: Seq[(String, String)] = Nil
     )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.user.v0.models.UserVersion]] = scala.concurrent.Future.successful {

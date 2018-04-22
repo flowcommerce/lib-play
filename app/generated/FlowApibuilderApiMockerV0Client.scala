@@ -5,23 +5,23 @@
  */
 package io.flow.apibuilder.api.mocker.v0.models {
 
-  case class MockApi(
+  final case class MockApi(
     request: io.flow.apibuilder.api.mocker.v0.models.MockApiRequest,
     response: io.flow.apibuilder.api.mocker.v0.models.MockApiResponse
   )
 
-  case class MockApiRequest(
+  final case class MockApiRequest(
     method: String,
     url: String
   )
 
-  case class MockApiResponse(
+  final case class MockApiResponse(
     httpStatusCode: Int,
     body: _root_.scala.Option[_root_.play.api.libs.json.JsValue] = None,
     contentType: String = "application/json"
   )
 
-  case class MockableApi(
+  final case class MockableApi(
     method: String,
     url: String,
     child: _root_.scala.Option[io.flow.apibuilder.api.mocker.v0.models.MockableApi] = None
@@ -221,7 +221,7 @@ package io.flow.apibuilder.api.mocker.v0 {
 
     }
 
-    case class ApibuilderQueryStringBindable[T](
+    final case class ApibuilderQueryStringBindable[T](
       converters: ApibuilderTypeConverter[T]
     ) extends QueryStringBindable[T] {
 
@@ -244,7 +244,7 @@ package io.flow.apibuilder.api.mocker.v0 {
       }
     }
 
-    case class ApibuilderPathBindable[T](
+    final case class ApibuilderPathBindable[T](
       converters: ApibuilderTypeConverter[T]
     ) extends PathBindable[T] {
 
@@ -392,7 +392,7 @@ package io.flow.apibuilder.api.mocker.v0 {
 
   sealed trait Authorization extends _root_.scala.Product with _root_.scala.Serializable
   object Authorization {
-    case class Basic(username: String, password: Option[String] = None) extends Authorization
+    final case class Basic(username: String, password: Option[String] = None) extends Authorization
   }
 
   package interfaces {
@@ -408,7 +408,7 @@ package io.flow.apibuilder.api.mocker.v0 {
 
   package errors {
 
-    case class FailedRequest(responseCode: Int, message: String, requestUri: Option[_root_.java.net.URI] = None) extends _root_.java.lang.Exception(s"HTTP $responseCode: $message")
+    final case class FailedRequest(responseCode: Int, message: String, requestUri: Option[_root_.java.net.URI] = None) extends _root_.java.lang.Exception(s"HTTP $responseCode: $message")
 
   }
 

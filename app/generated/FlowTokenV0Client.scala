@@ -17,7 +17,7 @@ package io.flow.token.v0.models {
     case object OrganizationToken extends TokenDiscriminator { override def toString = "organization_token" }
     case object PartnerToken extends TokenDiscriminator { override def toString = "partner_token" }
 
-    case class UNDEFINED(override val toString: String) extends TokenDiscriminator
+    final case class UNDEFINED(override val toString: String) extends TokenDiscriminator
 
     val all: scala.List[TokenDiscriminator] = scala.List(OrganizationToken, PartnerToken)
 
@@ -41,7 +41,7 @@ package io.flow.token.v0.models {
     case object OrganizationTokenReference extends TokenReferenceDiscriminator { override def toString = "organization_token_reference" }
     case object PartnerTokenReference extends TokenReferenceDiscriminator { override def toString = "partner_token_reference" }
 
-    case class UNDEFINED(override val toString: String) extends TokenReferenceDiscriminator
+    final case class UNDEFINED(override val toString: String) extends TokenReferenceDiscriminator
 
     val all: scala.List[TokenReferenceDiscriminator] = scala.List(OrganizationTokenReference, PartnerTokenReference)
 
@@ -59,7 +59,7 @@ package io.flow.token.v0.models {
    * 
    * @param value The actual cleartext value of the token
    */
-  case class Cleartext(
+  final case class Cleartext(
     value: String
   )
 
@@ -69,7 +69,7 @@ package io.flow.token.v0.models {
    * @param partial The partial API token
    * @param createdAt The date/time on which this token was created
    */
-  case class OrganizationToken(
+  final case class OrganizationToken(
     id: String,
     organization: io.flow.common.v0.models.OrganizationReference,
     user: io.flow.common.v0.models.UserReference,
@@ -83,7 +83,7 @@ package io.flow.token.v0.models {
    * Used to create a new token. User making the request must be authorized to create
    * a token for this organization.
    */
-  case class OrganizationTokenForm(
+  final case class OrganizationTokenForm(
     environment: io.flow.common.v0.models.Environment,
     description: _root_.scala.Option[String] = None
   )
@@ -91,7 +91,7 @@ package io.flow.token.v0.models {
   /**
    * Summary data for a given token
    */
-  case class OrganizationTokenReference(
+  final case class OrganizationTokenReference(
     id: String,
     organization: io.flow.common.v0.models.OrganizationReference,
     environment: io.flow.common.v0.models.Environment,
@@ -104,7 +104,7 @@ package io.flow.token.v0.models {
    * @param partial The partial API token
    * @param createdAt The date/time on which this token was created
    */
-  case class PartnerToken(
+  final case class PartnerToken(
     id: String,
     partner: io.flow.token.v0.models.TokenPartnerReference,
     user: io.flow.common.v0.models.UserReference,
@@ -118,7 +118,7 @@ package io.flow.token.v0.models {
    * Used to create a new token. User making the request must be authorized to create
    * a token for this partner.
    */
-  case class PartnerTokenForm(
+  final case class PartnerTokenForm(
     environment: io.flow.common.v0.models.Environment,
     description: _root_.scala.Option[String] = None
   )
@@ -128,7 +128,7 @@ package io.flow.token.v0.models {
    * 
    * @param partner The Id of the partner for which this token was created
    */
-  case class PartnerTokenReference(
+  final case class PartnerTokenReference(
     id: String,
     partner: io.flow.token.v0.models.TokenPartnerReference,
     environment: io.flow.common.v0.models.Environment,
@@ -140,11 +140,11 @@ package io.flow.token.v0.models {
    * 
    * @param token The actual token with which to authenticate
    */
-  case class TokenAuthenticationForm(
+  final case class TokenAuthenticationForm(
     token: String
   )
 
-  case class TokenPartnerReference(
+  final case class TokenPartnerReference(
     id: String
   )
 
@@ -153,7 +153,7 @@ package io.flow.token.v0.models {
    * 
    * @param status Textual description of whether or not token is valid
    */
-  case class TokenValidation(
+  final case class TokenValidation(
     status: String
   )
 
@@ -163,7 +163,7 @@ package io.flow.token.v0.models {
    * 
    * @param token The actual token that you are validating
    */
-  case class TokenValidationForm(
+  final case class TokenValidationForm(
     token: String
   )
 
@@ -175,7 +175,7 @@ package io.flow.token.v0.models {
    * @param description Information about the type that we received that is undefined in this version of
    *        the client.
    */
-  case class TokenUndefinedType(
+  final case class TokenUndefinedType(
     description: String
   ) extends Token
 
@@ -187,7 +187,7 @@ package io.flow.token.v0.models {
    * @param description Information about the type that we received that is undefined in this version of
    *        the client.
    */
-  case class TokenReferenceUndefinedType(
+  final case class TokenReferenceUndefinedType(
     description: String
   ) extends TokenReference
 
@@ -573,7 +573,7 @@ package io.flow.token.v0 {
 
     }
 
-    case class ApibuilderQueryStringBindable[T](
+    final case class ApibuilderQueryStringBindable[T](
       converters: ApibuilderTypeConverter[T]
     ) extends QueryStringBindable[T] {
 
@@ -596,7 +596,7 @@ package io.flow.token.v0 {
       }
     }
 
-    case class ApibuilderPathBindable[T](
+    final case class ApibuilderPathBindable[T](
       converters: ApibuilderTypeConverter[T]
     ) extends PathBindable[T] {
 
@@ -929,7 +929,7 @@ package io.flow.token.v0 {
 
   sealed trait Authorization extends _root_.scala.Product with _root_.scala.Serializable
   object Authorization {
-    case class Basic(username: String, password: Option[String] = None) extends Authorization
+    final case class Basic(username: String, password: Option[String] = None) extends Authorization
   }
 
   package interfaces {
@@ -1062,16 +1062,16 @@ package io.flow.token.v0 {
     import io.flow.error.v0.models.json._
     import io.flow.token.v0.models.json._
 
-    case class GenericErrorResponse(
+    final case class GenericErrorResponse(
       response: play.api.libs.ws.WSResponse,
       message: Option[String] = None
     ) extends Exception(message.getOrElse(response.status + ": " + response.body)){
       lazy val genericError = _root_.io.flow.token.v0.Client.parseJson("io.flow.error.v0.models.GenericError", response, _.validate[io.flow.error.v0.models.GenericError])
     }
 
-    case class UnitResponse(status: Int) extends Exception(s"HTTP $status")
+    final case class UnitResponse(status: Int) extends Exception(s"HTTP $status")
 
-    case class FailedRequest(responseCode: Int, message: String, requestUri: Option[_root_.java.net.URI] = None) extends _root_.java.lang.Exception(s"HTTP $responseCode: $message")
+    final case class FailedRequest(responseCode: Int, message: String, requestUri: Option[_root_.java.net.URI] = None) extends _root_.java.lang.Exception(s"HTTP $responseCode: $message")
 
   }
 

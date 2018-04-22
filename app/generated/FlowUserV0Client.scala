@@ -5,7 +5,7 @@
  */
 package io.flow.user.v0.models {
 
-  case class AuthenticationForm(
+  final case class AuthenticationForm(
     email: String,
     password: String
   )
@@ -15,11 +15,11 @@ package io.flow.user.v0.models {
    * email address in this case to allow the UI to display which email address was
    * verified.
    */
-  case class EmailVerification(
+  final case class EmailVerification(
     email: String
   )
 
-  case class NameForm(
+  final case class NameForm(
     first: _root_.scala.Option[String] = None,
     last: _root_.scala.Option[String] = None
   )
@@ -28,7 +28,7 @@ package io.flow.user.v0.models {
    * @param current The current valid account password
    * @param `new` The new password
    */
-  case class PasswordChangeForm(
+  final case class PasswordChangeForm(
     current: String,
     `new`: String
   )
@@ -37,27 +37,27 @@ package io.flow.user.v0.models {
    * @param token The token for the password reset request
    * @param password The new password
    */
-  case class PasswordResetForm(
+  final case class PasswordResetForm(
     token: String,
     password: String
   )
 
-  case class PasswordResetRequestForm(
+  final case class PasswordResetRequestForm(
     email: String
   )
 
-  case class UserForm(
+  final case class UserForm(
     email: _root_.scala.Option[String] = None,
     password: _root_.scala.Option[String] = None,
     name: _root_.scala.Option[io.flow.user.v0.models.NameForm] = None
   )
 
-  case class UserPutForm(
+  final case class UserPutForm(
     email: _root_.scala.Option[String] = None,
     name: _root_.scala.Option[io.flow.user.v0.models.NameForm] = None
   )
 
-  case class UserVersion(
+  final case class UserVersion(
     id: String,
     timestamp: _root_.org.joda.time.DateTime,
     `type`: io.flow.common.v0.models.ChangeType,
@@ -375,7 +375,7 @@ package io.flow.user.v0 {
 
     }
 
-    case class ApibuilderQueryStringBindable[T](
+    final case class ApibuilderQueryStringBindable[T](
       converters: ApibuilderTypeConverter[T]
     ) extends QueryStringBindable[T] {
 
@@ -398,7 +398,7 @@ package io.flow.user.v0 {
       }
     }
 
-    case class ApibuilderPathBindable[T](
+    final case class ApibuilderPathBindable[T](
       converters: ApibuilderTypeConverter[T]
     ) extends PathBindable[T] {
 
@@ -734,7 +734,7 @@ package io.flow.user.v0 {
 
   sealed trait Authorization extends _root_.scala.Product with _root_.scala.Serializable
   object Authorization {
-    case class Basic(username: String, password: Option[String] = None) extends Authorization
+    final case class Basic(username: String, password: Option[String] = None) extends Authorization
   }
 
   package interfaces {
@@ -862,16 +862,16 @@ package io.flow.user.v0 {
     import io.flow.error.v0.models.json._
     import io.flow.user.v0.models.json._
 
-    case class GenericErrorResponse(
+    final case class GenericErrorResponse(
       response: play.api.libs.ws.WSResponse,
       message: Option[String] = None
     ) extends Exception(message.getOrElse(response.status + ": " + response.body)){
       lazy val genericError = _root_.io.flow.user.v0.Client.parseJson("io.flow.error.v0.models.GenericError", response, _.validate[io.flow.error.v0.models.GenericError])
     }
 
-    case class UnitResponse(status: Int) extends Exception(s"HTTP $status")
+    final case class UnitResponse(status: Int) extends Exception(s"HTTP $status")
 
-    case class FailedRequest(responseCode: Int, message: String, requestUri: Option[_root_.java.net.URI] = None) extends _root_.java.lang.Exception(s"HTTP $responseCode: $message")
+    final case class FailedRequest(responseCode: Int, message: String, requestUri: Option[_root_.java.net.URI] = None) extends _root_.java.lang.Exception(s"HTTP $responseCode: $message")
 
   }
 

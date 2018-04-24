@@ -3,7 +3,8 @@ package io.flow.play.expanders
 import io.flow.common.v0.models.UserReference
 import io.flow.play.util.Expander
 import play.api.libs.json._
-import scala.concurrent.{Future, ExecutionContext}
+
+import scala.concurrent.{ExecutionContext, Future}
 import io.flow.common.v0.models.json._
 
 /*
@@ -27,31 +28,38 @@ case class User (
       case Nil => Future(
         records
       )
-      case ids => {
-        userClient.users.get(id = Some(ids), limit = userIds.size, requestHeaders = requestHeaders).map(users =>
-          Map(users.map(user => user.id -> user): _*)
-        ).map(userIdLookup =>
-          records.map { r =>
-            r.validate[JsObject] match {
-              case JsSuccess(obj, _) => {
-                (r \ fieldName).validate[UserReference] match {
-                  case JsSuccess(userReference, _) => {
-                    obj ++ Json.obj(
-                      fieldName ->
-                        (userIdLookup.get(userReference.id) match {  //getOrElse can't be used to serialize multiple types - no formatter
-                          case Some(user) => Json.toJson(user)
-                          case None => Json.toJson(userReference)
-                        })
-                    )
+      case allIds => {
+        val expanded = allIds.sliding(User.maxExpandedUsersPerCall).map { ids =>
+          userClient.users.get(id = Some(ids), limit = userIds.size, requestHeaders = requestHeaders).map(users =>
+            Map(users.map(user => user.id -> user): _*)
+          ).map(userIdLookup =>
+            records.map { r =>
+              r.validate[JsObject] match {
+                case JsSuccess(obj, _) => {
+                  (r \ fieldName).validate[UserReference] match {
+                    case JsSuccess(userReference, _) => {
+                      obj ++ Json.obj(
+                        fieldName ->
+                          (userIdLookup.get(userReference.id) match { //getOrElse can't be used to serialize multiple types - no formatter
+                            case Some(user) => Json.toJson(user)
+                            case None => Json.toJson(userReference)
+                          })
+                      )
+                    }
+                    case JsError(_) => r
                   }
-                  case JsError(_) => r
                 }
+                case JsError(_) => r
               }
-              case JsError(_) => r
             }
-          }
-        )
+          )
+        }
+        Future.fold(expanded)(Seq[JsValue]()) ((js, value) => js ++ value)
       }
     }
   }
+}
+
+object User {
+  val maxExpandedUsersPerCall = 40
 }

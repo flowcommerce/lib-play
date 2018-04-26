@@ -136,10 +136,10 @@ package io.flow.error.v0.models {
     }
 
     implicit def jsonReadsErrorGenericError: play.api.libs.json.Reads[GenericError] = {
-      (
-        (__ \ "code").read[io.flow.error.v0.models.GenericErrorCode] and
-        (__ \ "messages").read[Seq[String]]
-      )(GenericError.apply _)
+      for {
+        code <- (__ \ "code").read[io.flow.error.v0.models.GenericErrorCode]
+        messages <- (__ \ "messages").read[Seq[String]]
+      } yield GenericError(code, messages)
     }
 
     def jsObjectGenericError(obj: io.flow.error.v0.models.GenericError): play.api.libs.json.JsObject = {

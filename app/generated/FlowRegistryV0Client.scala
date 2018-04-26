@@ -190,11 +190,11 @@ package io.flow.registry.v0.models {
     }
 
     implicit def jsonReadsRegistryApplication: play.api.libs.json.Reads[Application] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "ports").read[Seq[io.flow.registry.v0.models.Port]] and
-        (__ \ "dependencies").read[Seq[String]]
-      )(Application.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        ports <- (__ \ "ports").read[Seq[io.flow.registry.v0.models.Port]]
+        dependencies <- (__ \ "dependencies").read[Seq[String]]
+      } yield Application(id, ports, dependencies)
     }
 
     def jsObjectApplication(obj: io.flow.registry.v0.models.Application): play.api.libs.json.JsObject = {
@@ -214,13 +214,13 @@ package io.flow.registry.v0.models {
     }
 
     implicit def jsonReadsRegistryApplicationForm: play.api.libs.json.Reads[ApplicationForm] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "service").read[String] and
-        (__ \ "external").readNullable[Long] and
-        (__ \ "internal").readNullable[Long] and
-        (__ \ "dependency").readNullable[Seq[String]]
-      )(ApplicationForm.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        service <- (__ \ "service").read[String]
+        external <- (__ \ "external").readNullable[Long]
+        internal <- (__ \ "internal").readNullable[Long]
+        dependency <- (__ \ "dependency").readNullable[Seq[String]]
+      } yield ApplicationForm(id, service, external, internal, dependency)
     }
 
     def jsObjectApplicationForm(obj: io.flow.registry.v0.models.ApplicationForm): play.api.libs.json.JsObject = {
@@ -250,12 +250,12 @@ package io.flow.registry.v0.models {
     }
 
     implicit def jsonReadsRegistryApplicationPutForm: play.api.libs.json.Reads[ApplicationPutForm] = {
-      (
-        (__ \ "service").readNullable[String] and
-        (__ \ "external").readNullable[Long] and
-        (__ \ "internal").readNullable[Long] and
-        (__ \ "dependency").readNullable[Seq[String]]
-      )(ApplicationPutForm.apply _)
+      for {
+        service <- (__ \ "service").readNullable[String]
+        external <- (__ \ "external").readNullable[Long]
+        internal <- (__ \ "internal").readNullable[Long]
+        dependency <- (__ \ "dependency").readNullable[Seq[String]]
+      } yield ApplicationPutForm(service, external, internal, dependency)
     }
 
     def jsObjectApplicationPutForm(obj: io.flow.registry.v0.models.ApplicationPutForm): play.api.libs.json.JsObject = {
@@ -286,12 +286,12 @@ package io.flow.registry.v0.models {
     }
 
     implicit def jsonReadsRegistryApplicationVersion: play.api.libs.json.Reads[ApplicationVersion] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "timestamp").read[_root_.org.joda.time.DateTime] and
-        (__ \ "type").read[io.flow.common.v0.models.ChangeType] and
-        (__ \ "application").read[io.flow.registry.v0.models.Application]
-      )(ApplicationVersion.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        timestamp <- (__ \ "timestamp").read[_root_.org.joda.time.DateTime]
+        `type` <- (__ \ "type").read[io.flow.common.v0.models.ChangeType]
+        application <- (__ \ "application").read[io.flow.registry.v0.models.Application]
+      } yield ApplicationVersion(id, timestamp, `type`, application)
     }
 
     def jsObjectApplicationVersion(obj: io.flow.registry.v0.models.ApplicationVersion): play.api.libs.json.JsObject = {
@@ -312,10 +312,10 @@ package io.flow.registry.v0.models {
     }
 
     implicit def jsonReadsRegistryHttp: play.api.libs.json.Reads[Http] = {
-      (
-        (__ \ "host").read[String] and
-        (__ \ "port").read[Long]
-      )(Http.apply _)
+      for {
+        host <- (__ \ "host").read[String]
+        port <- (__ \ "port").read[Long]
+      } yield Http(host, port)
     }
 
     def jsObjectHttp(obj: io.flow.registry.v0.models.Http): play.api.libs.json.JsObject = {
@@ -326,11 +326,11 @@ package io.flow.registry.v0.models {
     }
 
     implicit def jsonReadsRegistryPort: play.api.libs.json.Reads[Port] = {
-      (
-        (__ \ "service").read[io.flow.registry.v0.models.ServiceReference] and
-        (__ \ "external").read[Long] and
-        (__ \ "internal").read[Long]
-      )(Port.apply _)
+      for {
+        service <- (__ \ "service").read[io.flow.registry.v0.models.ServiceReference]
+        external <- (__ \ "external").read[Long]
+        internal <- (__ \ "internal").read[Long]
+      } yield Port(service, external, internal)
     }
 
     def jsObjectPort(obj: io.flow.registry.v0.models.Port): play.api.libs.json.JsObject = {
@@ -350,12 +350,12 @@ package io.flow.registry.v0.models {
     }
 
     implicit def jsonReadsRegistryPostgresql: play.api.libs.json.Reads[Postgresql] = {
-      (
-        (__ \ "dbname").read[String] and
-        (__ \ "host").read[String] and
-        (__ \ "port").read[Long] and
-        (__ \ "user").read[String]
-      )(Postgresql.apply _)
+      for {
+        dbname <- (__ \ "dbname").read[String]
+        host <- (__ \ "host").read[String]
+        port <- (__ \ "port").read[Long]
+        user <- (__ \ "user").read[String]
+      } yield Postgresql(dbname, host, port, user)
     }
 
     def jsObjectPostgresql(obj: io.flow.registry.v0.models.Postgresql): play.api.libs.json.JsObject = {
@@ -368,10 +368,10 @@ package io.flow.registry.v0.models {
     }
 
     implicit def jsonReadsRegistryService: play.api.libs.json.Reads[Service] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "default_port").read[Long]
-      )(Service.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        defaultPort <- (__ \ "default_port").read[Long]
+      } yield Service(id, defaultPort)
     }
 
     def jsObjectService(obj: io.flow.registry.v0.models.Service): play.api.libs.json.JsObject = {
@@ -390,10 +390,10 @@ package io.flow.registry.v0.models {
     }
 
     implicit def jsonReadsRegistryServiceForm: play.api.libs.json.Reads[ServiceForm] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "default_port").read[Long]
-      )(ServiceForm.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        defaultPort <- (__ \ "default_port").read[Long]
+      } yield ServiceForm(id, defaultPort)
     }
 
     def jsObjectServiceForm(obj: io.flow.registry.v0.models.ServiceForm): play.api.libs.json.JsObject = {
@@ -448,12 +448,12 @@ package io.flow.registry.v0.models {
     }
 
     implicit def jsonReadsRegistryServiceVersion: play.api.libs.json.Reads[ServiceVersion] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "timestamp").read[_root_.org.joda.time.DateTime] and
-        (__ \ "type").read[io.flow.common.v0.models.ChangeType] and
-        (__ \ "service").read[io.flow.registry.v0.models.Service]
-      )(ServiceVersion.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        timestamp <- (__ \ "timestamp").read[_root_.org.joda.time.DateTime]
+        `type` <- (__ \ "type").read[io.flow.common.v0.models.ChangeType]
+        service <- (__ \ "service").read[io.flow.registry.v0.models.Service]
+      } yield ServiceVersion(id, timestamp, `type`, service)
     }
 
     def jsObjectServiceVersion(obj: io.flow.registry.v0.models.ServiceVersion): play.api.libs.json.JsObject = {

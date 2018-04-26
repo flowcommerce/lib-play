@@ -71,10 +71,10 @@ package io.flow.apibuilder.api.mocker.v0.models {
     }
 
     implicit def jsonReadsApibuilderApiMockerMockApi: play.api.libs.json.Reads[MockApi] = {
-      (
-        (__ \ "request").read[io.flow.apibuilder.api.mocker.v0.models.MockApiRequest] and
-        (__ \ "response").read[io.flow.apibuilder.api.mocker.v0.models.MockApiResponse]
-      )(MockApi.apply _)
+      for {
+        request <- (__ \ "request").read[io.flow.apibuilder.api.mocker.v0.models.MockApiRequest]
+        response <- (__ \ "response").read[io.flow.apibuilder.api.mocker.v0.models.MockApiResponse]
+      } yield MockApi(request, response)
     }
 
     def jsObjectMockApi(obj: io.flow.apibuilder.api.mocker.v0.models.MockApi): play.api.libs.json.JsObject = {
@@ -93,10 +93,10 @@ package io.flow.apibuilder.api.mocker.v0.models {
     }
 
     implicit def jsonReadsApibuilderApiMockerMockApiRequest: play.api.libs.json.Reads[MockApiRequest] = {
-      (
-        (__ \ "method").read[String] and
-        (__ \ "url").read[String]
-      )(MockApiRequest.apply _)
+      for {
+        method <- (__ \ "method").read[String]
+        url <- (__ \ "url").read[String]
+      } yield MockApiRequest(method, url)
     }
 
     def jsObjectMockApiRequest(obj: io.flow.apibuilder.api.mocker.v0.models.MockApiRequest): play.api.libs.json.JsObject = {
@@ -115,11 +115,11 @@ package io.flow.apibuilder.api.mocker.v0.models {
     }
 
     implicit def jsonReadsApibuilderApiMockerMockApiResponse: play.api.libs.json.Reads[MockApiResponse] = {
-      (
-        (__ \ "http_status_code").read[Int] and
-        (__ \ "body").readNullable[_root_.play.api.libs.json.JsValue] and
-        (__ \ "content_type").read[String]
-      )(MockApiResponse.apply _)
+      for {
+        httpStatusCode <- (__ \ "http_status_code").read[Int]
+        body <- (__ \ "body").readNullable[_root_.play.api.libs.json.JsValue]
+        contentType <- (__ \ "content_type").read[String]
+      } yield MockApiResponse(httpStatusCode, body, contentType)
     }
 
     def jsObjectMockApiResponse(obj: io.flow.apibuilder.api.mocker.v0.models.MockApiResponse): play.api.libs.json.JsObject = {
@@ -141,11 +141,11 @@ package io.flow.apibuilder.api.mocker.v0.models {
     }
 
     implicit def jsonReadsApibuilderApiMockerMockableApi: play.api.libs.json.Reads[MockableApi] = {
-      (
-        (__ \ "method").read[String] and
-        (__ \ "url").read[String] and
-        (__ \ "child").lazyReadNullable(play.api.libs.json.Reads.of[io.flow.apibuilder.api.mocker.v0.models.MockableApi])
-      )(MockableApi.apply _)
+      for {
+        method <- (__ \ "method").read[String]
+        url <- (__ \ "url").read[String]
+        child <- (__ \ "child").lazyReadNullable(play.api.libs.json.Reads.of[io.flow.apibuilder.api.mocker.v0.models.MockableApi])
+      } yield MockableApi(method, url, child)
     }
 
     def jsObjectMockableApi(obj: io.flow.apibuilder.api.mocker.v0.models.MockableApi): play.api.libs.json.JsObject = {

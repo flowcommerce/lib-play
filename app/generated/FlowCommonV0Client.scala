@@ -2288,16 +2288,16 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonAddress: play.api.libs.json.Reads[Address] = {
-      (
-        (__ \ "text").readNullable[String] and
-        (__ \ "streets").readNullable[Seq[String]] and
-        (__ \ "city").readNullable[String] and
-        (__ \ "province").readNullable[String] and
-        (__ \ "postal").readNullable[String] and
-        (__ \ "country").readNullable[String] and
-        (__ \ "latitude").readNullable[String] and
-        (__ \ "longitude").readNullable[String]
-      )(Address.apply _)
+      for {
+        text <- (__ \ "text").readNullable[String]
+        streets <- (__ \ "streets").readNullable[Seq[String]]
+        city <- (__ \ "city").readNullable[String]
+        province <- (__ \ "province").readNullable[String]
+        postal <- (__ \ "postal").readNullable[String]
+        country <- (__ \ "country").readNullable[String]
+        latitude <- (__ \ "latitude").readNullable[String]
+        longitude <- (__ \ "longitude").readNullable[String]
+      } yield Address(text, streets, city, province, postal, country, latitude, longitude)
     }
 
     def jsObjectAddress(obj: io.flow.common.v0.models.Address): play.api.libs.json.JsObject = {
@@ -2344,10 +2344,10 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonCatalogItemReference: play.api.libs.json.Reads[CatalogItemReference] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "number").read[String]
-      )(CatalogItemReference.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        number <- (__ \ "number").read[String]
+      } yield CatalogItemReference(id, number)
     }
 
     def jsObjectCatalogItemReference(obj: io.flow.common.v0.models.CatalogItemReference): play.api.libs.json.JsObject = {
@@ -2366,11 +2366,11 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonCatalogItemSummary: play.api.libs.json.Reads[CatalogItemSummary] = {
-      (
-        (__ \ "number").read[String] and
-        (__ \ "name").read[String] and
-        (__ \ "attributes").read[Map[String, String]]
-      )(CatalogItemSummary.apply _)
+      for {
+        number <- (__ \ "number").read[String]
+        name <- (__ \ "name").read[String]
+        attributes <- (__ \ "attributes").read[Map[String, String]]
+      } yield CatalogItemSummary(number, name, attributes)
     }
 
     def jsObjectCatalogItemSummary(obj: io.flow.common.v0.models.CatalogItemSummary): play.api.libs.json.JsObject = {
@@ -2390,12 +2390,12 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonContact: play.api.libs.json.Reads[Contact] = {
-      (
-        (__ \ "name").read[io.flow.common.v0.models.Name] and
-        (__ \ "company").readNullable[String] and
-        (__ \ "email").readNullable[String] and
-        (__ \ "phone").readNullable[String]
-      )(Contact.apply _)
+      for {
+        name <- (__ \ "name").read[io.flow.common.v0.models.Name]
+        company <- (__ \ "company").readNullable[String]
+        email <- (__ \ "email").readNullable[String]
+        phone <- (__ \ "phone").readNullable[String]
+      } yield Contact(name, company, email, phone)
     }
 
     def jsObjectContact(obj: io.flow.common.v0.models.Contact): play.api.libs.json.JsObject = {
@@ -2424,12 +2424,12 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonCustomer: play.api.libs.json.Reads[Customer] = {
-      (
-        (__ \ "name").read[io.flow.common.v0.models.Name] and
-        (__ \ "number").readNullable[String] and
-        (__ \ "phone").readNullable[String] and
-        (__ \ "email").readNullable[String]
-      )(Customer.apply _)
+      for {
+        name <- (__ \ "name").read[io.flow.common.v0.models.Name]
+        number <- (__ \ "number").readNullable[String]
+        phone <- (__ \ "phone").readNullable[String]
+        email <- (__ \ "email").readNullable[String]
+      } yield Customer(name, number, phone, email)
     }
 
     def jsObjectCustomer(obj: io.flow.common.v0.models.Customer): play.api.libs.json.JsObject = {
@@ -2458,10 +2458,10 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonDatetimeRange: play.api.libs.json.Reads[DatetimeRange] = {
-      (
-        (__ \ "from").read[_root_.org.joda.time.DateTime] and
-        (__ \ "to").read[_root_.org.joda.time.DateTime]
-      )(DatetimeRange.apply _)
+      for {
+        from <- (__ \ "from").read[_root_.org.joda.time.DateTime]
+        to <- (__ \ "to").read[_root_.org.joda.time.DateTime]
+      } yield DatetimeRange(from, to)
     }
 
     def jsObjectDatetimeRange(obj: io.flow.common.v0.models.DatetimeRange): play.api.libs.json.JsObject = {
@@ -2480,13 +2480,13 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonDimension: play.api.libs.json.Reads[Dimension] = {
-      (
-        (__ \ "depth").readNullable[io.flow.common.v0.models.Measurement] and
-        (__ \ "diameter").readNullable[io.flow.common.v0.models.Measurement] and
-        (__ \ "length").readNullable[io.flow.common.v0.models.Measurement] and
-        (__ \ "weight").readNullable[io.flow.common.v0.models.Measurement] and
-        (__ \ "width").readNullable[io.flow.common.v0.models.Measurement]
-      )(Dimension.apply _)
+      for {
+        depth <- (__ \ "depth").readNullable[io.flow.common.v0.models.Measurement]
+        diameter <- (__ \ "diameter").readNullable[io.flow.common.v0.models.Measurement]
+        length <- (__ \ "length").readNullable[io.flow.common.v0.models.Measurement]
+        weight <- (__ \ "weight").readNullable[io.flow.common.v0.models.Measurement]
+        width <- (__ \ "width").readNullable[io.flow.common.v0.models.Measurement]
+      } yield Dimension(depth, diameter, length, weight, width)
     }
 
     def jsObjectDimension(obj: io.flow.common.v0.models.Dimension): play.api.libs.json.JsObject = {
@@ -2521,10 +2521,10 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonDimensions: play.api.libs.json.Reads[Dimensions] = {
-      (
-        (__ \ "product").readNullable[io.flow.common.v0.models.Dimension] and
-        (__ \ "packaging").readNullable[io.flow.common.v0.models.Dimension]
-      )(Dimensions.apply _)
+      for {
+        product <- (__ \ "product").readNullable[io.flow.common.v0.models.Dimension]
+        packaging <- (__ \ "packaging").readNullable[io.flow.common.v0.models.Dimension]
+      } yield Dimensions(product, packaging)
     }
 
     def jsObjectDimensions(obj: io.flow.common.v0.models.Dimensions): play.api.libs.json.JsObject = {
@@ -2547,10 +2547,10 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonDuration: play.api.libs.json.Reads[Duration] = {
-      (
-        (__ \ "unit").read[io.flow.common.v0.models.UnitOfTime] and
-        (__ \ "value").read[Long]
-      )(Duration.apply _)
+      for {
+        unit <- (__ \ "unit").read[io.flow.common.v0.models.UnitOfTime]
+        value <- (__ \ "value").read[Long]
+      } yield Duration(unit, value)
     }
 
     def jsObjectDuration(obj: io.flow.common.v0.models.Duration): play.api.libs.json.JsObject = {
@@ -2569,10 +2569,10 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonException: play.api.libs.json.Reads[Exception] = {
-      (
-        (__ \ "type").read[io.flow.common.v0.models.ExceptionType] and
-        (__ \ "datetime_range").read[io.flow.common.v0.models.DatetimeRange]
-      )(Exception.apply _)
+      for {
+        `type` <- (__ \ "type").read[io.flow.common.v0.models.ExceptionType]
+        datetimeRange <- (__ \ "datetime_range").read[io.flow.common.v0.models.DatetimeRange]
+      } yield Exception(`type`, datetimeRange)
     }
 
     def jsObjectException(obj: io.flow.common.v0.models.Exception): play.api.libs.json.JsObject = {
@@ -2591,14 +2591,14 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonExperienceSummary: play.api.libs.json.Reads[ExperienceSummary] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "key").read[String] and
-        (__ \ "name").read[String] and
-        (__ \ "country").readNullable[String] and
-        (__ \ "currency").readNullable[String] and
-        (__ \ "language").readNullable[String]
-      )(ExperienceSummary.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        key <- (__ \ "key").read[String]
+        name <- (__ \ "name").read[String]
+        country <- (__ \ "country").readNullable[String]
+        currency <- (__ \ "currency").readNullable[String]
+        language <- (__ \ "language").readNullable[String]
+      } yield ExperienceSummary(id, key, name, country, currency, language)
     }
 
     def jsObjectExperienceSummary(obj: io.flow.common.v0.models.ExperienceSummary): play.api.libs.json.JsObject = {
@@ -2629,10 +2629,10 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonIncludedLevies: play.api.libs.json.Reads[IncludedLevies] = {
-      (
-        (__ \ "key").read[io.flow.common.v0.models.IncludedLevyKey] and
-        (__ \ "label").read[String]
-      )(IncludedLevies.apply _)
+      for {
+        key <- (__ \ "key").read[io.flow.common.v0.models.IncludedLevyKey]
+        label <- (__ \ "label").read[String]
+      } yield IncludedLevies(key, label)
     }
 
     def jsObjectIncludedLevies(obj: io.flow.common.v0.models.IncludedLevies): play.api.libs.json.JsObject = {
@@ -2651,14 +2651,14 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonLineItem: play.api.libs.json.Reads[LineItem] = {
-      (
-        (__ \ "number").read[String] and
-        (__ \ "quantity").read[Long] and
-        (__ \ "price").read[io.flow.common.v0.models.Money] and
-        (__ \ "attributes").read[Map[String, String]] and
-        (__ \ "center").readNullable[String] and
-        (__ \ "discount").readNullable[io.flow.common.v0.models.Money]
-      )(LineItem.apply _)
+      for {
+        number <- (__ \ "number").read[String]
+        quantity <- (__ \ "quantity").read[Long]
+        price <- (__ \ "price").read[io.flow.common.v0.models.Money]
+        attributes <- (__ \ "attributes").read[Map[String, String]]
+        center <- (__ \ "center").readNullable[String]
+        discount <- (__ \ "discount").readNullable[io.flow.common.v0.models.Money]
+      } yield LineItem(number, quantity, price, attributes, center, discount)
     }
 
     def jsObjectLineItem(obj: io.flow.common.v0.models.LineItem): play.api.libs.json.JsObject = {
@@ -2686,15 +2686,15 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonLineItemForm: play.api.libs.json.Reads[LineItemForm] = {
-      (
-        (__ \ "number").read[String] and
-        (__ \ "quantity").read[Long] and
-        (__ \ "shipment_estimate").readNullable[io.flow.common.v0.models.DatetimeRange] and
-        (__ \ "price").readNullable[io.flow.common.v0.models.Money] and
-        (__ \ "attributes").readNullable[Map[String, String]] and
-        (__ \ "center").readNullable[String] and
-        (__ \ "discount").readNullable[io.flow.common.v0.models.Money]
-      )(LineItemForm.apply _)
+      for {
+        number <- (__ \ "number").read[String]
+        quantity <- (__ \ "quantity").read[Long]
+        shipmentEstimate <- (__ \ "shipment_estimate").readNullable[io.flow.common.v0.models.DatetimeRange]
+        price <- (__ \ "price").readNullable[io.flow.common.v0.models.Money]
+        attributes <- (__ \ "attributes").readNullable[Map[String, String]]
+        center <- (__ \ "center").readNullable[String]
+        discount <- (__ \ "discount").readNullable[io.flow.common.v0.models.Money]
+      } yield LineItemForm(number, quantity, shipmentEstimate, price, attributes, center, discount)
     }
 
     def jsObjectLineItemForm(obj: io.flow.common.v0.models.LineItemForm): play.api.libs.json.JsObject = {
@@ -2732,10 +2732,10 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonMargin: play.api.libs.json.Reads[Margin] = {
-      (
-        (__ \ "type").read[io.flow.common.v0.models.MarginType] and
-        (__ \ "value").read[BigDecimal]
-      )(Margin.apply _)
+      for {
+        `type` <- (__ \ "type").read[io.flow.common.v0.models.MarginType]
+        value <- (__ \ "value").read[BigDecimal]
+      } yield Margin(`type`, value)
     }
 
     def jsObjectMargin(obj: io.flow.common.v0.models.Margin): play.api.libs.json.JsObject = {
@@ -2754,10 +2754,10 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonMeasurement: play.api.libs.json.Reads[Measurement] = {
-      (
-        (__ \ "value").read[String] and
-        (__ \ "units").read[io.flow.common.v0.models.UnitOfMeasurement]
-      )(Measurement.apply _)
+      for {
+        value <- (__ \ "value").read[String]
+        units <- (__ \ "units").read[io.flow.common.v0.models.UnitOfMeasurement]
+      } yield Measurement(value, units)
     }
 
     def jsObjectMeasurement(obj: io.flow.common.v0.models.Measurement): play.api.libs.json.JsObject = {
@@ -2776,10 +2776,10 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonMoney: play.api.libs.json.Reads[Money] = {
-      (
-        (__ \ "amount").read[Double] and
-        (__ \ "currency").read[String]
-      )(Money.apply _)
+      for {
+        amount <- (__ \ "amount").read[Double]
+        currency <- (__ \ "currency").read[String]
+      } yield Money(amount, currency)
     }
 
     def jsObjectMoney(obj: io.flow.common.v0.models.Money): play.api.libs.json.JsObject = {
@@ -2798,10 +2798,10 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonName: play.api.libs.json.Reads[Name] = {
-      (
-        (__ \ "first").readNullable[String] and
-        (__ \ "last").readNullable[String]
-      )(Name.apply _)
+      for {
+        first <- (__ \ "first").readNullable[String]
+        last <- (__ \ "last").readNullable[String]
+      } yield Name(first, last)
     }
 
     def jsObjectName(obj: io.flow.common.v0.models.Name): play.api.libs.json.JsObject = {
@@ -2824,12 +2824,12 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonOrganization: play.api.libs.json.Reads[Organization] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "name").read[String] and
-        (__ \ "environment").read[io.flow.common.v0.models.Environment] and
-        (__ \ "parent").readNullable[io.flow.common.v0.models.OrganizationReference]
-      )(Organization.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        name <- (__ \ "name").read[String]
+        environment <- (__ \ "environment").read[io.flow.common.v0.models.Environment]
+        parent <- (__ \ "parent").readNullable[io.flow.common.v0.models.OrganizationReference]
+      } yield Organization(id, name, environment, parent)
     }
 
     def jsObjectOrganization(obj: io.flow.common.v0.models.Organization): play.api.libs.json.JsObject = {
@@ -2854,10 +2854,10 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonOrganizationSummary: play.api.libs.json.Reads[OrganizationSummary] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "name").read[String]
-      )(OrganizationSummary.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        name <- (__ \ "name").read[String]
+      } yield OrganizationSummary(id, name)
     }
 
     def jsObjectOrganizationSummary(obj: io.flow.common.v0.models.OrganizationSummary): play.api.libs.json.JsObject = {
@@ -2894,11 +2894,11 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonPrice: play.api.libs.json.Reads[Price] = {
-      (
-        (__ \ "amount").read[Double] and
-        (__ \ "currency").read[String] and
-        (__ \ "label").read[String]
-      )(Price.apply _)
+      for {
+        amount <- (__ \ "amount").read[Double]
+        currency <- (__ \ "currency").read[String]
+        label <- (__ \ "label").read[String]
+      } yield Price(amount, currency, label)
     }
 
     def jsObjectPrice(obj: io.flow.common.v0.models.Price): play.api.libs.json.JsObject = {
@@ -2918,10 +2918,10 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonPriceForm: play.api.libs.json.Reads[PriceForm] = {
-      (
-        (__ \ "amount").read[Double] and
-        (__ \ "currency").read[String]
-      )(PriceForm.apply _)
+      for {
+        amount <- (__ \ "amount").read[Double]
+        currency <- (__ \ "currency").read[String]
+      } yield PriceForm(amount, currency)
     }
 
     def jsObjectPriceForm(obj: io.flow.common.v0.models.PriceForm): play.api.libs.json.JsObject = {
@@ -2940,12 +2940,12 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonPriceWithBase: play.api.libs.json.Reads[PriceWithBase] = {
-      (
-        (__ \ "currency").read[String] and
-        (__ \ "amount").read[Double] and
-        (__ \ "label").read[String] and
-        (__ \ "base").readNullable[io.flow.common.v0.models.Price]
-      )(PriceWithBase.apply _)
+      for {
+        currency <- (__ \ "currency").read[String]
+        amount <- (__ \ "amount").read[Double]
+        label <- (__ \ "label").read[String]
+        base <- (__ \ "base").readNullable[io.flow.common.v0.models.Price]
+      } yield PriceWithBase(currency, amount, label, base)
     }
 
     def jsObjectPriceWithBase(obj: io.flow.common.v0.models.PriceWithBase): play.api.libs.json.JsObject = {
@@ -2968,11 +2968,11 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonRounding: play.api.libs.json.Reads[Rounding] = {
-      (
-        (__ \ "type").read[io.flow.common.v0.models.RoundingType] and
-        (__ \ "method").read[io.flow.common.v0.models.RoundingMethod] and
-        (__ \ "value").read[BigDecimal]
-      )(Rounding.apply _)
+      for {
+        `type` <- (__ \ "type").read[io.flow.common.v0.models.RoundingType]
+        method <- (__ \ "method").read[io.flow.common.v0.models.RoundingMethod]
+        value <- (__ \ "value").read[BigDecimal]
+      } yield Rounding(`type`, method, value)
     }
 
     def jsObjectRounding(obj: io.flow.common.v0.models.Rounding): play.api.libs.json.JsObject = {
@@ -2992,14 +2992,14 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonSchedule: play.api.libs.json.Reads[Schedule] = {
-      (
-        (__ \ "calendar").readNullable[io.flow.common.v0.models.Calendar] and
-        (__ \ "holiday").read[io.flow.common.v0.models.HolidayCalendar] and
-        (__ \ "exception").read[Seq[io.flow.common.v0.models.Exception]] and
-        (__ \ "cutoff").readNullable[String] and
-        (__ \ "min_lead_time").readNullable[Long] and
-        (__ \ "max_lead_time").readNullable[Long]
-      )(Schedule.apply _)
+      for {
+        calendar <- (__ \ "calendar").readNullable[io.flow.common.v0.models.Calendar]
+        holiday <- (__ \ "holiday").read[io.flow.common.v0.models.HolidayCalendar]
+        exception <- (__ \ "exception").read[Seq[io.flow.common.v0.models.Exception]]
+        cutoff <- (__ \ "cutoff").readNullable[String]
+        minLeadTime <- (__ \ "min_lead_time").readNullable[Long]
+        maxLeadTime <- (__ \ "max_lead_time").readNullable[Long]
+      } yield Schedule(calendar, holiday, exception, cutoff, minLeadTime, maxLeadTime)
     }
 
     def jsObjectSchedule(obj: io.flow.common.v0.models.Schedule): play.api.libs.json.JsObject = {
@@ -3033,12 +3033,12 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonUser: play.api.libs.json.Reads[User] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "email").readNullable[String] and
-        (__ \ "name").read[io.flow.common.v0.models.Name] and
-        (__ \ "status").read[io.flow.common.v0.models.UserStatus]
-      )(User.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        email <- (__ \ "email").readNullable[String]
+        name <- (__ \ "name").read[io.flow.common.v0.models.Name]
+        status <- (__ \ "status").read[io.flow.common.v0.models.UserStatus]
+      } yield User(id, email, name, status)
     }
 
     def jsObjectUser(obj: io.flow.common.v0.models.User): play.api.libs.json.JsObject = {
@@ -3063,10 +3063,10 @@ package io.flow.common.v0.models {
     }
 
     implicit def jsonReadsCommonZone: play.api.libs.json.Reads[Zone] = {
-      (
-        (__ \ "province").readNullable[String] and
-        (__ \ "country").read[String]
-      )(Zone.apply _)
+      for {
+        province <- (__ \ "province").readNullable[String]
+        country <- (__ \ "country").read[String]
+      } yield Zone(province, country)
     }
 
     def jsObjectZone(obj: io.flow.common.v0.models.Zone): play.api.libs.json.JsObject = {

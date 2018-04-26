@@ -110,10 +110,10 @@ package io.flow.user.v0.models {
     }
 
     implicit def jsonReadsUserAuthenticationForm: play.api.libs.json.Reads[AuthenticationForm] = {
-      (
-        (__ \ "email").read[String] and
-        (__ \ "password").read[String]
-      )(AuthenticationForm.apply _)
+      for {
+        email <- (__ \ "email").read[String]
+        password <- (__ \ "password").read[String]
+      } yield AuthenticationForm(email, password)
     }
 
     def jsObjectAuthenticationForm(obj: io.flow.user.v0.models.AuthenticationForm): play.api.libs.json.JsObject = {
@@ -150,10 +150,10 @@ package io.flow.user.v0.models {
     }
 
     implicit def jsonReadsUserNameForm: play.api.libs.json.Reads[NameForm] = {
-      (
-        (__ \ "first").readNullable[String] and
-        (__ \ "last").readNullable[String]
-      )(NameForm.apply _)
+      for {
+        first <- (__ \ "first").readNullable[String]
+        last <- (__ \ "last").readNullable[String]
+      } yield NameForm(first, last)
     }
 
     def jsObjectNameForm(obj: io.flow.user.v0.models.NameForm): play.api.libs.json.JsObject = {
@@ -176,10 +176,10 @@ package io.flow.user.v0.models {
     }
 
     implicit def jsonReadsUserPasswordChangeForm: play.api.libs.json.Reads[PasswordChangeForm] = {
-      (
-        (__ \ "current").read[String] and
-        (__ \ "new").read[String]
-      )(PasswordChangeForm.apply _)
+      for {
+        current <- (__ \ "current").read[String]
+        `new` <- (__ \ "new").read[String]
+      } yield PasswordChangeForm(current, `new`)
     }
 
     def jsObjectPasswordChangeForm(obj: io.flow.user.v0.models.PasswordChangeForm): play.api.libs.json.JsObject = {
@@ -198,10 +198,10 @@ package io.flow.user.v0.models {
     }
 
     implicit def jsonReadsUserPasswordResetForm: play.api.libs.json.Reads[PasswordResetForm] = {
-      (
-        (__ \ "token").read[String] and
-        (__ \ "password").read[String]
-      )(PasswordResetForm.apply _)
+      for {
+        token <- (__ \ "token").read[String]
+        password <- (__ \ "password").read[String]
+      } yield PasswordResetForm(token, password)
     }
 
     def jsObjectPasswordResetForm(obj: io.flow.user.v0.models.PasswordResetForm): play.api.libs.json.JsObject = {
@@ -238,11 +238,11 @@ package io.flow.user.v0.models {
     }
 
     implicit def jsonReadsUserUserForm: play.api.libs.json.Reads[UserForm] = {
-      (
-        (__ \ "email").readNullable[String] and
-        (__ \ "password").readNullable[String] and
-        (__ \ "name").readNullable[io.flow.user.v0.models.NameForm]
-      )(UserForm.apply _)
+      for {
+        email <- (__ \ "email").readNullable[String]
+        password <- (__ \ "password").readNullable[String]
+        name <- (__ \ "name").readNullable[io.flow.user.v0.models.NameForm]
+      } yield UserForm(email, password, name)
     }
 
     def jsObjectUserForm(obj: io.flow.user.v0.models.UserForm): play.api.libs.json.JsObject = {
@@ -269,10 +269,10 @@ package io.flow.user.v0.models {
     }
 
     implicit def jsonReadsUserUserPutForm: play.api.libs.json.Reads[UserPutForm] = {
-      (
-        (__ \ "email").readNullable[String] and
-        (__ \ "name").readNullable[io.flow.user.v0.models.NameForm]
-      )(UserPutForm.apply _)
+      for {
+        email <- (__ \ "email").readNullable[String]
+        name <- (__ \ "name").readNullable[io.flow.user.v0.models.NameForm]
+      } yield UserPutForm(email, name)
     }
 
     def jsObjectUserPutForm(obj: io.flow.user.v0.models.UserPutForm): play.api.libs.json.JsObject = {
@@ -295,12 +295,12 @@ package io.flow.user.v0.models {
     }
 
     implicit def jsonReadsUserUserVersion: play.api.libs.json.Reads[UserVersion] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "timestamp").read[_root_.org.joda.time.DateTime] and
-        (__ \ "type").read[io.flow.common.v0.models.ChangeType] and
-        (__ \ "user").read[io.flow.common.v0.models.User]
-      )(UserVersion.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        timestamp <- (__ \ "timestamp").read[_root_.org.joda.time.DateTime]
+        `type` <- (__ \ "type").read[io.flow.common.v0.models.ChangeType]
+        user <- (__ \ "user").read[io.flow.common.v0.models.User]
+      } yield UserVersion(id, timestamp, `type`, user)
     }
 
     def jsObjectUserVersion(obj: io.flow.user.v0.models.UserVersion): play.api.libs.json.JsObject = {

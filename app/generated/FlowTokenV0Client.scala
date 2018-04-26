@@ -255,15 +255,15 @@ package io.flow.token.v0.models {
     }
 
     implicit def jsonReadsTokenOrganizationToken: play.api.libs.json.Reads[OrganizationToken] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "organization").read[io.flow.common.v0.models.OrganizationReference] and
-        (__ \ "user").read[io.flow.common.v0.models.UserReference] and
-        (__ \ "environment").read[io.flow.common.v0.models.Environment] and
-        (__ \ "partial").read[String] and
-        (__ \ "created_at").read[_root_.org.joda.time.DateTime] and
-        (__ \ "description").readNullable[String]
-      )(OrganizationToken.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        organization <- (__ \ "organization").read[io.flow.common.v0.models.OrganizationReference]
+        user <- (__ \ "user").read[io.flow.common.v0.models.UserReference]
+        environment <- (__ \ "environment").read[io.flow.common.v0.models.Environment]
+        partial <- (__ \ "partial").read[String]
+        createdAt <- (__ \ "created_at").read[_root_.org.joda.time.DateTime]
+        description <- (__ \ "description").readNullable[String]
+      } yield OrganizationToken(id, organization, user, environment, partial, createdAt, description)
     }
 
     def jsObjectOrganizationToken(obj: io.flow.token.v0.models.OrganizationToken): play.api.libs.json.JsObject = {
@@ -281,10 +281,10 @@ package io.flow.token.v0.models {
     }
 
     implicit def jsonReadsTokenOrganizationTokenForm: play.api.libs.json.Reads[OrganizationTokenForm] = {
-      (
-        (__ \ "environment").read[io.flow.common.v0.models.Environment] and
-        (__ \ "description").readNullable[String]
-      )(OrganizationTokenForm.apply _)
+      for {
+        environment <- (__ \ "environment").read[io.flow.common.v0.models.Environment]
+        description <- (__ \ "description").readNullable[String]
+      } yield OrganizationTokenForm(environment, description)
     }
 
     def jsObjectOrganizationTokenForm(obj: io.flow.token.v0.models.OrganizationTokenForm): play.api.libs.json.JsObject = {
@@ -305,12 +305,12 @@ package io.flow.token.v0.models {
     }
 
     implicit def jsonReadsTokenOrganizationTokenReference: play.api.libs.json.Reads[OrganizationTokenReference] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "organization").read[io.flow.common.v0.models.OrganizationReference] and
-        (__ \ "environment").read[io.flow.common.v0.models.Environment] and
-        (__ \ "user").read[io.flow.common.v0.models.UserReference]
-      )(OrganizationTokenReference.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        organization <- (__ \ "organization").read[io.flow.common.v0.models.OrganizationReference]
+        environment <- (__ \ "environment").read[io.flow.common.v0.models.Environment]
+        user <- (__ \ "user").read[io.flow.common.v0.models.UserReference]
+      } yield OrganizationTokenReference(id, organization, environment, user)
     }
 
     def jsObjectOrganizationTokenReference(obj: io.flow.token.v0.models.OrganizationTokenReference): play.api.libs.json.JsObject = {
@@ -323,15 +323,15 @@ package io.flow.token.v0.models {
     }
 
     implicit def jsonReadsTokenPartnerToken: play.api.libs.json.Reads[PartnerToken] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "partner").read[io.flow.token.v0.models.TokenPartnerReference] and
-        (__ \ "user").read[io.flow.common.v0.models.UserReference] and
-        (__ \ "environment").read[io.flow.common.v0.models.Environment] and
-        (__ \ "partial").read[String] and
-        (__ \ "created_at").read[_root_.org.joda.time.DateTime] and
-        (__ \ "description").readNullable[String]
-      )(PartnerToken.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        partner <- (__ \ "partner").read[io.flow.token.v0.models.TokenPartnerReference]
+        user <- (__ \ "user").read[io.flow.common.v0.models.UserReference]
+        environment <- (__ \ "environment").read[io.flow.common.v0.models.Environment]
+        partial <- (__ \ "partial").read[String]
+        createdAt <- (__ \ "created_at").read[_root_.org.joda.time.DateTime]
+        description <- (__ \ "description").readNullable[String]
+      } yield PartnerToken(id, partner, user, environment, partial, createdAt, description)
     }
 
     def jsObjectPartnerToken(obj: io.flow.token.v0.models.PartnerToken): play.api.libs.json.JsObject = {
@@ -349,10 +349,10 @@ package io.flow.token.v0.models {
     }
 
     implicit def jsonReadsTokenPartnerTokenForm: play.api.libs.json.Reads[PartnerTokenForm] = {
-      (
-        (__ \ "environment").read[io.flow.common.v0.models.Environment] and
-        (__ \ "description").readNullable[String]
-      )(PartnerTokenForm.apply _)
+      for {
+        environment <- (__ \ "environment").read[io.flow.common.v0.models.Environment]
+        description <- (__ \ "description").readNullable[String]
+      } yield PartnerTokenForm(environment, description)
     }
 
     def jsObjectPartnerTokenForm(obj: io.flow.token.v0.models.PartnerTokenForm): play.api.libs.json.JsObject = {
@@ -373,12 +373,12 @@ package io.flow.token.v0.models {
     }
 
     implicit def jsonReadsTokenPartnerTokenReference: play.api.libs.json.Reads[PartnerTokenReference] = {
-      (
-        (__ \ "id").read[String] and
-        (__ \ "partner").read[io.flow.token.v0.models.TokenPartnerReference] and
-        (__ \ "environment").read[io.flow.common.v0.models.Environment] and
-        (__ \ "user").read[io.flow.common.v0.models.UserReference]
-      )(PartnerTokenReference.apply _)
+      for {
+        id <- (__ \ "id").read[String]
+        partner <- (__ \ "partner").read[io.flow.token.v0.models.TokenPartnerReference]
+        environment <- (__ \ "environment").read[io.flow.common.v0.models.Environment]
+        user <- (__ \ "user").read[io.flow.common.v0.models.UserReference]
+      } yield PartnerTokenReference(id, partner, environment, user)
     }
 
     def jsObjectPartnerTokenReference(obj: io.flow.token.v0.models.PartnerTokenReference): play.api.libs.json.JsObject = {

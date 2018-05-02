@@ -17,8 +17,11 @@ case class Salts(config: Config) {
         trim.split("\\s+").map(_.trim).
         filter(_.nonEmpty).toList
     } else {
+      val salt = config.optionalString("JWT_SALT").getOrElse {
+        sys.error(s"FlowError Configuration variable[$VarName] is required")
+      }
       Logger.warn("[io.flow.play.util.Salts] Using old JWT_SALT environment variable")
-      List(config.requiredString("JWT_SALT"))
+      List(salt)
     }
 
     assert(

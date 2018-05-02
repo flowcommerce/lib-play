@@ -14,11 +14,11 @@ class AuthHeaders @Inject() (
 
   val FlowRequestId = "X-Flow-Request-Id"
 
-  private[this] lazy val jwtSalt = Salts(config).preferred
+  private[this] lazy val salts = Salts(config)
 
   def headers(auth: AuthData): Seq[(String, String)] = {
     Seq(
-      AuthHeaders.Header -> auth.jwt(jwtSalt),
+      AuthHeaders.Header -> auth.jwt(salts.preferred),
       FlowRequestId -> auth.requestId
     )
   }

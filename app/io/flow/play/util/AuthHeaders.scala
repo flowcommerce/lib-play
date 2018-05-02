@@ -1,7 +1,6 @@
 package io.flow.play.util
 
 import io.flow.common.v0.models.{Environment, Role, UserReference}
-import java.util.UUID
 import javax.inject.{Inject, Singleton}
 
 /**
@@ -14,7 +13,10 @@ class AuthHeaders @Inject() (
 ) {
 
   val FlowRequestId = "X-Flow-Request-Id"
-  private[this] lazy val jwtSalt = config.requiredString("JWT_SALT")
+
+  private[this] lazy val jwtSalt = Salts.all(config).headOption.getOrElse {
+    sys.error("Must have at least one salt in JWT_SALTS configuration parameter")
+  }
 
   def headers(auth: AuthData): Seq[(String, String)] = {
     Seq(

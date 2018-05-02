@@ -3,7 +3,7 @@ package io.flow.play.controllers
 import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
 import com.typesafe.config.ConfigFactory
 import io.flow.play.clients.MockConfig
-import io.flow.play.util.{ApplicationConfig, DefaultConfig, LibPlaySpec}
+import io.flow.play.util.{ApplicationConfig, DefaultConfig, LibPlaySpec, Salts}
 import play.api.Configuration
 
 class AuthorizationSpec extends LibPlaySpec {
@@ -12,7 +12,9 @@ class AuthorizationSpec extends LibPlaySpec {
 
   def createJWTHeader(
                        userId: String,
-                       salt: String = mockConfig.requiredString("JWT_SALT")
+                       salt: String = Salts.all(mockConfig).headOption.getOrElse{
+                         sys.error("Missing salt")
+                       }
                      ): String = {
     val header = JwtHeader("HS256")
     val claimsSet = JwtClaimsSet(Map("id" -> userId))
@@ -32,14 +34,17 @@ class AuthorizationSpec extends LibPlaySpec {
 
     "Jwt should decode" in {
       val userId = "usr-20160130-1"
-      val headerValue = createJWTHeader(userId = userId)
+      val allSalts = Salts.all(mockConfig)
+      allSalts.length > 1 must be(true)
 
-      new AuthorizationImpl(mockConfig).get(headerValue).map { authToken =>
-        authToken match {
+      allSalts.foreach { s =>
+        val headerValue = createJWTHeader(userId = userId, salt = s)
+
+        new AuthorizationImpl(mockConfig).get(headerValue).map {
           case JwtToken(id) => id must be(userId)
           case _ => fail("Did not parse a JwtToken, got a different type instead.")
-        }
-      }.getOrElse(fail("Could not parse token!"))
+        }.getOrElse(fail("Could not parse token!"))
+      }
     }
 
     "Jwt should fail to decode" in {
@@ -52,7 +57,7 @@ class AuthorizationSpec extends LibPlaySpec {
         }
         case Some(authToken) => {
           authToken match {
-            case t:JwtToken => fail("expected not to get a token due to bad salt.")
+            case _: JwtToken => fail("expected not to get a token due to bad salt.")
             case _ => fail("Did not parse a JwtToken, got a different type instead.")
           }
         }

@@ -1,7 +1,7 @@
 package io.flow.play.controllers
 
 import authentikat.jwt.{JsonWebToken, JwtClaimsSetJValue}
-import io.flow.play.util.{AuthData, AuthHeaders, Config}
+import io.flow.play.util.{AuthData, AuthHeaders, Config, Salts}
 import play.api.mvc.{Headers, Request, Result}
 import play.api.mvc.Results.Unauthorized
 
@@ -10,7 +10,7 @@ trait FlowActionInvokeBlockHelper {
 
   def unauthorized[A](request: Request[A]): Result = Unauthorized
 
-  def jwtSalt: String = config.requiredString("JWT_SALT")
+  def jwtSalts: List[String] = Salts.all(config)
 
   protected val DefaultAuthExpirationTimeSeconds = 180
 
@@ -26,7 +26,9 @@ trait FlowActionInvokeBlockHelper {
       case _ => None
   }
 
-  protected def jwtIsValid(token: String): Boolean = JsonWebToken.validate(token, jwtSalt)
+  protected def jwtIsValid(token: String): Boolean = jwtSalts.exists { s =>
+    JsonWebToken.validate(token, s)
+  }
 
   protected def parseJwtToken[T <: AuthData](claimsSet: JwtClaimsSetJValue)(f: Map[String, String] => Option[T]): Option[T] =
     claimsSet.asSimpleMap.toOption.flatMap { claims =>

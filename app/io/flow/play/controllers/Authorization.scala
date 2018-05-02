@@ -1,22 +1,21 @@
 package io.flow.play.controllers
 
 import javax.inject.Inject
-
-import io.flow.play.util.Config
+import io.flow.play.util.{Config, Salts}
 import org.apache.commons.codec.binary.Base64
 import authentikat.jwt._
-import play.api.{Application, Logger}
+import play.api.Logger
 
 trait Authorization
 
 case class JwtToken(userId: String) extends Authorization
 case class Token(token: String) extends Authorization
 
-class AuthorizationImpl @Inject() (config: Config) {
+class AuthorizationImpl @Inject() (
+  config: Config
+) {
 
-  private[this] lazy val jwtSalt = {
-    config.requiredString("JWT_SALT")
-  }
+  private[this] lazy val allSalts = Salts.all(config)
 
   def get(value: Option[String]): Option[Authorization] = {
     value.flatMap { get }
@@ -50,7 +49,11 @@ class AuthorizationImpl @Inject() (config: Config) {
     }
   }
 
-  private[this] def jwtIsValid(token: String): Boolean = JsonWebToken.validate(token, jwtSalt)
+  private[this] def jwtIsValid(token: String): Boolean = {
+    allSalts.exists { s =>
+      JsonWebToken.validate(token, s)
+    }
+  }
 
   private[this] def createJwtToken(claimsSet: JwtClaimsSetJValue): Option[JwtToken] =
     claimsSet.asSimpleMap.toOption.flatMap { claims =>

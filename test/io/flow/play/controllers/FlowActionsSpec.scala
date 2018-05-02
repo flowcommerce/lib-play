@@ -12,14 +12,15 @@ import play.api.Configuration
 class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
 
   private[this] lazy val mockConfig = MockConfig(DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty()))))
-  private[this] lazy val salt = "test"
 
   private[this] val user = UserReference("usr-20151006-1")
   private[this] val session = FlowSession(id = "F51test")
 
   override def config: MockConfig = mockConfig
 
-  override def jwtSalt: String = salt
+  private[this] lazy val salt = "test"
+
+  override def jwtSalts: List[String] = List(salt)
 
   "parse AuthData.AnonymousAuth w/ no user" in {
     val data = AuthData.Anonymous(

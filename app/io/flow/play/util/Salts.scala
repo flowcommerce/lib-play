@@ -5,7 +5,7 @@ object Salts {
 
   def all(config: Config): List[String] = {
     val salts = if (config.optionalString(VarName).isDefined) {
-      config.requiredList(VarName).toList
+      config.requiredString(VarName).trim.split("\\s+").map(_.trim).filter(_.nonEmpty).toList
     } else {
       List(config.requiredString("JWT_SALT"))
     }

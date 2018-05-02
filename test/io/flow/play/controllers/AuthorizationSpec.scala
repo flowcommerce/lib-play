@@ -12,9 +12,7 @@ class AuthorizationSpec extends LibPlaySpec {
 
   def createJWTHeader(
                        userId: String,
-                       salt: String = Salts.all(mockConfig).headOption.getOrElse{
-                         sys.error("Missing salt")
-                       }
+                       salt: String = Salts(mockConfig).preferred
                      ): String = {
     val header = JwtHeader("HS256")
     val claimsSet = JwtClaimsSet(Map("id" -> userId))
@@ -34,7 +32,7 @@ class AuthorizationSpec extends LibPlaySpec {
 
     "Jwt should decode" in {
       val userId = "usr-20160130-1"
-      val allSalts = Salts.all(mockConfig)
+      val allSalts = Salts(mockConfig).all
       allSalts.length > 1 must be(true)
 
       allSalts.foreach { s =>

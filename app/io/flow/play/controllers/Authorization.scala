@@ -15,7 +15,7 @@ class AuthorizationImpl @Inject() (
   config: Config
 ) {
 
-  private[this] lazy val allSalts = Salts.all(config)
+  private[this] lazy val salts = Salts(config)
 
   def get(value: Option[String]): Option[Authorization] = {
     value.flatMap { get }
@@ -50,13 +50,12 @@ class AuthorizationImpl @Inject() (
   }
 
   private[this] def jwtIsValid(token: String): Boolean = {
-    allSalts.exists { s =>
-      JsonWebToken.validate(token, s)
-    }
+    salts.isJsonWebTokenValid(token)
   }
 
-  private[this] def createJwtToken(claimsSet: JwtClaimsSetJValue): Option[JwtToken] =
+  private[this] def createJwtToken(claimsSet: JwtClaimsSetJValue): Option[JwtToken] = {
     claimsSet.asSimpleMap.toOption.flatMap { claims =>
       claims.get("id").map(JwtToken)
     }
+  }
 }

@@ -5,8 +5,6 @@ import io.flow.common.v0.models.{Environment, Role, UserReference}
 import io.flow.play.clients.MockConfig
 import io.flow.play.util._
 import org.joda.time.DateTime
-import org.scalatestplus.play._
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
 
 class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
@@ -18,9 +16,7 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
 
   override def config: MockConfig = mockConfig
 
-  private[this] lazy val salt = "test"
-
-  override def jwtSalts: List[String] = List(salt)
+  private[this] lazy val salts = Salts(config)
 
   "parse AuthData.AnonymousAuth w/ no user" in {
     val data = AuthData.Anonymous(
@@ -29,7 +25,7 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
       session = None
     )
 
-    parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
+    parse(data.jwt(salts.preferred))(AuthData.Anonymous.fromMap).getOrElse {
       sys.error("Failed to parse")
     } must be(data)
   }
@@ -41,7 +37,7 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
       session = Some(session)
     )
 
-    parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
+    parse(data.jwt(salts.preferred))(AuthData.Anonymous.fromMap).getOrElse {
       sys.error("Failed to parse")
     } must be(data)
   }
@@ -53,7 +49,7 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
       session = None
     )
 
-    parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
+    parse(data.jwt(salts.preferred))(AuthData.Anonymous.fromMap).getOrElse {
       sys.error("Failed to parse")
     } must be(data)
   }
@@ -65,7 +61,7 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
       session = Some(session)
     )
 
-    parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
+    parse(data.jwt(salts.preferred))(AuthData.Anonymous.fromMap).getOrElse {
       sys.error("Failed to parse")
     } must be(data)
   }
@@ -76,7 +72,7 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
       session = session
     )
 
-    parse(data.jwt(salt))(AuthData.Session.fromMap).getOrElse {
+    parse(data.jwt(salts.preferred))(AuthData.Session.fromMap).getOrElse {
       sys.error("Failed to parse")
     } must be(data)
   }
@@ -91,12 +87,12 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
       session = None
     )
 
-    parse(data.jwt(salt))(OrgAuthData.Identified.fromMap).getOrElse {
+    parse(data.jwt(salts.preferred))(OrgAuthData.Identified.fromMap).getOrElse {
       sys.error("Failed to parse")
     } must be(data)
 
     // Confirm generic org parser works
-    parse(data.jwt(salt))(OrgAuthData.Org.fromMap).getOrElse {
+    parse(data.jwt(salts.preferred))(OrgAuthData.Org.fromMap).getOrElse {
       sys.error("Failed to parse")
     } must be(data)
   }
@@ -111,7 +107,7 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
       session = Some(session)
     )
 
-    parse(data.jwt(salt))(OrgAuthData.Identified.fromMap).getOrElse {
+    parse(data.jwt(salts.preferred))(OrgAuthData.Identified.fromMap).getOrElse {
       sys.error("Failed to parse")
     } must be(data)
   }
@@ -124,12 +120,12 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
       environment = Environment.Sandbox
     )
 
-    parse(data.jwt(salt))(OrgAuthData.Session.fromMap).getOrElse {
+    parse(data.jwt(salts.preferred))(OrgAuthData.Session.fromMap).getOrElse {
       sys.error("Failed to parse")
     } must be(data)
 
     // Confirm generic org parser works
-    parse(data.jwt(salt))(OrgAuthData.Org.fromMap).getOrElse {
+    parse(data.jwt(salts.preferred))(OrgAuthData.Org.fromMap).getOrElse {
       sys.error("Failed to parse")
     } must be(data)
   }
@@ -141,15 +137,15 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
       session = None
     )
 
-    parse(data.jwt(salt))(AuthData.Anonymous.fromMap).isDefined must be(true)
+    parse(data.jwt(salts.preferred))(AuthData.Anonymous.fromMap).isDefined must be(true)
 
     parse(data.copy(
       createdAt = DateTime.now.minusMinutes(1)
-    ).jwt(salt))(AuthData.Anonymous.fromMap).isDefined must be(true)
+    ).jwt(salts.preferred))(AuthData.Anonymous.fromMap).isDefined must be(true)
 
     parse(data.copy(
       createdAt = DateTime.now.minusMinutes(5)
-    ).jwt(salt))(AuthData.Anonymous.fromMap).isDefined must be(false)
+    ).jwt(salts.preferred))(AuthData.Anonymous.fromMap).isDefined must be(false)
 
   }
 }

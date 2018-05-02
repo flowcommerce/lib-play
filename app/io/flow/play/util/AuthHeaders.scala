@@ -14,9 +14,7 @@ class AuthHeaders @Inject() (
 
   val FlowRequestId = "X-Flow-Request-Id"
 
-  private[this] lazy val jwtSalt = Salts.all(config).headOption.getOrElse {
-    sys.error("Must have at least one salt in JWT_SALTS configuration parameter")
-  }
+  private[this] lazy val jwtSalt = Salts(config).preferred
 
   def headers(auth: AuthData): Seq[(String, String)] = {
     Seq(

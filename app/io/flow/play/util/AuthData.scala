@@ -189,11 +189,13 @@ object AuthData {
 
   object Anonymous {
 
-    val Empty = Anonymous(
-      requestId = AuthHeaders.generateRequestId("anonymousrequest"),
-      user = None,
-      session = None
-    )
+    def empty(): Anonymous = {
+      Anonymous(
+        requestId = AuthHeaders.generateRequestId("anonymousrequest"),
+        user = None,
+        session = None
+      )
+    }
 
     def fromMap(data: Map[String, String]): Option[Anonymous] = {
       AuthDataMap.fromMap(data) { dm =>

@@ -85,7 +85,7 @@ class AnonymousActionBuilder @Inject()(val parser: BodyParsers.Default, val conf
   def invokeBlock[A](request: Request[A], block: (AnonymousRequest[A]) => Future[Result]): Future[Result] = {
     val ad = auth(request.headers)(AuthData.Anonymous.fromMap).getOrElse {
       // Create an empty header here so at least requestId tracking can start
-      AuthData.Anonymous.Empty
+      AuthData.Anonymous.empty()
     }
     block(new AnonymousRequest(ad, request))
   }
@@ -180,7 +180,7 @@ class MockableAnonymousActionBuilder @Inject()(val parser: BodyParsers.Default, 
     withMockableApis(request) {
       val ad = auth(request.headers)(AuthData.Anonymous.fromMap).getOrElse {
         // Create an empty header here so at least requestId tracking can start
-        AuthData.Anonymous.Empty
+        AuthData.Anonymous.empty()
       }
       block(new AnonymousRequest(ad, request))
     }

@@ -46,9 +46,9 @@ class SaltsSpec extends LibPlaySpec {
     config.set("JWT_SALTS", "a b")
     val salts = Salts(config)
 
-    salts.isJsonWebTokenValid(AuthData.Anonymous.Empty.jwt("a")) must be(true)
-    salts.isJsonWebTokenValid(AuthData.Anonymous.Empty.jwt("b")) must be(true)
-    salts.isJsonWebTokenValid(AuthData.Anonymous.Empty.jwt("c")) must be(false)
+    salts.isJsonWebTokenValid(AuthData.Anonymous.empty().jwt("a")) must be(true)
+    salts.isJsonWebTokenValid(AuthData.Anonymous.empty().jwt("b")) must be(true)
+    salts.isJsonWebTokenValid(AuthData.Anonymous.empty().jwt("c")) must be(false)
   }
 
 }

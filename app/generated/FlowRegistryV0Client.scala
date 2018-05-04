@@ -506,7 +506,7 @@ package io.flow.registry.v0.models {
 
 
 package io.flow.registry.v0 {
-  import com.ning.http.client.{AsyncCompletionHandler, AsyncHttpClient, AsyncHttpClientConfig, Realm, Request, RequestBuilder, Response}
+  import com.ning.http.client.{AsyncCompletionHandler, AsyncHttpClient, Realm, Request, RequestBuilder, Response, AsyncHttpClientConfig}
 
   object Constants {
 

@@ -3,7 +3,6 @@ package io.flow.play.jwt
 import akka.actor.ActorSystem
 import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
 import com.google.inject.ImplementedBy
-import io.flow.play.util.Config
 import javax.inject.{Inject, Singleton}
 
 import scala.concurrent.ExecutionContext
@@ -21,7 +20,6 @@ trait JwtService {
 
 @Singleton
 class DefaultJwtService @Inject() (
-  config: Config,
   retrieverService: JwtSecretsRetrieverService,
   system: ActorSystem
 )(implicit ec: ExecutionContext) extends JwtService {

@@ -10,7 +10,7 @@ import play.api.Logger
 
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 case class JwtSecrets(all: Map[String, JwtSecret], encoding: JwtSecret)
 
@@ -44,18 +44,16 @@ class RefreshingJwtSecretsRetrieverService @Inject() (
 
   override def get: JwtSecrets = secrets.get()
 
-  @throws[RuntimeException]("If the preferred secret id could not be found in the list of provided secrets")
-  private def transformSecrets(jwtSecrets: SecretConfig): JwtSecrets = {
+  private def transformSecrets(jwtSecrets: SecretConfig): Try[JwtSecrets] = {
     val all = jwtSecrets.secrets.map(s => s.id -> s).toMap
-    val encoding = all.getOrElse(
-      jwtSecrets.preferredSecretId,
-      sys.error(s"Preferred id [${jwtSecrets.preferredSecretId}] could not be found in the list of provided secrets")
-    )
-    JwtSecrets(all, encoding)
+    all
+      .get(jwtSecrets.preferredSecretId)
+      .map(e => Success(JwtSecrets(all, e)))
+      .getOrElse(Failure(new IllegalStateException(s"Preferred id [${jwtSecrets.preferredSecretId}] could not be found in the list of provided secrets")))
   }
 
   private def getAndTransformRetries(attempts: Int): Future[JwtSecrets] = {
-    jwtSecretsDao.get.map(transformSecrets).recoverWith {
+    jwtSecretsDao.get.flatMap(s => Future.fromTry(transformSecrets(s))).recoverWith {
       case t: Throwable if attempts < MaxAttempts =>
         Logger.warn(s"[JwtSecretsWarn] Error when retrieving JWT secrets ($attempts/$MaxAttempts). Retrying...", t)
         getAndTransformRetries(attempts + 1)

@@ -5,20 +5,37 @@ import akka.stream.Materializer
 import akka.stream.alpakka.s3.scaladsl.S3Client
 import akka.stream.alpakka.s3.{Proxy, S3Settings}
 import com.amazonaws.auth.{AWSCredentialsProviderChain, _}
+import com.amazonaws.regions.AwsRegionProvider
 import io.flow.play.util.Config
 import javax.inject.{Inject, Provider, Singleton}
 import play.api.{Environment, Mode}
 
 import scala.collection.JavaConverters._
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 @Singleton
 class S3ClientProvider @Inject() (
   aWSCredentials: AwsFallbackCredentials,
-  s3Proxy: Option[Proxy]
+  s3Proxy: Option[Proxy],
+  environment: Environment
 )(implicit system: ActorSystem, mat: Materializer) extends Provider[S3Client] {
 
-  private[this] val alpakkaS3Settings = S3Settings().copy(credentialsProvider = aWSCredentials, pathStyleAccess = true, proxy = s3Proxy)
+  private[this] val alpakkaS3Settings = {
+    val settings = S3Settings().copy(credentialsProvider = aWSCredentials, pathStyleAccess = true, proxy = s3Proxy)
+
+    // if in Test mode and if the DefaultAWSCredentialsProviderChain fails (no configuration keys were provided),
+    // falls back to us-east-1
+    val regionProvider =
+      if (environment.mode == Mode.Test) {
+      Try(settings.s3RegionProvider.getRegion) match {
+        case Success(_) => settings.s3RegionProvider
+        case Failure(_) => new AwsRegionProvider { val getRegion: String = "us-east-1" }
+      }
+    } else
+        settings.s3RegionProvider
+
+    settings.copy(s3RegionProvider = regionProvider)
+  }
   private[this] val alpakkaS3Client = new S3Client(alpakkaS3Settings)
 
   override def get(): S3Client = alpakkaS3Client

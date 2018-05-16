@@ -23,7 +23,7 @@ trait S3Util {
   protected val s3MockClient: AmazonS3 = AmazonS3ClientBuilder
     .standard
     .withPathStyleAccessEnabled(true)
-    .withEndpointConfiguration(new EndpointConfiguration(s"${s3Proxy.scheme}://${s3Proxy.host}:${s3Proxy.port}", "us-west-2"))
+    .withEndpointConfiguration(new EndpointConfiguration(s"${s3Proxy.scheme}://${s3Proxy.host}:${s3Proxy.port}", "us-east-1"))
     .withCredentials(new AWSStaticCredentialsProvider(new AnonymousAWSCredentials()))
     .build
 

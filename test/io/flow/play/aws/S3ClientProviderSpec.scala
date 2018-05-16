@@ -3,8 +3,7 @@ package io.flow.play.aws
 import akka.stream.Materializer
 import akka.stream.alpakka.s3.scaladsl.S3Client
 import akka.stream.scaladsl.Source
-import akka.util
-import akka.util.ByteString
+import akka.util.{ByteString, Timeout}
 import io.flow.play.clients.JwtModule
 import org.scalatest.BeforeAndAfterAll
 import org.scalatestplus.play.PlaySpec
@@ -31,7 +30,7 @@ class S3ClientProviderSpec extends PlaySpec with GuiceOneAppPerSuite with Before
       val content = "content of the file"
       await {
         Source.single(ByteString(content)).runWith(s3Client.multipartUpload(testBucket, "f.txt"))
-      } (util.Timeout(2.seconds))
+      } (Timeout(2.seconds))
 
       s3MockClient.getObjectAsString(testBucket, "f.txt") mustBe content
     }

@@ -21,13 +21,13 @@ trait JwtSecretsRetrieverService {
 }
 
 @Singleton
-class DefaultJwtSecretsRetrieverService @Inject() (
+class RefreshingJwtSecretsRetrieverService @Inject() (
   system: ActorSystem,
   jwtSecretsDao: JwtSecretsDao,
   @Named("jwtSecretsReloadInterval") reloadInterval: FiniteDuration
 )(implicit ec: ExecutionContext) extends JwtSecretsRetrieverService {
 
-  import DefaultJwtSecretsRetrieverService._
+  import RefreshingJwtSecretsRetrieverService._
 
   // blocks on init
   private val secrets = {
@@ -72,7 +72,7 @@ class DefaultJwtSecretsRetrieverService @Inject() (
 
 }
 
-object DefaultJwtSecretsRetrieverService {
+object RefreshingJwtSecretsRetrieverService {
   private val MaxAttempts = 3
 }
 

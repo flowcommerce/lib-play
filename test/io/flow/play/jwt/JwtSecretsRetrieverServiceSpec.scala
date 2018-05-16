@@ -26,12 +26,12 @@ class JwtSecretsRetrieverServiceSpec extends PlaySpec with GuiceOneAppPerSuite w
     preferredSecretId = secret2.id
   )
 
-  "DefaultJwtSecretsRetrieverService" should {
+  "RefreshingJwtSecretsRetrieverService" should {
 
     "get simple secrets" in {
       val dao = mock[JwtSecretsDao]
       when(dao.get).thenReturn(Future.successful(defaultSecretsConfig))
-      val service = new DefaultJwtSecretsRetrieverService(app.actorSystem, dao, 1.hour)
+      val service = new RefreshingJwtSecretsRetrieverService(app.actorSystem, dao, 1.hour)
 
       service.get mustBe JwtSecrets(all = defaultSecrets.map(s => s.id -> s).toMap, encoding = secret2)
     }
@@ -40,7 +40,7 @@ class JwtSecretsRetrieverServiceSpec extends PlaySpec with GuiceOneAppPerSuite w
       val dao = mock[JwtSecretsDao]
       when(dao.get).thenReturn(Future.successful(defaultSecretsConfig))
 
-      val service = new DefaultJwtSecretsRetrieverService(app.actorSystem, dao, 100.millis)
+      val service = new RefreshingJwtSecretsRetrieverService(app.actorSystem, dao, 100.millis)
 
       service.get mustBe JwtSecrets(all = defaultSecrets.map(s => s.id -> s).toMap, encoding = secret2)
 
@@ -57,14 +57,14 @@ class JwtSecretsRetrieverServiceSpec extends PlaySpec with GuiceOneAppPerSuite w
       val dao = mock[JwtSecretsDao]
       when(dao.get).thenReturn(Future.failed(new IllegalStateException("boom")))
 
-      a[IllegalStateException] mustBe thrownBy(new DefaultJwtSecretsRetrieverService(app.actorSystem, dao, 1.hour))
+      a[IllegalStateException] mustBe thrownBy(new RefreshingJwtSecretsRetrieverService(app.actorSystem, dao, 1.hour))
     }
 
     "fall back to last successful get if dao fails and then recovers" in {
       // init
       val dao = mock[JwtSecretsDao]
       when(dao.get).thenReturn(Future.successful(defaultSecretsConfig))
-      val service = new DefaultJwtSecretsRetrieverService(app.actorSystem, dao, 100.millis)
+      val service = new RefreshingJwtSecretsRetrieverService(app.actorSystem, dao, 100.millis)
 
       service.get mustBe JwtSecrets(all = defaultSecrets.map(s => s.id -> s).toMap, encoding = secret2)
 

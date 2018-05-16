@@ -88,7 +88,7 @@ class JwtModule(environment: Environment, configuration: Configuration) extends 
         // fail to start if the secrets cannot be accessed.
         // Downside of this approach is that an app which would not have needed to read the secrets would also
         // fail to start
-        bind(classOf[JwtSecretsRetrieverService]).to(classOf[DefaultJwtSecretsRetrieverService]).asEagerSingleton()
+        bind(classOf[JwtSecretsRetrieverService]).to(classOf[RefreshingJwtSecretsRetrieverService]).asEagerSingleton()
 
         bind(classOf[FiniteDuration])
           .annotatedWith(Names.named("jwtSecretsReloadInterval"))

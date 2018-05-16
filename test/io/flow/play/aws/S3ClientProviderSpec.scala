@@ -30,7 +30,7 @@ class S3ClientProviderSpec extends PlaySpec with GuiceOneAppPerSuite with Before
       val content = "content of the file"
       await {
         Source.single(ByteString(content)).runWith(s3Client.multipartUpload(testBucket, "f.txt"))
-      } (Timeout(2.seconds))
+      } (Timeout(4.seconds))
 
       s3MockClient.getObjectAsString(testBucket, "f.txt") mustBe content
     }

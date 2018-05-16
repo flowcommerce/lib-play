@@ -29,3 +29,8 @@ flow:
   apibuilder-api-mocker:
     play_2_6_client:
     - app/generated/FlowApibuilderApiMockerV0Client.scala
+  secret-internal:
+    play_2_x_json:
+    - app/generated/FlowSecretInternalV0Models.scala
+    play_2_6_mock_client:
+    - test/generated/FlowSecretInternalV0MockClient.scala

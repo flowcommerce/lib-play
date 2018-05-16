@@ -1,24 +1,23 @@
 package io.flow.play.util
 
 import io.flow.common.v0.models.{Environment, Role, UserReference}
-import java.util.UUID
+import io.flow.play.jwt.JwtService
 import javax.inject.{Inject, Singleton}
 
 /**
-  * Creates a valid X-Flow-Auth header for talking directly to a
-  * service. Bound config must have a JWT_SALT parameter.
+  * Creates a valid X-Flow-Auth header for talking directly to a service.
   */
 @Singleton
 class AuthHeaders @Inject() (
-  config: Config
+  config: Config,
+  jwtService: JwtService
 ) {
 
   val FlowRequestId = "X-Flow-Request-Id"
-  private[this] lazy val jwtSalt = config.requiredString("JWT_SALT")
 
   def headers(auth: AuthData): Seq[(String, String)] = {
     Seq(
-      AuthHeaders.Header -> auth.jwt(jwtSalt),
+      AuthHeaders.Header -> jwtService.encode(auth.toClaims),
       FlowRequestId -> auth.requestId
     )
   }

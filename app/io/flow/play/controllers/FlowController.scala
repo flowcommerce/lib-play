@@ -1,11 +1,11 @@
 package io.flow.play.controllers
 
 import javax.inject.Inject
-
 import com.google.inject.ImplementedBy
 import io.flow.common.v0.models.UserReference
+import io.flow.play.jwt.JwtService
 import io.flow.play.util.MockableApiUtil._
-import io.flow.play.util.{AuthData, AuthHeaders, Config, OrgAuthData}
+import io.flow.play.util._
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -79,8 +79,10 @@ case class FlowDefaultControllerComponents @Inject()(
 ) extends FlowControllerComponents
 
 // Anonymous
-class AnonymousActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(implicit val executionContext: ExecutionContext)
+class AnonymousActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, jwt: JwtService)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[AnonymousRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  override def jwtService: JwtService = jwt
 
   def invokeBlock[A](request: Request[A], block: (AnonymousRequest[A]) => Future[Result]): Future[Result] = {
     val ad = auth(request.headers)(AuthData.Anonymous.fromMap).getOrElse {
@@ -92,8 +94,10 @@ class AnonymousActionBuilder @Inject()(val parser: BodyParsers.Default, val conf
 }
 
 // Identified
-class IdentifiedActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(implicit val executionContext: ExecutionContext)
+class IdentifiedActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, jwt: JwtService)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[IdentifiedRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  override def jwtService: JwtService = jwt
 
   def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]): Future[Result] =
     auth(request.headers)(AuthData.Identified.fromMap) match {
@@ -103,8 +107,10 @@ class IdentifiedActionBuilder @Inject()(val parser: BodyParsers.Default, val con
 }
 
 // Session
-class SessionActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(implicit val executionContext: ExecutionContext)
+class SessionActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, jwt: JwtService)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[SessionRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  override def jwtService: JwtService = jwt
 
   def invokeBlock[A](request: Request[A], block: (SessionRequest[A]) => Future[Result]): Future[Result] =
     auth(request.headers)(AuthData.Session.fromMap) match {
@@ -114,8 +120,10 @@ class SessionActionBuilder @Inject()(val parser: BodyParsers.Default, val config
 }
 
 // Org
-class OrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(implicit val executionContext: ExecutionContext)
+class OrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, jwt: JwtService)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[OrgRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  override def jwtService: JwtService = jwt
 
   def invokeBlock[A](request: Request[A], block: (OrgRequest[A]) => Future[Result]): Future[Result] =
     auth(request.headers)(OrgAuthData.Org.fromMap) match {
@@ -125,8 +133,10 @@ class OrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Co
 }
 
 // IdentifiedOrg
-class IdentifiedOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(implicit val executionContext: ExecutionContext)
+class IdentifiedOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, jwt: JwtService)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[IdentifiedOrgRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  override def jwtService: JwtService = jwt
 
   def invokeBlock[A](request: Request[A], block: (IdentifiedOrgRequest[A]) => Future[Result]): Future[Result] =
     auth(request.headers)(OrgAuthData.Identified.fromMap) match {
@@ -136,8 +146,10 @@ class IdentifiedOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val 
 }
 
 // SessionOrg
-class SessionOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(implicit val executionContext: ExecutionContext)
+class SessionOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, jwt: JwtService)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[SessionOrgRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  override def jwtService: JwtService = jwt
 
   def invokeBlock[A](request: Request[A], block: (SessionOrgRequest[A]) => Future[Result]): Future[Result] =
     auth(request.headers)(OrgAuthData.Session.fromMap) match {
@@ -147,8 +159,10 @@ class SessionOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val con
 }
 
 // IdentifiedCookie
-class IdentifiedCookieActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(implicit val executionContext: ExecutionContext)
+class IdentifiedCookieActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, jwt: JwtService)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[IdentifiedRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  override def jwtService: JwtService = jwt
 
   def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]): Future[Result] =
     request.session.get(IdentifiedCookie.UserKey) match {
@@ -173,8 +187,10 @@ object IdentifiedCookie {
 
 
 // Mockable Anonymous
-class MockableAnonymousActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(implicit val executionContext: ExecutionContext)
+class MockableAnonymousActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, jwt: JwtService)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[AnonymousRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  override def jwtService: JwtService = jwt
 
   def invokeBlock[A](request: Request[A], block: (AnonymousRequest[A]) => Future[Result]): Future[Result] = {
     withMockableApis(request) {
@@ -188,8 +204,10 @@ class MockableAnonymousActionBuilder @Inject()(val parser: BodyParsers.Default, 
 }
 
 // Mockable Identified
-class MockableIdentifiedActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(implicit val executionContext: ExecutionContext)
+class MockableIdentifiedActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, jwt: JwtService)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[IdentifiedRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  override def jwtService: JwtService = jwt
 
   def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]): Future[Result] =
     withMockableApis(request) {
@@ -201,8 +219,10 @@ class MockableIdentifiedActionBuilder @Inject()(val parser: BodyParsers.Default,
 }
 
 // Mockable Session
-class MockableSessionActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(implicit val executionContext: ExecutionContext)
+class MockableSessionActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, jwt: JwtService)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[SessionRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  override def jwtService: JwtService = jwt
 
   def invokeBlock[A](request: Request[A], block: (SessionRequest[A]) => Future[Result]): Future[Result] =
     withMockableApis(request) {
@@ -214,8 +234,10 @@ class MockableSessionActionBuilder @Inject()(val parser: BodyParsers.Default, va
 }
 
 // Mockable Org
-class MockableOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(implicit val executionContext: ExecutionContext)
+class MockableOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, jwt: JwtService)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[OrgRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  override def jwtService: JwtService = jwt
 
   def invokeBlock[A](request: Request[A], block: (OrgRequest[A]) => Future[Result]): Future[Result] =
     withMockableApis(request) {
@@ -227,8 +249,10 @@ class MockableOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val co
 }
 
 // Mockable IdentifiedOrg
-class MockableIdentifiedOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(implicit val executionContext: ExecutionContext)
+class MockableIdentifiedOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, jwt: JwtService)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[IdentifiedOrgRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  override def jwtService: JwtService = jwt
 
   def invokeBlock[A](request: Request[A], block: (IdentifiedOrgRequest[A]) => Future[Result]): Future[Result] =
     withMockableApis(request) {
@@ -240,8 +264,10 @@ class MockableIdentifiedOrgActionBuilder @Inject()(val parser: BodyParsers.Defau
 }
 
 // Mockable SessionOrg
-class MockableSessionOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(implicit val executionContext: ExecutionContext)
+class MockableSessionOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, jwt: JwtService)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[SessionOrgRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  override def jwtService: JwtService = jwt
 
   def invokeBlock[A](request: Request[A], block: (SessionOrgRequest[A]) => Future[Result]): Future[Result] =
     withMockableApis(request) {
@@ -253,8 +279,10 @@ class MockableSessionOrgActionBuilder @Inject()(val parser: BodyParsers.Default,
 }
 
 // Mockable IdentifiedCookie
-class MockableIdentifiedCookieActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(implicit val executionContext: ExecutionContext)
+class MockableIdentifiedCookieActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, jwt: JwtService)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[IdentifiedRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  override def jwtService: JwtService = jwt
 
   def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]): Future[Result] =
     withMockableApis(request) {

@@ -33,3 +33,7 @@ code:
       version: latest
       generators:
         play_2_6_client: "app/generated"
+    secret-internal:
+      version: latest
+      generators:
+        play_2_x_json: "app/generated"

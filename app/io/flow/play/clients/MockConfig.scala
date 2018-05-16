@@ -7,6 +7,8 @@ case class MockConfig @javax.inject.Inject() (
   defaultConfig: DefaultConfig
 ) extends Config {
 
+  private val values = scala.collection.mutable.Map[String, Any]()
+
   override def optionalList(name: String): Option[Seq[String]] = {
     values.get(name) match {
       case Some(v) => Some(v.asInstanceOf[Seq[String]])
@@ -16,12 +18,6 @@ case class MockConfig @javax.inject.Inject() (
 
   def set(name: String, value: Seq[String]) {
     values += (name -> value)
-  }
-
-  val values = {
-    val d = scala.collection.mutable.Map[String, Any]()
-    d += ("JWT_SALT" -> "test")
-    d
   }
 
   def set(name: String, value: String) {

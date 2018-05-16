@@ -77,7 +77,5 @@ class AwsEnvironmentVariables @Inject() (config: Config, env: Environment) {
 
   val awsPresignedUrlExpireDays: Int =
     config.optionalPositiveInt("aws.presigned.url.expire.days").getOrElse(DefaultPresignedUrlExpireDays)
-
-  val awsRegionProvider =
-
+  
 }

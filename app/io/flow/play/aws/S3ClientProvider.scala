@@ -5,7 +5,7 @@ import akka.stream.Materializer
 import akka.stream.alpakka.s3.scaladsl.S3Client
 import akka.stream.alpakka.s3.{Proxy, S3Settings}
 import com.amazonaws.auth.{AWSCredentialsProviderChain, _}
-import com.amazonaws.regions.{AwsRegionProvider, AwsRegionProviderChain}
+import com.amazonaws.regions.AwsRegionProvider
 import io.flow.play.util.Config
 import javax.inject.{Inject, Provider, Singleton}
 import play.api.{Environment, Mode}
@@ -26,7 +26,10 @@ class S3ClientProvider @Inject() (
     // if in Test mode and a fall back to us-east-1 in case the original region provider does not provide any region
     val regionProvider =
       if (environment.mode == Mode.Test)
-        new AwsRegionProviderChain(settings.s3RegionProvider, new AwsRegionProvider { val getRegion = "us-east-1" })
+        Try(settings.s3RegionProvider.getRegion)
+          .toOption
+          .map(_ => settings.s3RegionProvider)
+          .getOrElse(new AwsRegionProvider { val getRegion = "us-east-1" })
       else
         settings.s3RegionProvider
 

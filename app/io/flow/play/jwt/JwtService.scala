@@ -8,7 +8,6 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
 
-
 @ImplementedBy(classOf[DefaultJwtService])
 trait JwtService {
 

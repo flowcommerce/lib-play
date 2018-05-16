@@ -40,7 +40,7 @@ class RefreshingJwtSecretsRetrieverService @Inject() (
     new AtomicReference[JwtSecrets](Await.result(secretsFuture, 30.seconds))
   }
 
-  system.scheduler.schedule(reloadInterval, reloadInterval, () => getAndUpdate())
+  system.scheduler.schedule(reloadInterval, reloadInterval)(getAndUpdate())
 
   override def get: JwtSecrets = secrets.get()
 

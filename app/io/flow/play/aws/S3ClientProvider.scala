@@ -5,13 +5,13 @@ import akka.stream.Materializer
 import akka.stream.alpakka.s3.scaladsl.S3Client
 import akka.stream.alpakka.s3.{Proxy, S3Settings}
 import com.amazonaws.auth.{AWSCredentialsProviderChain, _}
-import com.amazonaws.regions.AwsRegionProvider
+import com.amazonaws.regions.{AwsRegionProvider, AwsRegionProviderChain}
 import io.flow.play.util.Config
 import javax.inject.{Inject, Provider, Singleton}
 import play.api.{Environment, Mode}
 
 import scala.collection.JavaConverters._
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 
 @Singleton
 class S3ClientProvider @Inject() (
@@ -23,15 +23,11 @@ class S3ClientProvider @Inject() (
   private[this] val alpakkaS3Settings = {
     val settings = S3Settings().copy(credentialsProvider = aWSCredentials, pathStyleAccess = true, proxy = s3Proxy)
 
-    // if in Test mode and if the DefaultAWSCredentialsProviderChain fails (no configuration keys were provided),
-    // falls back to us-east-1
+    // if in Test mode and a fall back to us-east-1 in case the original region provider does not provide any region
     val regionProvider =
-      if (environment.mode == Mode.Test) {
-      Try(settings.s3RegionProvider.getRegion) match {
-        case Success(_) => settings.s3RegionProvider
-        case Failure(_) => new AwsRegionProvider { val getRegion: String = "us-east-1" }
-      }
-    } else
+      if (environment.mode == Mode.Test)
+        new AwsRegionProviderChain(settings.s3RegionProvider, new AwsRegionProvider { val getRegion = "us-east-1" })
+      else
         settings.s3RegionProvider
 
     settings.copy(s3RegionProvider = regionProvider)
@@ -81,5 +77,7 @@ class AwsEnvironmentVariables @Inject() (config: Config, env: Environment) {
 
   val awsPresignedUrlExpireDays: Int =
     config.optionalPositiveInt("aws.presigned.url.expire.days").getOrElse(DefaultPresignedUrlExpireDays)
+
+  val awsRegionProvider =
 
 }

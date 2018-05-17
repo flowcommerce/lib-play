@@ -62,19 +62,19 @@ object DefaultJwtService {
 @Singleton
 class NotImplementedJwtService @Inject() () extends JwtService {
 
-  private lazy val notIntendedBehavirMessage =
+  private lazy val notIntendedBehaviorMessage =
     "If this was not intended behavior, consider enabling the JwtModule in your app by adding " +
-    "\"play.modules.enabled += io.flow.play.clients.JwtModule\" to your application.conf"
+      "\"play.modules.enabled += io.flow.play.clients.JwtModule\" to your application.conf"
 
   Logger.info("NotImplementedJwtService started")
 
   override def decode(jwt: String): Try[Map[String, String]] = {
-    Logger.warn("[NotImplementedJwtService] decode function called. Returning a failure. " + notIntendedBehavirMessage)
+    Logger.warn("[NotImplementedJwtService] decode function called. Returning a failure. " + notIntendedBehaviorMessage)
     DefaultJwtService.JwtFailure
   }
 
   override def encode(claims: Map[String, String]): String = {
-    Logger.warn("[NotImplementedJwtService] encode function called. Throwing an exception. " + notIntendedBehavirMessage)
+    Logger.warn("[NotImplementedJwtService] encode function called. Throwing an exception. " + notIntendedBehaviorMessage)
     DefaultJwtService.JwtFailure.get
   }
 

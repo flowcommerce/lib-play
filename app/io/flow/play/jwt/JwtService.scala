@@ -64,7 +64,7 @@ class NotImplementedJwtService @Inject() () extends JwtService {
 
   private lazy val notIntendedBehavirMessage =
     "If this was not intended behavior, consider enabling the JwtModule in your app by adding " +
-    "\"play.modules.enabled += play.modules.enabled += io.flow.play.clients.JwtModule\" to your application.conf"
+    "\"play.modules.enabled += io.flow.play.clients.JwtModule\" to your application.conf"
 
   Logger.info("NotImplementedJwtService started")
 

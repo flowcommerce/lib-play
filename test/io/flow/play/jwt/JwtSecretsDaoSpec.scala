@@ -2,7 +2,6 @@ package io.flow.play.jwt
 
 import akka.stream.Materializer
 import io.flow.play.aws.S3Util
-import io.flow.play.clients.JwtModule
 import io.flow.secret.internal.v0.models.json._
 import io.flow.secret.internal.v0.models.{Secret, SecretConfig}
 import org.joda.time.DateTime

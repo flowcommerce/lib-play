@@ -39,7 +39,8 @@ class RefreshingJwtSecretsRetrieverService @Inject() (
         Logger.error(s"[JwtSecretsError] Error when initializing JWT secrets after $MaxAttempts attempts. Failed to initialize.", ex)
       case _ =>
     }
-    val (_, transformedSecrets) = Await.result(secretsFuture, 30.seconds)
+    val (secretsConfig, transformedSecrets) = Await.result(secretsFuture, 30.seconds)
+    logNew(secretsConfig)
     new AtomicReference[JwtSecrets](transformedSecrets)
   }
 
@@ -66,21 +67,24 @@ class RefreshingJwtSecretsRetrieverService @Inject() (
   private def getAndUpdate(): Unit = {
     getAndTransformRetries(1).onComplete {
       case Success((newConfig, newTransformed)) =>
-        setAndLogNew(newConfig, newTransformed)
+        setAndLogIfNew(newConfig, newTransformed)
       case Failure(ex) =>
         Logger.error(s"[JwtSecretsError] Error when retrieving JWT secrets after $MaxAttempts attempts. Jwt secrets not updating.", ex)
     }
   }
 
-  private def setAndLogNew(newConfig: SecretConfig, newTransformed: JwtSecrets): Unit = {
+  private def setAndLogIfNew(newConfig: SecretConfig, newTransformed: JwtSecrets): Unit = {
     val old = secrets.getAndSet(newTransformed)
-    if (old != newTransformed) {
-      val redactedNew = RedactedSecretConfig(
-        secrets = newConfig.secrets.map(s => RedactedSecret(id = s.id, createdAt = s.createdAt)),
-        preferredSecretId = newConfig.preferredSecretId
-      )
-      Logger.info(s"[RefreshingJwtSecretsRetrieverService] updated secrets to ${Json.toJson(redactedNew).toString()}")
-    }
+    if (old != newTransformed)
+      logNew(newConfig)
+  }
+
+  private def logNew(newConfig: SecretConfig): Unit = {
+    val redactedNew = RedactedSecretConfig(
+      secrets = newConfig.secrets.map(s => RedactedSecret(id = s.id, createdAt = s.createdAt)),
+      preferredSecretId = newConfig.preferredSecretId
+    )
+    Logger.info(s"[RefreshingJwtSecretsRetrieverService] updated secrets to ${Json.toJson(redactedNew).toString()}")
   }
 
 }

@@ -84,6 +84,8 @@ class JwtModule(environment: Environment, configuration: Configuration) extends 
     environment.mode match {
       case Mode.Prod | Mode.Dev =>
 
+        bind(classOf[JwtService]).to(classOf[DefaultJwtService])
+
         // To ensure secrets are accessible, the retriever service is started eagerly so that the app would
         // fail to start if the secrets cannot be accessed.
         // Downside of this approach is that an app which would not have needed to read the secrets would also
@@ -99,6 +101,7 @@ class JwtModule(environment: Environment, configuration: Configuration) extends 
         bind(new TypeLiteral[Option[Proxy]] {}).toInstance(None)
 
       case Mode.Test =>
+        bind(classOf[JwtService]).to(classOf[DefaultJwtService])
         bind(classOf[JwtSecretsRetrieverService]).to(classOf[MockJwtSecretsRetrieverService])
         bind(classOf[S3Client]).toProvider(classOf[S3ClientProvider])
         // allows to test s3 locally

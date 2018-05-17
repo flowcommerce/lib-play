@@ -4,11 +4,12 @@ import akka.actor.ActorSystem
 import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Singleton}
+import play.api.Logger
 
 import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success, Try}
 
-@ImplementedBy(classOf[DefaultJwtService])
+@ImplementedBy(classOf[NotImplementedJwtService])
 trait JwtService {
 
   def decode(jwt: String): Try[Map[String, String]]
@@ -54,6 +55,29 @@ object DefaultJwtService {
   private val KeyId = "kid"
   // TODO: remove when obsolete
   private val FallbackKeyId = "sec-201610-1"
-  private val JwtFailure = Failure(new IllegalArgumentException("Not a valid JsonWebToken"))
+  private[jwt] val JwtFailure = Failure(new IllegalArgumentException("Not a valid JsonWebToken"))
 
 }
+
+@Singleton
+class NotImplementedJwtService @Inject() () extends JwtService {
+
+  private lazy val notIntendedBehavirMessage =
+    "If this was not intended behavior, consider enabling the JwtModule in your app by adding " +
+    "\"play.modules.enabled += play.modules.enabled += io.flow.play.clients.JwtModule\" to your application.conf"
+
+  Logger.info("NotImplementedJwtService started")
+
+  override def decode(jwt: String): Try[Map[String, String]] = {
+    Logger.warn("[NotImplementedJwtService] decode function called. Returning a failure. " + notIntendedBehavirMessage)
+    DefaultJwtService.JwtFailure
+  }
+
+  override def encode(claims: Map[String, String]): String = {
+    Logger.warn("[NotImplementedJwtService] encode function called. Throwing an exception. " + notIntendedBehavirMessage)
+    DefaultJwtService.JwtFailure.get
+  }
+
+}
+
+

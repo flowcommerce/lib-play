@@ -2,6 +2,7 @@ package io.flow.play.jwt
 
 import akka.stream.Materializer
 import io.flow.play.aws.S3Util
+import io.flow.play.clients.JwtModule
 import io.flow.secret.internal.v0.models.json._
 import io.flow.secret.internal.v0.models.{Secret, SecretConfig}
 import org.joda.time.DateTime
@@ -25,7 +26,11 @@ class JwtSecretsDaoSpec extends PlaySpec with GuiceOneAppPerSuite with BeforeAnd
   private val s3key = "key"
 
   override def fakeApplication(): Application = {
-    new GuiceApplicationBuilder().configure("jwt.secrets.s3.bucket" -> s3bucket, "jwt.secrets.s3.key" -> s3key).build()
+    val builder = new GuiceApplicationBuilder()
+    builder
+      .overrides(new JwtModule(builder.environment, builder.configuration))
+      .configure("jwt.secrets.s3.bucket" -> s3bucket, "jwt.secrets.s3.key" -> s3key)
+      .build()
   }
 
   private implicit val ec: ExecutionContext = app.actorSystem.dispatcher

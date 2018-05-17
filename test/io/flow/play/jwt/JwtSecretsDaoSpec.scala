@@ -26,11 +26,7 @@ class JwtSecretsDaoSpec extends PlaySpec with GuiceOneAppPerSuite with BeforeAnd
   private val s3key = "key"
 
   override def fakeApplication(): Application = {
-    val builder = new GuiceApplicationBuilder()
-    builder
-      .overrides(new JwtModule(builder.environment, builder.configuration))
-      .configure("jwt.secrets.s3.bucket" -> s3bucket, "jwt.secrets.s3.key" -> s3key)
-      .build()
+    new GuiceApplicationBuilder().configure("jwt.secrets.s3.bucket" -> s3bucket, "jwt.secrets.s3.key" -> s3key).build()
   }
 
   private implicit val ec: ExecutionContext = app.actorSystem.dispatcher

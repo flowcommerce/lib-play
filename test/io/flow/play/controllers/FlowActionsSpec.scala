@@ -1,19 +1,12 @@
 package io.flow.play.controllers
 
 import io.flow.common.v0.models.{Environment, Role, UserReference}
-import io.flow.play.clients.{JwtModule, MockConfig}
+import io.flow.play.clients.MockConfig
 import io.flow.play.jwt.JwtService
 import io.flow.play.util._
 import org.joda.time.DateTime
-import play.api.Application
-import play.api.inject.guice.GuiceApplicationBuilder
 
 class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
-
-  override def fakeApplication(): Application = {
-    val builder = new GuiceApplicationBuilder()
-    builder.overrides(new JwtModule(builder.environment, builder.configuration)).build()
-  }
 
   private[this] val user = UserReference("usr-20151006-1")
   private[this] val session = FlowSession(id = "F51test")

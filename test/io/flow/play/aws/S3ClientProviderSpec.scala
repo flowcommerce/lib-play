@@ -8,8 +8,6 @@ import io.flow.play.clients.JwtModule
 import org.scalatest.BeforeAndAfterAll
 import org.scalatestplus.play.PlaySpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import play.api.Application
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 
 import scala.concurrent.ExecutionContext
@@ -17,11 +15,6 @@ import scala.concurrent.duration._
 
 class S3ClientProviderSpec extends PlaySpec with GuiceOneAppPerSuite with BeforeAndAfterAll with DefaultAwaitTimeout
   with FutureAwaits with S3Util {
-
-  override def fakeApplication(): Application = {
-    val builder = new GuiceApplicationBuilder()
-    builder.overrides(new JwtModule(builder.environment, builder.configuration)).build()
-  }
 
   private implicit val ec: ExecutionContext = app.actorSystem.dispatcher
   private implicit val mat: Materializer = app.materializer

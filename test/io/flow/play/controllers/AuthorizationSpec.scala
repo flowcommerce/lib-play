@@ -1,63 +1,33 @@
 package io.flow.play.controllers
 
-import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
-import com.typesafe.config.ConfigFactory
-import io.flow.play.clients.MockConfig
-import io.flow.play.util.{ApplicationConfig, DefaultConfig, LibPlaySpec}
-import play.api.Configuration
+import io.flow.play.jwt.JwtService
+import io.flow.play.util.LibPlaySpec
+import org.scalatest.OptionValues
 
-class AuthorizationSpec extends LibPlaySpec {
+class AuthorizationSpec extends LibPlaySpec with OptionValues {
 
-  private[this] lazy val mockConfig = MockConfig(DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty()))))
+  private val jwtService = app.injector.instanceOf[JwtService]
+  private val authorization = app.injector.instanceOf[AuthorizationImpl]
 
-  def createJWTHeader(
-                       userId: String,
-                       salt: String = mockConfig.requiredString("JWT_SALT")
-                     ): String = {
-    val header = JwtHeader("HS256")
-    val claimsSet = JwtClaimsSet(Map("id" -> userId))
-    val token = JsonWebToken(header, claimsSet, salt)
-    s"Bearer $token"
-  }
+  "Authorization" should {
 
-  "Authorization" must {
-    "Basic should decode a basic auth header" in {
+    "decode a basic auth header" in {
       val headerValue = "Basic YWRtaW46"
-
-      new AuthorizationImpl(mockConfig).get(headerValue).map {
-        case Token(token) => token must be("admin")
-        case _ => fail("Did not parse a Token, got a different type instead.")
-      }.getOrElse(fail("Could not parse token!"))
+      authorization.get(headerValue).value mustBe Token("admin")
     }
 
-    "Jwt should decode" in {
-      val userId = "usr-20160130-1"
-      val headerValue = createJWTHeader(userId = userId)
+    "decode a bearer jwt" in {
+      val encoded = jwtService.encode(Map("id" -> "usr-20160130-1"))
+      val headerValue = s"Bearer $encoded"
 
-      new AuthorizationImpl(mockConfig).get(headerValue).map { authToken =>
-        authToken match {
-          case JwtToken(id) => id must be(userId)
-          case _ => fail("Did not parse a JwtToken, got a different type instead.")
-        }
-      }.getOrElse(fail("Could not parse token!"))
+      authorization.get(headerValue).value mustBe JwtToken("usr-20160130-1")
     }
 
-    "Jwt should fail to decode" in {
-      val userId = "usr-20160130-1"
-      val headerValue = createJWTHeader(userId = userId, salt = "a different salt")
-
-      new AuthorizationImpl(mockConfig).get(headerValue) match {
-        case None => {
-          // all good
-        }
-        case Some(authToken) => {
-          authToken match {
-            case t:JwtToken => fail("expected not to get a token due to bad salt.")
-            case _ => fail("Did not parse a JwtToken, got a different type instead.")
-          }
-        }
-      }
+    "fail to decode a malformed jwt" in {
+      val headerValue = "Bearer malformed"
+      authorization.get(headerValue) mustBe None
     }
+
   }
 
 }

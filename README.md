@@ -5,10 +5,16 @@ Library supporting building REST APIs on play framework.
 
 ## Provided Bindings
 
-    play.modules.enabled += "io.flow.play.clients.ConfigModule"
-    play.modules.enabled += "io.flow.play.clients.RegistryModule"
-    play.modules.enabled += "io.flow.play.clients.TokenModule"
-    play.modules.enabled += "io.flow.play.clients.UserModule"
+The following bindings are enabled by default as defined in [reference.conf](app/resources/reference.conf)
+
+    play.modules.enabled += io.flow.play.clients.ConfigModule
+    play.modules.enabled += io.flow.play.clients.RegistryModule
+    play.modules.enabled += io.flow.play.clients.TokenClientModule
+    play.modules.enabled += io.flow.play.clients.UserClientModule
+
+    # Enable reading secrets from S3
+    # Disable the module in your application.conf if your app will never need any authentication
+    play.modules.enabled += io.flow.play.clients.JwtModule
 
 ## Request Logging
 

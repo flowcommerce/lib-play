@@ -61,8 +61,6 @@ case class FlowSession(
   * organization.
   */
 sealed trait AuthData {
-  
-  private[this] val header = JwtHeader("HS256")
 
   /**
     * Timestamp is used to expire authorizations automatically
@@ -83,20 +81,9 @@ sealed trait AuthData {
   protected def decorate(base: AuthDataMap): AuthDataMap
 
   /**
-    * Converts this auth data to a valid JWT string using the provided
-    * jwt salt.
+    * Converts this [[AuthData]] to a map containing the claims
     */
-  def jwt(salt: String): String = {
-    val all = decorate(
-      AuthDataMap(
-        requestId = requestId,
-        createdAt = createdAt
-      )
-    )
-
-    val claimsSet = JwtClaimsSet(all.toMap)
-    JsonWebToken(header, claimsSet, salt)
-  }
+  def toClaims: Map[String, String] = decorate(AuthDataMap(requestId = requestId, createdAt = createdAt)).toMap
 
 }
 

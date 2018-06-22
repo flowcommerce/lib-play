@@ -44,17 +44,14 @@ trait ErrorHandler {
     * 
     * }
     */
-  def withErrorHandler[T](
+  def withErrorHandler(
     description: Any
   ) (
-    f: => T
-  ) {
-    try {
-      f
-    } catch {
-      case t: Throwable => {
-        Logger.error(msg(s"$description: ${t}") , t)
-      }
+    f: => Any
+  ): Unit = {
+    try f catch {
+      case t: Throwable =>
+        Logger.error(msg(description.toString) , t)
     }
   }
 
@@ -76,22 +73,22 @@ trait ErrorHandler {
     *
     * }
     */
-  def withVerboseErrorHandler[T](
+  def withVerboseErrorHandler(
     description: Any
   ) (
-    f: => T
-  ) {
+    f: => Any
+  ): Unit = {
     Logger.info(msg(description.toString))
     withErrorHandler(description)(f)
   }
 
-  def logUnhandledMessage[T](
+  def logUnhandledMessage(
     description: Any
-  ) {
+  ): Unit = {
     Logger.error(msg(s"FlowEventError unhandled message: $description"))
   }
 
-  private[this] def msg(value: String) = {
+  private[this] def msg(value: String): String = {
     s"${getClass.getName}: $value"
   }
 

@@ -3,6 +3,7 @@ package io.flow.play.util
 import java.util.UUID
 import org.joda.time.{DateTime, DateTimeZone}
 
+@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
 object IdGenerator {
 
   val PrefixLength = 3
@@ -17,6 +18,7 @@ object IdGenerator {
   * @param prefix Global prefix to identify the type of resource for which you
   *         are generating an ID. Must be 3 characters, lowercase.
   */
+@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
 case class IdGenerator(
   prefix: String
 ) {

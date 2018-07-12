@@ -5,6 +5,7 @@ package io.flow.play.util
   * booleans. Aligns to the values used also by apidoc - helpful for
   * things like csv import, parsing attribute values, etc.
   */
+@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
 object Booleans {
 
   val TrueValues = Seq("t", "true", "y", "yes", "on", "1", "trueclass")

@@ -1,5 +1,6 @@
 package io.flow.play.util
 
+@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
 sealed trait FlowEnvironment
 
 /**
@@ -38,6 +39,7 @@ sealed trait FlowEnvironment
   *       case FlowEnvironment.Production => ...
   *     }
   */
+@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
 object FlowEnvironment {
 
   case object Development extends FlowEnvironment { override def toString() = "development" }

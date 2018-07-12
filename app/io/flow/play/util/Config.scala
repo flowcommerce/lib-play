@@ -8,6 +8,7 @@ import scala.util.{Failure, Success, Try}
   * Wrapper on play config testing for empty strings and standardizing
   * error message for required configuration.
   */
+@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
 trait Config {
 
   def optionalList(name: String): Option[Seq[String]]
@@ -93,6 +94,7 @@ trait Config {
 
 }
 
+@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
 case class ChainedConfig(configs: Seq[Config]) extends Config {
 
   override def optionalList(name: String): Option[Seq[String]] = {
@@ -126,6 +128,7 @@ case class DefaultConfig @javax.inject.Inject() (appConfig: ApplicationConfig) e
 
 }
 
+@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
 object EnvironmentConfig extends Config {
 
   override def optionalList(name: String): Option[Seq[String]] = {
@@ -146,6 +149,7 @@ object EnvironmentConfig extends Config {
   }
 }
 
+@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
 object PropertyConfig extends Config {
 
   override def optionalList(name: String): Option[Seq[String]] = {

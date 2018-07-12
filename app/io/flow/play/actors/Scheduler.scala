@@ -11,6 +11,7 @@ import scala.concurrent.duration._
   * Common utilities to help with scheduling of actors with intervals
   * coming from configuration file.
   */
+@deprecated("Deprecated in favour of lib-akka Scheduler", "0.4.78")
 trait Scheduler {
 
   def config: Config

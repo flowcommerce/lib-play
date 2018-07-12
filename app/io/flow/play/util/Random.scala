@@ -5,6 +5,7 @@ package io.flow.play.util
   * Wrapper on the scala random libraries providing higher level
   * common functions.
   */
+@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
 case class Random() {
 
   import Random._
@@ -107,6 +108,7 @@ case class Random() {
 
 }
 
+@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
 object Random {
 
   private val Ambiguous = "B8G6I1l0OoQDS5Z2".split("")

@@ -8,6 +8,7 @@ import play.api.Logger
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
 
+@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
 private[util] case class CacheEntry[V](
   value: V,
   expiresAt: DateTime
@@ -24,6 +25,7 @@ private[util] case class CacheEntry[V](
   * executes the refresh function then). If the call to `get` failes, and
   * and there is data cached in memory, you will get back the stale data.
   */
+@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
 trait CacheWithFallbackToStaleData[K, V] {
 
   private[this] val cache = new java.util.concurrent.ConcurrentHashMap[K, CacheEntry[V]]()

@@ -19,6 +19,7 @@ import scala.concurrent.duration.Duration
   *
   *    lazy val client = new Client(new Registry(env).host("user"))
   */
+@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
 trait Registry {
 
   /**
@@ -29,6 +30,7 @@ trait Registry {
 
 }
 
+@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
 object RegistryConstants {
 
   val ProductionDomain = "api.flow.io"
@@ -87,6 +89,7 @@ object RegistryConstants {
 /**
   * Production works by convention with no external dependencies.
   */
+@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
 class ProductionRegistry() extends Registry {
 
   override def host(applicationId: String) = {
@@ -175,6 +178,7 @@ class DevelopmentRegistry @javax.inject.Inject() (
 }
 
 @javax.inject.Singleton
+@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
 class MockRegistry() extends Registry {
 
   override def host(applicationId: String) = s"http://$applicationId.localhost"

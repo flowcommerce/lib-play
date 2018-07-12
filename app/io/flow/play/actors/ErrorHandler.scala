@@ -6,6 +6,7 @@ import play.api.Logger
 /**
   * Common utilities for handling and logging errors in actors
   */
+@deprecated("Deprecated in favour of lib-akka SafeReceive", "0.4.78")
 trait ErrorHandler {
   /**
     * Wraps an [[akka.actor.Actor.Receive]] with error handling that will catch any throwable and log it.

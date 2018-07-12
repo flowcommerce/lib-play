@@ -3,6 +3,7 @@ package io.flow.play.util
 import org.joda.time.{DateTime, DateTimeZone}
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 
+@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
 object DateHelper {
 
   object Implicits {

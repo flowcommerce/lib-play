@@ -1,6 +1,7 @@
 package io.flow.play.util
 
 // From http://www.freewebheaders.com/full-list-of-bad-words-banned-by-google/
+@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
 object BadWords {
 
   def contains(word: String): Boolean = {

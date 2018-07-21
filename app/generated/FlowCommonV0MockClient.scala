@@ -83,6 +83,15 @@ package io.flow.common.v0.mock {
       longitude = None
     )
 
+    def makeBillingAddress(): io.flow.common.v0.models.BillingAddress = io.flow.common.v0.models.BillingAddress(
+      name = None,
+      streets = None,
+      city = None,
+      province = None,
+      postal = None,
+      country = None
+    )
+
     def makeCatalogItemReference(): io.flow.common.v0.models.CatalogItemReference = io.flow.common.v0.models.CatalogItemReference(
       id = Factories.randomString(),
       number = Factories.randomString()

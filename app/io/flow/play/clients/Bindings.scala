@@ -1,6 +1,7 @@
 package io.flow.play.clients
 
-import io.flow.play.util.{Config, DefaultConfig, FlowEnvironment}
+import io.flow.util.Config
+import io.flow.play.util.{Config => FlowPlayConfig, DefaultConfig, FlowEnvironment}
 import io.flow.token.v0.interfaces.{Client => TokenClient}
 import io.flow.user.v0.interfaces.{Client => UserClient}
 import play.api.{Environment, Configuration, Mode}
@@ -10,8 +11,14 @@ class ConfigModule extends Module {
 
   def bindings(env: Environment, conf: Configuration) = {
     env.mode match {
-      case Mode.Prod | Mode.Dev => Seq(bind[Config].to[DefaultConfig])
-      case Mode.Test => Seq(bind[Config].to[MockConfig])
+      case Mode.Prod | Mode.Dev => Seq(
+        bind[Config].to[DefaultConfig],
+        bind[FlowPlayConfig].to[DefaultConfig]
+      )
+      case Mode.Test => Seq(
+        bind[Config].to[MockConfig],
+        bind[FlowPlayConfig].to[MockConfig]
+      )
     }
   }
 

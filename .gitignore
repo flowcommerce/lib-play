@@ -1,5 +1,6 @@
 .idea/
 target/
+**/.bloop
 logs/
 .ivy2
 *.swp

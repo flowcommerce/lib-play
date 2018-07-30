@@ -1,108 +1,18 @@
 package io.flow.play.clients
 
-import io.flow.play.util.{Config, EnvironmentConfig, FlowEnvironment, PropertyConfig}
 import io.flow.registry.v0.Client
 import io.flow.registry.v0.errors.UnitResponse
 import io.flow.registry.v0.models.Application
-import play.api.Logger
-import scala.concurrent.{Await, ExecutionContext, Future}
+import io.flow.util
+import io.flow.util.clients.RegistryConstants
+
+import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-/**
-  * This class implements service discovery for flow based on the
-  * environment in which we are in. In production, hostnames are build
-  * using convention (e.g. 'user' => 'user.api.flow.io'). In
-  * development, hostnames are built by querying the registry for port
-  * mappings.
-  * 
-  * Example:
-  *
-  *    lazy val client = new Client(new Registry(env).host("user"))
-  */
-@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
-trait Registry {
-
-  /**
-    * Returns the host of the application
-    * (e.g. http://user.api.flow.io or http://vm:6011)
-    */
-  def host(applicationId: String): String
-
-}
-
-@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
-object RegistryConstants {
-
-  val ProductionDomain = "api.flow.io"
-
-  val WorkstationHostVariableName = "WORKSTATION_HOST"
-
-  val DefaultWorkstationHost = "ws"
-
-  /**
-    * Defaults to the workstation host
-    */
-  private[this] lazy val devHost: String = workstationHost
-
-  /**
-    * The resolved name of the host used in workstation
-    */
-  private[this] lazy val workstationHost: String = {
-    EnvironmentConfig.optionalString(WorkstationHostVariableName).getOrElse {
-      PropertyConfig.optionalString(WorkstationHostVariableName).getOrElse {
-        Logger.info(s"[${getClass.getName}] defaulting workstationHost to '$DefaultWorkstationHost' (can override via env var[$WorkstationHostVariableName])")
-        DefaultWorkstationHost
-      }
-    }
-  }
-
-  def log(env: String, applicationId: String, message: String) {
-    Logger.info(s"[${getClass.getName} $env] app[$applicationId] $message")
-  }
-
-  /**
-    * Returns the hostname of the specified application in the
-    * production environment.
-    */
-  def productionHost(applicationId: String): String = {
-    s"https://${applicationId}.${ProductionDomain}"
-  }
-
-  def developmentHost(applicationId: String, port: Long): String = {
-    s"http://$devHost:$port"
-  }
-
-  def workstationHost(applicationId: String, port: Long): String = {
-    s"http://$workstationHost:$port"
-  }
-
-  def host(applicationId: String, port: Long) = {
-    FlowEnvironment.Current match {
-      case FlowEnvironment.Production => productionHost(applicationId)
-      case FlowEnvironment.Development => developmentHost(applicationId, port)
-      case FlowEnvironment.Workstation => workstationHost(applicationId, port)
-    }
-  }
-
-}
-
-/**
-  * Production works by convention with no external dependencies.
-  */
-@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
-class ProductionRegistry() extends Registry {
-
-  override def host(applicationId: String) = {
-    val host = RegistryConstants.productionHost(applicationId)
-    RegistryConstants.log("Production", applicationId, s"Host[$host]")
-    host
-  }
-
-}
-
+//todo rename file to match class
 @javax.inject.Singleton
 class DevelopmentRegistry @javax.inject.Inject() (
-  config: Config
+  config: util.Config
 ) extends Registry {
 
   private[this] lazy val RegistryHost: String = {
@@ -164,7 +74,7 @@ class DevelopmentRegistry @javax.inject.Inject() (
     * Allows user to set an environment variable to specify the
     * specific host for an application. If found, we use this value as
     * the host for that service. Ex: USER_HOST=http://localhost:6021
-    * 
+    *
     * Ex:
     *   USER_HOST="http://localhost:6021" sbt
     */
@@ -175,12 +85,4 @@ class DevelopmentRegistry @javax.inject.Inject() (
   protected def overriddeVariableName(applicationId: String): String = {
     s"${applicationId.toUpperCase}_HOST"
   }
-}
-
-@javax.inject.Singleton
-@deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
-class MockRegistry() extends Registry {
-
-  override def host(applicationId: String) = s"http://$applicationId.localhost"
-
 }

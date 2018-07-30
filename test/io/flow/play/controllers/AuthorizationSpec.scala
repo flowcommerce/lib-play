@@ -8,7 +8,7 @@ import play.api.Configuration
 
 class AuthorizationSpec extends LibPlaySpec {
 
-  private[this] lazy val mockConfig = MockConfig(DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty()))))
+  private[this] lazy val mockConfig = new MockConfig(new DefaultConfig(new ApplicationConfig(Configuration(ConfigFactory.empty()))))
 
   def createJWTHeader(
                        userId: String,
@@ -34,11 +34,9 @@ class AuthorizationSpec extends LibPlaySpec {
       val userId = "usr-20160130-1"
       val headerValue = createJWTHeader(userId = userId)
 
-      new AuthorizationImpl(mockConfig).get(headerValue).map { authToken =>
-        authToken match {
-          case JwtToken(id) => id must be(userId)
-          case _ => fail("Did not parse a JwtToken, got a different type instead.")
-        }
+      new AuthorizationImpl(mockConfig).get(headerValue).map {
+        case JwtToken(id) => id must be(userId)
+        case _ => fail("Did not parse a JwtToken, got a different type instead.")
       }.getOrElse(fail("Could not parse token!"))
     }
 

@@ -5,9 +5,10 @@ import io.flow.play.clients.MockConfig
 import com.typesafe.config.ConfigFactory
 import play.api.Configuration
 
+//todo move to lib-util
 class ConfigSpec extends LibPlaySpec {
 
-  private[this] lazy val config = MockConfig(DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty()))))
+  private[this] lazy val config = new MockConfig(new DefaultConfig(new ApplicationConfig(Configuration(ConfigFactory.empty()))))
 
   "optionalList" in {
     config.optionalList(createTestId()) must be(None)

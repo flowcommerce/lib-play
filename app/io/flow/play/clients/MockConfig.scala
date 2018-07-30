@@ -3,7 +3,7 @@ package io.flow.play.clients
 import io.flow.play.util.{Config, DefaultConfig}
 
 @javax.inject.Singleton
-case class MockConfig @javax.inject.Inject() (
+class MockConfig @javax.inject.Inject() (
   defaultConfig: DefaultConfig
 ) extends Config {
 

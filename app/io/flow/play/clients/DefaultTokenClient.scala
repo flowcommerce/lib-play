@@ -1,7 +1,7 @@
 package io.flow.play.clients
 
+import io.flow.util.clients.RegistryConstants
 import play.api.libs.ws.WSClient
-import io.flow.util.clients.{RegistryConstants => Constants}
 
 /**
   * Gets an instance of the token client. Note that we cannot declare
@@ -12,5 +12,5 @@ import io.flow.util.clients.{RegistryConstants => Constants}
   */
 @javax.inject.Singleton
 class DefaultTokenClient @javax.inject.Inject() (ws: WSClient) extends io.flow.token.v0.Client(ws,
-  Constants.host("token", 6151)
+  RegistryConstants.host("token", 6151)
 )

@@ -25,7 +25,7 @@ lazy val root = project
       "com.typesafe.akka" %% "akka-slf4j" % "2.5.13" % Provided,
       "com.lightbend.akka" %% "akka-stream-alpakka-sqs" % "0.20" % Provided,
       "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test,
-      "net.logstash.logback" % "logstash-logback-encoder" % "5.1",
+      "net.logstash.logback" % "logstash-logback-encoder" % "5.2",
       specs2 % Test
     ),
     resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/",

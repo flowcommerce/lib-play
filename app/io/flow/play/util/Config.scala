@@ -14,7 +14,10 @@ class DefaultConfig @javax.inject.Inject() (appConfig: ApplicationConfig)
 @javax.inject.Singleton
 class ApplicationConfig @javax.inject.Inject() (configuration: Configuration) extends Config {
 
-   override def optionalList(name: String): Option[Seq[String]] = {
+  override def optionalMap(name: String): Option[Map[String, Seq[String]]] =
+    configuration.getOptional[Map[String, Seq[String]]](name)
+
+  override def optionalList(name: String): Option[Seq[String]] = {
     configuration.getOptional[Seq[String]](name).map { list =>
       list.map(_.trim)
     }

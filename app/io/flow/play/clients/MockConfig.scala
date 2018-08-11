@@ -7,6 +7,12 @@ class MockConfig @javax.inject.Inject() (
   defaultConfig: DefaultConfig
 ) extends Config {
 
+  override def optionalMap(name: String): Option[Map[String, Seq[String]]] = {
+    values.get(name).map {
+      _.asInstanceOf[Map[String, Seq[String]]]
+    }.orElse(defaultConfig.optionalMap(name))
+  }
+
   override def optionalList(name: String): Option[Seq[String]] = {
     values.get(name) match {
       case Some(v) => Some(v.asInstanceOf[Seq[String]])

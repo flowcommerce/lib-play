@@ -6,6 +6,7 @@ import io.flow.token.v0.interfaces.{Client => TokenClient}
 import io.flow.user.v0.interfaces.{Client => UserClient}
 import play.api.{Environment, Configuration, Mode}
 import play.api.inject.Module
+import io.flow.play.clients.{Registry => FlowRegistry}
 
 class ConfigModule extends Module {
 
@@ -31,15 +32,18 @@ class RegistryModule extends Module {
       case Mode.Prod | Mode.Dev => {
         FlowEnvironment.Current match {
           case FlowEnvironment.Production => Seq(
-            bind[Registry].to[ProductionRegistry]
+            bind[io.flow.util.clients.Registry].to[ProductionRegistry],
+            bind[FlowRegistry].to[ProductionRegistry]
           )
           case FlowEnvironment.Development | FlowEnvironment.Workstation => Seq(
-            bind[Registry].to[DevelopmentRegistry]
+            bind[io.flow.util.clients.Registry].to[DevelopmentRegistry],
+            bind[FlowRegistry].to[DevelopmentRegistry]
           )
         }
       }
       case Mode.Test => Seq(
-        bind[Registry].to[MockRegistry]
+        bind[io.flow.util.clients.Registry].to[MockRegistry],
+        bind[FlowRegistry].to[MockRegistry]
       )
     }
   }

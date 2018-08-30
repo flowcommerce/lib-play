@@ -1,5 +1,8 @@
 ---
 flow:
+  apibuilder-api-mocker:
+    play_2_6_client:
+    - app/generated/FlowApibuilderApiMockerV0Client.scala
   common:
     play_2_6_client:
     - app/generated/FlowCommonV0Client.scala
@@ -8,14 +11,14 @@ flow:
   error:
     play_2_x_json:
     - app/generated/FlowErrorV0Models.scala
-  registry:
-    ning_1_9_client:
-    - app/generated/FlowRegistryV0Client.scala
   healthcheck:
     play_2_6_client:
     - app/generated/FlowHealthcheckV0Client.scala
     play_2_6_mock_client:
     - app/generated/FlowHealthcheckV0MockClient.scala
+  registry:
+    ning_1_9_client:
+    - app/generated/FlowRegistryV0Client.scala
   token:
     play_2_6_client:
     - app/generated/FlowTokenV0Client.scala
@@ -26,6 +29,3 @@ flow:
     - app/generated/FlowUserV0Client.scala
     play_2_6_mock_client:
     - app/generated/FlowUserV0MockClient.scala
-  apibuilder-api-mocker:
-    play_2_6_client:
-    - app/generated/FlowApibuilderApiMockerV0Client.scala

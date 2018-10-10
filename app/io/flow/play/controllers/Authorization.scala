@@ -1,11 +1,12 @@
 package io.flow.play.controllers
 
 import javax.inject.Inject
-
 import io.flow.play.util.Config
 import org.apache.commons.codec.binary.Base64
 import authentikat.jwt._
 import play.api.{Application, Logger}
+
+import scala.util.Try
 
 trait Authorization
 
@@ -50,7 +51,9 @@ class AuthorizationImpl @Inject() (config: Config) {
     }
   }
 
-  private[this] def jwtIsValid(token: String): Boolean = JsonWebToken.validate(token, jwtSalt)
+  private[this] def jwtIsValid(token: String): Boolean =
+    // swallow errors when decoding - for instance algo not supported
+    Try(JsonWebToken.validate(token, jwtSalt)).getOrElse(false)
 
   private[this] def createJwtToken(claimsSet: JwtClaimsSetJValue): Option[JwtToken] =
     claimsSet.asSimpleMap.toOption.flatMap { claims =>

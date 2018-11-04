@@ -1,20 +1,23 @@
 package io.flow.play.util
 
-import sys.process._
 import java.net.URL
 import java.io.File
-import scala.language.postfixOps
+import org.apache.commons.io.FileUtils
 
 object Urls {
 
   def downloadToFile(url: String, file: File): File = {
-    new URL(url) #> file !!
+    downloadToFile(new URL(url), file)
+  }
 
+  def downloadToFile(url: URL, file: File): File = {
+    FileUtils.copyURLToFile(url, file)
     file
   }
 
-  def downloadToTmpFile(url: String, prefix: String, suffix: String): File = {
-    downloadToFile(url, File.createTempFile(prefix, suffix))
+  def downloadToTmpFile(url: String, prefix: String = "download", suffix: String = "tmp"): File = {
+    val finalSuffix = if (suffix.startsWith(".")) { suffix } else { "." + suffix }
+    downloadToFile(url, File.createTempFile(prefix, finalSuffix))
   }
 
 }

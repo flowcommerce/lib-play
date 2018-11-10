@@ -5,10 +5,16 @@ code:
       generators:
         play_2_6_client: "app/generated"
         play_2_6_mock_client: "app/generated"
+    permission:
+      version: latest
+      generators:
+        play_2_6_client: "app/generated"
+        play_2_6_mock_client: "app/generated"
     error:
       version: latest
       generators:
-        play_2_x_json: "app/generated"
+        play_2_6_client: "app/generated"
+        play_2_6_mock_client: "app/generated"
     registry:
       version: latest
       generators:
@@ -29,7 +35,3 @@ code:
       generators:
         play_2_6_client: "app/generated"
         play_2_6_mock_client: "app/generated"
-    apibuilder-api-mocker:
-      version: latest
-      generators:
-        play_2_6_client: "app/generated"

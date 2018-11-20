@@ -25,7 +25,7 @@ class FlowLoggingFilter @javax.inject.Inject() (
   config: Config
 ) extends Filter {
 
-  private val LoggedRequestMethodConfig = "play.http.filters.logging.methods"
+  private val LoggedRequestMethodConfig = "play.http.logging.methods"
   private val DefaultLoggedRequestMethods = Seq("GET", "PATCH", "POST", "PUT", "DELETE", "OPTIONS", "HEAD")
 
   private val loggedRequestMethods = config.optionalList(LoggedRequestMethodConfig).getOrElse(DefaultLoggedRequestMethods).toSet

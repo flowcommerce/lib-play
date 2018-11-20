@@ -20,7 +20,7 @@ play application config:
 By default, all HTTP methods will be logged. To only
 log a specific subset of methods, add the following:
 
-    play.http.filters.logging.methods=["GET", "PUT"]
+    play.http.logging.methods=["GET","PUT"]
 
 ## CORS
 

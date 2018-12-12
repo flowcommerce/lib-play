@@ -12,19 +12,19 @@ class DefaultConfig @javax.inject.Inject() (appConfig: ApplicationConfig)
   extends ChainedConfig(Seq(EnvironmentConfig, PropertyConfig, appConfig))
 
 @javax.inject.Singleton
-class ApplicationConfig @javax.inject.Inject() (configuration: Configuration) extends Config {
+case class ApplicationConfig @javax.inject.Inject() (underlying: Configuration) extends Config {
 
   override def optionalMap(name: String): Option[Map[String, Seq[String]]] =
-    configuration.getOptional[Map[String, Seq[String]]](name)
+    underlying.getOptional[Map[String, Seq[String]]](name)
 
   override def optionalList(name: String): Option[Seq[String]] = {
-    configuration.getOptional[Seq[String]](name).map { list =>
+    underlying.getOptional[Seq[String]](name).map { list =>
       list.map(_.trim)
     }
   }
 
   override def get(name: String): Option[String] = {
-    configuration.getOptional[String](name).map(_.trim).map {
+    underlying.getOptional[String](name).map(_.trim).map {
       case "" => {
         val msg = s"FlowError Value for configuration parameter[$name] cannot be blank"
         Logger.error(msg)

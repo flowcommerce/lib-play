@@ -2,8 +2,8 @@ package io.flow.play.util
 
 import java.util.function.BiFunction
 
+import io.flow.log.RollbarLogger
 import org.joda.time.DateTime
-import play.api.Logger
 
 import scala.concurrent.duration._
 import scala.util.{Failure, Success, Try}
@@ -29,6 +29,10 @@ private[util] case class CacheEntry[V](
 trait CacheWithFallbackToStaleData[K, V] {
 
   private[this] val cache = new java.util.concurrent.ConcurrentHashMap[K, CacheEntry[V]]()
+
+  def logger: RollbarLogger
+
+  private[this] def log: RollbarLogger = logger.withKeyValue("class", getClass.getName)
 
   /**
     * Defines how long to cache each value for
@@ -74,14 +78,16 @@ trait CacheWithFallbackToStaleData[K, V] {
   }
 
   private[this] def failureFromEmpty(key: K, ex: Throwable): CacheEntry[V] = {
-    val msg = s"FlowError for Cache[${this.getClass.getName}] key[$key]: ${ex.getMessage}"
-    Logger.error(msg, ex)
-    sys.error(msg)
+    log.
+      withKeyValue("key", key.toString).
+      error("failureFromEmpty", ex)
+    sys.error(s"failureFromEmpty for key[$key]")
   }
 
   private[this] def failureFromRefresh(key: K, currentEntry: CacheEntry[V], ex: Throwable): CacheEntry[V] = {
-    Logger.warn(s"FlowError: Cache[${this.getClass.getName}] key[$key]: Falling back to stale data " +
-      s"as refresh failed with: ${ex.getMessage}", ex)
+    log.
+      withKeyValue("key", key.toString).
+      warn("failureFromRefresh - Falling back to stale data")
     currentEntry
   }
 

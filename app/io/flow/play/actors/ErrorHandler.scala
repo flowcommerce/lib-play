@@ -1,13 +1,18 @@
 package io.flow.play.actors
 
 import akka.actor.Actor.Receive
-import play.api.Logger
+import io.flow.log.RollbarLogger
 
 /**
   * Common utilities for handling and logging errors in actors
   */
 @deprecated("Deprecated in favour of lib-akka SafeReceive", "0.4.78")
 trait ErrorHandler {
+
+  def logger: RollbarLogger
+
+  private[this] def log: RollbarLogger = logger.withKeyValue("class", getClass.getName)
+
   /**
     * Wraps an [[akka.actor.Actor.Receive]] with error handling that will catch any throwable and log it.
     *
@@ -52,7 +57,7 @@ trait ErrorHandler {
   ): Unit = {
     try f catch {
       case t: Throwable =>
-        Logger.error(msg(description.toString) , t)
+        log.error(description.toString, t)
     }
   }
 
@@ -79,18 +84,13 @@ trait ErrorHandler {
   ) (
     f: => Any
   ): Unit = {
-    Logger.info(msg(description.toString))
+    log.info(description.toString)
     withErrorHandler(description)(f)
   }
 
   def logUnhandledMessage(
     description: Any
   ): Unit = {
-    Logger.error(msg(s"FlowEventError unhandled message: $description"))
+    log.withKeyValue("message", description.toString).warn("Unhandled message")
   }
-
-  private[this] def msg(value: String): String = {
-    s"${getClass.getName}: $value"
-  }
-
 }

@@ -2,6 +2,8 @@ package io.flow.play.clients
 
 import io.flow.play.util.{Config, DefaultConfig}
 
+import scala.collection.mutable
+
 @javax.inject.Singleton
 class MockConfig @javax.inject.Inject() (
   defaultConfig: DefaultConfig
@@ -24,7 +26,7 @@ class MockConfig @javax.inject.Inject() (
     values += (name -> value)
   }
 
-  val values = {
+  val values: mutable.Map[String, Any] = {
     val d = scala.collection.mutable.Map[String, Any]()
     d += ("JWT_SALT" -> "test")
     d

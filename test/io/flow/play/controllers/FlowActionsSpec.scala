@@ -5,13 +5,11 @@ import io.flow.common.v0.models.{Environment, Role, UserReference}
 import io.flow.play.clients.MockConfig
 import io.flow.play.util._
 import org.joda.time.DateTime
-import org.scalatestplus.play._
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Configuration
 
 class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
 
-  private[this] lazy val mockConfig = new MockConfig(new DefaultConfig(new ApplicationConfig(Configuration(ConfigFactory.empty()))))
+  private[this] lazy val mockConfig = new MockConfig(new DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty()))))
   private[this] lazy val salt = "test"
 
   private[this] val user = UserReference("usr-20151006-1")

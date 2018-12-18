@@ -59,6 +59,7 @@ trait ErrorHandler {
       case t: Throwable =>
         log.error(description.toString, t)
     }
+    ()
   }
 
   /**

@@ -3,7 +3,8 @@ package io.flow.play.expanders
 import io.flow.common.v0.models.json._
 import io.flow.common.v0.{models => common}
 import io.flow.play.clients.MockUserClient
-import io.flow.play.util.{IdGenerator, LibPlaySpec}
+import io.flow.play.util.LibPlaySpec
+import io.flow.util.IdGenerator
 import play.api.libs.json.Json
 import play.api.test.{DefaultAwaitTimeout, FutureAwaits}
 

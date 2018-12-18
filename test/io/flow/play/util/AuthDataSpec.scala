@@ -1,7 +1,6 @@
 package io.flow.play.util
 
 import io.flow.common.v0.models.{Environment, Role, UserReference}
-import org.scalatest.{FunSpec, Matchers}
 
 class AuthDataSpec extends LibPlaySpec {
 

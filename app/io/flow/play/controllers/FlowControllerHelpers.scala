@@ -172,7 +172,7 @@ trait FlowControllerHelpers {
                                         records: Seq[JsValue],
                                         function: JsValue => T,
                                         errorFunction: Result => T,
-                                        requestHeaders: Seq[(String, String)] = Nil
+                                        requestHeaders: Seq[(String, String)]
                                       ) (
                                         implicit ec: ExecutionContext
                                       ): T = {

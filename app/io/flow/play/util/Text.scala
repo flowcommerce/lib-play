@@ -20,7 +20,7 @@ object Text {
     ellipsis: Option[String] = Some(Ellipsis)
   ): String = {
     val suffix = ellipsis.getOrElse("")
-    require(maxLength >= suffix.length, "maxLength must be greater than the length of the suffix[${suffix.length}]")
+    require(maxLength >= suffix.length, s"maxLength must be greater than the length of the suffix[${suffix.length}]")
 
     if (value.length <= maxLength) {
       value

@@ -1,7 +1,6 @@
 package io.flow.play.util
 
 import io.flow.common.v0.models.{Environment, Role, UserReference}
-import java.util.UUID
 import javax.inject.{Inject, Singleton}
 
 /**
@@ -28,7 +27,7 @@ class AuthHeaders @Inject() (
 
 object AuthHeaders {
 
-  private[this] val random = Random()
+  private[this] val random = io.flow.util.Random()
 
   val Header = "X-Flow-Auth"
 
@@ -103,7 +102,7 @@ object AuthHeaders {
 
   def createFlowSession(): FlowSession = {
     FlowSession(
-      id = Constants.Prefixes.Session + random.alphaNumeric(36)
+      id = io.flow.util.Constants.Prefixes.Session + random.alphaNumeric(36)
     )
   }
 

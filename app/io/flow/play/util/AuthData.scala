@@ -45,8 +45,8 @@ case class FlowSession(
   id: String
 ) {
   assert(
-    id.startsWith(Constants.Prefixes.Session),
-    s"Flow session id must start with '${Constants.Prefixes.Session}' and not[${id.substring(0, 3)}]"
+    id.startsWith(io.flow.util.Constants.Prefixes.Session),
+    s"Flow session id must start with '${io.flow.util.Constants.Prefixes.Session}' and not[${id.substring(0, 3)}]"
   )
 }
 

@@ -22,7 +22,7 @@ class MockConfig @javax.inject.Inject() (
     }
   }
 
-  def set(name: String, value: Seq[String]) {
+  def set(name: String, value: Seq[String]): Unit = {
     values += (name -> value)
   }
 
@@ -32,7 +32,7 @@ class MockConfig @javax.inject.Inject() (
     d
   }
 
-  def set(name: String, value: String) {
+  def set(name: String, value: String): Unit = {
     values += (name -> value)
   }
 

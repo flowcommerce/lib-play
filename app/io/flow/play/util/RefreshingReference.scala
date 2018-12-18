@@ -68,7 +68,7 @@ trait RefreshingReference[T] {
       case Failure(ex) =>
         log.
           withKeyValue("max_attempts", maxAttempts).
-          warn(s"Failed to initialize cache", ex)
+          warn("Failed to initialize cache", ex)
         false
     }
   }
@@ -82,7 +82,7 @@ trait RefreshingReference[T] {
       case Failure(ex) =>
         log.
           withKeyValue("max_attempts", maxAttempts).
-          warn(s"Failed to initialize cache", ex)
+          warn("Failed to initialize cache", ex)
         throw ex
     }
     new AtomicReference(retrieved)
@@ -96,7 +96,7 @@ trait RefreshingReference[T] {
         log.
           withKeyValue("max_attempts", maxAttempts).
           withKeyValue("reload_interval", reloadInterval.toString).
-          warn(s"Failed to refresh cache. Will try again", ex)
+          warn("Failed to refresh cache. Will try again", ex)
     }
   }(retrieveExecutionContext)
 
@@ -106,7 +106,7 @@ trait RefreshingReference[T] {
         log.
           withKeyValue("max_attempts", maxAttempts).
           withKeyValue("reload_interval", reloadInterval.toString).
-          info(s"Failed to refresh cache. Trying again...", ex)
+          info("Failed to refresh cache. Trying again...", ex)
         doLoadRetry(attempts + 1, maxAttempts)
       }
 

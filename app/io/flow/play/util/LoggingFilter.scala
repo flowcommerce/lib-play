@@ -1,7 +1,7 @@
 package io.flow.play.util
 
 import akka.stream.Materializer
-import play.api.Logger
+import io.flow.log.RollbarLogger
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -16,12 +16,13 @@ import play.api.http.HttpFilters
   **/
 
 class LoggingFilter @javax.inject.Inject() (loggingFilter: FlowLoggingFilter) extends HttpFilters {
-  def filters = Seq(loggingFilter)
+  def filters: Seq[Filter] = Seq(loggingFilter)
 }
 
 class FlowLoggingFilter @javax.inject.Inject() (
   implicit ec: ExecutionContext,
   m: Materializer,
+  logger: RollbarLogger,
   config: Config
 ) extends Filter {
 
@@ -41,18 +42,19 @@ class FlowLoggingFilter @javax.inject.Inject() (
         val endTime = System.currentTimeMillis
         val requestTime = endTime - startTime
         val headerMap = requestHeader.headers.toMap
+        val requestId = headerMap.getOrElse("X-Flow-Request-Id", Nil).mkString(",")
         val line = Seq(
           requestHeader.method,
           s"${requestHeader.host}${requestHeader.uri}",
           result.header.status,
           s"${requestTime}ms",
-          headerMap.getOrElse("X-Flow-Request-Id", Nil).mkString(","),
+          requestId,
           headerMap.getOrElse("User-Agent", Nil).mkString(","),
           headerMap.getOrElse("X-Forwarded-For", Nil).mkString(","),
           headerMap.getOrElse("CF-Connecting-IP", Nil).mkString(",")
         ).mkString(" ")
 
-        Logger.info(line)
+        logger.withKeyValue("request_id", requestId).info(line)
       }
 
       result

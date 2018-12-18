@@ -4,7 +4,7 @@ import javax.inject.Inject
 import io.flow.play.util.Config
 import org.apache.commons.codec.binary.Base64
 import authentikat.jwt._
-import play.api.{Application, Logger}
+import io.flow.log.RollbarLogger
 
 import scala.util.Try
 
@@ -13,7 +13,10 @@ trait Authorization
 case class JwtToken(userId: String) extends Authorization
 case class Token(token: String) extends Authorization
 
-class AuthorizationImpl @Inject() (config: Config) {
+class AuthorizationImpl @Inject() (
+  logger: RollbarLogger,
+  config: Config
+) {
 
   private[this] lazy val jwtSalt = {
     config.requiredString("JWT_SALT")
@@ -42,7 +45,9 @@ class AuthorizationImpl @Inject() (config: Config) {
           case JsonWebToken(_, claimsSet, _) if jwtIsValid(value) => createJwtToken(claimsSet)
           case JsonWebToken(_, claimsSet, _) =>
             val tokenData = createJwtToken(claimsSet)
-            Logger.warn(s"JWT Token for user[${tokenData.map(_.userId).getOrElse("unknown")}] was invalid, bad salt")
+            logger.
+              withKeyValue("user_id", tokenData.map(_.userId).getOrElse("unknown")).
+              info("JWT Token was invalid, bad salt")
             None
           case _ => None
         }

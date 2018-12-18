@@ -1,9 +1,9 @@
 package io.flow.play.actors
 
 import akka.actor.ActorSystem
+import io.flow.log.RollbarLogger
 import io.flow.play.util.Config
-import play.api.Logger
-import play.api.Play.current
+
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration._
 
@@ -15,6 +15,10 @@ import scala.concurrent.duration._
 trait Scheduler {
 
   def config: Config
+
+  def logger: RollbarLogger
+
+  private[this] def log: RollbarLogger = logger.withKeyValue("class", getClass.getName)
 
   /**
    * Helper to schedule a recurring interval based on a configuration
@@ -47,12 +51,16 @@ trait Scheduler {
   ) {
     val seconds = config.requiredPositiveInt(configName)
     val initial = config.optionalPositiveInt(s"${configName}_initial").getOrElse(seconds)
-    Logger.info(s"[${getClass.getName}] scheduleRecurring[$configName]: Initial[$initial seconds], recurring[$seconds seconds]")
+    log.
+      withKeyValue("config_name", configName).
+      withKeyValue("initial_seconds", initial).
+      withKeyValue("recurring_seconds", seconds).
+      info("scheduleRecurring")
     system.scheduler.schedule(
       FiniteDuration(initial, SECONDS),
       FiniteDuration(seconds, SECONDS),
       new Runnable {
-        def run = f
+        def run(): Unit = f
       }
     )
   }
@@ -69,12 +77,17 @@ trait Scheduler {
     val seconds = config.optionalPositiveInt(configName).getOrElse(default)
     val initial = config.optionalPositiveInt(s"${configName}_initial").getOrElse(seconds)
 
-    Logger.info(s"[${getClass.getName}] scheduleRecurringWithDefault[$configName]: Initial[$initial seconds], recurring[$seconds seconds]")
+    log.
+      withKeyValue("config_name", configName).
+      withKeyValue("initial_seconds", initial).
+      withKeyValue("recurring_seconds", seconds).
+      info("scheduleRecurringWithDefault")
+
     system.scheduler.schedule(
       FiniteDuration(initial, SECONDS),
       FiniteDuration(seconds, SECONDS),
       new Runnable {
-        def run = f
+        def run(): Unit = f
       }
     )
   }

@@ -1,5 +1,6 @@
 package io.flow.play.util
 
+import io.flow.log.{RollbarLogger, RollbarProvider}
 import org.scalatest.concurrent.Eventually.{eventually, timeout}
 import org.scalatest.time.{Seconds, Span}
 
@@ -9,6 +10,7 @@ class CacheWithFallbackToStaleDataSpec extends LibPlaySpec {
 
   private[this] case class TestCacheWithFallbackToStaleData() extends CacheWithFallbackToStaleData[String, String] {
 
+    override val logger: RollbarLogger = RollbarProvider.logger("test")
     private[this] val data = scala.collection.mutable.Map[String, String]()
     private[this] val nextValues = scala.collection.mutable.Map[String, String]()
     var numberRefreshes: Int = 0

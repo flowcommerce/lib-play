@@ -1,5 +1,6 @@
 package io.flow.play.util
 
+import io.flow.log.RollbarProvider
 import org.mockito.Mockito
 import org.scalatest.concurrent.Eventually
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
@@ -13,8 +14,9 @@ import scala.concurrent.duration._
 class RefreshingReferenceSpec extends FlatSpec with GuiceOneAppPerSuite with Matchers with OptionValues with MockitoSugar
   with Eventually {
 
+  private[this] val logger = RollbarProvider.logger("test")
   def createCache[K, V](reloadPeriod: FiniteDuration, retrieve: () => Map[K, V], maxAttempts: Int = 1): RefreshingReference[Map[K, V]] =
-    RefreshingReference(app.actorSystem.scheduler, Implicits.global, reloadPeriod, retrieve, maxAttempts)
+    RefreshingReference(logger, app.actorSystem.scheduler, Implicits.global, reloadPeriod, retrieve, maxAttempts)
 
   "RefreshingReference" should "load and get" in {
     val cache = createCache[String, Int](1.minute, () => Map("1" -> 1))

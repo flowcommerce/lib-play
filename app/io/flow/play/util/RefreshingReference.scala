@@ -3,7 +3,7 @@ package io.flow.play.util
 import java.util.concurrent.atomic.AtomicReference
 
 import akka.actor.Scheduler
-import play.api.Logger
+import io.flow.log.RollbarLogger
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.FiniteDuration
@@ -19,6 +19,10 @@ import scala.util.{Failure, Success, Try}
   * cache that has never been initialized.
   */
 trait RefreshingReference[T] {
+
+  def logger: RollbarLogger
+
+  private[this] def log: RollbarLogger = logger.withKeyValue("class", getClass.getName)
 
   /**
     * The scheduler to use to schedule the [[retrieve]] function every [[reloadInterval]] period.
@@ -62,7 +66,9 @@ trait RefreshingReference[T] {
         cache.set(data)
         true
       case Failure(ex) =>
-        Logger.warn(s"Failed initializing cache after $maxAttempts attempt${if (maxAttempts > 1) "s" else ""}.", ex)
+        log.
+          withKeyValue("max_attempts", maxAttempts).
+          warn("Failed to initialize cache", ex)
         false
     }
   }
@@ -74,7 +80,9 @@ trait RefreshingReference[T] {
     val retrieved = doLoadRetry(1, maxAttempts) match {
       case Success(data) => data
       case Failure(ex) =>
-        Logger.warn(s"Failed initializing cache after $maxAttempts attempt${if (maxAttempts > 1) "s" else ""}.", ex)
+        log.
+          withKeyValue("max_attempts", maxAttempts).
+          warn("Failed to initialize cache", ex)
         throw ex
     }
     new AtomicReference(retrieved)
@@ -85,15 +93,20 @@ trait RefreshingReference[T] {
     doLoadRetry(1, maxAttempts) match {
       case Success(data) => cache.set(data)
       case Failure(ex) =>
-        Logger.warn(s"Failed refreshing cache after $maxAttempts attempt${if (maxAttempts > 1) "s" else ""}. " +
-          s"Will try again in $reloadInterval", ex)
+        log.
+          withKeyValue("max_attempts", maxAttempts).
+          withKeyValue("reload_interval", reloadInterval.toString).
+          warn("Failed to refresh cache. Will try again", ex)
     }
   }(retrieveExecutionContext)
 
   private def doLoadRetry(attempts: Int, maxAttempts: Int): Try[T] =
     Try(retrieve)
       .recoverWith { case ex if attempts < maxAttempts =>
-        Logger.warn(s"Failed refreshing cache at attempt $attempts/$maxAttempts. Trying again...", ex)
+        log.
+          withKeyValue("max_attempts", maxAttempts).
+          withKeyValue("reload_interval", reloadInterval.toString).
+          info("Failed to refresh cache. Trying again...", ex)
         doLoadRetry(attempts + 1, maxAttempts)
       }
 
@@ -104,14 +117,20 @@ object RefreshingReference {
   /**
     * Helper function to create a new [[RefreshingReference]]
     */
-  def apply[T](scheduler: Scheduler, retrieveExecutionContext: ExecutionContext, reloadInterval: FiniteDuration,
-               retrieve: () => T, maxAttempts: Int = 3): RefreshingReference[T] = {
+  def apply[T](
+    rollbarLogger: RollbarLogger,
+    scheduler: Scheduler,
+    retrieveExecutionContext: ExecutionContext,
+    reloadInterval: FiniteDuration,
+    retrieve: () => T, maxAttempts: Int = 3
+  ): RefreshingReference[T] = {
     val schedulerOuter = scheduler
     val retrieveExecutionContextOuter = retrieveExecutionContext
     val reloadIntervalOuter = reloadInterval
     val retrieveOuter = retrieve
     val maxAttemptsOuter = maxAttempts
     new RefreshingReference[T]() {
+      override def logger: RollbarLogger = rollbarLogger
       override def scheduler: Scheduler = schedulerOuter
       override def retrieveExecutionContext: ExecutionContext = retrieveExecutionContextOuter
       override def reloadInterval: FiniteDuration = reloadIntervalOuter

@@ -42,18 +42,18 @@ sealed trait FlowEnvironment
 @deprecated("Deprecated in favour of lib-util (io.flow.util.*)", "0.4.78")
 object FlowEnvironment {
 
-  case object Development extends FlowEnvironment { override def toString() = "development" }
-  case object Production extends FlowEnvironment { override def toString() = "production" }
-  case object Workstation extends FlowEnvironment { override def toString() = "workstation" }
+  case object Development extends FlowEnvironment { override def toString = "development" }
+  case object Production extends FlowEnvironment { override def toString = "production" }
+  case object Workstation extends FlowEnvironment { override def toString = "workstation" }
 
-  val all = Seq(Development, Production, Workstation)
+  val all: Seq[FlowEnvironment] = Seq(Development, Production, Workstation)
 
   private[this]
   val byName = all.map(x => x.toString.toLowerCase -> x).toMap
 
   def fromString(value: String): Option[FlowEnvironment] = byName.get(value.toLowerCase)
 
-  val Current = {
+  val Current: FlowEnvironment = {
     EnvironmentConfig.optionalString("FLOW_ENV") match {
       case Some(value) => {
         parse("environment variable", value)
@@ -64,7 +64,6 @@ object FlowEnvironment {
             parse("system property", value)
           }
           case None => {
-            play.api.Logger.info("Using default flow environment[development]. To override, specify environment variable or system property named[FLOW_ENV]")
             FlowEnvironment.Development
           }
         }
@@ -75,13 +74,10 @@ object FlowEnvironment {
   private[util] def parse(source: String, value: String): FlowEnvironment = {
     FlowEnvironment.fromString(value) match {
       case Some(env) => {
-        play.api.Logger.info(s"Set flow environment to[$env] from $source[FLOW_ENV]")
         env
       }
       case None => {
-        val message = s"Value[$value] from $source[FLOW_ENV] is invalid. Valid values are: " + all.map(_.toString).mkString(", ")
-        play.api.Logger.error(message)
-        sys.error(message)
+        sys.error(s"Value[$value] from $source[FLOW_ENV] is invalid. Valid values are: " + all.map(_.toString).mkString(", "))
       }
     }
   }

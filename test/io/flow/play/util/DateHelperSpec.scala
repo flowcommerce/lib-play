@@ -1,10 +1,11 @@
 package io.flow.play.util
 
+import com.github.ghik.silencer.silent
 import org.joda.time.format.ISODateTimeFormat.dateTimeParser
 import org.joda.time.{DateTime, DateTimeZone}
 import org.scalatest.{MustMatchers, WordSpec}
 
-class DateHelperSpec extends WordSpec with MustMatchers {
+@silent class DateHelperSpec extends WordSpec with MustMatchers {
 
   private[this] val jan1 = dateTimeParser.parseDateTime("2016-01-01T08:26:18.794-05:00").withZone(DateHelper.EasternTimezone)
 

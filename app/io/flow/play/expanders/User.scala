@@ -27,7 +27,7 @@ case class User (
     userIds match {
       case Nil => Future.successful(records)
       case ids => {
-        userClient.users.get(id = Some(ids), limit = userIds.size, requestHeaders = requestHeaders).map(users =>
+        userClient.users.get(id = Some(ids), limit = userIds.size.toLong, requestHeaders = requestHeaders).map(users =>
           Map(users.map(user => user.id -> user): _*)
         ).map(userIdLookup =>
           records.map { r =>

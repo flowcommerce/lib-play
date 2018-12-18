@@ -1,6 +1,7 @@
 package io.flow.play.controllers
 
 import authentikat.jwt.{JsonWebToken, JwtClaimsSetJValue}
+import com.github.ghik.silencer.silent
 import io.flow.play.util.{AuthData, AuthHeaders, Config}
 import play.api.mvc.{Headers, Request, Result}
 import play.api.mvc.Results.Unauthorized
@@ -8,7 +9,7 @@ import play.api.mvc.Results.Unauthorized
 trait FlowActionInvokeBlockHelper {
   def config: Config
 
-  def unauthorized[A](request: Request[A]): Result = Unauthorized
+  @silent def unauthorized[A](request: Request[A]): Result = Unauthorized
 
   def jwtSalt: String = config.requiredString("JWT_SALT")
 

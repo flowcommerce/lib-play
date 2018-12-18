@@ -48,7 +48,7 @@ object FormData {
     try {
       Some(s.toLong)
     } catch {
-      case e: Exception => None
+      case _: Exception => None
     }
   }
 }

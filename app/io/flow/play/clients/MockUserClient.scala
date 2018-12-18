@@ -2,7 +2,6 @@ package io.flow.play.clients
 
 import io.flow.common.v0.models.User
 import io.flow.user.v0.mock
-import scala.concurrent.{ExecutionContext, Future}
 
 /**
   * This object emulates storage of the users for the mock user

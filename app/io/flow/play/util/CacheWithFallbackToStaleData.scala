@@ -45,11 +45,12 @@ trait CacheWithFallbackToStaleData[K, V] {
     * Marks the specified key as expired. On next access, will attempt to refresh. Note that
     * if refresh fails, we will continue to return the stale data.
     */
-  def flush(key: K): Unit =
+  def flush(key: K): Unit = {
     cache.computeIfPresent(key, new BiFunction[K, CacheEntry[V], CacheEntry[V]] {
       override def apply(k: K, entry: CacheEntry[V]): CacheEntry[V] = entry.copy(expiresAt = DateTime.now.minusMillis(1))
     })
-
+    ()
+  }
   def get(key: K): V = {
     // try to do a quick get first
     val finalEntry = Option(cache.get(key)) match {
@@ -63,7 +64,7 @@ trait CacheWithFallbackToStaleData[K, V] {
                 // check again as this value may have been updated by a concurrent call
                 case Some(foundEntry) =>
                   if (!foundEntry.isExpired) foundEntry
-                  else doGetEntry(k)(failureFromRefresh(k, foundEntry, _))
+                  else doGetEntry(k)(_ => failureFromRefresh(k, foundEntry))
                 case None => doGetEntry(k)(failureFromEmpty(k, _))
               }
             }
@@ -84,7 +85,7 @@ trait CacheWithFallbackToStaleData[K, V] {
     sys.error(s"failureFromEmpty for key[$key]")
   }
 
-  private[this] def failureFromRefresh(key: K, currentEntry: CacheEntry[V], ex: Throwable): CacheEntry[V] = {
+  private[this] def failureFromRefresh(key: K, currentEntry: CacheEntry[V]): CacheEntry[V] = {
     log.
       withKeyValue("key", key.toString).
       warn("failureFromRefresh - Falling back to stale data")

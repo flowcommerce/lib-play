@@ -21,7 +21,7 @@ case class UrlKey(
   assert(minKeyLength > 0, s"minKeyLength[$minKeyLength] must be > 0")
   assert(maxIterations > 0, s"maxIterations[$maxIterations] must be > 0")
 
-  private[this] val random = Random()
+  private[this] val random = io.flow.util.Random()
 
   // Only want lower case letters and dashes
   private[this] val Regexp1 = """([^0-9a-z\-\_\.])""".r
@@ -71,7 +71,7 @@ case class UrlKey(
               case false => generate(value, Some(nextSuffix))(checkFunction)
             }
           }
-          case errors => {
+          case _ => {
             if (nextSuffix > maxIterations) {
               sys.error(s"Possible infinite loop generating key for value[$value]")
             }
@@ -92,11 +92,11 @@ case class UrlKey(
       RegexpLeadingSpaces.replaceAllIn(
         Regexp3.replaceAllIn(
           Regexp2.replaceAllIn(
-            Regexp1.replaceAllIn(value.toLowerCase.trim, m => "-"),
-            m => "-"
-          ), m => "_"
-        ), m => ""),
-      m => ""
+            Regexp1.replaceAllIn(value.toLowerCase.trim, _ => "-"),
+            _ => "-"
+          ), _ => "_"
+        ), _ => ""),
+      _ => ""
     )
   }
 
@@ -113,7 +113,7 @@ case class UrlKey(
     } else {
       val lower = lowerLabel.getOrElse(label.toLowerCase)
       reservedKeys.find(_ == generated) match {
-        case Some(value) => Seq(s"$key is a reserved word and cannot be used for the $lower")
+        case Some(_) => Seq(s"$key is a reserved word and cannot be used for the $lower")
         case None => Nil
       }
     }

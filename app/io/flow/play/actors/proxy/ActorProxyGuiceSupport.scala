@@ -4,6 +4,7 @@ import java.lang.reflect.Method
 
 import akka.actor.{ActorRef, ActorSystem}
 import com.amazonaws.services.sqs.AmazonSQSAsync
+import com.github.ghik.silencer.silent
 import com.google.inject.name.Names
 import com.google.inject.util.Providers
 import com.google.inject.{AbstractModule, Binder}
@@ -38,7 +39,7 @@ trait ActorProxyGuiceSupport {
       .asEagerSingleton()
   }
 
-  private class SenderProxyActorProvider(name: String, serde: ProxySerde) extends Provider[ActorRef] {
+  @silent private class SenderProxyActorProvider(name: String, serde: ProxySerde) extends Provider[ActorRef] {
 
     @Inject private var actorSystem: ActorSystem = _
     @Inject private var injector: Injector = _
@@ -53,7 +54,7 @@ trait ActorProxyGuiceSupport {
     }
   }
 
-  private class ReceiverProxyActorProvider(name: String, proxiedName: String, serde: ProxySerde) extends Provider[ActorRef] {
+  @silent private class ReceiverProxyActorProvider(name: String, proxiedName: String, serde: ProxySerde) extends Provider[ActorRef] {
 
     @Inject private var actorSystem: ActorSystem = _
     @Inject private var injector: Injector = _

@@ -18,5 +18,6 @@ class SQSSenderProxyActor(receiverActorName: String, sqs: AmazonSQSAsync, servic
         messageType = msg.getClass.getName,
         message = serde.serialize(msg)
       )))))
+      ()
   }
 }

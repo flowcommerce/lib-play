@@ -1,6 +1,8 @@
 package io.flow.play.util
 
-class IdGeneratorSpec extends LibPlaySpec {
+import com.github.ghik.silencer.silent
+
+@silent class IdGeneratorSpec extends LibPlaySpec {
 
   private[this] val MinimumRandomLength = 16
 
@@ -51,7 +53,7 @@ class IdGeneratorSpec extends LibPlaySpec {
         prefix must be("tst")
         uuid.length must be(32)
       }
-      case other => {
+      case _ => {
         sys.error("Expected one dash")
       }
     }

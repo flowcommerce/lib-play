@@ -1,6 +1,8 @@
 package io.flow.play.util
 
-class BooleansSpec extends LibPlaySpec {
+import com.github.ghik.silencer.silent
+
+@silent class BooleansSpec extends LibPlaySpec {
 
   "parse" in {
     Booleans.parse("") must be(None)

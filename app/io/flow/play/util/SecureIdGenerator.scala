@@ -31,11 +31,11 @@ case class SecureIdGenerator(
     s"prefix[$prefix] must be between " +
     s"${SecureIdGenerator.MinPrefixLength} and ${SecureIdGenerator.MaxPrefixLength} characters"
   )
-  assert(!BadWords.contains(prefix), s"prefix[$prefix] is on the black list and cannot be used")
+  assert(!io.flow.util.BadWords.contains(prefix), s"prefix[$prefix] is on the black list and cannot be used")
 
 
   private[this] val tokenLength = 64 - prefix.length
-  private[this] val random = Random()
+  private[this] val random = io.flow.util.Random()
 
   def randomId(): String = {
     prefix + random.alphaNumeric(tokenLength)

@@ -1,11 +1,13 @@
 package io.flow.play.util
 
-class RandomSpec extends LibPlaySpec {
+import com.github.ghik.silencer.silent
+
+@silent class RandomSpec extends LibPlaySpec {
 
   private[this] val random = Random()
   private[this] val Length = 100
 
-  def validate(alphabet: String, values: Seq[String]) {
+  def validate(alphabet: String, values: Seq[String]): Unit = {
     val letters = alphabet.split("")
     values.distinct.size must be(values.size)
     values.forall { _.size == Length } must be(true)
@@ -29,7 +31,7 @@ class RandomSpec extends LibPlaySpec {
     }
   }
 
-  def validateDoesNotStartWithNumber(values: Seq[String]) {
+  def validateDoesNotStartWithNumber(values: Seq[String]): Unit = {
     val numbers = "0123456789".split("")
     val found = values.filter { v => numbers.contains(v.substring(0, 1)) }
     if (!found.isEmpty) {
@@ -40,19 +42,19 @@ class RandomSpec extends LibPlaySpec {
   "lowercaseAlpha" in {
     validate(
       "abcdefghijklmnopqrstuvwxyz",
-      1.to(100).map { i => random.lowercaseAlpha(Length) }
+      1.to(100).map { _ => random.lowercaseAlpha(Length) }
     )
   }
 
   "alpha" in {
     validate(
       "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ",
-      1.to(100).map { i => random.alpha(Length) }
+      1.to(100).map { _ => random.alpha(Length) }
     )
   }
 
   "alphaNumeric" in {
-    val values = 1.to(100).map { i => random.alphaNumeric(Length) }
+    val values = 1.to(100).map { _ => random.alphaNumeric(Length) }
     validate(
       s"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789",
       values
@@ -61,7 +63,7 @@ class RandomSpec extends LibPlaySpec {
   }
 
   "alphaNumericNonAmbiguous" in {
-    val values = 1.to(100).map { i => random.alphaNumericNonAmbiguous(Length) }
+    val values = 1.to(100).map { _ => random.alphaNumericNonAmbiguous(Length) }
     validate(
       s"abcdefghijkmnpqrstuvwxyzACEFHJKLMNPRTUVWXY3479",
       values
@@ -70,13 +72,13 @@ class RandomSpec extends LibPlaySpec {
   }
 
   "positiveInt" in {
-    val values = 1.to(100).map { i => random.positiveInt() }
+    val values = 1.to(100).map { _ => random.positiveInt() }
     values.distinct.size must be(values.size)
     values.forall { i => i > 0 } must be(true)
   }
 
   "positiveLong" in {
-    val values = 1.to(100).map { i => random.positiveLong() }
+    val values = 1.to(100).map { _ => random.positiveLong() }
     values.distinct.size must be(values.size)
     values.forall { i => i > 0 } must be(true)
   }

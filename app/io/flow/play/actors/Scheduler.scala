@@ -48,7 +48,7 @@ trait Scheduler {
     f: => T
   ) (
     implicit ec: ExecutionContext
-  ) {
+  ): Unit = {
     val seconds = config.requiredPositiveInt(configName)
     val initial = config.optionalPositiveInt(s"${configName}_initial").getOrElse(seconds)
     log.
@@ -57,12 +57,16 @@ trait Scheduler {
       withKeyValue("recurring_seconds", seconds).
       info("scheduleRecurring")
     system.scheduler.schedule(
-      FiniteDuration(initial, SECONDS),
-      FiniteDuration(seconds, SECONDS),
+      FiniteDuration(initial.toLong, SECONDS),
+      FiniteDuration(seconds.toLong, SECONDS),
       new Runnable {
-        def run(): Unit = f
+        def run(): Unit = {
+          f
+          ()
+        }
       }
     )
+    ()
   }
 
   def scheduleRecurringWithDefault[T](
@@ -73,7 +77,7 @@ trait Scheduler {
     f: => T
   )(
     implicit ec: ExecutionContext
-  ) {
+  ): Unit = {
     val seconds = config.optionalPositiveInt(configName).getOrElse(default)
     val initial = config.optionalPositiveInt(s"${configName}_initial").getOrElse(seconds)
 
@@ -84,12 +88,16 @@ trait Scheduler {
       info("scheduleRecurringWithDefault")
 
     system.scheduler.schedule(
-      FiniteDuration(initial, SECONDS),
-      FiniteDuration(seconds, SECONDS),
+      FiniteDuration(initial.toLong, SECONDS),
+      FiniteDuration(seconds.toLong, SECONDS),
       new Runnable {
-        def run(): Unit = f
+        def run(): Unit = {
+          f
+          ()
+        }
       }
     )
+    ()
   }
 
 }

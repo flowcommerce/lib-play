@@ -1,6 +1,8 @@
 package io.flow.play.util
 
-class FlowEnvironmentSpec extends LibPlaySpec {
+import com.github.ghik.silencer.silent
+
+@silent class FlowEnvironmentSpec extends LibPlaySpec {
 
   "fromString" in {
     FlowEnvironment.fromString("development") must be(Some(FlowEnvironment.Development))

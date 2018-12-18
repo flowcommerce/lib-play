@@ -1,12 +1,13 @@
 package io.flow.play.util
 
+import com.github.ghik.silencer.silent
 import io.flow.log.{RollbarLogger, RollbarProvider}
 import org.scalatest.concurrent.Eventually.{eventually, timeout}
 import org.scalatest.time.{Seconds, Span}
 
 import scala.concurrent.duration._
 
-class CacheWithFallbackToStaleDataSpec extends LibPlaySpec {
+@silent class CacheWithFallbackToStaleDataSpec extends LibPlaySpec {
 
   private[this] case class TestCacheWithFallbackToStaleData() extends CacheWithFallbackToStaleData[String, String] {
 
@@ -23,11 +24,11 @@ class CacheWithFallbackToStaleDataSpec extends LibPlaySpec {
         numberRefreshes += 1
         data += key -> nextValues.getOrElse(
           key,
-          data.getOrElse(key, sys.error("Missing test data for key[$key]"))
+          data.getOrElse(key, sys.error(s"Missing test data for key[$key]"))
         )
       }
 
-      data.getOrElse(key, sys.error("Missing test data for key[$key]"))
+      data.getOrElse(key, sys.error(s"Missing test data for key[$key]"))
     }
 
     def setNextValue(key: String, value: String): Unit = {
@@ -40,7 +41,7 @@ class CacheWithFallbackToStaleDataSpec extends LibPlaySpec {
   }
 
   private[this] def eventuallyInNSeconds[T](n: Int)(f: => T): T = {
-    eventually(timeout(Span(n, Seconds))) {
+    eventually(timeout(Span(n.toLong, Seconds))) {
       f
     }
   }

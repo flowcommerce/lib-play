@@ -21,7 +21,7 @@ class FormDataSpec extends LibPlaySpec {
 
     "returns JsValue" in {
       fdHelper.formDataToJson(data) match {
-        case res: JsValue => assert(true)
+        case _: JsValue => assert(true)
         case _ => assert(false)
       }
     }

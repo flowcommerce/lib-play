@@ -29,6 +29,7 @@ class SQSReceiverProxyActor(receiver: ActorRef, sqs: AmazonSQSAsync, serviceName
       receiver ! serde.deserialise(envelope.message, envelope.messageType)
       (msg, MessageAction.Delete)
     }.runWith(SqsAckSink(QueueUrl))
+    ()
   }
 
   override def receive: Receive = SafeReceive {

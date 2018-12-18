@@ -2,6 +2,7 @@ package io.flow.play.util
 
 import io.flow.error.v0.models.json._
 import io.flow.log.RollbarLogger
+import io.flow.util.{FlowEnvironment => FlowEnv}
 import javax.inject.Inject
 import play.api.http.HttpErrorHandler
 import play.api.libs.json.Json
@@ -19,7 +20,7 @@ import scala.concurrent.Future
   */
 class ErrorHandler @Inject() (logger: RollbarLogger) extends HttpErrorHandler {
 
-  private[this] val idGenerator = IdGenerator("err")
+  private[this] val idGenerator = io.flow.util.IdGenerator("err")
 
   def onClientError(request: RequestHeader, statusCode: Int, message: String): Future[Result] = {
     statusCode match {
@@ -45,9 +46,9 @@ class ErrorHandler @Inject() (logger: RollbarLogger) extends HttpErrorHandler {
       withKeyValue("request_id", requestId).
       error("server error", exception)
 
-    val msg = FlowEnvironment.Current match {
-      case FlowEnvironment.Development | FlowEnvironment.Workstation => s"A server error has occurred (#$errorId) for requestId($requestId). Additional info for development environment: $exception"
-      case FlowEnvironment.Production => s"A server error has occurred (#$errorId)"
+    val msg = FlowEnv.Current match {
+      case FlowEnv.Development | FlowEnv.Workstation => s"A server error has occurred (#$errorId) for requestId($requestId). Additional info for development environment: $exception"
+      case FlowEnv.Production => s"A server error has occurred (#$errorId)"
     }
 
     Future.successful(InternalServerError(Json.toJson(Validation.error(msg))))

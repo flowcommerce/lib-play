@@ -45,7 +45,7 @@ class DevelopmentRegistry @javax.inject.Inject() (
         val port = getById(applicationId).ports.headOption.getOrElse {
           sys.error(s"application[$applicationId] does not have any ports in registry")
         }
-        val host = RegistryConstants.developmentHost(applicationId, port.external)
+        val host = RegistryConstants.developmentHost(port.external)
         RegistryConstants.log("Development", applicationId, s"Host[$host] (can override via env var[$varName])")
         host
       }

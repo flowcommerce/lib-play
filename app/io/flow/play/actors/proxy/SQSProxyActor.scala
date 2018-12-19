@@ -2,6 +2,7 @@ package io.flow.play.actors.proxy
 
 import akka.actor.{ActorRef, Props}
 import com.amazonaws.services.sqs.AmazonSQSAsync
+import io.flow.log.RollbarLogger
 import play.api.libs.json.{Json, OFormat}
 
 object ProxyEnvelope {
@@ -11,12 +12,12 @@ case class ProxyEnvelope(senderActorPath: String, messageType: String, message: 
 
 object SQSProxyActor {
 
-  def senderProps(receiverActorName: String, serviceName: String, sqs: AmazonSQSAsync, serde: ProxySerde): Props = {
-    Props(new SQSSenderProxyActor(receiverActorName, sqs, serviceName, serde))
+  def senderProps(receiverActorName: String, serviceName: String, sqs: AmazonSQSAsync, serde: ProxySerde, rollbar: RollbarLogger): Props = {
+    Props(new SQSSenderProxyActor(receiverActorName, sqs, serviceName, serde, rollbar))
   }
 
-  def receiverProps(serviceName: String, receiver: ActorRef, sqs: AmazonSQSAsync, serde: ProxySerde): Props = {
-    Props(new SQSReceiverProxyActor(receiver, sqs, serviceName, serde))
+  def receiverProps(serviceName: String, receiver: ActorRef, sqs: AmazonSQSAsync, serde: ProxySerde, rollbar: RollbarLogger): Props = {
+    Props(new SQSReceiverProxyActor(receiver, sqs, serviceName, serde, rollbar))
   }
 
   private[proxy] def generateQueueUrl(receiverActorName: String, serviceName: String, sqs: AmazonSQSAsync): String = {

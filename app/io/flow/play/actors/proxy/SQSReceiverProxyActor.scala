@@ -6,12 +6,14 @@ import akka.stream.alpakka.sqs.scaladsl.{SqsAckSink, SqsSource}
 import akka.stream.alpakka.sqs.{MessageAction, SqsSourceSettings}
 import com.amazonaws.services.sqs.AmazonSQSAsync
 import io.flow.akka.SafeReceive
+import io.flow.log.RollbarLogger
 import play.api.libs.json.Json
 
-class SQSReceiverProxyActor(receiver: ActorRef, sqs: AmazonSQSAsync, serviceName: String, serde: ProxySerde) extends Actor with ActorLogging {
+class SQSReceiverProxyActor(receiver: ActorRef, sqs: AmazonSQSAsync, serviceName: String, serde: ProxySerde, rollbar: RollbarLogger) extends Actor with ActorLogging {
   // This binds the created stream to this actors lifecycle, (i.e. actor dies, stream dies)
   private implicit val mat: ActorMaterializer = ActorMaterializer()
   private implicit val sqsClient: AmazonSQSAsync = sqs
+  private implicit val configuredRollbar: RollbarLogger = rollbar.fingerprint("SQSReceiverProxyActor").withKeyValue("class", getClass.getName)
   private val QueueUrl = SQSProxyActor.generateQueueUrl(receiver.path.name, serviceName, sqs)
 
   private val Source = SqsSource(

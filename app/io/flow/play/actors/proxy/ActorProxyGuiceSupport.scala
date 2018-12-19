@@ -8,6 +8,7 @@ import com.github.ghik.silencer.silent
 import com.google.inject.name.Names
 import com.google.inject.util.Providers
 import com.google.inject.{AbstractModule, Binder}
+import io.flow.log.RollbarLogger
 import javax.inject.{Inject, Provider}
 import play.api.inject.{BindingKey, Injector}
 import play.api.libs.concurrent.AkkaGuiceSupport
@@ -42,6 +43,7 @@ trait ActorProxyGuiceSupport {
   @silent private class SenderProxyActorProvider(name: String, serde: ProxySerde) extends Provider[ActorRef] {
 
     @Inject private var actorSystem: ActorSystem = _
+    @Inject private var rollbar: RollbarLogger = _
     @Inject private var injector: Injector = _
     lazy val get = {
       val sqs = injector.instanceOf(classOf[AmazonSQSAsync])
@@ -49,7 +51,8 @@ trait ActorProxyGuiceSupport {
         receiverActorName = name,
         serviceName = serviceName,
         sqs = sqs,
-        serde = serde
+        serde = serde,
+        rollbar = rollbar,
       ), name)
     }
   }
@@ -57,6 +60,7 @@ trait ActorProxyGuiceSupport {
   @silent private class ReceiverProxyActorProvider(name: String, proxiedName: String, serde: ProxySerde) extends Provider[ActorRef] {
 
     @Inject private var actorSystem: ActorSystem = _
+    @Inject private var rollbar: RollbarLogger = _
     @Inject private var injector: Injector = _
     lazy val get = {
       val proxiedActorRef = injector.instanceOf(BindingKey(classOf[ActorRef]).qualifiedWith(proxiedName))
@@ -65,7 +69,8 @@ trait ActorProxyGuiceSupport {
         serviceName = serviceName,
         receiver = proxiedActorRef,
         sqs = sqs,
-        serde = serde
+        serde = serde,
+        rollbar = rollbar,
       ), name)
     }
   }

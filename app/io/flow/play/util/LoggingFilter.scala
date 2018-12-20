@@ -34,10 +34,10 @@ class FlowLoggingFilter @javax.inject.Inject() (
   def apply(f: RequestHeader => Future[Result])(requestHeader: RequestHeader): Future[Result] = {
     val startTime = System.currentTimeMillis
     f(requestHeader).map { result =>
-      /**
-        * If user defined a list of methods that produce logs, then use that
-        * Otherwise default to list defined here, which is everything
-        */
+      /*
+       * If user defined a list of methods that produce logs, then use that
+       * Otherwise default to list defined here, which is everything
+       */
       if (loggedRequestMethods.contains(requestHeader.method)) {
         val endTime = System.currentTimeMillis
         val requestTime = endTime - startTime

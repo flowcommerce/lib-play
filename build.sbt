@@ -18,7 +18,7 @@ lazy val root = project
       guice,
       "io.flow" %% "lib-util" % "0.1.4",
       "io.flow" %% "lib-akka" % "0.1.1",
-      "io.flow" %% "lib-log" % "0.0.47",
+      "io.flow" %% "lib-log" % "0.0.48",
       "com.jason-goodwin" %% "authentikat-jwt" % "0.4.5",
       "com.ning" % "async-http-client" % "1.9.40",
       "org.apache.commons" % "commons-io" % "1.3.2",

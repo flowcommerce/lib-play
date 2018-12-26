@@ -23,7 +23,7 @@ lazy val root = project
       "com.ning" % "async-http-client" % "1.9.40",
       "org.apache.commons" % "commons-io" % "1.3.2",
       // The following libs are Provided so dependencies are only included if io.flow.play.actors.proxy.* is used
-      "com.typesafe.akka" %% "akka-stream" % "2.5.18" % Provided,
+      "com.typesafe.akka" %% "akka-stream" % "2.5.19" % Provided,
       "com.typesafe.akka" %% "akka-slf4j" % "2.5.13" % Provided,
       "com.lightbend.akka" %% "akka-stream-alpakka-sqs" % "0.20" % Provided,
       "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test,

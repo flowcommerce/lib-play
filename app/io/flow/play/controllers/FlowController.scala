@@ -1,9 +1,9 @@
 package io.flow.play.controllers
 
 import javax.inject.Inject
-
 import com.google.inject.ImplementedBy
 import io.flow.common.v0.models.UserReference
+import io.flow.log.RollbarLogger
 import io.flow.play.util.{AuthData, AuthHeaders, Config, OrgAuthData}
 import play.api.mvc._
 
@@ -53,7 +53,7 @@ case class FlowDefaultControllerComponents @Inject()(
 ) extends FlowControllerComponents
 
 // Anonymous
-class AnonymousActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(implicit val executionContext: ExecutionContext)
+class AnonymousActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[AnonymousRequest, AnyContent] with FlowActionInvokeBlockHelper {
 
   def invokeBlock[A](request: Request[A], block: (AnonymousRequest[A]) => Future[Result]): Future[Result] = {
@@ -66,7 +66,7 @@ class AnonymousActionBuilder @Inject()(val parser: BodyParsers.Default, val conf
 }
 
 // Identified
-class IdentifiedActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(implicit val executionContext: ExecutionContext)
+class IdentifiedActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[IdentifiedRequest, AnyContent] with FlowActionInvokeBlockHelper {
 
   def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]): Future[Result] =
@@ -77,7 +77,7 @@ class IdentifiedActionBuilder @Inject()(val parser: BodyParsers.Default, val con
 }
 
 // Session
-class SessionActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(implicit val executionContext: ExecutionContext)
+class SessionActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[SessionRequest, AnyContent] with FlowActionInvokeBlockHelper {
 
   def invokeBlock[A](request: Request[A], block: (SessionRequest[A]) => Future[Result]): Future[Result] =
@@ -88,7 +88,7 @@ class SessionActionBuilder @Inject()(val parser: BodyParsers.Default, val config
 }
 
 // Org
-class OrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(implicit val executionContext: ExecutionContext)
+class OrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[OrgRequest, AnyContent] with FlowActionInvokeBlockHelper {
 
   def invokeBlock[A](request: Request[A], block: (OrgRequest[A]) => Future[Result]): Future[Result] =
@@ -99,7 +99,7 @@ class OrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Co
 }
 
 // IdentifiedOrg
-class IdentifiedOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(implicit val executionContext: ExecutionContext)
+class IdentifiedOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[IdentifiedOrgRequest, AnyContent] with FlowActionInvokeBlockHelper {
 
   def invokeBlock[A](request: Request[A], block: (IdentifiedOrgRequest[A]) => Future[Result]): Future[Result] =
@@ -110,7 +110,7 @@ class IdentifiedOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val 
 }
 
 // SessionOrg
-class SessionOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(implicit val executionContext: ExecutionContext)
+class SessionOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[SessionOrgRequest, AnyContent] with FlowActionInvokeBlockHelper {
 
   def invokeBlock[A](request: Request[A], block: (SessionOrgRequest[A]) => Future[Result]): Future[Result] =

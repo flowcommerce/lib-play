@@ -2,6 +2,7 @@ package io.flow.play.controllers
 
 import com.typesafe.config.ConfigFactory
 import io.flow.common.v0.models.{Environment, Role, UserReference}
+import io.flow.log.RollbarLogger
 import io.flow.play.clients.MockConfig
 import io.flow.play.util._
 import org.joda.time.DateTime
@@ -14,6 +15,8 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
 
   private[this] val user = UserReference("usr-20151006-1")
   private[this] val session = FlowSession(id = "F51test")
+
+  implicit val logger = app.injector.instanceOf[RollbarLogger]
 
   override def config: MockConfig = mockConfig
 

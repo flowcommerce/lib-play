@@ -4,10 +4,10 @@ import java.util.UUID
 
 import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
 import io.flow.common.v0.models.{Environment, Role, UserReference}
+import io.flow.log.RollbarLogger
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.format.ISODateTimeFormat.dateTime
-import play.api.Logger
 
 case class AuthDataMap(
   requestId: String,
@@ -119,11 +119,11 @@ object AuthDataMap {
 
   def fromMap[T <: AuthData](data: Map[String, String])(
     f: AuthDataMap => Option[T]
-  ): Option[T] = {
+  )(implicit logger: RollbarLogger): Option[T] = {
     data.get("created_at").flatMap { ts =>
       val createdAt = ISODateTimeFormat.dateTimeParser.parseDateTime(ts)
       val requestId = data.get(Fields.RequestId).getOrElse {
-        Logger.warn("JWT Token did not have a request_id - generated a new request id")
+        logger.warn("JWT Token did not have a request_id - generated a new request id")
         "lib-play-" + UUID.randomUUID.toString
       }
       val session = data.get(Fields.Session).map { id =>
@@ -135,7 +135,7 @@ object AuthDataMap {
       val environment: Option[Environment] = data.get(Fields.Environment).map(Environment.apply).flatMap { e =>
         e match {
           case Environment.UNDEFINED(other) => {
-            Logger.warn(s"Unexpected Environment[$other] - ignoring")
+            logger.withKeyValue("env", other).warn(s"Unexpected Environment - ignoring")
             None
           }
           case Environment.Production => Some(e)
@@ -146,7 +146,7 @@ object AuthDataMap {
       val role: Option[Role] = data.get(Fields.Role).map(Role.apply).flatMap { role =>
         role match {
           case Role.UNDEFINED(other) => {
-            Logger.warn(s"Unexpected Role[$other] - ignoring")
+            logger.withKeyValue("role", other).warn(s"Unexpected Role - ignoring")
             None
           }
           case Role.Member => Some(role)
@@ -195,7 +195,7 @@ object AuthData {
       session = None
     )
 
-    def fromMap(data: Map[String, String]): Option[Anonymous] = {
+    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[Anonymous] = {
       AuthDataMap.fromMap(data) { dm =>
         Some(
           Anonymous(
@@ -228,7 +228,7 @@ object AuthData {
 
   object Identified {
 
-    def fromMap(data: Map[String, String]): Option[Identified] = {
+    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[Identified] = {
       AuthDataMap.fromMap(data) { dm =>
         dm.user.map { user =>
           Identified(
@@ -259,7 +259,7 @@ object AuthData {
 
   object Session {
 
-    def fromMap(data: Map[String, String]): Option[Session] = {
+    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[Session] = {
       AuthDataMap.fromMap(data) { dm =>
         dm.session.map { session =>
           Session(
@@ -295,7 +295,7 @@ object OrgAuthData {
 
   object Session {
 
-    def fromMap(data: Map[String, String]): Option[Session] = {
+    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[Session] = {
       AuthDataMap.fromMap(data) { dm =>
         (dm.organization, dm.environment) match {
           case (Some(org), Some(env)) => {
@@ -339,7 +339,7 @@ object OrgAuthData {
 
   object Identified {
 
-    def fromMap(data: Map[String, String]): Option[Identified] = {
+    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[Identified] = {
       AuthDataMap.fromMap(data) { dm =>
         (dm.user, dm.organization, dm.environment, dm.role) match {
           case (Some(user), Some(org), Some(env), Some(role)) => {
@@ -366,7 +366,7 @@ object OrgAuthData {
     /**
       * Parses either an identified org or session org (or None)
       */
-    def fromMap(data: Map[String, String]): Option[io.flow.play.util.OrgAuthData] = {
+    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[io.flow.play.util.OrgAuthData] = {
       Identified.fromMap(data) match {
         case None => Session.fromMap(data)
         case Some(auth) => Some(auth)

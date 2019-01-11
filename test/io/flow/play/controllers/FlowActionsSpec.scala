@@ -16,7 +16,7 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
   private[this] val user = UserReference("usr-20151006-1")
   private[this] val session = FlowSession(id = "F51test")
 
-  implicit val logger = app.injector.instanceOf[RollbarLogger]
+  implicit val logger = RollbarLogger.SimpleLogger
 
   override def config: MockConfig = mockConfig
 

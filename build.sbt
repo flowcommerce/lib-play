@@ -16,7 +16,7 @@ lazy val root = project
       ws,
       filters,
       guice,
-      "io.flow" %% "lib-util" % "0.1.5",
+      "io.flow" %% "lib-util" % "0.1.6",
       "io.flow" %% "lib-akka" % "0.1.2",
       "io.flow" %% "lib-log" % "0.0.57",
       "com.jason-goodwin" %% "authentikat-jwt" % "0.4.5",

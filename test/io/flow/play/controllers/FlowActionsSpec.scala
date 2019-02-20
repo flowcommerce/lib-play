@@ -5,8 +5,9 @@ import io.flow.common.v0.models.{Environment, Role, UserReference}
 import io.flow.log.RollbarLogger
 import io.flow.play.clients.MockConfig
 import io.flow.play.util._
-import org.joda.time.DateTime
 import play.api.Configuration
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
 
@@ -144,11 +145,11 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
     parse(data.jwt(salt))(AuthData.Anonymous.fromMap).isDefined must be(true)
 
     parse(data.copy(
-      createdAt = DateTime.now.minusMinutes(1)
+      createdAt = Instant.now.minus(1.toLong, ChronoUnit.MINUTES)
     ).jwt(salt))(AuthData.Anonymous.fromMap).isDefined must be(true)
 
     parse(data.copy(
-      createdAt = DateTime.now.minusMinutes(5)
+      createdAt = Instant.now.minus(5.toLong, ChronoUnit.MINUTES)
     ).jwt(salt))(AuthData.Anonymous.fromMap).isDefined must be(false)
 
   }

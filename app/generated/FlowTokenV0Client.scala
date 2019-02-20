@@ -75,7 +75,7 @@ package io.flow.token.v0.models {
     user: io.flow.common.v0.models.UserReference,
     environment: io.flow.common.v0.models.Environment,
     partial: String,
-    createdAt: _root_.org.joda.time.DateTime,
+    createdAt: _root_.java.time.Instant,
     description: _root_.scala.Option[String] = None
   ) extends Token
 
@@ -110,7 +110,7 @@ package io.flow.token.v0.models {
     user: io.flow.common.v0.models.UserReference,
     environment: io.flow.common.v0.models.Environment,
     partial: String,
-    createdAt: _root_.org.joda.time.DateTime,
+    createdAt: _root_.java.time.Instant,
     description: _root_.scala.Option[String] = None
   ) extends Token
 
@@ -204,38 +204,8 @@ package io.flow.token.v0.models {
     import io.flow.error.v0.models.json._
     import io.flow.permission.v0.models.json._
     import io.flow.token.v0.models.json._
-
-    private[v0] implicit val jsonReadsUUID = __.read[String].map(java.util.UUID.fromString)
-
-    private[v0] implicit val jsonWritesUUID = new Writes[java.util.UUID] {
-      def writes(x: java.util.UUID) = JsString(x.toString)
-    }
-
-    private[v0] implicit val jsonReadsJodaDateTime = __.read[String].map { str =>
-      import org.joda.time.format.ISODateTimeFormat.dateTimeParser
-      dateTimeParser.parseDateTime(str)
-    }
-
-    private[v0] implicit val jsonWritesJodaDateTime = new Writes[org.joda.time.DateTime] {
-      def writes(x: org.joda.time.DateTime) = {
-        import org.joda.time.format.ISODateTimeFormat.dateTime
-        val str = dateTime.print(x)
-        JsString(str)
-      }
-    }
-
-    private[v0] implicit val jsonReadsJodaLocalDate = __.read[String].map { str =>
-      import org.joda.time.format.ISODateTimeFormat.dateParser
-      dateParser.parseLocalDate(str)
-    }
-
-    private[v0] implicit val jsonWritesJodaLocalDate = new Writes[org.joda.time.LocalDate] {
-      def writes(x: org.joda.time.LocalDate) = {
-        import org.joda.time.format.ISODateTimeFormat.date
-        val str = date.print(x)
-        JsString(str)
-      }
-    }
+    import play.api.libs.json.Writes._
+    import play.api.libs.json.Reads._
 
     implicit def jsonReadsTokenCleartext: play.api.libs.json.Reads[Cleartext] = {
       (__ \ "value").read[String].map { x => new Cleartext(value = x) }
@@ -262,7 +232,7 @@ package io.flow.token.v0.models {
         user <- (__ \ "user").read[io.flow.common.v0.models.UserReference]
         environment <- (__ \ "environment").read[io.flow.common.v0.models.Environment]
         partial <- (__ \ "partial").read[String]
-        createdAt <- (__ \ "created_at").read[_root_.org.joda.time.DateTime]
+        createdAt <- (__ \ "created_at").read[_root_.java.time.Instant]
         description <- (__ \ "description").readNullable[String]
       } yield OrganizationToken(id, organization, user, environment, partial, createdAt, description)
     }
@@ -274,7 +244,7 @@ package io.flow.token.v0.models {
         "user" -> io.flow.common.v0.models.json.jsObjectUserReference(obj.user),
         "environment" -> play.api.libs.json.JsString(obj.environment.toString),
         "partial" -> play.api.libs.json.JsString(obj.partial),
-        "created_at" -> play.api.libs.json.JsString(_root_.org.joda.time.format.ISODateTimeFormat.dateTime.print(obj.createdAt))
+        "created_at" -> play.api.libs.json.JsString(obj.createdAt.toString)
       ) ++ (obj.description match {
         case None => play.api.libs.json.Json.obj()
         case Some(x) => play.api.libs.json.Json.obj("description" -> play.api.libs.json.JsString(x))
@@ -330,7 +300,7 @@ package io.flow.token.v0.models {
         user <- (__ \ "user").read[io.flow.common.v0.models.UserReference]
         environment <- (__ \ "environment").read[io.flow.common.v0.models.Environment]
         partial <- (__ \ "partial").read[String]
-        createdAt <- (__ \ "created_at").read[_root_.org.joda.time.DateTime]
+        createdAt <- (__ \ "created_at").read[_root_.java.time.Instant]
         description <- (__ \ "description").readNullable[String]
       } yield PartnerToken(id, partner, user, environment, partial, createdAt, description)
     }
@@ -342,7 +312,7 @@ package io.flow.token.v0.models {
         "user" -> io.flow.common.v0.models.json.jsObjectUserReference(obj.user),
         "environment" -> play.api.libs.json.JsString(obj.environment.toString),
         "partial" -> play.api.libs.json.JsString(obj.partial),
-        "created_at" -> play.api.libs.json.JsString(_root_.org.joda.time.format.ISODateTimeFormat.dateTime.print(obj.createdAt))
+        "created_at" -> play.api.libs.json.JsString(obj.createdAt.toString)
       ) ++ (obj.description match {
         case None => play.api.libs.json.Json.obj()
         case Some(x) => play.api.libs.json.Json.obj("description" -> play.api.libs.json.JsString(x))
@@ -531,11 +501,11 @@ package io.flow.token.v0 {
     import Core._
 
     object Core {
-      implicit def pathBindableDateTimeIso8601(implicit stringBinder: QueryStringBindable[String]): PathBindable[_root_.org.joda.time.DateTime] = ApibuilderPathBindable(ApibuilderTypes.dateTimeIso8601)
-      implicit def queryStringBindableDateTimeIso8601(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[_root_.org.joda.time.DateTime] = ApibuilderQueryStringBindable(ApibuilderTypes.dateTimeIso8601)
+      implicit def pathBindableDateTimeIso8601(implicit stringBinder: QueryStringBindable[String]): PathBindable[_root_.java.time.Instant] = ApibuilderPathBindable(ApibuilderTypes.dateTimeIso8601)
+      implicit def queryStringBindableDateTimeIso8601(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[_root_.java.time.Instant] = ApibuilderQueryStringBindable(ApibuilderTypes.dateTimeIso8601)
 
-      implicit def pathBindableDateIso8601(implicit stringBinder: QueryStringBindable[String]): PathBindable[_root_.org.joda.time.LocalDate] = ApibuilderPathBindable(ApibuilderTypes.dateIso8601)
-      implicit def queryStringBindableDateIso8601(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[_root_.org.joda.time.LocalDate] = ApibuilderQueryStringBindable(ApibuilderTypes.dateIso8601)
+      implicit def pathBindableDateIso8601(implicit stringBinder: QueryStringBindable[String]): PathBindable[_root_.java.time.LocalDate] = ApibuilderPathBindable(ApibuilderTypes.dateIso8601)
+      implicit def queryStringBindableDateIso8601(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[_root_.java.time.LocalDate] = ApibuilderQueryStringBindable(ApibuilderTypes.dateIso8601)
     }
 
     trait ApibuilderTypeConverter[T] {
@@ -558,16 +528,16 @@ package io.flow.token.v0 {
     }
 
     object ApibuilderTypes {
-      import org.joda.time.{format, DateTime, LocalDate}
+      import java.time.{Instant, LocalDate}
 
-      val dateTimeIso8601: ApibuilderTypeConverter[DateTime] = new ApibuilderTypeConverter[DateTime] {
-        override def convert(value: String): DateTime = format.ISODateTimeFormat.dateTimeParser.parseDateTime(value)
-        override def convert(value: DateTime): String = format.ISODateTimeFormat.dateTime.print(value)
-        override def example: DateTime = DateTime.now
+      val dateTimeIso8601: ApibuilderTypeConverter[Instant] = new ApibuilderTypeConverter[Instant] {
+        override def convert(value: String): Instant = Instant.parse(value)
+        override def convert(value: Instant): String = value.toString
+        override def example: Instant = Instant.now
       }
 
       val dateIso8601: ApibuilderTypeConverter[LocalDate] = new ApibuilderTypeConverter[LocalDate] {
-        override def convert(value: String): LocalDate = format.ISODateTimeFormat.yearMonthDay.parseLocalDate(value)
+        override def convert(value: String): LocalDate = LocalDate.parse(value)
         override def convert(value: LocalDate): String = value.toString
         override def example: LocalDate = LocalDate.now
       }

@@ -35,3 +35,8 @@ code:
       generators:
         play_2_6_client: "app/generated"
         play_2_6_mock_client: "app/generated"
+
+attributes:
+  generators:
+    "*":
+      scala_generator.time_library: java

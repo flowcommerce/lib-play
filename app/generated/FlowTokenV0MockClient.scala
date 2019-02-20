@@ -180,7 +180,7 @@ package io.flow.token.v0.mock {
       user = io.flow.common.v0.mock.Factories.makeUserReference(),
       environment = io.flow.common.v0.mock.Factories.makeEnvironment(),
       partial = Factories.randomString(),
-      createdAt = org.joda.time.DateTime.now,
+      createdAt = java.time.Instant.now,
       description = None
     )
 
@@ -202,7 +202,7 @@ package io.flow.token.v0.mock {
       user = io.flow.common.v0.mock.Factories.makeUserReference(),
       environment = io.flow.common.v0.mock.Factories.makeEnvironment(),
       partial = Factories.randomString(),
-      createdAt = org.joda.time.DateTime.now,
+      createdAt = java.time.Instant.now,
       description = None
     )
 

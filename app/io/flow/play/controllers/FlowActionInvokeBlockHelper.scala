@@ -5,6 +5,8 @@ import com.github.ghik.silencer.silent
 import io.flow.play.util.{AuthData, AuthHeaders, Config}
 import play.api.mvc.{Headers, Request, Result}
 import play.api.mvc.Results.Unauthorized
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 trait FlowActionInvokeBlockHelper {
   def config: Config
@@ -31,6 +33,6 @@ trait FlowActionInvokeBlockHelper {
 
   protected def parseJwtToken[T <: AuthData](claimsSet: JwtClaimsSetJValue)(f: Map[String, String] => Option[T]): Option[T] =
     claimsSet.asSimpleMap.toOption.flatMap { claims =>
-    f(claims).filter { auth => auth.createdAt.plusSeconds(authExpirationTimeSeconds).isAfterNow }
+    f(claims).filter { auth => auth.createdAt.plus(authExpirationTimeSeconds.toLong, ChronoUnit.SECONDS).isAfter(Instant.now()) }
   }
 }

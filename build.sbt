@@ -1,6 +1,6 @@
 import play.sbt.PlayScala._
 
-name := "lib-play-play26"
+name := "lib-play-javatime"
 
 organization := "io.flow"
 
@@ -8,7 +8,7 @@ scalaVersion in ThisBuild := "2.12.8"
 
 version := "0.5.41"
 
-val timeLibSuffix = ""
+val timeLibSuffix = "-javatime"
 
 lazy val root = project
   .in(file("."))

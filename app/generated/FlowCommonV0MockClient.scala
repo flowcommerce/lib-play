@@ -125,8 +125,8 @@ package io.flow.common.v0.mock {
     )
 
     def makeDatetimeRange(): io.flow.common.v0.models.DatetimeRange = io.flow.common.v0.models.DatetimeRange(
-      from = org.joda.time.DateTime.now,
-      to = org.joda.time.DateTime.now
+      from = java.time.Instant.now,
+      to = java.time.Instant.now
     )
 
     def makeDimension(): io.flow.common.v0.models.Dimension = io.flow.common.v0.models.Dimension(

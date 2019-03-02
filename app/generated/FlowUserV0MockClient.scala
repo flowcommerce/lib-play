@@ -188,7 +188,7 @@ package io.flow.user.v0.mock {
 
     def makeUserVersion(): io.flow.user.v0.models.UserVersion = io.flow.user.v0.models.UserVersion(
       id = Factories.randomString(),
-      timestamp = org.joda.time.DateTime.now,
+      timestamp = java.time.Instant.now,
       `type` = io.flow.common.v0.mock.Factories.makeChangeType(),
       user = io.flow.common.v0.mock.Factories.makeUser()
     )

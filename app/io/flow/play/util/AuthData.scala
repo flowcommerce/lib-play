@@ -5,13 +5,13 @@ import java.util.UUID
 import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
 import io.flow.common.v0.models.{Environment, Role, UserReference}
 import io.flow.log.RollbarLogger
-import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
-import org.joda.time.format.ISODateTimeFormat.dateTime
+import io.flow.util.DateHelper
+import java.time.{ Instant, ZoneOffset }
+import java.time.format.DateTimeFormatter
 
 case class AuthDataMap(
   requestId: String,
-  createdAt: DateTime,
+  createdAt: Instant,
   session: Option[FlowSession] = None,
   user: Option[UserReference] = None,
   organization: Option[String] = None,
@@ -22,7 +22,7 @@ case class AuthDataMap(
   def toMap: Map[String, String] = {
     Map(
       AuthDataMap.Fields.RequestId -> Some(requestId),
-      AuthDataMap.Fields.CreatedAt -> Some(dateTime.print(createdAt)),
+      AuthDataMap.Fields.CreatedAt -> Some(DateTimeFormatter.ISO_INSTANT.format(createdAt.atOffset(ZoneOffset.UTC))),
       AuthDataMap.Fields.UserId -> user.map(_.id),
       AuthDataMap.Fields.Session -> session.map(_.id),
       AuthDataMap.Fields.Organization -> organization,
@@ -67,7 +67,7 @@ sealed trait AuthData {
   /**
     * Timestamp is used to expire authorizations automatically
     */
-  def createdAt: DateTime
+  def createdAt: Instant
 
   /**
     * In production, we set request id in the API Proxy, and it is
@@ -121,7 +121,7 @@ object AuthDataMap {
     f: AuthDataMap => Option[T]
   )(implicit logger: RollbarLogger): Option[T] = {
     data.get("created_at").flatMap { ts =>
-      val createdAt = ISODateTimeFormat.dateTimeParser.parseDateTime(ts)
+      val createdAt = DateHelper.ISODateTimeParser.parse(ts, Instant.from(_))
       val requestId = data.get(Fields.RequestId).getOrElse {
         logger.warn("JWT Token did not have a request_id - generated a new request id")
         "lib-play-" + UUID.randomUUID.toString
@@ -172,7 +172,7 @@ object AuthDataMap {
 object AuthData {
 
   case class Anonymous(
-    override val createdAt: DateTime = DateTime.now,
+    override val createdAt: Instant = Instant.now,
     override val requestId: String,
     user: Option[UserReference],
     session: Option[FlowSession]
@@ -211,7 +211,7 @@ object AuthData {
   }
 
   case class Identified(
-    override val createdAt: DateTime = DateTime.now,
+    override val createdAt: Instant = Instant.now,
     override val requestId: String,
     user: UserReference,
     session: Option[FlowSession]
@@ -244,7 +244,7 @@ object AuthData {
   }
 
   case class Session(
-    override val createdAt: DateTime = DateTime.now,
+    override val createdAt: Instant = Instant.now,
     override val requestId: String,
     session: FlowSession
   ) extends AuthData {
@@ -277,7 +277,7 @@ object AuthData {
 object OrgAuthData {
 
   case class Session(
-    override val createdAt: DateTime = DateTime.now,
+    override val createdAt: Instant = Instant.now,
     override val requestId: String,
     override val organization: String,
     override val environment: Environment,
@@ -316,7 +316,7 @@ object OrgAuthData {
   }
 
   case class Identified(
-    override val createdAt: DateTime = DateTime.now,
+    override val createdAt: Instant = Instant.now,
     override val requestId: String,
     override val organization: String,
     override val environment: Environment,

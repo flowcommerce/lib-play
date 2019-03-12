@@ -6,7 +6,7 @@ organization := "io.flow"
 
 scalaVersion in ThisBuild := "2.12.8"
 
-version := "0.5.36"
+version := "0.5.38"
 
 lazy val root = project
   .in(file("."))
@@ -60,4 +60,3 @@ publishTo := {
     Some("Artifactory Realm" at s"$host/libs-release-local")
   }
 }
-version := "0.5.37"

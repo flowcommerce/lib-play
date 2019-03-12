@@ -116,6 +116,11 @@ package io.flow.common.v0.mock {
       number = None,
       phone = None,
       email = None,
+      address = None,
+      invoice = None
+    )
+
+    def makeCustomerInvoice(): io.flow.common.v0.models.CustomerInvoice = io.flow.common.v0.models.CustomerInvoice(
       address = None
     )
 

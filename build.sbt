@@ -18,9 +18,9 @@ lazy val root = project
       ws,
       filters,
       guice,
-      "io.flow" %% s"lib-util$timeLibSuffix" % "0.1.17",
+      "io.flow" %% s"lib-util$timeLibSuffix" % "0.1.19",
       "io.flow" %% s"lib-akka$timeLibSuffix" % "0.1.3",
-      "io.flow" %% s"lib-log$timeLibSuffix" % "0.0.65",
+      "io.flow" %% s"lib-log$timeLibSuffix" % "0.0.67",
       "com.jason-goodwin" %% "authentikat-jwt" % "0.4.5",
       "com.ning" % "async-http-client" % "1.9.40",
       "org.apache.commons" % "commons-io" % "1.3.2",
@@ -31,7 +31,7 @@ lazy val root = project
       "org.scalatestplus.play" %% "scalatestplus-play" % "3.1.2" % Test,
       "net.logstash.logback" % "logstash-logback-encoder" % "5.2",
       specs2 % Test,
-      compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.3.0"),
+      compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.3.1"),
       "com.github.ghik" %% "silencer-lib" % "1.3.0" % Provided
     ),
     

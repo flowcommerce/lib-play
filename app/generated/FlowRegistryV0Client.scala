@@ -64,7 +64,7 @@ package io.flow.registry.v0.models {
 
   final case class ApplicationVersion(
     id: String,
-    timestamp: _root_.java.time.Instant,
+    timestamp: _root_.org.joda.time.DateTime,
     `type`: io.flow.common.v0.models.ChangeType,
     application: io.flow.registry.v0.models.Application
   )
@@ -127,7 +127,7 @@ package io.flow.registry.v0.models {
 
   final case class ServiceVersion(
     id: String,
-    timestamp: _root_.java.time.Instant,
+    timestamp: _root_.org.joda.time.DateTime,
     `type`: io.flow.common.v0.models.ChangeType,
     service: io.flow.registry.v0.models.Service
   )
@@ -156,8 +156,34 @@ package io.flow.registry.v0.models {
     import io.flow.common.v0.models.json._
     import io.flow.error.v0.models.json._
     import io.flow.registry.v0.models.json._
-    import play.api.libs.json.Writes._
-    import play.api.libs.json.Reads._
+
+    private[v0] implicit val jsonReadsUUID = __.read[String].map { str =>
+      _root_.java.util.UUID.fromString(str)
+    }
+
+    private[v0] implicit val jsonWritesUUID = new Writes[_root_.java.util.UUID] {
+      def writes(x: _root_.java.util.UUID) = JsString(x.toString)
+    }
+
+    private[v0] implicit val jsonReadsJodaDateTime = __.read[String].map { str =>
+      _root_.org.joda.time.format.ISODateTimeFormat.dateTimeParser.parseDateTime(str)
+    }
+
+    private[v0] implicit val jsonWritesJodaDateTime = new Writes[_root_.org.joda.time.DateTime] {
+      def writes(x: _root_.org.joda.time.DateTime) = {
+        JsString(_root_.org.joda.time.format.ISODateTimeFormat.dateTime.print(x))
+      }
+    }
+
+    private[v0] implicit val jsonReadsJodaLocalDate = __.read[String].map { str =>
+      _root_.org.joda.time.format.ISODateTimeFormat.dateTimeParser.parseLocalDate(str)
+    }
+
+    private[v0] implicit val jsonWritesJodaLocalDate = new Writes[_root_.org.joda.time.LocalDate] {
+      def writes(x: _root_.org.joda.time.LocalDate) = {
+        JsString(_root_.org.joda.time.format.ISODateTimeFormat.date.print(x))
+      }
+    }
 
     implicit def jsonReadsRegistryApplication: play.api.libs.json.Reads[Application] = {
       for {
@@ -258,7 +284,7 @@ package io.flow.registry.v0.models {
     implicit def jsonReadsRegistryApplicationVersion: play.api.libs.json.Reads[ApplicationVersion] = {
       for {
         id <- (__ \ "id").read[String]
-        timestamp <- (__ \ "timestamp").read[_root_.java.time.Instant]
+        timestamp <- (__ \ "timestamp").read[_root_.org.joda.time.DateTime]
         `type` <- (__ \ "type").read[io.flow.common.v0.models.ChangeType]
         application <- (__ \ "application").read[io.flow.registry.v0.models.Application]
       } yield ApplicationVersion(id, timestamp, `type`, application)
@@ -267,7 +293,7 @@ package io.flow.registry.v0.models {
     def jsObjectApplicationVersion(obj: io.flow.registry.v0.models.ApplicationVersion): play.api.libs.json.JsObject = {
       play.api.libs.json.Json.obj(
         "id" -> play.api.libs.json.JsString(obj.id),
-        "timestamp" -> play.api.libs.json.JsString(obj.timestamp.toString),
+        "timestamp" -> play.api.libs.json.JsString(_root_.org.joda.time.format.ISODateTimeFormat.dateTime.print(obj.timestamp)),
         "type" -> play.api.libs.json.JsString(obj.`type`.toString),
         "application" -> jsObjectApplication(obj.application)
       )
@@ -420,7 +446,7 @@ package io.flow.registry.v0.models {
     implicit def jsonReadsRegistryServiceVersion: play.api.libs.json.Reads[ServiceVersion] = {
       for {
         id <- (__ \ "id").read[String]
-        timestamp <- (__ \ "timestamp").read[_root_.java.time.Instant]
+        timestamp <- (__ \ "timestamp").read[_root_.org.joda.time.DateTime]
         `type` <- (__ \ "type").read[io.flow.common.v0.models.ChangeType]
         service <- (__ \ "service").read[io.flow.registry.v0.models.Service]
       } yield ServiceVersion(id, timestamp, `type`, service)
@@ -429,7 +455,7 @@ package io.flow.registry.v0.models {
     def jsObjectServiceVersion(obj: io.flow.registry.v0.models.ServiceVersion): play.api.libs.json.JsObject = {
       play.api.libs.json.Json.obj(
         "id" -> play.api.libs.json.JsString(obj.id),
-        "timestamp" -> play.api.libs.json.JsString(obj.timestamp.toString),
+        "timestamp" -> play.api.libs.json.JsString(_root_.org.joda.time.format.ISODateTimeFormat.dateTime.print(obj.timestamp)),
         "type" -> play.api.libs.json.JsString(obj.`type`.toString),
         "service" -> jsObjectService(obj.service)
       )

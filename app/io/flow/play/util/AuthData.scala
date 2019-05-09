@@ -16,7 +16,8 @@ case class AuthDataMap(
   user: Option[UserReference] = None,
   organization: Option[String] = None,
   environment: Option[Environment] = None,
-  role: Option[Role] = None
+  role: Option[Role] = None,
+  customer: Option[CustomerReference] = None
 ) {
 
   def toMap: Map[String, String] = {
@@ -27,7 +28,8 @@ case class AuthDataMap(
       AuthDataMap.Fields.Session -> session.map(_.id),
       AuthDataMap.Fields.Organization -> organization,
       AuthDataMap.Fields.Environment -> environment.map(_.toString),
-      AuthDataMap.Fields.Role -> role.map(_.toString)
+      AuthDataMap.Fields.Role -> role.map(_.toString),
+      AuthDataMap.Fields.Customer -> customer.map(_.number),
     ).flatMap { case (k, value) => value.map { v => k -> v } }
   }
 
@@ -49,6 +51,18 @@ case class FlowSession(
     s"Flow session id must start with '${io.flow.util.Constants.Prefixes.Session}' and not[${id.substring(0, 3)}]"
   )
 }
+
+/**
+  * Makes available key data from the flow customer. These data
+  * come from the JWT Headers usually set by the API proxy. We
+  * do not make ALL customer data available - but provide a base
+  * class here to expose more information over time as it becomes
+  * critical (as well as providing a strongly typed class to
+  * store the customer number)
+  */
+case class CustomerReference(
+  number: String
+)
 
 /**
   * Represents the data securely authenticated by the API proxy
@@ -115,6 +129,7 @@ object AuthDataMap {
     val Organization = "organization"
     val Environment = "environment"
     val Role = "role"
+    val Customer = "customer"
   }
 
   def fromMap[T <: AuthData](data: Map[String, String])(
@@ -154,6 +169,10 @@ object AuthDataMap {
         }
       }
 
+      val customer = data.get(Fields.Customer).map { number =>
+        CustomerReference(number = number)
+      }
+
       f(
         AuthDataMap(
           createdAt = createdAt,
@@ -162,7 +181,8 @@ object AuthDataMap {
           user = user,
           organization = organizationId,
           environment = environment,
-          role = role
+          role = role,
+          customer = customer
         )
       )
     }
@@ -175,13 +195,15 @@ object AuthData {
     override val createdAt: DateTime = DateTime.now,
     override val requestId: String,
     user: Option[UserReference],
-    session: Option[FlowSession]
+    session: Option[FlowSession],
+    customer: Option[CustomerReference]
   ) extends AuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
       base.copy(
         user = user,
-        session = session
+        session = session,
+        customer = customer
       )
     }
 
@@ -192,7 +214,8 @@ object AuthData {
     val Empty = Anonymous(
       requestId = AuthHeaders.generateRequestId("anonymousrequest"),
       user = None,
-      session = None
+      session = None,
+      customer = None
     )
 
     def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[Anonymous] = {
@@ -202,7 +225,8 @@ object AuthData {
             createdAt = dm.createdAt,
             requestId = dm.requestId,
             user = dm.user,
-            session = dm.session
+            session = dm.session,
+            customer = dm.customer
           )
         )
       }
@@ -214,13 +238,15 @@ object AuthData {
     override val createdAt: DateTime = DateTime.now,
     override val requestId: String,
     user: UserReference,
-    session: Option[FlowSession]
+    session: Option[FlowSession],
+    customer: Option[CustomerReference]
   ) extends AuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
       base.copy(
         user = Some(user),
-        session = session
+        session = session,
+        customer = customer
       )
     }
 
@@ -235,7 +261,8 @@ object AuthData {
             createdAt = dm.createdAt,
             requestId = dm.requestId,
             user = user,
-            session = dm.session
+            session = dm.session,
+            customer = dm.customer
           )
         }
       }
@@ -267,6 +294,42 @@ object AuthData {
             requestId = dm.requestId,
             session = session
           )
+        }
+      }
+    }
+
+  }
+
+  case class IdentifiedCustomer(
+    override val createdAt: DateTime = DateTime.now,
+    override val requestId: String,
+    session: FlowSession,
+    customer: CustomerReference
+  ) extends AuthData {
+
+    override protected def decorate(base: AuthDataMap): AuthDataMap = {
+      base.copy(
+        session = Some(session),
+        customer = Some(customer)
+      )
+    }
+
+  }
+
+  object IdentifiedCustomer {
+
+    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[IdentifiedCustomer] = {
+      AuthDataMap.fromMap(data) { dm =>
+        (dm.session, dm.customer) match {
+          case (Some(session), Some(customer)) =>
+            Some(IdentifiedCustomer(
+              createdAt = dm.createdAt,
+              requestId = dm.requestId,
+              session = session,
+              customer = customer
+            ))
+
+          case _ => None
         }
       }
     }
@@ -322,7 +385,8 @@ object OrgAuthData {
     override val environment: Environment,
     user: UserReference,
     role: Role,
-    session: Option[FlowSession]
+    session: Option[FlowSession],
+    customer: Option[CustomerReference]
   ) extends OrgAuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
@@ -331,7 +395,8 @@ object OrgAuthData {
         environment = Some(environment),
         user = Some(user),
         role = Some(role),
-        session = session
+        session = session,
+        customer = customer
       )
     }
 
@@ -351,9 +416,50 @@ object OrgAuthData {
                 organization = org,
                 environment = env,
                 role = role,
-                session = dm.session
+                session = dm.session,
+                customer = dm.customer
               )
             )
+          }
+          case _ => None
+        }
+      }
+    }
+  }
+
+  case class IdentifiedCustomer(
+    override val createdAt: DateTime = DateTime.now,
+    override val requestId: String,
+    override val organization: String,
+    override val environment: Environment,
+    session: FlowSession,
+    customer: CustomerReference
+  ) extends OrgAuthData {
+
+    override protected def decorate(base: AuthDataMap): AuthDataMap = {
+      base.copy(
+        organization = Some(organization),
+        environment = Some(environment),
+        session = Some(session),
+        customer = Some(customer)
+      )
+    }
+  }
+
+  object IdentifiedCustomer {
+
+    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[IdentifiedCustomer] = {
+      AuthDataMap.fromMap(data) { dm =>
+        (dm.organization, dm.environment, dm.session, dm.customer) match {
+          case (Some(org), Some(env), Some(session), Some(customer)) => {
+            Some(IdentifiedCustomer(
+              createdAt = dm.createdAt,
+              requestId = dm.requestId,
+              session = session,
+              organization = org,
+              environment = env,
+              customer = customer
+            ))
           }
           case _ => None
         }

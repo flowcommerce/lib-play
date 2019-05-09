@@ -29,6 +29,7 @@ trait FlowController extends BaseController with FlowControllerHelpers {
   def IdentifiedOrg: IdentifiedOrgActionBuilder = flowControllerComponents.identifiedOrgActionBuilder
   def SessionOrg: SessionOrgActionBuilder = flowControllerComponents.sessionOrgActionBuilder
   def IdentifiedCookie: IdentifiedCookieActionBuilder = flowControllerComponents.identifiedCookieActionBuilder
+  def IdentifiedCustomer: IdentifiedCustomerActionBuilder = flowControllerComponents.identifiedCustomerActionBuilder
 }
 
 @ImplementedBy(classOf[FlowDefaultControllerComponents])
@@ -40,6 +41,7 @@ trait FlowControllerComponents {
   def identifiedOrgActionBuilder: IdentifiedOrgActionBuilder
   def sessionOrgActionBuilder: SessionOrgActionBuilder
   def identifiedCookieActionBuilder: IdentifiedCookieActionBuilder
+  def identifiedCustomerActionBuilder: IdentifiedCustomerActionBuilder
 }
 
 case class FlowDefaultControllerComponents @Inject()(
@@ -49,7 +51,8 @@ case class FlowDefaultControllerComponents @Inject()(
   orgActionBuilder: OrgActionBuilder,
   identifiedOrgActionBuilder: IdentifiedOrgActionBuilder,
   sessionOrgActionBuilder: SessionOrgActionBuilder,
-  identifiedCookieActionBuilder: IdentifiedCookieActionBuilder
+  identifiedCookieActionBuilder: IdentifiedCookieActionBuilder,
+  identifiedCustomerActionBuilder: IdentifiedCustomerActionBuilder
 ) extends FlowControllerComponents
 
 // Anonymous
@@ -141,4 +144,15 @@ object IdentifiedCookie {
     def withIdentifiedCookieUser(user: UserReference): Result = result.withSession(UserKey -> user.id.toString)
   }
 
+}
+
+// IdentifiedCustomer
+class IdentifiedCustomerActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
+  extends ActionBuilder[IdentifiedCustomerRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  def invokeBlock[A](request: Request[A], block: (IdentifiedCustomerRequest[A]) => Future[Result]): Future[Result] =
+    auth(request.headers)(OrgAuthData.IdentifiedCustomer.fromMap) match {
+      case None => Future.successful(unauthorized(request))
+      case Some(ad) => block(new IdentifiedCustomerRequest(ad, request))
+    }
 }

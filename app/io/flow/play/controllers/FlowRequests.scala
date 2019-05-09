@@ -43,6 +43,16 @@ class IdentifiedOrgRequest[A](
   val environment: Environment = auth.environment
 }
 
+class IdentifiedCustomerRequest[A](
+                                val auth: OrgAuthData.IdentifiedCustomer,
+                                request: Request[A]
+                              ) extends WrappedRequest[A](request) {
+  val organization: String = auth.organization
+  val environment: Environment = auth.environment
+  val flowSession: FlowSession = auth.session
+  val customer: CustomerReference = auth.customer
+}
+
 /**
   * Any type of request that contains org data
   */

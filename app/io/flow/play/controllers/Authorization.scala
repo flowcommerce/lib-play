@@ -10,6 +10,7 @@ import scala.util.Try
 
 trait Authorization
 
+case class JwtCustomerToken(customer: String) extends Authorization
 case class JwtToken(userId: String) extends Authorization
 case class Token(token: String) extends Authorization
 
@@ -45,8 +46,21 @@ class AuthorizationImpl @Inject() (
           case JsonWebToken(_, claimsSet, _) if jwtIsValid(value) => createJwtToken(claimsSet)
           case JsonWebToken(_, claimsSet, _) =>
             val tokenData = createJwtToken(claimsSet)
+
+            val data = tokenData match {
+              case Some(t) =>
+                t match {
+                  case userToken: JwtToken => userToken.userId
+                  case customerToken: JwtCustomerToken => customerToken.customer
+                  case _ => "unknown"
+                }
+
+              case _ => "unknown"
+
+            }
+
             logger.
-              withKeyValue("user_id", tokenData.map(_.userId).getOrElse("unknown")).
+              withKeyValue("data", data).
               info("JWT Token was invalid, bad salt")
             None
           case _ => None
@@ -60,8 +74,11 @@ class AuthorizationImpl @Inject() (
     // swallow errors when decoding - for instance algo not supported
     Try(JsonWebToken.validate(token, jwtSalt)).getOrElse(false)
 
-  private[this] def createJwtToken(claimsSet: JwtClaimsSetJValue): Option[JwtToken] =
+  private[this] def createJwtToken(claimsSet: JwtClaimsSetJValue): Option[Authorization] =
     claimsSet.asSimpleMap.toOption.flatMap { claims =>
-      claims.get("id").map(JwtToken)
+      val userIdToken = claims.get("id").map(JwtToken)
+      val customerToken = claims.get("customer").map(JwtCustomerToken)
+
+      userIdToken.orElse(customerToken)
     }
 }

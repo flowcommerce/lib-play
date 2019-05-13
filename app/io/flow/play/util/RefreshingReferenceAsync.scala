@@ -59,31 +59,34 @@ trait RefreshingReferenceAsync[T] {
   /**
     * Forces the cache to refresh. If successful, the cache is refreshed with the latest data, otherwise the cache is not refreshed.
     *
-    * @return true if cache is successfully refreshed and false otherwise
+    * @return the result of the refresh call, potentially a failed [[Future]]
     */
   def forceRefresh(): Future[T] = doRefresh()
 
   def get: T = cache.get().value
 
   // load blocking and fail if the retrieval is not successful after maxAttempts
-  private[this] val cache: AtomicReference[Result[T]] =
+  private[this] val cache: AtomicReference[AsyncResult[T]] =
     Try(Await.result(doLoadRetry(1, maxAttempts), 10.minutes)) match {
       case Success(data) =>
         new AtomicReference(data)
       case Failure(ex) =>
-        log.
-          withKeyValue("max_attempts", maxAttempts).
-          warn("Failed to initialize cache", ex)
+        log
+          .withKeyValue("max_attempts", maxAttempts)
+          .warn("Failed to initialize cache", ex)
         throw ex
     }
 
   // schedule subsequent reloads
-  scheduler.schedule(reloadInterval, reloadInterval)(doRefresh())(retrieveExecutionContext)
+  scheduler.schedule(reloadInterval, reloadInterval) {
+    doRefresh()
+    ()
+  }(retrieveExecutionContext)
 
   private def doRefresh(): Future[T] = {
     val res = doLoadRetry(1, maxAttempts)
-      // update cache
-      res.onComplete {
+    // update cache
+    res.onComplete {
       case Success(data) =>
         // only set if requested at is after
         cache.updateAndGet { current  =>
@@ -91,32 +94,34 @@ trait RefreshingReferenceAsync[T] {
           else current
         }
       case Failure(ex) =>
-        log.
-          withKeyValue("max_attempts", maxAttempts).
-          withKeyValue("reload_interval", reloadInterval.toString).
-          warn(s"Failed to refresh cache. Will try again in $reloadInterval", ex)
+        log
+          .withKeyValue("max_attempts", maxAttempts)
+          .withKeyValue("reload_interval", reloadInterval.toString)
+          .warn(s"Failed to refresh cache. Will try again in $reloadInterval", ex)
     }(retrieveExecutionContext)
 
     res.map(_.value)(retrieveExecutionContext)
   }
 
-
-  private def doLoadRetry(attempts: Int, maxAttempts: Int): Future[Result[T]] = {
+  private def doLoadRetry(attempts: Int, maxAttempts: Int): Future[AsyncResult[T]] = {
     val requestedAt = ZonedDateTime.now()
-    retrieve
-      .map(f => Result(requestedAt, f))(retrieveExecutionContext)
+    // In case the provided retrieve throws an exception, enclose in a Future
+    Future
+      .unit
+      .flatMap(_ => retrieve)(retrieveExecutionContext)
+      .map(f => AsyncResult(requestedAt, f))(retrieveExecutionContext)
       .recoverWith { case ex if attempts < maxAttempts =>
-      log.
-        withKeyValue("max_attempts", maxAttempts).
-        withKeyValue("reload_interval", reloadInterval.toString).
-        info(s"Failed to refresh cache ($attempts/$maxAttempts). Trying again...", ex)
-      doLoadRetry(attempts + 1, maxAttempts)
-    }(retrieveExecutionContext)
+        log.
+          withKeyValue("max_attempts", maxAttempts).
+          withKeyValue("reload_interval", reloadInterval.toString).
+          info(s"Failed to refresh cache ($attempts/$maxAttempts). Trying again...", ex)
+        doLoadRetry(attempts + 1, maxAttempts)
+      }(retrieveExecutionContext)
   }
 
 }
 
-private case class Result[T](
+private case class AsyncResult[T](
   requestedAt: java.time.ZonedDateTime,
   value: T
 )

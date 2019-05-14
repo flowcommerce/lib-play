@@ -3,7 +3,7 @@ package io.flow.play.util
 import java.time.ZonedDateTime
 import java.util.concurrent.atomic.AtomicReference
 
-import akka.actor.Scheduler
+import akka.actor.{ActorSystem, Scheduler}
 import io.flow.log.RollbarLogger
 
 import scala.concurrent.duration.{FiniteDuration, _}
@@ -11,10 +11,11 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 /**
-  * Maintains a reference that gets refreshed every `reloadInterval`
+  * Maintains a reference that gets asynchronously refreshed every `reloadInterval`.
   *
-  * The data is refreshed every `reloadInterval` period calling the `retrieve` function up to `maxAtttempts` times
-  * Upon successful completion, the data is refreshed with the retrieved data, otherwise the cache is not refreshed.
+  * The data is asynchronously refreshed every `reloadInterval` period calling the `retrieve` function up to
+  * `maxAtttempts` times if the function throws an exception or is completed by a failure.
+  * Upon successful completion, the cached is refreshed with the retrieved data, otherwise the cache is not refreshed.
   *
   * The class will not initialize if the retrieval function fails the first `maxAttempts` times to avoid querying a
   * cache that has never been initialized.
@@ -132,12 +133,12 @@ object RefreshingReferenceAsync {
     * Helper function to create a new [[RefreshingReference]]
     */
   def apply[T](
-    rollbarLogger: RollbarLogger,
+    retrieve: () => Future[T],
     scheduler: Scheduler,
     retrieveExecutionContext: ExecutionContext,
-    reloadInterval: FiniteDuration,
-    retrieve: () => Future[T],
-    maxAttempts: Int = 3
+    rollbarLogger: RollbarLogger,
+    reloadInterval: FiniteDuration = 1.minute,
+    maxAttempts: Int = 3,
   ): RefreshingReferenceAsync[T] = {
     val schedulerOuter = scheduler
     val retrieveExecutionContextOuter = retrieveExecutionContext
@@ -153,5 +154,25 @@ object RefreshingReferenceAsync {
       override def maxAttempts: Int = maxAttemptsOuter
     }
   }
+
+  /**
+    * Helper function to create a new [[RefreshingReference]]
+    *
+    * Uses the system's scheduler and default dispatcher
+    */
+  def fromActorSystem[T](
+    retrieve: () => Future[T],
+    system: ActorSystem,
+    rollbarLogger: RollbarLogger,
+    reloadInterval: FiniteDuration = 1.minute,
+    maxAttempts: Int = 3
+  ): RefreshingReferenceAsync[T] = apply(
+    retrieve = retrieve,
+    scheduler = system.scheduler,
+    retrieveExecutionContext = system.dispatcher,
+    reloadInterval = reloadInterval,
+    rollbarLogger = rollbarLogger,
+    maxAttempts = maxAttempts
+  )
 
 }

@@ -25,7 +25,7 @@ class RefreshingReferenceAsyncSpec extends WordSpec with GuiceOneAppPerSuite wit
     retrieve: () => Future[Map[K, V]],
     maxAttempts: Int = 1
   ): RefreshingReferenceAsync[Map[K, V]] =
-    RefreshingReferenceAsync(logger, app.actorSystem.scheduler, app.actorSystem.dispatcher, reloadPeriod, retrieve, maxAttempts)
+    RefreshingReferenceAsync.fromActorSystem(retrieve, app.actorSystem, logger, reloadPeriod, maxAttempts)
 
   "RefreshingReferenceAsync" should {
 

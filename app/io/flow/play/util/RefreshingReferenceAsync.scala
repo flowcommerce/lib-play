@@ -15,10 +15,23 @@ import scala.util.{Failure, Success, Try}
   *
   * The data is asynchronously refreshed every `reloadInterval` period calling the `retrieve` function up to
   * `maxAtttempts` times if the function throws an exception or is completed by a failure.
-  * Upon successful completion, the cached is refreshed with the retrieved data, otherwise the cache is not refreshed.
+  * Upon successful completion, the cached is refreshed with the retrieved data, otherwise the cache is not refreshed
+  * and will retry `reloadInterval` after the first failed attempt.
   *
   * The class will not initialize if the retrieval function fails the first `maxAttempts` times to avoid querying a
   * cache that has never been initialized.
+  *
+  * Example usage:
+  *
+  * {{{
+  *   val cache = RefreshingReferenceAsync.fromActorSystem[Seq[Feature]](
+  *     retrieve = () => client.getAllFeatures,
+  *     system = system,
+  *     logger = logger,
+  *     reloadInterval = 2.minutes
+  *   )
+  * }}}
+  *
   */
 trait RefreshingReferenceAsync[T] {
 

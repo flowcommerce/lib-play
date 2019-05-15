@@ -6,6 +6,20 @@ import io.flow.log.RollbarLogger
 import scala.concurrent.duration.{FiniteDuration, _}
 import scala.concurrent.{ExecutionContext, Future}
 
+/**
+  * Example:
+  *
+  * {{{
+  * val cache = RefreshingReferenceAsync.fromActorSystem[String, String](
+  *   retrieve = () => client.getAllFeatures.map(features.groupBy(_.organizationId).mapValues(_.featureKey)),
+  *   system = system,
+  *   logger = logger,
+  *   reloadInterval = 2.minutes
+  * )
+  * // ...
+  * val hasFeature: Boolean = cache.getKey("org").contains("some_feature")
+  * }}}
+  */
 trait RefreshingBulkCacheAsync[K, V] extends RefreshingReferenceAsync[Map[K, V]] {
 
   def getKey(key: K): Option[V] = super.get.get(key)

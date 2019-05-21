@@ -10,7 +10,11 @@ import scala.util.Try
 
 trait Authorization
 
-case class JwtCustomerToken(customer: String) extends Authorization
+case class JwtIdentifiedToken(
+  order: String,
+  session: Option[String],
+  customer: Option[String]
+) extends Authorization
 case class JwtToken(userId: String) extends Authorization
 case class Token(token: String) extends Authorization
 
@@ -30,7 +34,10 @@ class AuthorizationImpl @Inject() (
   /**
     * Parses the actual authorization header value. Acceptable types are:
     * - Basic - the API Token for the user.
-    * - Bearer - the JWT Token for the user with that contains an id field representing the user id in the database
+    * - Bearer (one of)
+    *   - the JWT Token for the user that contains an id field representing the user id in the database
+    *   - the JWT Token for the order that contains an order field representing the order number in the database
+    *     with an optional customer field representing the customer number in the database
     */
   def get(headerValue: String): Option[Authorization] = {
     headerValue.split(" ").toList match {
@@ -51,7 +58,11 @@ class AuthorizationImpl @Inject() (
               case Some(t) =>
                 t match {
                   case userToken: JwtToken => userToken.userId
-                  case customerToken: JwtCustomerToken => customerToken.customer
+                  case identifiedToken: JwtIdentifiedToken =>
+                    (Seq(identifiedToken.order)
+                      ++ identifiedToken.session
+                      ++ identifiedToken.customer
+                      ).mkString("-")
                   case _ => "unknown"
                 }
 
@@ -77,8 +88,14 @@ class AuthorizationImpl @Inject() (
   private[this] def createJwtToken(claimsSet: JwtClaimsSetJValue): Option[Authorization] =
     claimsSet.asSimpleMap.toOption.flatMap { claims =>
       val userIdToken = claims.get("id").map(JwtToken)
-      val customerToken = claims.get("customer").map(JwtCustomerToken)
+      val identifiedToken = claims.get("order").map { o =>
+        JwtIdentifiedToken(
+          order = o,
+          session = claims.get("session"),
+          customer = claims.get("customer")
+        )
+      }
 
-      userIdToken.orElse(customerToken)
+      userIdToken.orElse(identifiedToken)
     }
 }

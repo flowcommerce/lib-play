@@ -1,6 +1,6 @@
 package io.flow.play.util
 
-import io.flow.common.v0.models.{Environment, Role, UserReference}
+import io.flow.common.v0.models.{CustomerReference, Environment, Role, UserReference}
 import javax.inject.{Inject, Singleton}
 
 /**

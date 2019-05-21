@@ -3,7 +3,7 @@ package io.flow.play.util
 import java.util.UUID
 
 import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
-import io.flow.common.v0.models.{Environment, Role, UserReference}
+import io.flow.common.v0.models.{CustomerReference, Environment, Role, UserReference}
 import io.flow.log.RollbarLogger
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
@@ -51,18 +51,6 @@ case class FlowSession(
     s"Flow session id must start with '${io.flow.util.Constants.Prefixes.Session}' and not[${id.substring(0, 3)}]"
   )
 }
-
-/**
-  * Makes available key data from the flow customer. These data
-  * come from the JWT Headers usually set by the API proxy. We
-  * do not make ALL customer data available - but provide a base
-  * class here to expose more information over time as it becomes
-  * critical (as well as providing a strongly typed class to
-  * store the customer number)
-  */
-case class CustomerReference(
-  number: String
-)
 
 /**
   * Represents the data securely authenticated by the API proxy

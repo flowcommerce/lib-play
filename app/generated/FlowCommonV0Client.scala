@@ -221,6 +221,13 @@ package io.flow.common.v0.models {
     address: _root_.scala.Option[io.flow.common.v0.models.BillingAddress] = None
   )
 
+  /**
+   * @param number Customer identification number as represented in the client's system
+   */
+  final case class CustomerReference(
+    number: String
+  )
+
   final case class DatetimeRange(
     from: _root_.org.joda.time.DateTime,
     to: _root_.org.joda.time.DateTime
@@ -3272,6 +3279,24 @@ package io.flow.common.v0.models {
       new play.api.libs.json.Writes[io.flow.common.v0.models.CustomerInvoice] {
         def writes(obj: io.flow.common.v0.models.CustomerInvoice) = {
           jsObjectCustomerInvoice(obj)
+        }
+      }
+    }
+
+    implicit def jsonReadsCommonCustomerReference: play.api.libs.json.Reads[CustomerReference] = {
+      (__ \ "number").read[String].map { x => new CustomerReference(number = x) }
+    }
+
+    def jsObjectCustomerReference(obj: io.flow.common.v0.models.CustomerReference): play.api.libs.json.JsObject = {
+      play.api.libs.json.Json.obj(
+        "number" -> play.api.libs.json.JsString(obj.number)
+      )
+    }
+
+    implicit def jsonWritesCommonCustomerReference: play.api.libs.json.Writes[CustomerReference] = {
+      new play.api.libs.json.Writes[io.flow.common.v0.models.CustomerReference] {
+        def writes(obj: io.flow.common.v0.models.CustomerReference) = {
+          jsObjectCustomerReference(obj)
         }
       }
     }

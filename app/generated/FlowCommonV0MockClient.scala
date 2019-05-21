@@ -117,6 +117,10 @@ package io.flow.common.v0.mock {
       address = None
     )
 
+    def makeCustomerReference(): io.flow.common.v0.models.CustomerReference = io.flow.common.v0.models.CustomerReference(
+      number = Factories.randomString(24)
+    )
+
     def makeDatetimeRange(): io.flow.common.v0.models.DatetimeRange = io.flow.common.v0.models.DatetimeRange(
       from = _root_.org.joda.time.DateTime.now,
       to = _root_.org.joda.time.DateTime.now

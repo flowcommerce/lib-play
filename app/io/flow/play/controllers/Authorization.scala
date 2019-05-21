@@ -57,7 +57,7 @@ class AuthorizationImpl @Inject() (
   }
 
   private[this] def jwtIsValid(token: String): Boolean =
-  // swallow errors when decoding - for instance algo not supported
+    // swallow errors when decoding - for instance algo not supported
     Try(JsonWebToken.validate(token, jwtSalt)).getOrElse(false)
 
   private[this] def createJwtToken(claimsSet: JwtClaimsSetJValue): Option[JwtToken] =

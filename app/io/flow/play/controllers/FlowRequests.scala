@@ -43,8 +43,8 @@ class IdentifiedOrgRequest[A](
   val environment: Environment = auth.environment
 }
 
-class IdentifiedCustomerRequest[A](
-                                val auth: OrgAuthData.IdentifiedCustomer,
+class CustomerRequest[A](
+                                val auth: OrgAuthData.Customer,
                                 request: Request[A]
                               ) extends WrappedRequest[A](request) {
   val organization: String = auth.organization

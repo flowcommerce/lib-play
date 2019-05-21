@@ -170,8 +170,8 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
     } must be(data)
   }
 
-  "parse OrgAuthData.IdentifiedCustomer" in {
-    val data = OrgAuthData.IdentifiedCustomer(
+  "parse OrgAuthData.Customer" in {
+    val data = OrgAuthData.Customer(
       requestId = "test",
       session = session,
       organization = "demo",
@@ -179,7 +179,7 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
       customer = customer
     )
 
-    parse(data.jwt(salt))(OrgAuthData.IdentifiedCustomer.fromMap).getOrElse {
+    parse(data.jwt(salt))(OrgAuthData.Customer.fromMap).getOrElse {
       sys.error("Failed to parse")
     } must be(data)
   }

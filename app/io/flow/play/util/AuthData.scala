@@ -300,7 +300,7 @@ object AuthData {
 
   }
 
-  case class IdentifiedCustomer(
+  case class Customer(
     override val createdAt: DateTime = DateTime.now,
     override val requestId: String,
     session: FlowSession,
@@ -316,13 +316,13 @@ object AuthData {
 
   }
 
-  object IdentifiedCustomer {
+  object Customer {
 
-    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[IdentifiedCustomer] = {
+    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[Customer] = {
       AuthDataMap.fromMap(data) { dm =>
         (dm.session, dm.customer) match {
           case (Some(session), Some(customer)) =>
-            Some(IdentifiedCustomer(
+            Some(Customer(
               createdAt = dm.createdAt,
               requestId = dm.requestId,
               session = session,
@@ -427,7 +427,7 @@ object OrgAuthData {
     }
   }
 
-  case class IdentifiedCustomer(
+  case class Customer(
     override val createdAt: DateTime = DateTime.now,
     override val requestId: String,
     override val organization: String,
@@ -446,13 +446,13 @@ object OrgAuthData {
     }
   }
 
-  object IdentifiedCustomer {
+  object Customer {
 
-    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[IdentifiedCustomer] = {
+    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[Customer] = {
       AuthDataMap.fromMap(data) { dm =>
         (dm.organization, dm.environment, dm.session, dm.customer) match {
           case (Some(org), Some(env), Some(session), Some(customer)) => {
-            Some(IdentifiedCustomer(
+            Some(Customer(
               createdAt = dm.createdAt,
               requestId = dm.requestId,
               session = session,
@@ -473,10 +473,9 @@ object OrgAuthData {
       * Parses either an identified org or session org (or None)
       */
     def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[io.flow.play.util.OrgAuthData] = {
-      Identified.fromMap(data) match {
-        case None => Session.fromMap(data)
-        case Some(auth) => Some(auth)
-      }
+      Identified.fromMap(data)
+        .orElse(Customer.fromMap(data))
+        .orElse(Session.fromMap(data))
     }
   }
 

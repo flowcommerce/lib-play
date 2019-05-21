@@ -29,7 +29,7 @@ trait FlowController extends BaseController with FlowControllerHelpers {
   def IdentifiedOrg: IdentifiedOrgActionBuilder = flowControllerComponents.identifiedOrgActionBuilder
   def SessionOrg: SessionOrgActionBuilder = flowControllerComponents.sessionOrgActionBuilder
   def IdentifiedCookie: IdentifiedCookieActionBuilder = flowControllerComponents.identifiedCookieActionBuilder
-  def IdentifiedCustomer: IdentifiedCustomerActionBuilder = flowControllerComponents.identifiedCustomerActionBuilder
+  def Customer: CustomerActionBuilder = flowControllerComponents.customerActionBuilder
 }
 
 @ImplementedBy(classOf[FlowDefaultControllerComponents])
@@ -41,7 +41,7 @@ trait FlowControllerComponents {
   def identifiedOrgActionBuilder: IdentifiedOrgActionBuilder
   def sessionOrgActionBuilder: SessionOrgActionBuilder
   def identifiedCookieActionBuilder: IdentifiedCookieActionBuilder
-  def identifiedCustomerActionBuilder: IdentifiedCustomerActionBuilder
+  def customerActionBuilder: CustomerActionBuilder
 }
 
 case class FlowDefaultControllerComponents @Inject()(
@@ -52,7 +52,7 @@ case class FlowDefaultControllerComponents @Inject()(
   identifiedOrgActionBuilder: IdentifiedOrgActionBuilder,
   sessionOrgActionBuilder: SessionOrgActionBuilder,
   identifiedCookieActionBuilder: IdentifiedCookieActionBuilder,
-  identifiedCustomerActionBuilder: IdentifiedCustomerActionBuilder
+  customerActionBuilder: CustomerActionBuilder
 ) extends FlowControllerComponents
 
 // Anonymous
@@ -146,13 +146,13 @@ object IdentifiedCookie {
 
 }
 
-// IdentifiedCustomer
-class IdentifiedCustomerActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
-  extends ActionBuilder[IdentifiedCustomerRequest, AnyContent] with FlowActionInvokeBlockHelper {
+// Customer
+class CustomerActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
+  extends ActionBuilder[CustomerRequest, AnyContent] with FlowActionInvokeBlockHelper {
 
-  def invokeBlock[A](request: Request[A], block: (IdentifiedCustomerRequest[A]) => Future[Result]): Future[Result] =
-    auth(request.headers)(OrgAuthData.IdentifiedCustomer.fromMap) match {
+  def invokeBlock[A](request: Request[A], block: (CustomerRequest[A]) => Future[Result]): Future[Result] =
+    auth(request.headers)(OrgAuthData.Customer.fromMap) match {
       case None => Future.successful(unauthorized(request))
-      case Some(ad) => block(new IdentifiedCustomerRequest(ad, request))
+      case Some(ad) => block(new CustomerRequest(ad, request))
     }
 }

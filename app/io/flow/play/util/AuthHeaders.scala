@@ -64,8 +64,8 @@ object AuthHeaders {
     requestId: String = generateRequestId(),
     session: FlowSession = createFlowSession(),
     customer: CustomerReference = createCustomerReference()
-  ): AuthData.IdentifiedCustomer = {
-    AuthData.IdentifiedCustomer(
+  ): AuthData.Customer = {
+    AuthData.Customer(
       requestId = requestId,
       session = session,
       customer = customer

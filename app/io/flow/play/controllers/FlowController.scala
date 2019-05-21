@@ -147,10 +147,12 @@ object IdentifiedCookie {
 }
 
 // Customer
-class CustomerActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
-  extends ActionBuilder[CustomerRequest, AnyContent] with FlowActionInvokeBlockHelper {
+class CustomerActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(
+  implicit private val logger: RollbarLogger,
+  implicit val executionContext: ExecutionContext
+) extends ActionBuilder[CustomerRequest, AnyContent] with FlowActionInvokeBlockHelper {
 
-  def invokeBlock[A](request: Request[A], block: (CustomerRequest[A]) => Future[Result]): Future[Result] =
+  def invokeBlock[A](request: Request[A], block: CustomerRequest[A] => Future[Result]): Future[Result] =
     auth(request.headers)(OrgAuthData.Customer.fromMap) match {
       case None => Future.successful(unauthorized(request))
       case Some(ad) => block(new CustomerRequest(ad, request))

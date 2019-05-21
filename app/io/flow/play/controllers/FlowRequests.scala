@@ -1,6 +1,6 @@
 package io.flow.play.controllers
 
-import io.flow.common.v0.models.{Environment, UserReference}
+import io.flow.common.v0.models.{CustomerReference, Environment, UserReference}
 import io.flow.play.util._
 import play.api.mvc._
 

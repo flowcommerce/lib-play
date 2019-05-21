@@ -1,7 +1,7 @@
 package io.flow.play.controllers
 
 import com.typesafe.config.ConfigFactory
-import io.flow.common.v0.models.{Environment, Role, UserReference}
+import io.flow.common.v0.models.{CustomerReference, Environment, Role, UserReference}
 import io.flow.log.RollbarLogger
 import io.flow.play.clients.MockConfig
 import io.flow.play.util._

@@ -12,7 +12,7 @@ trait Authorization
 
 case class JwtIdentifiedToken(
   order: String,
-  session: Option[String],
+  session: String,
   customer: Option[String]
 ) extends Authorization
 case class JwtToken(userId: String) extends Authorization
@@ -88,13 +88,18 @@ class AuthorizationImpl @Inject() (
   private[this] def createJwtToken(claimsSet: JwtClaimsSetJValue): Option[Authorization] =
     claimsSet.asSimpleMap.toOption.flatMap { claims =>
       val userIdToken = claims.get("id").map(JwtToken)
-      val identifiedToken = claims.get("order").map { o =>
-        JwtIdentifiedToken(
-          order = o,
-          session = claims.get("session"),
-          customer = claims.get("customer")
-        )
-      }
+      val identifiedToken =
+        (claims.get("order"), claims.get("session")) match {
+          case (Some(o), Some(s)) =>
+            Some(
+              JwtIdentifiedToken(
+                order = o,
+                session = s,
+                customer = claims.get("customer")
+              )
+            )
+          case _ => None
+        }
 
       userIdToken.orElse(identifiedToken)
     }

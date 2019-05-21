@@ -84,7 +84,7 @@ trait RefreshingReferenceAsync[T] {
 
   // load blocking and fail if the retrieval is not successful after maxAttempts
   private[this] val cache: AtomicReference[AsyncResult[T]] =
-    Try(Await.result(doLoadRetry(1, maxAttempts), 10.minutes)) match {
+    Try(Await.result(doLoadRetry(1, maxAttempts), 10.seconds)) match {
       case Success(data) =>
         new AtomicReference(data)
       case Failure(ex) =>

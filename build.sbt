@@ -18,7 +18,7 @@ lazy val root = project
       ws,
       filters,
       guice,
-      "io.flow" %% s"lib-util$timeLibSuffix" % "0.1.21",
+      "io.flow" %% s"lib-util$timeLibSuffix" % "0.1.22",
       "io.flow" %% s"lib-akka$timeLibSuffix" % "0.1.3",
       "io.flow" %% s"lib-log$timeLibSuffix" % "0.0.70",
       "com.jason-goodwin" %% "authentikat-jwt" % "0.4.5",
@@ -66,3 +66,4 @@ publishTo := {
 }
 
 version := "0.5.52"
+version := "0.5.53"

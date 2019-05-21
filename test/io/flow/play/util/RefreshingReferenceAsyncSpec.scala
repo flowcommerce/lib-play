@@ -147,6 +147,21 @@ class RefreshingReferenceAsyncSpec extends WordSpec with GuiceOneAppPerSuite wit
       f.eitherValue.value.right.value shouldBe Map("2" -> 2)
     }
 
+    "fetch at most once at a time" in {
+      val retrieve = mock[() => Future[Map[String, Int]]]
+      Mockito.when(retrieve.apply())
+        .thenReturn(Future.successful(Map("1" -> 1)))
+        .thenReturn(futures.delayed(50.millis)(Future.successful(Map("2" -> 2))))
+
+      val cache = createCache(10.millis, retrieve)
+
+      eventually(Timeout(100.millis)) {
+        cache.get shouldBe Map("2" -> 2)
+        Mockito.verify(retrieve, Mockito.times(2)).apply()
+      }
+
+    }
+
   }
 
 }

@@ -1,6 +1,6 @@
 package io.flow.play.util
 
-import io.flow.common.v0.models.{Environment, Role, UserReference}
+import io.flow.common.v0.models.{CustomerReference, Environment, Role, UserReference}
 import javax.inject.{Inject, Singleton}
 
 /**
@@ -39,12 +39,14 @@ object AuthHeaders {
   def user(
     user: UserReference,
     requestId: String = generateRequestId(),
-    session: Option[FlowSession] = None
+    session: Option[FlowSession] = None,
+    customer: Option[CustomerReference] = None
   ): AuthData.Identified = {
     AuthData.Identified(
       requestId = requestId,
       user = user,
-      session = session
+      session = session,
+      customer = customer
     )
   }
 
@@ -55,6 +57,18 @@ object AuthHeaders {
     AuthData.Session(
       requestId = requestId,
       session = session
+    )
+  }
+
+  def customer(
+    requestId: String = generateRequestId(),
+    session: FlowSession = createFlowSession(),
+    customer: CustomerReference = createCustomerReference()
+  ): AuthData.Customer = {
+    AuthData.Customer(
+      requestId = requestId,
+      session = session,
+      customer = customer
     )
   }
 
@@ -69,7 +83,8 @@ object AuthHeaders {
     role: Role = Role.Member,
     environment: Environment = Environment.Sandbox,
     requestId: String = generateRequestId(),
-    session: Option[FlowSession] = None
+    session: Option[FlowSession] = None,
+    customer: Option[CustomerReference] = None
 ): OrgAuthData.Identified = {
     OrgAuthData.Identified(
       requestId = requestId,
@@ -77,7 +92,8 @@ object AuthHeaders {
       organization = org,
       environment = environment,
       role = role,
-      session = session
+      session = session,
+      customer = customer
     )
   }
 
@@ -103,6 +119,12 @@ object AuthHeaders {
   def createFlowSession(): FlowSession = {
     FlowSession(
       id = io.flow.util.Constants.Prefixes.Session + random.alphaNumeric(36)
+    )
+  }
+
+  def createCustomerReference(): CustomerReference = {
+    CustomerReference(
+      number = random.alphaNumeric(36)
     )
   }
 

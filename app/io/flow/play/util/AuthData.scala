@@ -289,7 +289,7 @@ object AuthData {
   }
 
   case class Customer(
-    override val createdAt: DateTime = DateTime.now,
+    override val createdAt: Instant = Instant.now,
     override val requestId: String,
     session: FlowSession,
     customer: CustomerReference
@@ -416,7 +416,7 @@ object OrgAuthData {
   }
 
   case class Customer(
-    override val createdAt: DateTime = DateTime.now,
+    override val createdAt: Instant = Instant.now,
     override val requestId: String,
     override val organization: String,
     override val environment: Environment,

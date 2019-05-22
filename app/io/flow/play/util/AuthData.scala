@@ -287,42 +287,7 @@ object AuthData {
     }
 
   }
-
-  case class Customer(
-    override val createdAt: DateTime = DateTime.now,
-    override val requestId: String,
-    session: FlowSession,
-    customer: CustomerReference
-  ) extends AuthData {
-
-    override protected def decorate(base: AuthDataMap): AuthDataMap = {
-      base.copy(
-        session = Some(session),
-        customer = Some(customer)
-      )
-    }
-
-  }
-
-  object Customer {
-
-    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[Customer] = {
-      AuthDataMap.fromMap(data) { dm =>
-        (dm.session, dm.customer) match {
-          case (Some(session), Some(customer)) =>
-            Some(Customer(
-              createdAt = dm.createdAt,
-              requestId = dm.requestId,
-              session = session,
-              customer = customer
-            ))
-
-          case _ => None
-        }
-      }
-    }
-
-  }
+  
 }
 
 object OrgAuthData {

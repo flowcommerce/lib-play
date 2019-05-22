@@ -62,11 +62,15 @@ object AuthHeaders {
 
   def customer(
     requestId: String = generateRequestId(),
+    org: String,
+    environment: Environment = Environment.Sandbox,
     session: FlowSession = createFlowSession(),
     customer: CustomerReference = createCustomerReference()
-  ): AuthData.Customer = {
-    AuthData.Customer(
+  ): OrgAuthData.Customer = {
+    OrgAuthData.Customer(
       requestId = requestId,
+      organization = org,
+      environment = environment,
       session = session,
       customer = customer
     )

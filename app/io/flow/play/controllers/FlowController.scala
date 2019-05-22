@@ -29,6 +29,7 @@ trait FlowController extends BaseController with FlowControllerHelpers {
   def IdentifiedOrg: IdentifiedOrgActionBuilder = flowControllerComponents.identifiedOrgActionBuilder
   def SessionOrg: SessionOrgActionBuilder = flowControllerComponents.sessionOrgActionBuilder
   def IdentifiedCookie: IdentifiedCookieActionBuilder = flowControllerComponents.identifiedCookieActionBuilder
+  def Customer: CustomerActionBuilder = flowControllerComponents.customerActionBuilder
 }
 
 @ImplementedBy(classOf[FlowDefaultControllerComponents])
@@ -40,6 +41,7 @@ trait FlowControllerComponents {
   def identifiedOrgActionBuilder: IdentifiedOrgActionBuilder
   def sessionOrgActionBuilder: SessionOrgActionBuilder
   def identifiedCookieActionBuilder: IdentifiedCookieActionBuilder
+  def customerActionBuilder: CustomerActionBuilder
 }
 
 case class FlowDefaultControllerComponents @Inject()(
@@ -49,7 +51,8 @@ case class FlowDefaultControllerComponents @Inject()(
   orgActionBuilder: OrgActionBuilder,
   identifiedOrgActionBuilder: IdentifiedOrgActionBuilder,
   sessionOrgActionBuilder: SessionOrgActionBuilder,
-  identifiedCookieActionBuilder: IdentifiedCookieActionBuilder
+  identifiedCookieActionBuilder: IdentifiedCookieActionBuilder,
+  customerActionBuilder: CustomerActionBuilder
 ) extends FlowControllerComponents
 
 // Anonymous
@@ -141,4 +144,17 @@ object IdentifiedCookie {
     def withIdentifiedCookieUser(user: UserReference): Result = result.withSession(UserKey -> user.id.toString)
   }
 
+}
+
+// Customer
+class CustomerActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(
+  implicit private val logger: RollbarLogger,
+  implicit val executionContext: ExecutionContext
+) extends ActionBuilder[CustomerRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  def invokeBlock[A](request: Request[A], block: CustomerRequest[A] => Future[Result]): Future[Result] =
+    auth(request.headers)(OrgAuthData.Customer.fromMap) match {
+      case None => Future.successful(unauthorized(request))
+      case Some(ad) => block(new CustomerRequest(ad, request))
+    }
 }

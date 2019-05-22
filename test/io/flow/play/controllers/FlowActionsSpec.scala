@@ -1,7 +1,7 @@
 package io.flow.play.controllers
 
 import com.typesafe.config.ConfigFactory
-import io.flow.common.v0.models.{Environment, Role, UserReference}
+import io.flow.common.v0.models.{CustomerReference, Environment, Role, UserReference}
 import io.flow.log.RollbarLogger
 import io.flow.play.clients.MockConfig
 import io.flow.play.util._
@@ -16,6 +16,7 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
 
   private[this] val user = UserReference("usr-20151006-1")
   private[this] val session = FlowSession(id = "F51test")
+  private[this] val customer = CustomerReference(number = "tech@flow.io")
 
   implicit val logger = RollbarLogger.SimpleLogger
 
@@ -27,7 +28,8 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
     val data = AuthData.Anonymous(
       requestId = "test",
       user = None,
-      session = None
+      session = None,
+      customer = None
     )
 
     parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
@@ -39,7 +41,21 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
     val data = AuthData.Anonymous(
       requestId = "test",
       user = None,
-      session = Some(session)
+      session = Some(session),
+      customer = None
+    )
+
+    parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
+      sys.error("Failed to parse")
+    } must be(data)
+  }
+
+  "parse AuthData.AnonymousAuth w/ no user, no session and customer" in {
+    val data = AuthData.Anonymous(
+      requestId = "test",
+      user = None,
+      session = None,
+      customer = Some(customer)
     )
 
     parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
@@ -51,7 +67,8 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
     val data = AuthData.Anonymous(
       requestId = "test",
       user = Some(user),
-      session = None
+      session = None,
+      customer = None
     )
 
     parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
@@ -59,11 +76,12 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
     } must be(data)
   }
 
-  "parse AuthData.AnonymousAuth w/ user and session" in {
+  "parse AuthData.AnonymousAuth w/ user and session and customer" in {
     val data = AuthData.Anonymous(
       requestId = "test",
       user = Some(user),
-      session = Some(session)
+      session = Some(session),
+      customer = Some(customer)
     )
 
     parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
@@ -89,7 +107,8 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
       organization = "demo",
       environment = Environment.Sandbox,
       role = Role.Member,
-      session = None
+      session = None,
+      customer = None
     )
 
     parse(data.jwt(salt))(OrgAuthData.Identified.fromMap).getOrElse {
@@ -109,7 +128,24 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
       organization = "demo",
       environment = Environment.Sandbox,
       role = Role.Member,
-      session = Some(session)
+      session = Some(session),
+      customer = None
+    )
+
+    parse(data.jwt(salt))(OrgAuthData.Identified.fromMap).getOrElse {
+      sys.error("Failed to parse")
+    } must be(data)
+  }
+
+  "parse OrgAuthData.Identified w/ customer" in {
+    val data = OrgAuthData.Identified(
+      requestId = "test",
+      user = user,
+      organization = "demo",
+      environment = Environment.Sandbox,
+      role = Role.Member,
+      session = None,
+      customer = Some(customer)
     )
 
     parse(data.jwt(salt))(OrgAuthData.Identified.fromMap).getOrElse {
@@ -135,11 +171,26 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
     } must be(data)
   }
 
+  "parse OrgAuthData.Customer" in {
+    val data = OrgAuthData.Customer(
+      requestId = "test",
+      session = session,
+      organization = "demo",
+      environment = Environment.Sandbox,
+      customer = customer
+    )
+
+    parse(data.jwt(salt))(OrgAuthData.Customer.fromMap).getOrElse {
+      sys.error("Failed to parse")
+    } must be(data)
+  }
+
   "expired" in {
     val data = AuthData.Anonymous(
       requestId = "test",
       user = None,
-      session = None
+      session = None,
+      customer = None
     )
 
     parse(data.jwt(salt))(AuthData.Anonymous.fromMap).isDefined must be(true)

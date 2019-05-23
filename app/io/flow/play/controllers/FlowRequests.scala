@@ -34,6 +34,14 @@ class SessionRequest[A](
   val flowSession: FlowSession = auth.session
 }
 
+class CustomerRequest[A](
+  val auth: AuthData.Customer,
+  request: Request[A]
+) extends WrappedRequest[A](request) {
+  val flowSession: FlowSession = auth.session
+  val customer: CustomerReference = auth.customer
+}
+
 class IdentifiedOrgRequest[A](
   val auth: OrgAuthData.Identified,
   request: Request[A]
@@ -43,7 +51,7 @@ class IdentifiedOrgRequest[A](
   val environment: Environment = auth.environment
 }
 
-class CustomerRequest[A](
+class CustomerOrgRequest[A](
   val auth: OrgAuthData.Customer,
   request: Request[A]
 ) extends WrappedRequest[A](request) {

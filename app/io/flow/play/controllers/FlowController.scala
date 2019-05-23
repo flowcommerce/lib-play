@@ -25,11 +25,12 @@ trait FlowController extends BaseController with FlowControllerHelpers {
   def Anonymous: AnonymousActionBuilder = flowControllerComponents.anonymousActionBuilder
   def Identified: IdentifiedActionBuilder = flowControllerComponents.identifiedActionBuilder
   def Session: SessionActionBuilder = flowControllerComponents.sessionActionBuilder
+  def Customer: CustomerActionBuilder = flowControllerComponents.customerActionBuilder
   def Org: OrgActionBuilder = flowControllerComponents.orgActionBuilder
   def IdentifiedOrg: IdentifiedOrgActionBuilder = flowControllerComponents.identifiedOrgActionBuilder
   def SessionOrg: SessionOrgActionBuilder = flowControllerComponents.sessionOrgActionBuilder
   def IdentifiedCookie: IdentifiedCookieActionBuilder = flowControllerComponents.identifiedCookieActionBuilder
-  def Customer: CustomerActionBuilder = flowControllerComponents.customerActionBuilder
+  def CustomerOrg: CustomerOrgActionBuilder = flowControllerComponents.customerOrgActionBuilder
 }
 
 @ImplementedBy(classOf[FlowDefaultControllerComponents])
@@ -37,22 +38,24 @@ trait FlowControllerComponents {
   def anonymousActionBuilder: AnonymousActionBuilder
   def identifiedActionBuilder: IdentifiedActionBuilder
   def sessionActionBuilder: SessionActionBuilder
+  def customerActionBuilder: CustomerActionBuilder
   def orgActionBuilder: OrgActionBuilder
   def identifiedOrgActionBuilder: IdentifiedOrgActionBuilder
   def sessionOrgActionBuilder: SessionOrgActionBuilder
   def identifiedCookieActionBuilder: IdentifiedCookieActionBuilder
-  def customerActionBuilder: CustomerActionBuilder
+  def customerOrgActionBuilder: CustomerOrgActionBuilder
 }
 
 case class FlowDefaultControllerComponents @Inject()(
   anonymousActionBuilder: AnonymousActionBuilder,
   identifiedActionBuilder: IdentifiedActionBuilder,
   sessionActionBuilder: SessionActionBuilder,
+  customerActionBuilder: CustomerActionBuilder,
   orgActionBuilder: OrgActionBuilder,
   identifiedOrgActionBuilder: IdentifiedOrgActionBuilder,
   sessionOrgActionBuilder: SessionOrgActionBuilder,
   identifiedCookieActionBuilder: IdentifiedCookieActionBuilder,
-  customerActionBuilder: CustomerActionBuilder
+  customerOrgActionBuilder: CustomerOrgActionBuilder
 ) extends FlowControllerComponents
 
 // Anonymous
@@ -87,6 +90,17 @@ class SessionActionBuilder @Inject()(val parser: BodyParsers.Default, val config
     auth(request.headers)(AuthData.Session.fromMap) match {
       case None => Future.successful(unauthorized(request))
       case Some(ad) => block(new SessionRequest(ad, request))
+    }
+}
+
+// Customer
+class CustomerActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
+  extends ActionBuilder[CustomerRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  def invokeBlock[A](request: Request[A], block: (CustomerRequest[A]) => Future[Result]): Future[Result] =
+    auth(request.headers)(AuthData.Customer.fromMap) match {
+      case None => Future.successful(unauthorized(request))
+      case Some(ad) => block(new CustomerRequest(ad, request))
     }
 }
 
@@ -146,15 +160,15 @@ object IdentifiedCookie {
 
 }
 
-// Customer
-class CustomerActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(
+// CustomerOrg
+class CustomerOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(
   implicit private val logger: RollbarLogger,
   implicit val executionContext: ExecutionContext
-) extends ActionBuilder[CustomerRequest, AnyContent] with FlowActionInvokeBlockHelper {
+) extends ActionBuilder[CustomerOrgRequest, AnyContent] with FlowActionInvokeBlockHelper {
 
-  def invokeBlock[A](request: Request[A], block: CustomerRequest[A] => Future[Result]): Future[Result] =
+  def invokeBlock[A](request: Request[A], block: CustomerOrgRequest[A] => Future[Result]): Future[Result] =
     auth(request.headers)(OrgAuthData.Customer.fromMap) match {
       case None => Future.successful(unauthorized(request))
-      case Some(ad) => block(new CustomerRequest(ad, request))
+      case Some(ad) => block(new CustomerOrgRequest(ad, request))
     }
 }

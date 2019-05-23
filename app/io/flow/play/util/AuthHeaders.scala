@@ -98,7 +98,7 @@ object AuthHeaders {
   }
 
   /**
-    * Helper to create a valid session auth data
+    * Helper to create a valid session org auth data
     *
     * @param requestId Will be created if not specified
     */
@@ -113,6 +113,27 @@ object AuthHeaders {
       session = session,
       organization = org,
       environment = environment
+    )
+  }
+
+  /**
+    * Helper to create a valid customer org auth data
+    *
+    * @param requestId Will be created if not specified
+    */
+  def organizationCustomer(
+    org: String,
+    environment: Environment = Environment.Sandbox,
+    requestId: String = generateRequestId(),
+    session: FlowSession = createFlowSession(),
+    customer: CustomerReference = createCustomerReference()
+  ): OrgAuthData.Customer = {
+    OrgAuthData.Customer(
+      requestId = requestId,
+      organization = org,
+      environment = environment,
+      session = session,
+      customer = customer
     )
   }
 

@@ -12,15 +12,22 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 /**
-  * Maintains a reference that gets asynchronously refreshed every `reloadInterval`.
+  * Maintains a reference that is refreshed asynchronously every `reloadInterval`.
   *
   * The data is asynchronously refreshed every `reloadInterval` period calling the `retrieve` function up to
   * `maxAtttempts` times if the function throws an exception or is completed by a failure.
-  * Upon successful completion, the cached is refreshed with the retrieved data, otherwise the cache is not refreshed
+  * Upon successful completion, the cache is refreshed with the retrieved data, otherwise the cache is not refreshed
   * and will retry `reloadInterval` after the first failed attempt.
   *
-  * The class will not initialize if the retrieval function fails the first `maxAttempts` times to avoid querying a
-  * cache that has never been initialized.
+  * The cache will throw an exception on creation if the retrieval function fails the first `maxAttempts` times to avoid
+  * querying a cache that has never been initialized.
+  *
+  * If the asynchronous `retrieve` function has not completed when the next call is scheduled, this next call is not
+  * issued.
+  *
+  * The `forceRefresh` will always issue a call to the `retrieve` function, regardless of scheduled calls or other
+  * `forceRefresh` not yet completed.
+  * Analogously to a scheduled refresh, the cache is refreshed with the retrieved data when the call completes.
   *
   * Example usage:
   *

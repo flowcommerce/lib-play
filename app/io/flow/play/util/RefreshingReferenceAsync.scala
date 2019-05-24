@@ -80,7 +80,10 @@ trait RefreshingReferenceAsync[T] {
 
   def get: T = cache.get().value
 
-  private[this] val fetching = new ConcurrentHashMap[Object, Future[AsyncResult[T]]]()
+  def shutdown(): Boolean = scheduled.cancel()
+
+  // keep track of non completed retrievals
+  private[this] val retrieving = new ConcurrentHashMap[Object, Future[AsyncResult[T]]]()
 
   // load blocking and fail if the retrieval is not successful after maxAttempts
   private[this] val cache: AtomicReference[AsyncResult[T]] =
@@ -95,7 +98,7 @@ trait RefreshingReferenceAsync[T] {
     }
 
   // schedule subsequent reloads
-  scheduler.schedule(reloadInterval, reloadInterval) {
+  private val scheduled = scheduler.schedule(reloadInterval, reloadInterval) {
     refreshInternal(force = false)
     ()
   }(retrieveExecutionContext)
@@ -105,8 +108,8 @@ trait RefreshingReferenceAsync[T] {
       doRefresh()
     else
     // synchronize to avoid fetching twice if the map is empty
-      fetching.synchronized {
-        if (fetching.isEmpty)
+      retrieving.synchronized {
+        if (retrieving.isEmpty)
           doRefresh()
         else
           Future.successful(cache.get)
@@ -114,7 +117,7 @@ trait RefreshingReferenceAsync[T] {
 
   private def doRefresh(): Future[AsyncResult[T]] = {
     val key = new Object
-    val res = fetching.compute(key, (_, _) => doLoadRetry(1, maxAttempts))
+    val res = retrieving.compute(key, (_, _) => doLoadRetry(1, maxAttempts))
 
     // update cache
     res.onComplete {
@@ -132,7 +135,7 @@ trait RefreshingReferenceAsync[T] {
     }(retrieveExecutionContext)
 
     // removing from fetching
-    res.onComplete(_ => fetching.remove(key))(retrieveExecutionContext)
+    res.onComplete(_ => retrieving.remove(key))(retrieveExecutionContext)
 
     res
   }
@@ -143,7 +146,7 @@ trait RefreshingReferenceAsync[T] {
     // also allows for creating a Future right away
     Future
       .unit
-      .flatMap(_ => retrieve)(retrieveExecutionContext)
+      .flatMap(_ =>  retrieve)(retrieveExecutionContext)
       .map(f => AsyncResult(requestedAt, f))(retrieveExecutionContext)
       .recoverWith { case ex if attempts < maxAttempts =>
         log.

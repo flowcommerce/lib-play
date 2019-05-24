@@ -68,7 +68,7 @@ class RefreshingReferenceAsyncSpec extends WordSpec with GuiceOneAppPerSuite wit
 
       withCache(createCache(10.millis, retrieve)) { cache =>
         cache.get shouldBe Map("1" -> 1)
-        eventually(Timeout(30.millis), Interval(5.millis)) {
+        eventually(Timeout(50.millis), Interval(5.millis)) {
           cache.get shouldBe Map("2" -> 2)
         }
       }
@@ -82,7 +82,7 @@ class RefreshingReferenceAsyncSpec extends WordSpec with GuiceOneAppPerSuite wit
 
       withCache(createCache(10.millis, retrieve)) { cache =>
         cache.get shouldBe Map("1" -> 1)
-        Thread.sleep(30)
+        Thread.sleep(50)
         cache.get shouldBe Map("1" -> 1)
       }
     }
@@ -95,7 +95,7 @@ class RefreshingReferenceAsyncSpec extends WordSpec with GuiceOneAppPerSuite wit
 
       withCache(createCache(10.millis, retrieve)) { cache =>
         cache.get shouldBe Map("1" -> 1)
-        Thread.sleep(30)
+        Thread.sleep(50)
         cache.get shouldBe Map("1" -> 1)
       }
     }

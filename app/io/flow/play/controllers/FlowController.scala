@@ -31,6 +31,7 @@ trait FlowController extends BaseController with FlowControllerHelpers {
   def SessionOrg: SessionOrgActionBuilder = flowControllerComponents.sessionOrgActionBuilder
   def IdentifiedCookie: IdentifiedCookieActionBuilder = flowControllerComponents.identifiedCookieActionBuilder
   def CustomerOrg: CustomerOrgActionBuilder = flowControllerComponents.customerOrgActionBuilder
+  def Checkout: CheckoutActionBuilder = flowControllerComponents.checkoutActionBuilder
 }
 
 @ImplementedBy(classOf[FlowDefaultControllerComponents])
@@ -44,6 +45,7 @@ trait FlowControllerComponents {
   def sessionOrgActionBuilder: SessionOrgActionBuilder
   def identifiedCookieActionBuilder: IdentifiedCookieActionBuilder
   def customerOrgActionBuilder: CustomerOrgActionBuilder
+  def checkoutActionBuilder: CheckoutActionBuilder
 }
 
 case class FlowDefaultControllerComponents @Inject()(
@@ -55,7 +57,8 @@ case class FlowDefaultControllerComponents @Inject()(
   identifiedOrgActionBuilder: IdentifiedOrgActionBuilder,
   sessionOrgActionBuilder: SessionOrgActionBuilder,
   identifiedCookieActionBuilder: IdentifiedCookieActionBuilder,
-  customerOrgActionBuilder: CustomerOrgActionBuilder
+  customerOrgActionBuilder: CustomerOrgActionBuilder,
+  checkoutActionBuilder: CheckoutActionBuilder,
 ) extends FlowControllerComponents
 
 // Anonymous
@@ -112,6 +115,17 @@ class OrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Co
     auth(request.headers)(OrgAuthData.Org.fromMap) match {
       case None => Future.successful(unauthorized(request))
       case Some(ad) => block(new OrgRequest(ad, request))
+    }
+}
+
+// Checkout
+class CheckoutActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
+  extends ActionBuilder[CheckoutRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  def invokeBlock[A](request: Request[A], block: (CheckoutRequest[A]) => Future[Result]): Future[Result] =
+    auth(request.headers)(OrgAuthData.Checkout.fromMap) match {
+      case None => Future.successful(unauthorized(request))
+      case Some(ad) => block(new CheckoutRequest(ad, request))
     }
 }
 

@@ -467,4 +467,23 @@ object OrgAuthData {
     }
   }
 
+
+  /**
+    * Required wrapper to assist in migrating authorization in Checkout UI.
+    * Authorization header may be passed as either a Bearer JWT (represented as a OrgAuthData.Customer)
+    * or the legacy session (represented as an AuthData.Session)
+    *
+    * Note the different, intentionally referenced traits, OrgAuthData vs. AuthData
+    */
+  object Checkout {
+
+    /**
+      * Parses either a customer org or a session (or None)
+      */
+    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[io.flow.play.util.AuthData] = {
+      OrgAuthData.Customer.fromMap(data)
+        .orElse(AuthData.Session.fromMap(data))
+    }
+  }
+
 }

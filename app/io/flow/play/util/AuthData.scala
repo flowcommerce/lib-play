@@ -458,12 +458,23 @@ object OrgAuthData {
   object Org {
 
     /**
-      * Parses either an identified org or session org (or None)
+      * Parses either an identified org or customer org or session org (or None)
       */
     def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[io.flow.play.util.OrgAuthData] = {
       Identified.fromMap(data)
         .orElse(Customer.fromMap(data))
         .orElse(Session.fromMap(data))
+    }
+  }
+
+  object IdentifiedCustomer {
+
+    /**
+      * Parses either an identified org or customer org (or None)
+      */
+    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[io.flow.play.util.OrgAuthData] = {
+      Identified.fromMap(data)
+        .orElse(Customer.fromMap(data))
     }
   }
 

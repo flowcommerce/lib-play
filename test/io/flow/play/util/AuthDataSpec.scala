@@ -94,4 +94,22 @@ class AuthDataSpec extends LibPlaySpec {
     session must be(authDataSession)
   }
 
+  "OrgAuthData.IdentifiedCustomer - customer" in {
+    val orgAuthDataCustomer = AuthHeaders.organizationCustomer(org = createTestId())
+    val customerData: Map[String, String] = Map(
+      Fields.CreatedAt -> orgAuthDataCustomer.createdAt.toString,
+      Fields.RequestId -> orgAuthDataCustomer.requestId,
+      Fields.Organization -> orgAuthDataCustomer.organization,
+      Fields.Environment -> orgAuthDataCustomer.environment.toString,
+      Fields.Session -> orgAuthDataCustomer.session.id,
+      Fields.Customer -> orgAuthDataCustomer.customer.number
+    )
+
+    val auth: Option[AuthData] = OrgAuthData.IdentifiedCustomer.fromMap(customerData)(logger)
+
+    auth.get.isInstanceOf[OrgAuthData.Customer] must be(true)
+    val customer = auth.get.asInstanceOf[OrgAuthData.Customer]
+    customer must be(orgAuthDataCustomer)
+  }
+
 }

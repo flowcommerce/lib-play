@@ -54,6 +54,12 @@ class AuthDataSpec extends LibPlaySpec {
     auth.get.isInstanceOf[OrgAuthData.Customer] must be(true)
     val customer = auth.get.asInstanceOf[OrgAuthData.Customer]
     customer must be(orgAuthDataCustomer)
+
+    val orgAuth: Option[AuthData] = OrgAuthData.CheckoutOrg.fromMap(customerData)(logger)
+
+    orgAuth.get.isInstanceOf[OrgAuthData.Customer] must be(true)
+    val customer2 = auth.get.asInstanceOf[OrgAuthData.Customer]
+    customer2 must be(orgAuthDataCustomer)
   }
 
   "OrgAuthData.Checkout - session" in {
@@ -61,13 +67,30 @@ class AuthDataSpec extends LibPlaySpec {
     val sessionData: Map[String, String] = Map(
       Fields.CreatedAt -> authDataSession.createdAt.toString,
       Fields.RequestId -> authDataSession.requestId,
-      Fields.Session -> authDataSession.session.id,
+      Fields.Session -> authDataSession.session.id
     )
 
     val auth: Option[AuthData] = OrgAuthData.Checkout.fromMap(sessionData)(logger)
 
     auth.get.isInstanceOf[AuthData.Session] must be(true)
     val session = auth.get.asInstanceOf[AuthData.Session]
+    session must be(authDataSession)
+  }
+
+  "OrgAuthData.CheckoutOrg - session org" in {
+    val authDataSession = AuthHeaders.organizationSession(createTestId())
+    val sessionData: Map[String, String] = Map(
+      Fields.CreatedAt -> authDataSession.createdAt.toString,
+      Fields.RequestId -> authDataSession.requestId,
+      Fields.Session -> authDataSession.session.id,
+      Fields.Organization -> authDataSession.organization,
+      Fields.Environment -> authDataSession.environment.toString
+    )
+
+    val auth: Option[AuthData] = OrgAuthData.CheckoutOrg.fromMap(sessionData)(logger)
+
+    auth.get.isInstanceOf[OrgAuthData.Session] must be(true)
+    val session = auth.get.asInstanceOf[OrgAuthData.Session]
     session must be(authDataSession)
   }
 

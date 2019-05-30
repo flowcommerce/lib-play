@@ -32,6 +32,7 @@ trait FlowController extends BaseController with FlowControllerHelpers {
   def IdentifiedCookie: IdentifiedCookieActionBuilder = flowControllerComponents.identifiedCookieActionBuilder
   def CustomerOrg: CustomerOrgActionBuilder = flowControllerComponents.customerOrgActionBuilder
   def Checkout: CheckoutActionBuilder = flowControllerComponents.checkoutActionBuilder
+  def CheckoutOrg: CheckoutOrgActionBuilder = flowControllerComponents.checkoutOrgActionBuilder
 }
 
 @ImplementedBy(classOf[FlowDefaultControllerComponents])
@@ -46,6 +47,7 @@ trait FlowControllerComponents {
   def identifiedCookieActionBuilder: IdentifiedCookieActionBuilder
   def customerOrgActionBuilder: CustomerOrgActionBuilder
   def checkoutActionBuilder: CheckoutActionBuilder
+  def checkoutOrgActionBuilder: CheckoutOrgActionBuilder
 }
 
 case class FlowDefaultControllerComponents @Inject()(
@@ -59,6 +61,7 @@ case class FlowDefaultControllerComponents @Inject()(
   identifiedCookieActionBuilder: IdentifiedCookieActionBuilder,
   customerOrgActionBuilder: CustomerOrgActionBuilder,
   checkoutActionBuilder: CheckoutActionBuilder,
+  checkoutOrgActionBuilder: CheckoutOrgActionBuilder
 ) extends FlowControllerComponents
 
 // Anonymous
@@ -126,6 +129,17 @@ class CheckoutActionBuilder @Inject()(val parser: BodyParsers.Default, val confi
     auth(request.headers)(OrgAuthData.Checkout.fromMap) match {
       case None => Future.successful(unauthorized(request))
       case Some(ad) => block(new CheckoutRequest(ad, request))
+    }
+}
+
+// CheckoutOrg
+class CheckoutOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
+  extends ActionBuilder[CheckoutOrgRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  def invokeBlock[A](request: Request[A], block: (CheckoutOrgRequest[A]) => Future[Result]): Future[Result] =
+    auth(request.headers)(OrgAuthData.CheckoutOrg.fromMap) match {
+      case None => Future.successful(unauthorized(request))
+      case Some(ad) => block(new CheckoutOrgRequest(ad, request))
     }
 }
 

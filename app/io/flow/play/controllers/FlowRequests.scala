@@ -79,3 +79,15 @@ class CheckoutRequest[A](
   val auth: AuthData,
   request: Request[A]
 ) extends WrappedRequest[A](request)
+
+/**
+  * Any type of request that contains checkout org data
+  */
+class CheckoutOrgRequest[A](
+  val auth: OrgAuthData,
+  request: Request[A]
+) extends WrappedRequest[A](request) {
+  val organization: String = auth.organization
+  val environment: Environment = auth.environment
+}
+

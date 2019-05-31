@@ -3,6 +3,7 @@ package io.flow.play.util
 import io.flow.common.v0.models.{Environment, Role, UserReference}
 import io.flow.log.RollbarProvider
 import io.flow.play.util.AuthDataMap.Fields
+import org.joda.time.DateTime
 
 class AuthDataSpec extends LibPlaySpec {
 
@@ -110,6 +111,37 @@ class AuthDataSpec extends LibPlaySpec {
     auth.get.isInstanceOf[OrgAuthData.Customer] must be(true)
     val customer = auth.get.asInstanceOf[OrgAuthData.Customer]
     customer must be(orgAuthDataCustomer)
+  }
+
+  "OrgAuthData.CustomerOrAnonymous" in {
+    val orgAuthDataCustomer = AuthHeaders.organizationCustomer(org = createTestId())
+    val customerData: Map[String, String] = Map(
+      Fields.CreatedAt -> orgAuthDataCustomer.createdAt.toString,
+      Fields.RequestId -> orgAuthDataCustomer.requestId,
+      Fields.Organization -> orgAuthDataCustomer.organization,
+      Fields.Environment -> orgAuthDataCustomer.environment.toString,
+      Fields.Session -> orgAuthDataCustomer.session.id,
+      Fields.Customer -> orgAuthDataCustomer.customer.number
+    )
+
+    val auth: Option[AuthData] = OrgAuthData.CustomerOrAnonymous.fromMap(customerData)(logger)
+
+    auth.get.isInstanceOf[OrgAuthData.Customer] must be(true)
+    val customer = auth.get.asInstanceOf[OrgAuthData.Customer]
+    customer must be(orgAuthDataCustomer)
+
+
+    val anonAuthData = AuthData.Anonymous(createdAt = DateTime.now, requestId = createTestId(), None, None, None)
+    val anonData = Map(
+      Fields.CreatedAt -> anonAuthData.createdAt.toString,
+      Fields.RequestId -> anonAuthData.requestId
+    )
+
+    val anonAuth: Option[AuthData] = OrgAuthData.CustomerOrAnonymous.fromMap(anonData)(logger)
+
+    anonAuth.get.isInstanceOf[AuthData.Anonymous] must be(true)
+    val anon = anonAuth.get.asInstanceOf[AuthData.Anonymous]
+    anon must be(anonAuthData)
   }
 
 }

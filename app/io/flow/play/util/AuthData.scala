@@ -513,4 +513,18 @@ object OrgAuthData {
     }
   }
 
+  /**
+    * Wrapper to assist is allowing requests to be authenticated with customer or not.
+    */
+  object CustomerOrAnonymous {
+
+    /**
+      * Parses either a customer org or anonymous (or None)
+      */
+    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[io.flow.play.util.AuthData] = {
+      OrgAuthData.Customer.fromMap(data)
+        .orElse(AuthData.Anonymous.fromMap(data))
+    }
+  }
+
 }

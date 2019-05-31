@@ -34,6 +34,7 @@ trait FlowController extends BaseController with FlowControllerHelpers {
   def Checkout: CheckoutActionBuilder = flowControllerComponents.checkoutActionBuilder
   def CheckoutOrg: CheckoutOrgActionBuilder = flowControllerComponents.checkoutOrgActionBuilder
   def IdentifiedCustomer: IdentifiedCustomerActionBuilder = flowControllerComponents.identifiedCustomerActionBuilder
+  def CustomerOrAnonymous: CustomerOrAnonymousActionBuilder = flowControllerComponents.customerOrAnonymousActionBuilder
 }
 
 @ImplementedBy(classOf[FlowDefaultControllerComponents])
@@ -50,6 +51,7 @@ trait FlowControllerComponents {
   def checkoutActionBuilder: CheckoutActionBuilder
   def checkoutOrgActionBuilder: CheckoutOrgActionBuilder
   def identifiedCustomerActionBuilder: IdentifiedCustomerActionBuilder
+  def customerOrAnonymousActionBuilder: CustomerOrAnonymousActionBuilder
 }
 
 case class FlowDefaultControllerComponents @Inject()(
@@ -64,7 +66,8 @@ case class FlowDefaultControllerComponents @Inject()(
   customerOrgActionBuilder: CustomerOrgActionBuilder,
   checkoutActionBuilder: CheckoutActionBuilder,
   checkoutOrgActionBuilder: CheckoutOrgActionBuilder,
-  identifiedCustomerActionBuilder: IdentifiedCustomerActionBuilder
+  identifiedCustomerActionBuilder: IdentifiedCustomerActionBuilder,
+  customerOrAnonymousActionBuilder: CustomerOrAnonymousActionBuilder
 ) extends FlowControllerComponents
 
 // Anonymous
@@ -214,5 +217,18 @@ class IdentifiedCustomerActionBuilder @Inject()(val parser: BodyParsers.Default,
     auth(request.headers)(OrgAuthData.IdentifiedCustomer.fromMap) match {
       case None => Future.successful(unauthorized(request))
       case Some(ad) => block(new IdentifiedCustomerRequest(ad, request))
+    }
+}
+
+// CustomerOrAnonymous
+class CustomerOrAnonymousActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(
+  implicit private val logger: RollbarLogger,
+  implicit val executionContext: ExecutionContext
+) extends ActionBuilder[CustomerOrAnonymousRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  def invokeBlock[A](request: Request[A], block: CustomerOrAnonymousRequest[A] => Future[Result]): Future[Result] =
+    auth(request.headers)(OrgAuthData.CustomerOrAnonymous.fromMap) match {
+      case None => Future.successful(unauthorized(request))
+      case Some(ad) => block(new CustomerOrAnonymousRequest(ad, request))
     }
 }

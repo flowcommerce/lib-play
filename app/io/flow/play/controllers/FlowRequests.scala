@@ -99,3 +99,8 @@ class CheckoutOrgRequest[A](
   val environment: Environment = auth.environment
 }
 
+class CustomerOrAnonymousRequest[A](
+  val auth: AuthData,
+  request: Request[A]
+) extends WrappedRequest[A](request)
+

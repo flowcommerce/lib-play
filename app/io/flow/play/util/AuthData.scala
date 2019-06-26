@@ -1,13 +1,12 @@
 package io.flow.play.util
 
-import java.util.UUID
-
 import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
 import io.flow.common.v0.models.{CustomerReference, Environment, Role, UserReference}
 import io.flow.log.RollbarLogger
 import io.flow.util.DateHelper
 import java.time.{ Instant, ZoneOffset }
 import java.time.format.DateTimeFormatter
+import io.flow.util.Constants
 
 case class AuthDataMap(
   requestId: String,
@@ -47,8 +46,8 @@ case class FlowSession(
   id: String
 ) {
   assert(
-    id.startsWith(io.flow.util.Constants.Prefixes.Session),
-    s"Flow session id must start with '${io.flow.util.Constants.Prefixes.Session}' and not[${id.substring(0, 3)}]"
+    id.startsWith(Constants.Prefixes.Session),
+    s"Flow session id must start with '${Constants.Prefixes.Session}' and not[${id.substring(0, 3)}]"
   )
 }
 
@@ -125,10 +124,7 @@ object AuthDataMap {
   )(implicit logger: RollbarLogger): Option[T] = {
     data.get("created_at").flatMap { ts =>
       val createdAt = DateHelper.ISODateTimeParser.parse(ts, Instant.from(_))
-      val requestId = data.get(Fields.RequestId).getOrElse {
-        logger.warn("JWT Token did not have a request_id - generated a new request id")
-        "lib-play-" + UUID.randomUUID.toString
-      }
+      val requestId = data.getOrElse(Fields.RequestId, AuthHeaders.generateRequestId())
       val session = data.get(Fields.Session).map { id =>
         FlowSession(id = id)
       }

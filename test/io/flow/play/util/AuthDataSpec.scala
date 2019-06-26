@@ -1,9 +1,10 @@
 package io.flow.play.util
 
+import java.time.Instant
+
 import io.flow.common.v0.models.{Environment, Role, UserReference}
 import io.flow.log.RollbarProvider
 import io.flow.play.util.AuthDataMap.Fields
-import org.joda.time.DateTime
 
 class AuthDataSpec extends LibPlaySpec {
 
@@ -131,7 +132,7 @@ class AuthDataSpec extends LibPlaySpec {
     customer must be(orgAuthDataCustomer)
 
 
-    val anonAuthData = AuthData.Anonymous(createdAt = DateTime.now, requestId = createTestId(), None, None, None)
+    val anonAuthData = AuthData.Anonymous(createdAt = Instant.now(), requestId = createTestId(), None, None, None)
     val anonData = Map(
       Fields.CreatedAt -> anonAuthData.createdAt.toString,
       Fields.RequestId -> anonAuthData.requestId

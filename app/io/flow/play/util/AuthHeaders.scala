@@ -3,6 +3,7 @@ package io.flow.play.util
 import java.util.UUID
 
 import io.flow.common.v0.models.{Environment, Role, UserReference}
+import io.flow.util.Constants
 import javax.inject.{Inject, Singleton}
 
 /**
@@ -72,7 +73,7 @@ object AuthHeaders {
     environment: Environment = Environment.Sandbox,
     requestId: String = generateRequestId(),
     session: Option[FlowSession] = None
-): OrgAuthData.Identified = {
+  ): OrgAuthData.Identified = {
     OrgAuthData.Identified(
       requestId = requestId,
       user = user,
@@ -104,7 +105,7 @@ object AuthHeaders {
 
   def createFlowSession(): FlowSession = {
     FlowSession(
-      id = io.flow.util.Constants.Prefixes.Session + generateToken()
+      id = Constants.Prefixes.Session + generateToken()
     )
   }
 
@@ -125,7 +126,7 @@ object AuthHeaders {
     prefix + generateToken()
   }
 
-  private[this] def generateToken(numberRandom: Int = 5): String = {
+  private[this] def generateToken(numberRandom: Int = 6): String = {
     random.alphaNumeric(numberRandom) ++ UUID.randomUUID().toString.replaceAll("-", "")
   }
 }

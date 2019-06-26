@@ -1,5 +1,7 @@
 package io.flow.play.util
 
+import java.util.UUID
+
 import io.flow.common.v0.models.{Environment, Role, UserReference}
 import javax.inject.{Inject, Singleton}
 
@@ -102,11 +104,11 @@ object AuthHeaders {
 
   def createFlowSession(): FlowSession = {
     FlowSession(
-      id = io.flow.util.Constants.Prefixes.Session + random.alphaNumeric(36)
+      id = io.flow.util.Constants.Prefixes.Session + generateToken()
     )
   }
 
-  private[this] def generateRequestId(): String = {
+  private[util] def generateRequestId(): String = {
     generateRequestId("libplay")
   }
 
@@ -120,7 +122,10 @@ object AuthHeaders {
     *        no punctuation to make cut & paste easier.
     */
   def generateRequestId(prefix: String): String = {
-    prefix + random.alphaNumeric(36)
+    prefix + generateToken()
   }
 
+  private[this] def generateToken(numberRandom: Int = 5): String = {
+    random.alphaNumeric(numberRandom) ++ UUID.randomUUID().toString.replaceAll("-", "")
+  }
 }

@@ -3,6 +3,7 @@ package io.flow.play.util
 import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
 import io.flow.common.v0.models.{Environment, Role, UserReference}
 import io.flow.log.RollbarLogger
+import io.flow.util.Constants
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.format.ISODateTimeFormat.dateTime
@@ -43,8 +44,8 @@ case class FlowSession(
   id: String
 ) {
   assert(
-    id.startsWith(io.flow.util.Constants.Prefixes.Session),
-    s"Flow session id must start with '${io.flow.util.Constants.Prefixes.Session}' and not[${id.substring(0, 3)}]"
+    id.startsWith(Constants.Prefixes.Session),
+    s"Flow session id must start with '${Constants.Prefixes.Session}' and not[${id.substring(0, 3)}]"
   )
 }
 

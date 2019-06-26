@@ -6,7 +6,7 @@ organization := "io.flow"
 
 scalaVersion in ThisBuild := "2.12.8"
 
-version := "0.5.51"
+version := "0.5.61"
 
 val timeLibSuffix = ""
 
@@ -18,9 +18,9 @@ lazy val root = project
       ws,
       filters,
       guice,
-      "io.flow" %% s"lib-util$timeLibSuffix" % "0.1.21",
-      "io.flow" %% s"lib-akka$timeLibSuffix" % "0.1.3",
-      "io.flow" %% s"lib-log$timeLibSuffix" % "0.0.70",
+      "io.flow" %% s"lib-util$timeLibSuffix" % "0.1.25",
+      "io.flow" %% s"lib-akka$timeLibSuffix" % "0.1.4",
+      "io.flow" %% s"lib-log$timeLibSuffix" % "0.0.71",
       "com.jason-goodwin" %% "authentikat-jwt" % "0.4.5",
       "com.ning" % "async-http-client" % "1.9.40",
       "org.apache.commons" % "commons-io" % "1.3.2",

@@ -25,10 +25,16 @@ trait FlowController extends BaseController with FlowControllerHelpers {
   def Anonymous: AnonymousActionBuilder = flowControllerComponents.anonymousActionBuilder
   def Identified: IdentifiedActionBuilder = flowControllerComponents.identifiedActionBuilder
   def Session: SessionActionBuilder = flowControllerComponents.sessionActionBuilder
+  def Customer: CustomerActionBuilder = flowControllerComponents.customerActionBuilder
   def Org: OrgActionBuilder = flowControllerComponents.orgActionBuilder
   def IdentifiedOrg: IdentifiedOrgActionBuilder = flowControllerComponents.identifiedOrgActionBuilder
   def SessionOrg: SessionOrgActionBuilder = flowControllerComponents.sessionOrgActionBuilder
   def IdentifiedCookie: IdentifiedCookieActionBuilder = flowControllerComponents.identifiedCookieActionBuilder
+  def CustomerOrg: CustomerOrgActionBuilder = flowControllerComponents.customerOrgActionBuilder
+  def Checkout: CheckoutActionBuilder = flowControllerComponents.checkoutActionBuilder
+  def CheckoutOrg: CheckoutOrgActionBuilder = flowControllerComponents.checkoutOrgActionBuilder
+  def IdentifiedCustomer: IdentifiedCustomerActionBuilder = flowControllerComponents.identifiedCustomerActionBuilder
+  def CustomerOrAnonymous: CustomerOrAnonymousActionBuilder = flowControllerComponents.customerOrAnonymousActionBuilder
 }
 
 @ImplementedBy(classOf[FlowDefaultControllerComponents])
@@ -36,20 +42,32 @@ trait FlowControllerComponents {
   def anonymousActionBuilder: AnonymousActionBuilder
   def identifiedActionBuilder: IdentifiedActionBuilder
   def sessionActionBuilder: SessionActionBuilder
+  def customerActionBuilder: CustomerActionBuilder
   def orgActionBuilder: OrgActionBuilder
   def identifiedOrgActionBuilder: IdentifiedOrgActionBuilder
   def sessionOrgActionBuilder: SessionOrgActionBuilder
   def identifiedCookieActionBuilder: IdentifiedCookieActionBuilder
+  def customerOrgActionBuilder: CustomerOrgActionBuilder
+  def checkoutActionBuilder: CheckoutActionBuilder
+  def checkoutOrgActionBuilder: CheckoutOrgActionBuilder
+  def identifiedCustomerActionBuilder: IdentifiedCustomerActionBuilder
+  def customerOrAnonymousActionBuilder: CustomerOrAnonymousActionBuilder
 }
 
 case class FlowDefaultControllerComponents @Inject()(
   anonymousActionBuilder: AnonymousActionBuilder,
   identifiedActionBuilder: IdentifiedActionBuilder,
   sessionActionBuilder: SessionActionBuilder,
+  customerActionBuilder: CustomerActionBuilder,
   orgActionBuilder: OrgActionBuilder,
   identifiedOrgActionBuilder: IdentifiedOrgActionBuilder,
   sessionOrgActionBuilder: SessionOrgActionBuilder,
-  identifiedCookieActionBuilder: IdentifiedCookieActionBuilder
+  identifiedCookieActionBuilder: IdentifiedCookieActionBuilder,
+  customerOrgActionBuilder: CustomerOrgActionBuilder,
+  checkoutActionBuilder: CheckoutActionBuilder,
+  checkoutOrgActionBuilder: CheckoutOrgActionBuilder,
+  identifiedCustomerActionBuilder: IdentifiedCustomerActionBuilder,
+  customerOrAnonymousActionBuilder: CustomerOrAnonymousActionBuilder
 ) extends FlowControllerComponents
 
 // Anonymous
@@ -87,6 +105,17 @@ class SessionActionBuilder @Inject()(val parser: BodyParsers.Default, val config
     }
 }
 
+// Customer
+class CustomerActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
+  extends ActionBuilder[CustomerRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  def invokeBlock[A](request: Request[A], block: (CustomerRequest[A]) => Future[Result]): Future[Result] =
+    auth(request.headers)(AuthData.Customer.fromMap) match {
+      case None => Future.successful(unauthorized(request))
+      case Some(ad) => block(new CustomerRequest(ad, request))
+    }
+}
+
 // Org
 class OrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[OrgRequest, AnyContent] with FlowActionInvokeBlockHelper {
@@ -95,6 +124,28 @@ class OrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Co
     auth(request.headers)(OrgAuthData.Org.fromMap) match {
       case None => Future.successful(unauthorized(request))
       case Some(ad) => block(new OrgRequest(ad, request))
+    }
+}
+
+// Checkout
+class CheckoutActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
+  extends ActionBuilder[CheckoutRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  def invokeBlock[A](request: Request[A], block: (CheckoutRequest[A]) => Future[Result]): Future[Result] =
+    auth(request.headers)(OrgAuthData.Checkout.fromMap) match {
+      case None => Future.successful(unauthorized(request))
+      case Some(ad) => block(new CheckoutRequest(ad, request))
+    }
+}
+
+// CheckoutOrg
+class CheckoutOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
+  extends ActionBuilder[CheckoutOrgRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  def invokeBlock[A](request: Request[A], block: (CheckoutOrgRequest[A]) => Future[Result]): Future[Result] =
+    auth(request.headers)(OrgAuthData.CheckoutOrg.fromMap) match {
+      case None => Future.successful(unauthorized(request))
+      case Some(ad) => block(new CheckoutOrgRequest(ad, request))
     }
 }
 
@@ -141,4 +192,43 @@ object IdentifiedCookie {
     def withIdentifiedCookieUser(user: UserReference): Result = result.withSession(UserKey -> user.id.toString)
   }
 
+}
+
+// CustomerOrg
+class CustomerOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(
+  implicit private val logger: RollbarLogger,
+  implicit val executionContext: ExecutionContext
+) extends ActionBuilder[CustomerOrgRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  def invokeBlock[A](request: Request[A], block: CustomerOrgRequest[A] => Future[Result]): Future[Result] =
+    auth(request.headers)(OrgAuthData.Customer.fromMap) match {
+      case None => Future.successful(unauthorized(request))
+      case Some(ad) => block(new CustomerOrgRequest(ad, request))
+    }
+}
+
+// IdentifiedCustomer
+class IdentifiedCustomerActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(
+  implicit private val logger: RollbarLogger,
+  implicit val executionContext: ExecutionContext
+) extends ActionBuilder[IdentifiedCustomerRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  def invokeBlock[A](request: Request[A], block: IdentifiedCustomerRequest[A] => Future[Result]): Future[Result] =
+    auth(request.headers)(OrgAuthData.IdentifiedCustomer.fromMap) match {
+      case None => Future.successful(unauthorized(request))
+      case Some(ad) => block(new IdentifiedCustomerRequest(ad, request))
+    }
+}
+
+// CustomerOrAnonymous
+class CustomerOrAnonymousActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(
+  implicit private val logger: RollbarLogger,
+  implicit val executionContext: ExecutionContext
+) extends ActionBuilder[CustomerOrAnonymousRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  def invokeBlock[A](request: Request[A], block: CustomerOrAnonymousRequest[A] => Future[Result]): Future[Result] =
+    auth(request.headers)(OrgAuthData.CustomerOrAnonymous.fromMap) match {
+      case None => Future.successful(unauthorized(request))
+      case Some(ad) => block(new CustomerOrAnonymousRequest(ad, request))
+    }
 }

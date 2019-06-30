@@ -46,53 +46,37 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
   }
 
   "parse AuthData.AnonymousAuth w/ no user and organization" in {
-    val org = createTestId()
-    val data = AuthData.Anonymous.Empty.copy(
-      organization = Some(org)
+    validateParse(
+      AuthData.Anonymous.Empty.copy(
+        organization = Some(createTestId())
+      )
     )
-
-    parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
-      sys.error("Failed to parse")
-    } must be(data)
   }
 
   "parse AuthData.AnonymousAuth w/ no user, no session and customer" in {
-    val data = AuthData.Anonymous(
-      requestId = "test",
-      user = None,
-      session = None,
-      customer = Some(customer)
+    validateParse(
+      AuthData.Anonymous.Empty.copy(
+        customer = Some(customer)
+      )
     )
-
-    parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
-      sys.error("Failed to parse")
-    } must be(data)
   }
 
   "parse AuthData.AnonymousAuth w/ user" in {
-    val data = AuthData.Anonymous(
-      requestId = "test",
-      user = Some(user),
-      session = None,
-      customer = None
+    validateParse(
+      AuthData.Anonymous.Empty.copy(
+        user = Some(user)
+      )
     )
-
-    parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
-      sys.error("Failed to parse")
-    } must be(data)
   }
 
   "parse AuthData.AnonymousAuth w/ user and session and customer" in {
-    val data = AuthData.Anonymous(
-      requestId = "test",
-      user = Some(user),
-      session = Some(session),
-      customer = Some(customer)
+    validateParse(
+      AuthData.Anonymous.Empty.copy(
+        user = Some(user),
+        session = Some(session),
+        customer = Some(customer)
+      )
     )
-
-    parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
-      sys.error("Failed to parse")
-    } must be(data)
   }
 
   "parse AuthData.SessionAuth" in {

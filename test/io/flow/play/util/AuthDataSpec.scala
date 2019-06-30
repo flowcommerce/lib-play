@@ -113,35 +113,31 @@ class AuthDataSpec extends LibPlaySpec {
     customer must be(orgAuthDataCustomer)
   }
 
-  "OrgAuthData.CustomerOrAnonymous" in {
+  "OrgAuthData.Anonymous with org data" in {
     val orgAuthDataCustomer = AuthHeaders.organizationCustomer(org = createTestId())
     val customerData: Map[String, String] = Map(
       Fields.CreatedAt -> orgAuthDataCustomer.createdAt.toString,
       Fields.RequestId -> orgAuthDataCustomer.requestId,
       Fields.Organization -> orgAuthDataCustomer.organization,
-      Fields.Environment -> orgAuthDataCustomer.environment.toString,
       Fields.Session -> orgAuthDataCustomer.session.id,
       Fields.Customer -> orgAuthDataCustomer.customer.number
     )
 
-    val auth: Option[AuthData] = OrgAuthData.CustomerOrAnonymous.fromMap(customerData)(logger)
+    val auth = AuthData.Anonymous.fromMap(customerData)(logger).get.isInstanceOf[AuthData.Anonymous]
+    auth.customer must equal(Some(orgAuthDataCustomer.customer.number))
+    auth.session must equal(Some(orgAuthDataCustomer.session))
+    auth.organization must equal(Some(orgAuthDataCustomer.organization))
 
-    auth.get.isInstanceOf[OrgAuthData.Customer] must be(true)
-    val customer = auth.get.asInstanceOf[OrgAuthData.Customer]
-    customer must be(orgAuthDataCustomer)
-
-
-    val anonAuthData = AuthData.Anonymous(createdAt = DateTime.now, requestId = createTestId(), None, None, None)
+    val anonAuthData = AuthData.Anonymous.Empty.copy(createdAt = DateTime.now)
     val anonData = Map(
       Fields.CreatedAt -> anonAuthData.createdAt.toString,
       Fields.RequestId -> anonAuthData.requestId
     )
 
-    val anonAuth: Option[AuthData] = OrgAuthData.CustomerOrAnonymous.fromMap(anonData)(logger)
-
-    anonAuth.get.isInstanceOf[AuthData.Anonymous] must be(true)
-    val anon = anonAuth.get.asInstanceOf[AuthData.Anonymous]
-    anon must be(anonAuthData)
+    val anonAuth = AuthData.Anonymous.fromMap(anonData)(logger).get.isInstanceOf[AuthData.Anonymous]
+    anonAuth.customer must be(empty)
+    anonAuth.session must be(empty)
+    anonAuth.organization must be(empty)
   }
 
 }

@@ -23,25 +23,32 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
 
   override def jwtSalt: String = salt
 
-  "parse AuthData.AnonymousAuth w/ no user" in {
-    val data = AuthData.Anonymous(
-      requestId = "test",
-      user = None,
-      session = None,
-      customer = None
-    )
-
+  private[this] def parseAnonymous(data: AuthData.Anonymous) = {
     parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
       sys.error("Failed to parse")
-    } must be(data)
+    }
+  }
+
+  private[this] def validateParse(data: AuthData.Anonymous) = {
+    parseAnonymous(data) must be(data)
+  }
+
+  "parse AuthData.AnonymousAuth w/ no user" in {
+    validateParse(AuthData.Anonymous.Empty)
   }
 
   "parse AuthData.AnonymousAuth w/ no user and session" in {
-    val data = AuthData.Anonymous(
-      requestId = "test",
-      user = None,
-      session = Some(session),
-      customer = None
+    validateParse(
+      AuthData.Anonymous.Empty.copy(
+        session = Some(session)
+      )
+    )
+  }
+
+  "parse AuthData.AnonymousAuth w/ no user and organization" in {
+    val org = createTestId()
+    val data = AuthData.Anonymous.Empty.copy(
+      organization = Some(org)
     )
 
     parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {

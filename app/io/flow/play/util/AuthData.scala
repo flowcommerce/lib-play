@@ -180,7 +180,8 @@ object AuthData {
     override val requestId: String,
     user: Option[UserReference],
     session: Option[FlowSession],
-    customer: Option[CustomerReference]
+    customer: Option[CustomerReference],
+    organization: Option[String]
   ) extends AuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
@@ -199,7 +200,8 @@ object AuthData {
       requestId = AuthHeaders.generateRequestId("anonymousrequest"),
       user = None,
       session = None,
-      customer = None
+      customer = None,
+      organization = None
     )
 
     def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[Anonymous] = {
@@ -210,7 +212,8 @@ object AuthData {
             requestId = dm.requestId,
             user = dm.user,
             session = dm.session,
-            customer = dm.customer
+            customer = dm.customer,
+            organization = dm.organization
           )
         )
       }
@@ -506,20 +509,6 @@ object OrgAuthData {
     def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[io.flow.play.util.OrgAuthData] = {
       OrgAuthData.Customer.fromMap(data)
         .orElse(OrgAuthData.Session.fromMap(data))
-    }
-  }
-
-  /**
-    * Wrapper to assist is allowing requests to be authenticated with customer or not.
-    */
-  object CustomerOrAnonymous {
-
-    /**
-      * Parses either a customer org or anonymous (or None)
-      */
-    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[io.flow.play.util.AuthData] = {
-      OrgAuthData.Customer.fromMap(data)
-        .orElse(AuthData.Anonymous.fromMap(data))
     }
   }
 

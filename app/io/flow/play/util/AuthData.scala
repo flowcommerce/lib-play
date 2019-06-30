@@ -123,7 +123,6 @@ object AuthDataMap {
     f: AuthDataMap => Option[T]
   )(implicit logger: RollbarLogger): Option[T] = {
     data.get("created_at").flatMap { ts =>
-      println(s"fromMap data: $data")
       val createdAt = ISODateTimeFormat.dateTimeParser.parseDateTime(ts)
       val requestId = data.getOrElse(Fields.RequestId, AuthHeaders.generateRequestId())
       val session = data.get(Fields.Session).map { id =>
@@ -131,7 +130,6 @@ object AuthDataMap {
       }
       val user: Option[UserReference] = data.get(Fields.UserId).map(UserReference.apply)
       val organizationId: Option[String] = data.get(Fields.Organization)
-      println(s"organizationId: $organizationId")
 
       val environment: Option[Environment] = data.get(Fields.Environment).map(Environment.apply).flatMap { e =>
         e match {
@@ -212,8 +210,6 @@ object AuthData {
 
     def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[Anonymous] = {
       AuthDataMap.fromMap(data) { dm =>
-        println(s"dm: ${dm}")
-        println(s"dm.organization: ${dm.organization}")
         Some(
           Anonymous(
             createdAt = dm.createdAt,

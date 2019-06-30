@@ -29,7 +29,6 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
   }
 
   private[this] def validateParse[T <: AuthData](data: AuthData)(f: Map[String, String] => Option[T]) = {
-    println(s"validateParse: $data")
     parseAuthData(data)(f) must be(data)
   }
 

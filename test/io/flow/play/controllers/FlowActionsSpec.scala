@@ -11,208 +11,160 @@ import play.api.Configuration
 class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
 
   private[this] lazy val mockConfig = new MockConfig(new DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty()))))
-  private[this] lazy val salt = "test"
 
   private[this] val user = UserReference("usr-20151006-1")
-  private[this] val session = FlowSession(id = "F51test")
-  private[this] val customer = CustomerReference(number = "tech@flow.io")
+  private[this] val session = AuthHeaders.createFlowSession()
+  private[this] val customer = CustomerReference(number = createTestId())
 
-  implicit val logger = RollbarLogger.SimpleLogger
+  private[this] implicit val logger: RollbarLogger = RollbarLogger.SimpleLogger
 
   override def config: MockConfig = mockConfig
 
-  override def jwtSalt: String = salt
+  override def jwtSalt: String = "test"
+
+  private[this] def parseAuthData[T <: AuthData](data: AuthData)(f: Map[String, String] => Option[T]) = {
+    parse(data.jwt(jwtSalt))(f).getOrElse {
+      sys.error("Failed to parse")
+    }
+  }
+
+  private[this] def validateParse[T <: AuthData](data: AuthData)(f: Map[String, String] => Option[T]) = {
+    parseAuthData(data)(f) must be(data)
+  }
 
   "parse AuthData.AnonymousAuth w/ no user" in {
-    val data = AuthData.Anonymous(
-      requestId = "test",
-      user = None,
-      session = None,
-      customer = None
-    )
-
-    parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
-      sys.error("Failed to parse")
-    } must be(data)
+    validateParse(
+      AuthData.Anonymous.Empty
+    )(AuthData.Anonymous.fromMap)
   }
 
   "parse AuthData.AnonymousAuth w/ no user and session" in {
-    val data = AuthData.Anonymous(
-      requestId = "test",
-      user = None,
-      session = Some(session),
-      customer = None
-    )
-
-    parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
-      sys.error("Failed to parse")
-    } must be(data)
+    validateParse(
+      AuthData.Anonymous.Empty.copy(
+        session = Some(session)
+      )
+    )(AuthData.Anonymous.fromMap)
   }
 
   "parse AuthData.AnonymousAuth w/ no user, no session and customer" in {
-    val data = AuthData.Anonymous(
-      requestId = "test",
-      user = None,
-      session = None,
-      customer = Some(customer)
-    )
-
-    parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
-      sys.error("Failed to parse")
-    } must be(data)
+    validateParse(
+      AuthData.Anonymous.Empty.copy(
+        customer = Some(customer)
+      )
+    )(AuthData.Anonymous.fromMap)
   }
 
   "parse AuthData.AnonymousAuth w/ user" in {
-    val data = AuthData.Anonymous(
-      requestId = "test",
-      user = Some(user),
-      session = None,
-      customer = None
-    )
-
-    parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
-      sys.error("Failed to parse")
-    } must be(data)
+    validateParse(
+      AuthData.Anonymous.Empty.copy(
+        user = Some(user)
+      )
+    )(AuthData.Anonymous.fromMap)
   }
 
   "parse AuthData.AnonymousAuth w/ user and session and customer" in {
-    val data = AuthData.Anonymous(
-      requestId = "test",
-      user = Some(user),
-      session = Some(session),
-      customer = Some(customer)
-    )
-
-    parse(data.jwt(salt))(AuthData.Anonymous.fromMap).getOrElse {
-      sys.error("Failed to parse")
-    } must be(data)
+    validateParse(
+      AuthData.Anonymous.Empty.copy(
+        user = Some(user),
+        session = Some(session),
+        customer = Some(customer)
+      )
+    )(AuthData.Anonymous.fromMap)
   }
 
   "parse AuthData.SessionAuth" in {
-    val data = AuthData.Session(
-      requestId = "test",
-      session = session
-    )
-
-    parse(data.jwt(salt))(AuthData.Session.fromMap).getOrElse {
-      sys.error("Failed to parse")
-    } must be(data)
+    validateParse(
+      AuthData.Session(
+        requestId = createTestId(),
+        session = session
+      )
+    )(AuthData.Session.fromMap)
   }
 
   "parse AuthData.Customer" in {
-    val data = AuthData.Customer(
-      requestId = "test",
-      session = session,
-      customer = customer
-    )
-
-    parse(data.jwt(salt))(AuthData.Customer.fromMap).getOrElse {
-      sys.error("Failed to parse")
-    } must be(data)
+    validateParse(
+      AuthData.Customer(
+        requestId = createTestId(),
+        session = session,
+        customer = customer
+      )
+    )(AuthData.Customer.fromMap)
   }
 
   "parse OrgAuthData.Identified" in {
-    val data = OrgAuthData.Identified(
-      requestId = "test",
+    val auth = OrgAuthData.Identified(
+      requestId = createTestId(),
       user = user,
-      organization = "demo",
+      organization = createTestId(),
       environment = Environment.Sandbox,
       role = Role.Member,
       session = None,
       customer = None
     )
-
-    parse(data.jwt(salt))(OrgAuthData.Identified.fromMap).getOrElse {
-      sys.error("Failed to parse")
-    } must be(data)
-
-    // Confirm generic org parser works
-    parse(data.jwt(salt))(OrgAuthData.Org.fromMap).getOrElse {
-      sys.error("Failed to parse")
-    } must be(data)
+    validateParse(auth)(OrgAuthData.Identified.fromMap)
+    validateParse(auth)(OrgAuthData.Org.fromMap)
   }
 
   "parse OrgAuthData.Identified w/ session" in {
-    val data = OrgAuthData.Identified(
-      requestId = "test",
-      user = user,
-      organization = "demo",
-      environment = Environment.Sandbox,
-      role = Role.Member,
-      session = Some(session),
-      customer = None
-    )
-
-    parse(data.jwt(salt))(OrgAuthData.Identified.fromMap).getOrElse {
-      sys.error("Failed to parse")
-    } must be(data)
+    validateParse(
+      OrgAuthData.Identified(
+        requestId = createTestId(),
+        user = user,
+        organization = createTestId(),
+        environment = Environment.Sandbox,
+        role = Role.Member,
+        session = Some(session),
+        customer = None
+      )
+    )(OrgAuthData.Identified.fromMap)
   }
 
   "parse OrgAuthData.Identified w/ customer" in {
-    val data = OrgAuthData.Identified(
-      requestId = "test",
-      user = user,
-      organization = "demo",
-      environment = Environment.Sandbox,
-      role = Role.Member,
-      session = None,
-      customer = Some(customer)
-    )
-
-    parse(data.jwt(salt))(OrgAuthData.Identified.fromMap).getOrElse {
-      sys.error("Failed to parse")
-    } must be(data)
+    validateParse(
+      OrgAuthData.Identified(
+        requestId = createTestId(),
+        user = user,
+        organization = createTestId(),
+        environment = Environment.Sandbox,
+        role = Role.Member,
+        session = None,
+        customer = Some(customer)
+      )
+    )(OrgAuthData.Identified.fromMap)
   }
 
   "parse OrgAuthData.Session" in {
-    val data = OrgAuthData.Session(
-      requestId = "test",
+    val auth = OrgAuthData.Session(
+      requestId = createTestId(),
       session = session,
-      organization = "demo",
+      organization = createTestId(),
       environment = Environment.Sandbox
     )
-
-    parse(data.jwt(salt))(OrgAuthData.Session.fromMap).getOrElse {
-      sys.error("Failed to parse")
-    } must be(data)
-
-    // Confirm generic org parser works
-    parse(data.jwt(salt))(OrgAuthData.Org.fromMap).getOrElse {
-      sys.error("Failed to parse")
-    } must be(data)
+    validateParse(auth)(OrgAuthData.Session.fromMap)
+    validateParse(auth)(OrgAuthData.Org.fromMap)
   }
 
   "parse OrgAuthData.Customer" in {
-    val data = OrgAuthData.Customer(
-      requestId = "test",
-      session = session,
-      organization = "demo",
-      environment = Environment.Sandbox,
-      customer = customer
-    )
-
-    parse(data.jwt(salt))(OrgAuthData.Customer.fromMap).getOrElse {
-      sys.error("Failed to parse")
-    } must be(data)
+    validateParse(
+      OrgAuthData.Customer(
+        requestId = createTestId(),
+        session = session,
+        organization = createTestId(),
+        environment = Environment.Sandbox,
+        customer = customer
+      )
+    )(OrgAuthData.Customer.fromMap)
   }
 
   "expired" in {
-    val data = AuthData.Anonymous(
-      requestId = "test",
-      user = None,
-      session = None,
-      customer = None
-    )
-
-    parse(data.jwt(salt))(AuthData.Anonymous.fromMap).isDefined must be(true)
-
-    parse(data.copy(
-      createdAt = DateTime.now.minusMinutes(1)
-    ).jwt(salt))(AuthData.Anonymous.fromMap).isDefined must be(true)
+    val data = AuthData.Anonymous.Empty
+    validateParse(data)(AuthData.Anonymous.fromMap)
+    validateParse(
+      data.copy(createdAt = DateTime.now.minusMinutes(1))
+    )(AuthData.Anonymous.fromMap)
 
     parse(data.copy(
       createdAt = DateTime.now.minusMinutes(5)
-    ).jwt(salt))(AuthData.Anonymous.fromMap).isDefined must be(false)
-
+    ).jwt(jwtSalt))(AuthData.Anonymous.fromMap).isDefined must be(false)
   }
 }

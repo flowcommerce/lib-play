@@ -123,8 +123,8 @@ class AuthDataSpec extends LibPlaySpec {
       Fields.Customer -> orgAuthDataCustomer.customer.number
     )
 
-    val auth = AuthData.Anonymous.fromMap(customerData)(logger).get.isInstanceOf[AuthData.Anonymous]
-    auth.customer must equal(Some(orgAuthDataCustomer.customer.number))
+    val auth = AuthData.Anonymous.fromMap(customerData)(logger).get
+    auth.customer must equal(Some(orgAuthDataCustomer.customer))
     auth.session must equal(Some(orgAuthDataCustomer.session))
     auth.organization must equal(Some(orgAuthDataCustomer.organization))
 
@@ -134,7 +134,7 @@ class AuthDataSpec extends LibPlaySpec {
       Fields.RequestId -> anonAuthData.requestId
     )
 
-    val anonAuth = AuthData.Anonymous.fromMap(anonData)(logger).get.isInstanceOf[AuthData.Anonymous]
+    val anonAuth = AuthData.Anonymous.fromMap(anonData)(logger).get
     anonAuth.customer must be(empty)
     anonAuth.session must be(empty)
     anonAuth.organization must be(empty)

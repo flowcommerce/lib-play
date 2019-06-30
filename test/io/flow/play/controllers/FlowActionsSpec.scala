@@ -29,6 +29,7 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
   }
 
   private[this] def validateParse[T <: AuthData](data: AuthData)(f: Map[String, String] => Option[T]) = {
+    println(s"validateParse: $data")
     parseAuthData(data)(f) must be(data)
   }
 
@@ -58,6 +59,15 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
     validateParse(
       AuthData.Anonymous.Empty.copy(
         user = Some(user)
+      )
+    )(AuthData.Anonymous.fromMap)
+  }
+
+  "parse AuthData.AnonymousAuth w/ organization and environment" in {
+    validateParse(
+      AuthData.Anonymous.Empty.copy(
+        organization = Some(createTestId()),
+        environment = Some(Environment.Sandbox)
       )
     )(AuthData.Anonymous.fromMap)
   }

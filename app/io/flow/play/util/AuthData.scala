@@ -123,6 +123,7 @@ object AuthDataMap {
     f: AuthDataMap => Option[T]
   )(implicit logger: RollbarLogger): Option[T] = {
     data.get("created_at").flatMap { ts =>
+      println(s"fromMap data: $data")
       val createdAt = ISODateTimeFormat.dateTimeParser.parseDateTime(ts)
       val requestId = data.getOrElse(Fields.RequestId, AuthHeaders.generateRequestId())
       val session = data.get(Fields.Session).map { id =>
@@ -130,11 +131,12 @@ object AuthDataMap {
       }
       val user: Option[UserReference] = data.get(Fields.UserId).map(UserReference.apply)
       val organizationId: Option[String] = data.get(Fields.Organization)
+      println(s"organizationId: $organizationId")
 
       val environment: Option[Environment] = data.get(Fields.Environment).map(Environment.apply).flatMap { e =>
         e match {
           case Environment.UNDEFINED(other) => {
-            logger.withKeyValue("env", other).warn(s"Unexpected Environment - ignoring")
+            logger.withKeyValue("env", other).warn("Unexpected Environment - ignoring")
             None
           }
           case Environment.Production => Some(e)
@@ -181,7 +183,8 @@ object AuthData {
     user: Option[UserReference],
     session: Option[FlowSession],
     customer: Option[CustomerReference],
-    organization: Option[String]
+    organization: Option[String],
+    environment: Option[Environment]
   ) extends AuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
@@ -201,11 +204,14 @@ object AuthData {
       user = None,
       session = None,
       customer = None,
-      organization = None
+      organization = None,
+      environment = None
     )
 
     def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[Anonymous] = {
       AuthDataMap.fromMap(data) { dm =>
+        println(s"dm: ${dm}")
+        println(s"dm.organization: ${dm.organization}")
         Some(
           Anonymous(
             createdAt = dm.createdAt,
@@ -213,7 +219,8 @@ object AuthData {
             user = dm.user,
             session = dm.session,
             customer = dm.customer,
-            organization = dm.organization
+            organization = dm.organization,
+            environment = dm.environment
           )
         )
       }

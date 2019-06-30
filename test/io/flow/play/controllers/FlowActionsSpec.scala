@@ -62,6 +62,15 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
     )(AuthData.Anonymous.fromMap)
   }
 
+  "parse AuthData.AnonymousAuth w/ organization and environment" in {
+    validateParse(
+      AuthData.Anonymous.Empty.copy(
+        organization = Some(createTestId()),
+        environment = Some(Environment.Sandbox)
+      )
+    )(AuthData.Anonymous.fromMap)
+  }
+
   "parse AuthData.AnonymousAuth w/ user and session and customer" in {
     validateParse(
       AuthData.Anonymous.Empty.copy(

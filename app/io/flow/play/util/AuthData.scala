@@ -191,7 +191,9 @@ object AuthData {
       base.copy(
         user = user,
         session = session,
-        customer = customer
+        customer = customer,
+        organization = organization,
+        environment = environment
       )
     }
 

@@ -18,7 +18,7 @@ lazy val root = project
       ws,
       filters,
       guice,
-      "io.flow" %% s"lib-util$timeLibSuffix" % "0.1.26",
+      "io.flow" %% s"lib-util$timeLibSuffix" % "0.1.27",
       "io.flow" %% s"lib-akka$timeLibSuffix" % "0.1.4",
       "io.flow" %% s"lib-log$timeLibSuffix" % "0.0.72",
       "com.jason-goodwin" %% "authentikat-jwt" % "0.4.5",

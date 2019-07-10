@@ -20,7 +20,7 @@ lazy val root = project
       guice,
       "io.flow" %% s"lib-util$timeLibSuffix" % "0.1.27",
       "io.flow" %% s"lib-akka$timeLibSuffix" % "0.1.4",
-      "io.flow" %% s"lib-log$timeLibSuffix" % "0.0.72",
+      "io.flow" %% s"lib-log$timeLibSuffix" % "0.0.73",
       "com.jason-goodwin" %% "authentikat-jwt" % "0.4.5",
       "com.ning" % "async-http-client" % "1.9.40",
       "org.apache.commons" % "commons-io" % "1.3.2",

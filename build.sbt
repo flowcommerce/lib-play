@@ -6,7 +6,7 @@ organization := "io.flow"
 
 scalaVersion in ThisBuild := "2.12.8"
 
-version := "0.5.69"
+version := "0.5.71"
 
 val timeLibSuffix = ""
 
@@ -65,4 +65,4 @@ publishTo := {
   }
 }
 
-version := "0.5.70"
+version := "0.5.71"

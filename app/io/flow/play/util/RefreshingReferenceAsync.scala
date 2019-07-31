@@ -1,6 +1,7 @@
 package io.flow.play.util
 
 import java.time.ZonedDateTime
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicReference
 
 import akka.actor.{ActorSystem, Scheduler}
@@ -11,15 +12,22 @@ import scala.concurrent.{Await, ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 /**
-  * Maintains a reference that gets asynchronously refreshed every `reloadInterval`.
+  * Maintains a reference that is refreshed asynchronously every `reloadInterval`.
   *
   * The data is asynchronously refreshed every `reloadInterval` period calling the `retrieve` function up to
   * `maxAtttempts` times if the function throws an exception or is completed by a failure.
-  * Upon successful completion, the cached is refreshed with the retrieved data, otherwise the cache is not refreshed
+  * Upon successful completion, the cache is refreshed with the retrieved data, otherwise the cache is not refreshed
   * and will retry `reloadInterval` after the first failed attempt.
   *
-  * The class will not initialize if the retrieval function fails the first `maxAttempts` times to avoid querying a
-  * cache that has never been initialized.
+  * The cache will throw an exception on creation if the retrieval function fails the first `maxAttempts` times to avoid
+  * querying a cache that has never been initialized.
+  *
+  * If the asynchronous `retrieve` function has not completed when the next call is scheduled, this next call is not
+  * issued.
+  *
+  * The `forceRefresh` will always issue a call to the `retrieve` function, regardless of scheduled calls or other
+  * `forceRefresh` not yet completed.
+  * Analogously to a scheduled refresh, the cache is refreshed with the retrieved data when the call completes.
   *
   * Example usage:
   *
@@ -75,13 +83,18 @@ trait RefreshingReferenceAsync[T] {
     *
     * @return the result of the refresh call, potentially a failed [[Future]]
     */
-  def forceRefresh(): Future[T] = doRefresh()
+  def forceRefresh(): Future[T] = refreshInternal(force = true).map(_.value)(retrieveExecutionContext)
 
   def get: T = cache.get().value
 
+  def shutdown(): Boolean = scheduled.cancel()
+
+  // keep track of non completed retrievals
+  private[this] val retrieving = new ConcurrentHashMap[Object, Future[AsyncResult[T]]]()
+
   // load blocking and fail if the retrieval is not successful after maxAttempts
   private[this] val cache: AtomicReference[AsyncResult[T]] =
-    Try(Await.result(doLoadRetry(1, maxAttempts), 10.minutes)) match {
+    Try(Await.result(doLoadRetry(1, maxAttempts), 10.seconds)) match {
       case Success(data) =>
         new AtomicReference(data)
       case Failure(ex) =>
@@ -92,18 +105,32 @@ trait RefreshingReferenceAsync[T] {
     }
 
   // schedule subsequent reloads
-  scheduler.schedule(reloadInterval, reloadInterval) {
-    doRefresh()
+  private val scheduled = scheduler.schedule(reloadInterval, reloadInterval) {
+    refreshInternal(force = false)
     ()
   }(retrieveExecutionContext)
 
-  private def doRefresh(): Future[T] = {
-    val res = doLoadRetry(1, maxAttempts)
+  private def refreshInternal(force: Boolean): Future[AsyncResult[T]] =
+    if (force)
+      doRefresh()
+    else
+    // synchronize to avoid fetching twice if the map is empty
+      retrieving.synchronized {
+        if (retrieving.isEmpty)
+          doRefresh()
+        else
+          Future.successful(cache.get)
+      }
+
+  private def doRefresh(): Future[AsyncResult[T]] = {
+    val key = new Object
+    val res = retrieving.compute(key, (_, _) => doLoadRetry(1, maxAttempts))
+
     // update cache
     res.onComplete {
       case Success(data) =>
         // only set if requested at is after
-        cache.updateAndGet { current  =>
+        cache.updateAndGet { current =>
           if (data.requestedAt.isAfter(current.requestedAt)) data
           else current
         }
@@ -114,15 +141,19 @@ trait RefreshingReferenceAsync[T] {
           .warn(s"Failed to refresh cache. Will try again in $reloadInterval", ex)
     }(retrieveExecutionContext)
 
-    res.map(_.value)(retrieveExecutionContext)
+    // removing from fetching
+    res.onComplete(_ => retrieving.remove(key))(retrieveExecutionContext)
+
+    res
   }
 
   private def doLoadRetry(attempts: Int, maxAttempts: Int): Future[AsyncResult[T]] = {
     val requestedAt = ZonedDateTime.now()
-    // In case the provided retrieve throws an exception, enclose in a Future
+    // in case the provided retrieve throws an exception, enclose in a Future
+    // also allows for creating a Future right away
     Future
       .unit
-      .flatMap(_ => retrieve)(retrieveExecutionContext)
+      .flatMap(_ =>  retrieve)(retrieveExecutionContext)
       .map(f => AsyncResult(requestedAt, f))(retrieveExecutionContext)
       .recoverWith { case ex if attempts < maxAttempts =>
         log.

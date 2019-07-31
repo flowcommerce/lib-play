@@ -20,7 +20,8 @@ trait ActorProxyGuiceSupport {
 
   private def accessBinder: Binder = {
     val method: Method = classOf[AbstractModule].getDeclaredMethod("binder")
-    if (!method.isAccessible) {
+    @silent val isAccessible = method.isAccessible // deprecated from java 9 onwards, use canAccess
+    if (!isAccessible) {
       method.setAccessible(true)
     }
     method.invoke(this).asInstanceOf[Binder]

@@ -1,6 +1,8 @@
 package io.flow.play.util
 
-import io.flow.common.v0.models.{Environment, Role, UserReference}
+import java.util.UUID
+import io.flow.util.Constants
+import io.flow.common.v0.models.{CustomerReference, Environment, Role, UserReference}
 import javax.inject.{Inject, Singleton}
 
 /**
@@ -39,12 +41,14 @@ object AuthHeaders {
   def user(
     user: UserReference,
     requestId: String = generateRequestId(),
-    session: Option[FlowSession] = None
+    session: Option[FlowSession] = None,
+    customer: Option[CustomerReference] = None
   ): AuthData.Identified = {
     AuthData.Identified(
       requestId = requestId,
       user = user,
-      session = session
+      session = session,
+      customer = customer
     )
   }
 
@@ -55,6 +59,18 @@ object AuthHeaders {
     AuthData.Session(
       requestId = requestId,
       session = session
+    )
+  }
+
+  def customer(
+    requestId: String = generateRequestId(),
+    session: FlowSession = createFlowSession(),
+    customer: CustomerReference = createCustomerReference()
+  ): AuthData.Customer = {
+    AuthData.Customer(
+      requestId = requestId,
+      session = session,
+      customer = customer
     )
   }
 
@@ -69,7 +85,8 @@ object AuthHeaders {
     role: Role = Role.Member,
     environment: Environment = Environment.Sandbox,
     requestId: String = generateRequestId(),
-    session: Option[FlowSession] = None
+    session: Option[FlowSession] = None,
+    customer: Option[CustomerReference] = None
 ): OrgAuthData.Identified = {
     OrgAuthData.Identified(
       requestId = requestId,
@@ -77,12 +94,13 @@ object AuthHeaders {
       organization = org,
       environment = environment,
       role = role,
-      session = session
+      session = session,
+      customer = customer
     )
   }
 
   /**
-    * Helper to create a valid session auth data
+    * Helper to create a valid session org auth data
     *
     * @param requestId Will be created if not specified
     */
@@ -100,13 +118,40 @@ object AuthHeaders {
     )
   }
 
-  def createFlowSession(): FlowSession = {
-    FlowSession(
-      id = io.flow.util.Constants.Prefixes.Session + random.alphaNumeric(36)
+  /**
+    * Helper to create a valid customer org auth data
+    *
+    * @param requestId Will be created if not specified
+    */
+  def organizationCustomer(
+    org: String,
+    environment: Environment = Environment.Sandbox,
+    requestId: String = generateRequestId(),
+    session: FlowSession = createFlowSession(),
+    customer: CustomerReference = createCustomerReference()
+  ): OrgAuthData.Customer = {
+    OrgAuthData.Customer(
+      requestId = requestId,
+      organization = org,
+      environment = environment,
+      session = session,
+      customer = customer
     )
   }
 
-  private[this] def generateRequestId(): String = {
+  def createFlowSession(): FlowSession = {
+    FlowSession(
+      id = Constants.Prefixes.Session + generateToken()
+    )
+  }
+
+  def createCustomerReference(): CustomerReference = {
+    CustomerReference(
+      number = generateToken()
+    )
+  }
+
+  private[util] def generateRequestId(): String = {
     generateRequestId("libplay")
   }
 
@@ -120,7 +165,10 @@ object AuthHeaders {
     *        no punctuation to make cut & paste easier.
     */
   def generateRequestId(prefix: String): String = {
-    prefix + random.alphaNumeric(36)
+    prefix + generateToken()
   }
 
+  private[this] def generateToken(numberRandom: Int = 6): String = {
+    random.alphaNumeric(numberRandom) ++ UUID.randomUUID().toString.replaceAll("-", "")
+  }
 }

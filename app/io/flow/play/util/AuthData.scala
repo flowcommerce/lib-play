@@ -1,10 +1,9 @@
 package io.flow.play.util
 
-import java.util.UUID
-
 import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
-import io.flow.common.v0.models.{Environment, Role, UserReference}
+import io.flow.common.v0.models.{CustomerReference, Environment, Role, UserReference}
 import io.flow.log.RollbarLogger
+import io.flow.util.Constants
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.format.ISODateTimeFormat.dateTime
@@ -16,7 +15,8 @@ case class AuthDataMap(
   user: Option[UserReference] = None,
   organization: Option[String] = None,
   environment: Option[Environment] = None,
-  role: Option[Role] = None
+  role: Option[Role] = None,
+  customer: Option[CustomerReference] = None
 ) {
 
   def toMap: Map[String, String] = {
@@ -27,7 +27,8 @@ case class AuthDataMap(
       AuthDataMap.Fields.Session -> session.map(_.id),
       AuthDataMap.Fields.Organization -> organization,
       AuthDataMap.Fields.Environment -> environment.map(_.toString),
-      AuthDataMap.Fields.Role -> role.map(_.toString)
+      AuthDataMap.Fields.Role -> role.map(_.toString),
+      AuthDataMap.Fields.Customer -> customer.map(_.number),
     ).flatMap { case (k, value) => value.map { v => k -> v } }
   }
 
@@ -45,8 +46,8 @@ case class FlowSession(
   id: String
 ) {
   assert(
-    id.startsWith(io.flow.util.Constants.Prefixes.Session),
-    s"Flow session id must start with '${io.flow.util.Constants.Prefixes.Session}' and not[${id.substring(0, 3)}]"
+    id.startsWith(Constants.Prefixes.Session),
+    s"Flow session id must start with '${Constants.Prefixes.Session}' and not[${id.substring(0, 3)}]"
   )
 }
 
@@ -115,6 +116,7 @@ object AuthDataMap {
     val Organization = "organization"
     val Environment = "environment"
     val Role = "role"
+    val Customer = "customer"
   }
 
   def fromMap[T <: AuthData](data: Map[String, String])(
@@ -122,10 +124,7 @@ object AuthDataMap {
   )(implicit logger: RollbarLogger): Option[T] = {
     data.get("created_at").flatMap { ts =>
       val createdAt = ISODateTimeFormat.dateTimeParser.parseDateTime(ts)
-      val requestId = data.get(Fields.RequestId).getOrElse {
-        logger.warn("JWT Token did not have a request_id - generated a new request id")
-        "lib-play-" + UUID.randomUUID.toString
-      }
+      val requestId = data.getOrElse(Fields.RequestId, AuthHeaders.generateRequestId())
       val session = data.get(Fields.Session).map { id =>
         FlowSession(id = id)
       }
@@ -135,7 +134,7 @@ object AuthDataMap {
       val environment: Option[Environment] = data.get(Fields.Environment).map(Environment.apply).flatMap { e =>
         e match {
           case Environment.UNDEFINED(other) => {
-            logger.withKeyValue("env", other).warn(s"Unexpected Environment - ignoring")
+            logger.withKeyValue("env", other).warn("Unexpected Environment - ignoring")
             None
           }
           case Environment.Production => Some(e)
@@ -154,6 +153,10 @@ object AuthDataMap {
         }
       }
 
+      val customer = data.get(Fields.Customer).map { number =>
+        CustomerReference(number = number)
+      }
+
       f(
         AuthDataMap(
           createdAt = createdAt,
@@ -162,7 +165,8 @@ object AuthDataMap {
           user = user,
           organization = organizationId,
           environment = environment,
-          role = role
+          role = role,
+          customer = customer
         )
       )
     }
@@ -175,13 +179,19 @@ object AuthData {
     override val createdAt: DateTime = DateTime.now,
     override val requestId: String,
     user: Option[UserReference],
-    session: Option[FlowSession]
+    session: Option[FlowSession],
+    customer: Option[CustomerReference],
+    organization: Option[String],
+    environment: Option[Environment]
   ) extends AuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
       base.copy(
         user = user,
-        session = session
+        session = session,
+        customer = customer,
+        organization = organization,
+        environment = environment
       )
     }
 
@@ -192,7 +202,10 @@ object AuthData {
     val Empty = Anonymous(
       requestId = AuthHeaders.generateRequestId("anonymousrequest"),
       user = None,
-      session = None
+      session = None,
+      customer = None,
+      organization = None,
+      environment = None
     )
 
     def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[Anonymous] = {
@@ -202,7 +215,10 @@ object AuthData {
             createdAt = dm.createdAt,
             requestId = dm.requestId,
             user = dm.user,
-            session = dm.session
+            session = dm.session,
+            customer = dm.customer,
+            organization = dm.organization,
+            environment = dm.environment
           )
         )
       }
@@ -214,13 +230,15 @@ object AuthData {
     override val createdAt: DateTime = DateTime.now,
     override val requestId: String,
     user: UserReference,
-    session: Option[FlowSession]
+    session: Option[FlowSession],
+    customer: Option[CustomerReference]
   ) extends AuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
       base.copy(
         user = Some(user),
-        session = session
+        session = session,
+        customer = customer
       )
     }
 
@@ -235,7 +253,8 @@ object AuthData {
             createdAt = dm.createdAt,
             requestId = dm.requestId,
             user = user,
-            session = dm.session
+            session = dm.session,
+            customer = dm.customer
           )
         }
       }
@@ -267,6 +286,42 @@ object AuthData {
             requestId = dm.requestId,
             session = session
           )
+        }
+      }
+    }
+
+  }
+
+  case class Customer(
+    override val createdAt: DateTime = DateTime.now,
+    override val requestId: String,
+    session: FlowSession,
+    customer: CustomerReference
+  ) extends AuthData {
+
+    override protected def decorate(base: AuthDataMap): AuthDataMap = {
+      base.copy(
+        session = Some(session),
+        customer = Some(customer)
+      )
+    }
+
+  }
+
+  object Customer {
+
+    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[Customer] = {
+      AuthDataMap.fromMap(data) { dm =>
+        (dm.session, dm.customer) match {
+          case (Some(session), Some(customer)) =>
+            Some(Customer(
+              createdAt = dm.createdAt,
+              requestId = dm.requestId,
+              session = session,
+              customer = customer
+            ))
+
+          case _ => None
         }
       }
     }
@@ -322,7 +377,8 @@ object OrgAuthData {
     override val environment: Environment,
     user: UserReference,
     role: Role,
-    session: Option[FlowSession]
+    session: Option[FlowSession],
+    customer: Option[CustomerReference]
   ) extends OrgAuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
@@ -331,7 +387,8 @@ object OrgAuthData {
         environment = Some(environment),
         user = Some(user),
         role = Some(role),
-        session = session
+        session = session,
+        customer = customer
       )
     }
 
@@ -351,9 +408,50 @@ object OrgAuthData {
                 organization = org,
                 environment = env,
                 role = role,
-                session = dm.session
+                session = dm.session,
+                customer = dm.customer
               )
             )
+          }
+          case _ => None
+        }
+      }
+    }
+  }
+
+  case class Customer(
+    override val createdAt: DateTime = DateTime.now,
+    override val requestId: String,
+    override val organization: String,
+    override val environment: Environment,
+    session: FlowSession,
+    customer: CustomerReference
+  ) extends OrgAuthData {
+
+    override protected def decorate(base: AuthDataMap): AuthDataMap = {
+      base.copy(
+        organization = Some(organization),
+        environment = Some(environment),
+        session = Some(session),
+        customer = Some(customer)
+      )
+    }
+  }
+
+  object Customer {
+
+    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[Customer] = {
+      AuthDataMap.fromMap(data) { dm =>
+        (dm.organization, dm.environment, dm.session, dm.customer) match {
+          case (Some(org), Some(env), Some(session), Some(customer)) => {
+            Some(Customer(
+              createdAt = dm.createdAt,
+              requestId = dm.requestId,
+              session = session,
+              organization = org,
+              environment = env,
+              customer = customer
+            ))
           }
           case _ => None
         }
@@ -364,13 +462,58 @@ object OrgAuthData {
   object Org {
 
     /**
-      * Parses either an identified org or session org (or None)
+      * Parses either an identified org or customer org or session org (or None)
       */
     def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[io.flow.play.util.OrgAuthData] = {
-      Identified.fromMap(data) match {
-        case None => Session.fromMap(data)
-        case Some(auth) => Some(auth)
-      }
+      Identified.fromMap(data)
+        .orElse(Customer.fromMap(data))
+        .orElse(Session.fromMap(data))
+    }
+  }
+
+  object IdentifiedCustomer {
+
+    /**
+      * Parses either an identified org or customer org (or None)
+      */
+    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[io.flow.play.util.OrgAuthData] = {
+      Identified.fromMap(data)
+        .orElse(Customer.fromMap(data))
+    }
+  }
+
+
+  /**
+    * Required wrapper to assist in migrating authorization in Checkout UI.
+    * Authorization header may be passed as either a Bearer JWT (represented as a OrgAuthData.Customer)
+    * or the legacy session (represented as an AuthData.Session)
+    *
+    * Note the different, intentionally referenced traits, OrgAuthData vs. AuthData
+    */
+  object Checkout {
+
+    /**
+      * Parses either a customer org or a session (or None)
+      */
+    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[io.flow.play.util.AuthData] = {
+      OrgAuthData.Customer.fromMap(data)
+        .orElse(AuthData.Session.fromMap(data))
+    }
+  }
+
+  /**
+    * Required wrapper to assist in migrating authorization in Checkout UI.
+    * Authorization header may be passed as either a Bearer JWT (represented as a OrgAuthData.Customer)
+    * or the legacy session (represented as an OrgAuthData.SessionOrg)
+    */
+  object CheckoutOrg {
+
+    /**
+      * Parses either a customer org or a session org (or None)
+      */
+    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[io.flow.play.util.OrgAuthData] = {
+      OrgAuthData.Customer.fromMap(data)
+        .orElse(OrgAuthData.Session.fromMap(data))
     }
   }
 

@@ -4,7 +4,6 @@ import io.flow.play.util.{Config, DefaultConfig}
 
 import scala.collection.mutable
 
-@javax.inject.Singleton
 class MockConfig @javax.inject.Inject() (
   defaultConfig: DefaultConfig
 ) extends Config {

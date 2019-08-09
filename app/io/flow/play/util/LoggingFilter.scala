@@ -66,6 +66,7 @@ class FlowLoggingFilter @javax.inject.Inject() (
               "User-Agent",
               "X-Forwarded-For",
               "CF-Connecting-IP",
+              "X-Apidoc-Version",
             ).contains(key)
           })
           .withKeyValue("request_id", requestId)

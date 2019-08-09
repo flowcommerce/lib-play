@@ -28,6 +28,12 @@ class FlowLoggingFilter @javax.inject.Inject() (
 
   private val LoggedRequestMethodConfig = "play.http.logging.methods"
   private val DefaultLoggedRequestMethods = Seq("GET", "PATCH", "POST", "PUT", "DELETE", "OPTIONS", "HEAD")
+  private val LoggedHeaders = Seq(
+    "User-Agent",
+    "X-Forwarded-For",
+    "CF-Connecting-IP",
+    "X-Apidoc-Version",
+  ).map(_.toLowerCase)
 
   private val loggedRequestMethods = config.optionalList(LoggedRequestMethodConfig).getOrElse(DefaultLoggedRequestMethods).toSet
 
@@ -54,7 +60,19 @@ class FlowLoggingFilter @javax.inject.Inject() (
           headerMap.getOrElse("CF-Connecting-IP", Nil).mkString(",")
         ).mkString(" ")
 
-        logger.withKeyValue("request_id", requestId).info(line)
+        logger
+          .withKeyValue("method", requestHeader.method)
+          .withKeyValue("host", requestHeader.host)
+          .withKeyValue("path", requestHeader.path)
+          .withKeyValue("query_params", requestHeader.queryString)
+          .withKeyValue("http_code", result.header.status)
+          .withKeyValue("request_time_ms", requestTime)
+          .withKeyValue("request_headers",
+            headerMap
+              .map { case (key, value) => key.toLowerCase -> value }
+              .filterKeys(LoggedHeaders.contains))
+          .withKeyValue("request_id", requestId)
+          .info(line)
       }
 
       result

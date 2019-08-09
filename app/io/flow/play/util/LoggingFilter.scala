@@ -43,18 +43,18 @@ class FlowLoggingFilter @javax.inject.Inject() (
         val requestTime = endTime - startTime
         val headerMap = requestHeader.headers.toMap
         val requestId = headerMap.getOrElse("X-Flow-Request-Id", Nil).mkString(",")
-        val line = Seq(
-          requestHeader.method,
-          s"${requestHeader.host}${requestHeader.uri}",
-          result.header.status,
-          s"${requestTime}ms",
-          requestId,
-          headerMap.getOrElse("User-Agent", Nil).mkString(","),
-          headerMap.getOrElse("X-Forwarded-For", Nil).mkString(","),
-          headerMap.getOrElse("CF-Connecting-IP", Nil).mkString(",")
-        ).mkString(" ")
 
-        logger.withKeyValue("request_id", requestId).info(line)
+        logger.
+          withKeyValue("method", requestHeader.method).
+          withKeyValue("uri", requestHeader.uri).
+          withKeyValue("host", requestHeader.host).
+          withKeyValue("status", result.header.status).
+          withKeyValue("duration", requestTime).
+          withKeyValue("user_agent", headerMap.getOrElse("User-Agent", Nil).mkString(",")).
+          withKeyValue("cf_connecting_ip", headerMap.getOrElse("CF-Connecting-IP", Nil).mkString(",")).
+          withKeyValue("x_forwarded_for", headerMap.getOrElse("X-Forwarded-For", Nil).mkString(",")).
+          withKeyValue("request_id", requestId).
+          info("") // What should we put here?
       }
 
       result

@@ -61,7 +61,13 @@ class FlowLoggingFilter @javax.inject.Inject() (
           .withKeyValue("query_params", requestHeader.queryString)
           .withKeyValue("http_code", result.header.status)
           .withKeyValue("request_time_ms", requestTime)
-          .withKeyValue("request_headers", headerMap)
+          .withKeyValue("request_headers", headerMap.filterKeys { key =>
+            Seq(
+              "User-Agent",
+              "X-Forwarded-For",
+              "CF-Connecting-IP",
+            ).contains(key)
+          })
           .withKeyValue("request_id", requestId)
           .info(line)
       }

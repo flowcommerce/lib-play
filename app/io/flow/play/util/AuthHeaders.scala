@@ -83,7 +83,7 @@ object AuthHeaders {
     user: UserReference,
     org: String,
     role: Role = Role.Member,
-    environment: Environment = Environment.Sandbox,
+    environment: Environment,
     requestId: String = generateRequestId(),
     session: Option[FlowSession] = None,
     customer: Option[CustomerReference] = None
@@ -106,7 +106,7 @@ object AuthHeaders {
     */
   def organizationSession(
     org: String,
-    environment: Environment = Environment.Sandbox,
+    environment: Environment,
     requestId: String = generateRequestId(),
     session: FlowSession = createFlowSession()
   ): OrgAuthData.Session = {
@@ -125,7 +125,7 @@ object AuthHeaders {
     */
   def organizationCustomer(
     org: String,
-    environment: Environment = Environment.Sandbox,
+    environment: Environment,
     requestId: String = generateRequestId(),
     session: FlowSession = createFlowSession(),
     customer: CustomerReference = createCustomerReference()

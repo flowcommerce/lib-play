@@ -17,7 +17,7 @@ class AuthDataSpec extends LibPlaySpec {
   }
 
   "AuthData.organization defaults" in {
-    val auth = AuthHeaders.organization(UserReference("user-1"), "demo")
+    val auth = AuthHeaders.organization(UserReference("user-1"), "demo", environment = Environment.Sandbox)
     auth.user.id must be("user-1")
     auth.organization must be("demo")
     auth.environment must be(Environment.Sandbox)
@@ -40,7 +40,7 @@ class AuthDataSpec extends LibPlaySpec {
   }
 
   "OrgAuthData.Checkout - customer" in {
-    val orgAuthDataCustomer = AuthHeaders.organizationCustomer(org = createTestId())
+    val orgAuthDataCustomer = AuthHeaders.organizationCustomer(org = createTestId(), environment = Environment.Sandbox)
     val customerData: Map[String, String] = Map(
       Fields.CreatedAt -> orgAuthDataCustomer.createdAt.toString,
       Fields.RequestId -> orgAuthDataCustomer.requestId,
@@ -79,7 +79,7 @@ class AuthDataSpec extends LibPlaySpec {
   }
 
   "OrgAuthData.CheckoutOrg - session org" in {
-    val authDataSession = AuthHeaders.organizationSession(createTestId())
+    val authDataSession = AuthHeaders.organizationSession(createTestId(), environment = Environment.Sandbox)
     val sessionData: Map[String, String] = Map(
       Fields.CreatedAt -> authDataSession.createdAt.toString,
       Fields.RequestId -> authDataSession.requestId,
@@ -96,7 +96,7 @@ class AuthDataSpec extends LibPlaySpec {
   }
 
   "OrgAuthData.IdentifiedCustomer - customer" in {
-    val orgAuthDataCustomer = AuthHeaders.organizationCustomer(org = createTestId())
+    val orgAuthDataCustomer = AuthHeaders.organizationCustomer(org = createTestId(), environment = Environment.Sandbox)
     val customerData: Map[String, String] = Map(
       Fields.CreatedAt -> orgAuthDataCustomer.createdAt.toString,
       Fields.RequestId -> orgAuthDataCustomer.requestId,
@@ -114,7 +114,7 @@ class AuthDataSpec extends LibPlaySpec {
   }
 
   "OrgAuthData.Anonymous with org data" in {
-    val orgAuthDataCustomer = AuthHeaders.organizationCustomer(org = createTestId())
+    val orgAuthDataCustomer = AuthHeaders.organizationCustomer(org = createTestId(), environment = Environment.Sandbox)
     val customerData: Map[String, String] = Map(
       Fields.CreatedAt -> orgAuthDataCustomer.createdAt.toString,
       Fields.RequestId -> orgAuthDataCustomer.requestId,

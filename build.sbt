@@ -21,7 +21,6 @@ lazy val root = project
       "com.ning" % "async-http-client" % "1.9.40",
       "org.apache.commons" % "commons-io" % "1.3.2",
       "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.3" % Test,
-      "net.logstash.logback" % "logstash-logback-encoder" % "6.1",
       specs2 % Test,
       compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.4.2"),
       "com.github.ghik" %% "silencer-lib" % "1.4.2" % Provided

@@ -24,10 +24,6 @@ lazy val root = project
       "com.jason-goodwin" %% "authentikat-jwt" % "0.4.5",
       "com.ning" % "async-http-client" % "1.9.40",
       "org.apache.commons" % "commons-io" % "1.3.2",
-      // The following libs are Provided so dependencies are only included if io.flow.play.actors.proxy.* is used
-      "com.typesafe.akka" %% "akka-stream" % "2.5.25" % Provided,
-      "com.typesafe.akka" %% "akka-slf4j" % "2.5.19" % Provided,
-      "com.lightbend.akka" %% "akka-stream-alpakka-sqs" % "1.1.1" % Provided,
       "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.3" % Test,
       "net.logstash.logback" % "logstash-logback-encoder" % "6.1",
       specs2 % Test,

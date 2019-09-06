@@ -8,8 +8,6 @@ scalaVersion in ThisBuild := "2.12.8"
 
 version := "0.5.78"
 
-val timeLibSuffix = ""
-
 lazy val root = project
   .in(file("."))
   .enablePlugins(PlayScala)
@@ -18,7 +16,7 @@ lazy val root = project
       ws,
       filters,
       guice,
-      "io.flow" %% s"lib-log$timeLibSuffix" % "0.0.82",
+      "io.flow" %% "lib-log" % "0.0.82",
       "com.jason-goodwin" %% "authentikat-jwt" % "0.4.5",
       "com.ning" % "async-http-client" % "1.9.40",
       "org.apache.commons" % "commons-io" % "1.3.2",

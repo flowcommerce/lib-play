@@ -4,8 +4,8 @@ import io.flow.log.RollbarProvider
 import org.mockito.Mockito
 import org.scalatest.concurrent.Eventually
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
-import org.scalatest.mockito.MockitoSugar
 import org.scalatest.{FlatSpec, Matchers, OptionValues}
+import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 import scala.concurrent.ExecutionContext.Implicits

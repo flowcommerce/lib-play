@@ -4,7 +4,7 @@ name := "lib-play-play26"
 
 organization := "io.flow"
 
-scalaVersion in ThisBuild := "2.12.8"
+scalaVersion in ThisBuild := "2.12.10"
 
 version := "0.5.82"
 

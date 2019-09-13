@@ -5,7 +5,7 @@ logLevel := Level.Warn
 credentials += Credentials(Path.userHome / ".ivy2" / ".artifactory")
 
 // The Typesafe repository
-resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
+resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/"
 
 resolvers += "Artifactory" at "https://flow.artifactoryonline.com/flow/libs-release-local/"
 

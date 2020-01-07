@@ -6,8 +6,7 @@ import io.flow.util.Constants
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.format.ISODateTimeFormat.dateTime
-import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim, JwtHeader, JwtJson}
-import play.api.libs.json.{JsValue, Json}
+import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim, JwtHeader}
 
 case class AuthDataMap(
   requestId: String,

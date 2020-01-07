@@ -3,8 +3,7 @@ package io.flow.play.controllers
 import io.flow.log.RollbarLogger
 import io.flow.play.util.Config
 import javax.inject.Inject
-import pdi.jwt.JwtAlgorithm.HS256
-import pdi.jwt.{Jwt, JwtJson}
+import pdi.jwt.{Jwt, JwtAlgorithm, JwtJson, JwtOptions}
 
 import scala.util.{Failure, Success}
 
@@ -40,12 +39,13 @@ class AuthorizationImpl @Inject() (
         }
 
       case "Bearer" :: value :: Nil =>
-        JwtJson.decodeJson(value, jwtSalt, Seq(HS256)) match {
+        // whitelist only hmac algorithms
+        JwtJson.decodeJson(value, jwtSalt, JwtAlgorithm.allHmac) match {
           case Success(claims) =>
             (claims \ "id").asOpt[String].map(JwtToken)
           case Failure(ex) =>
-            if (Jwt.isValid(value))
-              logger.info("JWT Token was invalid, bad salt", ex)
+            if (Jwt.isValid(value, JwtOptions.DEFAULT.copy(signature = false)))
+              logger.info("JWT Token was valid, but we can't verify the signature", ex)
             None
         }
 

@@ -1,11 +1,13 @@
 package io.flow.play.controllers
 
-import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
 import com.typesafe.config.ConfigFactory
 import io.flow.log.RollbarProvider
 import io.flow.play.clients.MockConfig
 import io.flow.play.util.{ApplicationConfig, DefaultConfig, LibPlaySpec}
+import pdi.jwt.JwtAlgorithm.HS256
+import pdi.jwt.JwtJson
 import play.api.Configuration
+import play.api.libs.json.Json
 
 class AuthorizationSpec extends LibPlaySpec {
 
@@ -19,9 +21,7 @@ class AuthorizationSpec extends LibPlaySpec {
                        userId: String,
                        salt: String = mockConfig.requiredString("JWT_SALT")
                      ): String = {
-    val header = JwtHeader("HS256")
-    val claimsSet = JwtClaimsSet(Map("id" -> userId))
-    val token = JsonWebToken(header, claimsSet, salt)
+    val token = JwtJson.encode(Json.obj("id" -> userId), salt, HS256)
     s"Bearer $token"
   }
 

@@ -1,10 +1,14 @@
 package io.flow.play.controllers
 
-import authentikat.jwt.{JsonWebToken, JwtClaimsSetJValue}
 import com.github.ghik.silencer.silent
 import io.flow.play.util.{AuthData, AuthHeaders, Config}
-import play.api.mvc.{Headers, Request, Result}
+import pdi.jwt.JwtAlgorithm.HS256
+import pdi.jwt.JwtJson
+import play.api.libs.json.JsObject
 import play.api.mvc.Results.Unauthorized
+import play.api.mvc.{Headers, Request, Result}
+
+import scala.util.Success
 
 trait FlowActionInvokeBlockHelper {
   def config: Config
@@ -22,15 +26,13 @@ trait FlowActionInvokeBlockHelper {
     headers.get(AuthHeaders.Header).flatMap { v => parse(v)(f) }
 
   def parse[T <: AuthData](value: String)(f: Map[String, String] => Option[T]): Option[T] =
-    value match {
-      case JsonWebToken(_, claimsSet, _) if jwtIsValid(value) => parseJwtToken(claimsSet)(f)
+    JwtJson.decodeJson(value, jwtSalt, Seq(HS256)) match {
+      case Success(claims) => parseJwtToken(claims)(f)
       case _ => None
-  }
+    }
 
-  protected def jwtIsValid(token: String): Boolean = JsonWebToken.validate(token, jwtSalt)
-
-  protected def parseJwtToken[T <: AuthData](claimsSet: JwtClaimsSetJValue)(f: Map[String, String] => Option[T]): Option[T] =
-    claimsSet.asSimpleMap.toOption.flatMap { claims =>
-    f(claims).filter { auth => auth.createdAt.plusSeconds(authExpirationTimeSeconds).isAfterNow }
-  }
+  protected def parseJwtToken[T <: AuthData](claims: JsObject)(f: Map[String, String] => Option[T]): Option[T] =
+    claims.asOpt[Map[String, String]].flatMap { claims =>
+      f(claims).filter(_.createdAt.plusSeconds(authExpirationTimeSeconds).isAfterNow)
+    }
 }

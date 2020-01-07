@@ -1,12 +1,13 @@
 package io.flow.play.util
 
-import authentikat.jwt.{JsonWebToken, JwtClaimsSet, JwtHeader}
 import io.flow.common.v0.models.{CustomerReference, Environment, Role, UserReference}
 import io.flow.log.RollbarLogger
 import io.flow.util.Constants
 import org.joda.time.DateTime
 import org.joda.time.format.ISODateTimeFormat
 import org.joda.time.format.ISODateTimeFormat.dateTime
+import pdi.jwt.{Jwt, JwtAlgorithm, JwtClaim, JwtHeader, JwtJson}
+import play.api.libs.json.{JsValue, Json}
 
 case class AuthDataMap(
   requestId: String,
@@ -63,7 +64,7 @@ case class FlowSession(
   */
 sealed trait AuthData {
   
-  private[this] val header = JwtHeader("HS256")
+  private[this] val header = JwtHeader(JwtAlgorithm.HS256)
 
   /**
     * Timestamp is used to expire authorizations automatically
@@ -95,8 +96,8 @@ sealed trait AuthData {
       )
     )
 
-    val claimsSet = JwtClaimsSet(all.toMap)
-    JsonWebToken(header, claimsSet, salt)
+    val claimsSet: JwtClaim = JwtClaim() ++ (all.toMap.toSeq: _*)
+    Jwt.encode(header, claimsSet, salt)
   }
 
 }

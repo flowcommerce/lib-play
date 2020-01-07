@@ -1,12 +1,12 @@
 package io.flow.play.controllers
 
-import javax.inject.Inject
-import io.flow.play.util.Config
-import org.apache.commons.codec.binary.Base64
-import authentikat.jwt._
 import io.flow.log.RollbarLogger
+import io.flow.play.util.Config
+import javax.inject.Inject
+import pdi.jwt.JwtAlgorithm.HS256
+import pdi.jwt.{Jwt, JwtJson}
 
-import scala.util.Try
+import scala.util.{Failure, Success}
 
 trait Authorization
 
@@ -33,35 +33,24 @@ class AuthorizationImpl @Inject() (
     */
   def get(headerValue: String): Option[Authorization] = {
     headerValue.split(" ").toList match {
-      case "Basic" :: value :: Nil => {
-        new String(Base64.decodeBase64(value.getBytes)).split(":").toList match {
+      case "Basic" :: value :: Nil =>
+        new String(java.util.Base64.getDecoder.decode(value.getBytes)).split(":").toList match {
           case Nil => None
           case token :: _ => Some(Token(token))
         }
-      }
 
-      case "Bearer" :: value :: Nil => {
-        value match {
-          case JsonWebToken(_, claimsSet, _) if jwtIsValid(value) => createJwtToken(claimsSet)
-          case JsonWebToken(_, claimsSet, _) =>
-            val tokenData = createJwtToken(claimsSet)
-            logger.
-              withKeyValue("user_id", tokenData.map(_.userId).getOrElse("unknown")).
-              info("JWT Token was invalid, bad salt")
+      case "Bearer" :: value :: Nil =>
+        JwtJson.decodeJson(value, jwtSalt, Seq(HS256)) match {
+          case Success(claims) =>
+            (claims \ "id").asOpt[String].map(JwtToken)
+          case Failure(ex) =>
+            if (Jwt.isValid(value))
+              logger.info("JWT Token was invalid, bad salt", ex)
             None
-          case _ => None
         }
-      }
+
       case _ => None
     }
   }
 
-  private[this] def jwtIsValid(token: String): Boolean =
-    // swallow errors when decoding - for instance algo not supported
-    Try(JsonWebToken.validate(token, jwtSalt)).getOrElse(false)
-
-  private[this] def createJwtToken(claimsSet: JwtClaimsSetJValue): Option[JwtToken] =
-    claimsSet.asSimpleMap.toOption.flatMap { claims =>
-      claims.get("id").map(JwtToken)
-    }
 }

@@ -46,10 +46,10 @@ case class MockUsers(data: MockUserData) extends mock.MockUsers {
     }.filter { u =>
       email match {
         case None => true
-        case Some(email) => u.email == Some(email)
+        case Some(email) => u.email.contains(email)
       }
 
-    }.drop(offset.toInt).take(limit.toInt) // TODO: Add sorting
+    }.slice(offset.toInt, offset.toInt + limit.toInt).toSeq // TODO: Add sorting
   }
 
   override def getById(

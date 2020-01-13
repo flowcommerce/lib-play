@@ -2,8 +2,7 @@ package io.flow.play.controllers
 
 import com.github.ghik.silencer.silent
 import io.flow.play.util.{AuthData, AuthHeaders, Config}
-import pdi.jwt.JwtAlgorithm.HS256
-import pdi.jwt.JwtJson
+import pdi.jwt.{JwtAlgorithm, JwtJson}
 import play.api.libs.json.JsObject
 import play.api.mvc.Results.Unauthorized
 import play.api.mvc.{Headers, Request, Result}
@@ -26,7 +25,7 @@ trait FlowActionInvokeBlockHelper {
     headers.get(AuthHeaders.Header).flatMap { v => parse(v)(f) }
 
   def parse[T <: AuthData](value: String)(f: Map[String, String] => Option[T]): Option[T] =
-    JwtJson.decodeJson(value, jwtSalt, Seq(HS256)) match {
+    JwtJson.decodeJson(value, jwtSalt, JwtAlgorithm.allHmac) match {
       case Success(claims) => parseJwtToken(claims)(f)
       case _ => None
     }

@@ -750,10 +750,14 @@ package io.flow.permission.v0.models {
 
     implicit def jsonReadsPermissionFlowRole: play.api.libs.json.Reads[FlowRole] = new play.api.libs.json.Reads[FlowRole] {
       def reads(js: play.api.libs.json.JsValue): play.api.libs.json.JsResult[FlowRole] = {
-        (js \ "discriminator").asOpt[String].getOrElse { sys.error("Union[FlowRole] requires a discriminator named 'discriminator' - this field was not found in the Json Value") } match {
-          case "flow_user_role" => js.validate[io.flow.permission.v0.models.FlowUserRole]
-          case "flow_addon_role" => js.validate[io.flow.permission.v0.models.FlowAddonRole]
-          case other => play.api.libs.json.JsSuccess(io.flow.permission.v0.models.FlowRoleUndefinedType(other))
+        (js \ "discriminator").asOpt[String] match {
+          case Some("flow_user_role") => js.validate[io.flow.permission.v0.models.FlowUserRole]
+          case Some("flow_addon_role") => js.validate[io.flow.permission.v0.models.FlowAddonRole]
+          case None =>
+            (js \ "flow_user_role").validate[io.flow.permission.v0.models.FlowUserRole]
+              .orElse((js \ "flow_addon_role").validate[io.flow.permission.v0.models.FlowUserRole])
+              .orElse[FlowRole](play.api.libs.json.JsSuccess(io.flow.permission.v0.models.FlowRoleUndefinedType(js.toString)))
+          case Some(other) => play.api.libs.json.JsSuccess(io.flow.permission.v0.models.FlowRoleUndefinedType(other))
         }
       }
     }

@@ -755,7 +755,7 @@ package io.flow.permission.v0.models {
           case Some("flow_addon_role") => js.validate[io.flow.permission.v0.models.FlowAddonRole]
           case None =>
             (js \ "flow_user_role").validate[io.flow.permission.v0.models.FlowUserRole]
-              .orElse((js \ "flow_addon_role").validate[io.flow.permission.v0.models.FlowUserRole])
+              .orElse((js \ "flow_addon_role").validate[io.flow.permission.v0.models.FlowAddonRole])
               .orElse[FlowRole](play.api.libs.json.JsSuccess(io.flow.permission.v0.models.FlowRoleUndefinedType(js.toString)))
           case Some(other) => play.api.libs.json.JsSuccess(io.flow.permission.v0.models.FlowRoleUndefinedType(other))
         }

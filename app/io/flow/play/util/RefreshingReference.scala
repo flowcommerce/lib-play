@@ -89,7 +89,7 @@ trait RefreshingReference[T] {
   }
 
   // schedule subsequent reloads
-  scheduler.scheduleAtFixedRate(reloadInterval, reloadInterval) { () =>
+  scheduler.schedule(reloadInterval, reloadInterval) {
     doLoadRetry(1, maxAttempts) match {
       case Success(data) => cache.set(data)
       case Failure(ex) =>

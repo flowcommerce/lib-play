@@ -21,7 +21,7 @@ trait FlowActionInvokeBlockHelper {
   protected lazy val authExpirationTimeSeconds: Int =
     config.optionalPositiveInt("FLOW_AUTH_EXPIRATION_SECONDS").getOrElse(DefaultAuthExpirationTimeSeconds)
 
-  protected def auth[T <: AuthData](headers: Headers)(f: Map[String, String] => Option[T]): Option[T] =
+  def auth[T <: AuthData](headers: Headers)(f: Map[String, String] => Option[T]): Option[T] =
     headers.get(AuthHeaders.Header).flatMap { v => parse(v)(f) }
 
   def parse[T <: AuthData](value: String)(f: Map[String, String] => Option[T]): Option[T] =

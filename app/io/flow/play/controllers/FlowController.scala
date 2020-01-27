@@ -4,7 +4,7 @@ import javax.inject.Inject
 import com.google.inject.ImplementedBy
 import io.flow.common.v0.models.UserReference
 import io.flow.log.RollbarLogger
-import io.flow.play.util.{AuthData, AuthHeaders, Config, OrgAuthData}
+import io.flow.play.util.{AuthHeaders, Config, RequestFactory}
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -68,104 +68,77 @@ case class FlowDefaultControllerComponents @Inject()(
 ) extends FlowControllerComponents
 
 // Anonymous
-class AnonymousActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
+class AnonymousActionBuilder @Inject()(requestFactory: RequestFactory, val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[AnonymousRequest, AnyContent] with FlowActionInvokeBlockHelper {
 
   def invokeBlock[A](request: Request[A], block: (AnonymousRequest[A]) => Future[Result]): Future[Result] = {
-    val ad = auth(request.headers)(AuthData.Anonymous.fromMap).getOrElse {
-      // Create an empty header here so at least requestId tracking can start
-      AuthData.Anonymous.Empty
-    }
-    block(new AnonymousRequest(ad, request))
+    val flowRequest = requestFactory.anonymous(request)
+    block(flowRequest)
   }
 }
 
 // Identified
-class IdentifiedActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
+class IdentifiedActionBuilder @Inject()(requestFactory: RequestFactory, val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[IdentifiedRequest, AnyContent] with FlowActionInvokeBlockHelper {
 
   def invokeBlock[A](request: Request[A], block: (IdentifiedRequest[A]) => Future[Result]): Future[Result] =
-    auth(request.headers)(AuthData.Identified.fromMap) match {
-      case None => Future.successful(unauthorized(request))
-      case Some(ad) => block(new IdentifiedRequest(ad, request))
-    }
+    requestFactory.identified(request).fold(Future.successful(unauthorized(request)))(block)
 }
 
 // Session
-class SessionActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
+class SessionActionBuilder @Inject()(requestFactory: RequestFactory, val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[SessionRequest, AnyContent] with FlowActionInvokeBlockHelper {
 
   def invokeBlock[A](request: Request[A], block: (SessionRequest[A]) => Future[Result]): Future[Result] =
-    auth(request.headers)(AuthData.Session.fromMap) match {
-      case None => Future.successful(unauthorized(request))
-      case Some(ad) => block(new SessionRequest(ad, request))
-    }
+    requestFactory.session(request).fold(Future.successful(unauthorized(request)))(block)
 }
 
 // Customer
-class CustomerActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
+class CustomerActionBuilder @Inject()(requestFactory: RequestFactory, val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[CustomerRequest, AnyContent] with FlowActionInvokeBlockHelper {
 
   def invokeBlock[A](request: Request[A], block: (CustomerRequest[A]) => Future[Result]): Future[Result] =
-    auth(request.headers)(AuthData.Customer.fromMap) match {
-      case None => Future.successful(unauthorized(request))
-      case Some(ad) => block(new CustomerRequest(ad, request))
-    }
+    requestFactory.customer(request).fold(Future.successful(unauthorized(request)))(block)
 }
 
 // Org
-class OrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
+class OrgActionBuilder @Inject()(requestFactory: RequestFactory, val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[OrgRequest, AnyContent] with FlowActionInvokeBlockHelper {
 
   def invokeBlock[A](request: Request[A], block: (OrgRequest[A]) => Future[Result]): Future[Result] =
-    auth(request.headers)(OrgAuthData.Org.fromMap) match {
-      case None => Future.successful(unauthorized(request))
-      case Some(ad) => block(new OrgRequest(ad, request))
-    }
+    requestFactory.org(request).fold(Future.successful(unauthorized(request)))(block)
 }
 
 // Checkout
-class CheckoutActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
+class CheckoutActionBuilder @Inject()(requestFactory: RequestFactory, val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[CheckoutRequest, AnyContent] with FlowActionInvokeBlockHelper {
 
   def invokeBlock[A](request: Request[A], block: (CheckoutRequest[A]) => Future[Result]): Future[Result] =
-    auth(request.headers)(OrgAuthData.Checkout.fromMap) match {
-      case None => Future.successful(unauthorized(request))
-      case Some(ad) => block(new CheckoutRequest(ad, request))
-    }
+    requestFactory.checkout(request).fold(Future.successful(unauthorized(request)))(block)
 }
 
 // CheckoutOrg
-class CheckoutOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
+class CheckoutOrgActionBuilder @Inject()(requestFactory: RequestFactory, val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[CheckoutOrgRequest, AnyContent] with FlowActionInvokeBlockHelper {
 
   def invokeBlock[A](request: Request[A], block: (CheckoutOrgRequest[A]) => Future[Result]): Future[Result] =
-    auth(request.headers)(OrgAuthData.CheckoutOrg.fromMap) match {
-      case None => Future.successful(unauthorized(request))
-      case Some(ad) => block(new CheckoutOrgRequest(ad, request))
-    }
+    requestFactory.checkoutOrg(request).fold(Future.successful(unauthorized(request)))(block)
 }
 
 // IdentifiedOrg
-class IdentifiedOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
+class IdentifiedOrgActionBuilder @Inject()(requestFactory: RequestFactory, val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[IdentifiedOrgRequest, AnyContent] with FlowActionInvokeBlockHelper {
 
   def invokeBlock[A](request: Request[A], block: (IdentifiedOrgRequest[A]) => Future[Result]): Future[Result] =
-    auth(request.headers)(OrgAuthData.Identified.fromMap) match {
-      case None => Future.successful(unauthorized(request))
-      case Some(ad) => block(new IdentifiedOrgRequest(ad, request))
-    }
+    requestFactory.identifiedOrg(request).fold(Future.successful(unauthorized(request)))(block)
 }
 
 // SessionOrg
-class SessionOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
+class SessionOrgActionBuilder @Inject()(requestFactory: RequestFactory, val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[SessionOrgRequest, AnyContent] with FlowActionInvokeBlockHelper {
 
   def invokeBlock[A](request: Request[A], block: (SessionOrgRequest[A]) => Future[Result]): Future[Result] =
-    auth(request.headers)(OrgAuthData.Session.fromMap) match {
-      case None => Future.successful(unauthorized(request))
-      case Some(ad) => block(new SessionOrgRequest(ad, request))
-    }
+    requestFactory.sessionOrg(request).fold(Future.successful(unauthorized(request)))(block)
 }
 
 // IdentifiedCookie
@@ -192,27 +165,21 @@ object IdentifiedCookie {
 }
 
 // CustomerOrg
-class CustomerOrgActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(
+class CustomerOrgActionBuilder @Inject()(requestFactory: RequestFactory, val parser: BodyParsers.Default, val config: Config)(
   implicit private val logger: RollbarLogger,
   implicit val executionContext: ExecutionContext
 ) extends ActionBuilder[CustomerOrgRequest, AnyContent] with FlowActionInvokeBlockHelper {
 
   def invokeBlock[A](request: Request[A], block: CustomerOrgRequest[A] => Future[Result]): Future[Result] =
-    auth(request.headers)(OrgAuthData.Customer.fromMap) match {
-      case None => Future.successful(unauthorized(request))
-      case Some(ad) => block(new CustomerOrgRequest(ad, request))
-    }
+    requestFactory.customerOrg(request).fold(Future.successful(unauthorized(request)))(block)
 }
 
 // IdentifiedCustomer
-class IdentifiedCustomerActionBuilder @Inject()(val parser: BodyParsers.Default, val config: Config)(
+class IdentifiedCustomerActionBuilder @Inject()(requestFactory: RequestFactory, val parser: BodyParsers.Default, val config: Config)(
   implicit private val logger: RollbarLogger,
   implicit val executionContext: ExecutionContext
 ) extends ActionBuilder[IdentifiedCustomerRequest, AnyContent] with FlowActionInvokeBlockHelper {
 
   def invokeBlock[A](request: Request[A], block: IdentifiedCustomerRequest[A] => Future[Result]): Future[Result] =
-    auth(request.headers)(OrgAuthData.IdentifiedCustomer.fromMap) match {
-      case None => Future.successful(unauthorized(request))
-      case Some(ad) => block(new IdentifiedCustomerRequest(ad, request))
-    }
+    requestFactory.identifiedCustomer(request).fold(Future.successful(unauthorized(request)))(block)
 }

@@ -6,7 +6,7 @@ organization := "io.flow"
 
 scalaVersion := "2.13.1"
 
-version := "0.5.91"
+version := "0.5.92"
 
 lazy val root = project
   .in(file("."))
@@ -16,7 +16,7 @@ lazy val root = project
       ws,
       filters,
       guice,
-      "io.flow" %% "lib-log" % "0.0.96",
+      "io.flow" %% "lib-log" % "0.0.97",
       "com.pauldijou" %% "jwt-play-json" % "4.2.0",
       "com.ning" % "async-http-client" % "1.9.40",
       "org.apache.commons" % "commons-io" % "1.3.2",

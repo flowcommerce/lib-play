@@ -105,8 +105,8 @@ trait RefreshingReferenceAsync[T] {
     }
 
   // schedule subsequent reloads
-  private val scheduled = scheduler.scheduleWithFixedDelay(reloadInterval, reloadInterval) {
-    () => refreshInternal(force = false)
+  private val scheduled = scheduler.scheduleWithFixedDelay(reloadInterval, reloadInterval) { () =>
+    refreshInternal(force = false)
     ()
   }(retrieveExecutionContext)
 

@@ -3,18 +3,18 @@ code:
     common:
       version: latest
       generators:
-        play_2_6_client: "app/generated"
-        play_2_6_mock_client: "app/generated"
+        play_2_8_client: "app/generated"
+        play_2_8_mock_client: "app/generated"
     permission:
       version: latest
       generators:
-        play_2_6_client: "app/generated"
-        play_2_6_mock_client: "app/generated"
+        play_2_8_client: "app/generated"
+        play_2_8_mock_client: "app/generated"
     error:
       version: latest
       generators:
-        play_2_6_client: "app/generated"
-        play_2_6_mock_client: "app/generated"
+        play_2_8_client: "app/generated"
+        play_2_8_mock_client: "app/generated"
     registry:
       version: latest
       generators:
@@ -22,16 +22,16 @@ code:
     healthcheck:
       version: latest
       generators:
-        play_2_6_client: "app/generated"
-        play_2_6_mock_client: "app/generated"
+        play_2_8_client: "app/generated"
+        play_2_8_mock_client: "app/generated"
     token:
       version: latest
       generators:
-        play_2_6_client: "app/generated"
-        play_2_6_mock_client: "app/generated"
+        play_2_8_client: "app/generated"
+        play_2_8_mock_client: "app/generated"
     # User is needed for 'user' expansion
     user:
       version: latest
       generators:
-        play_2_6_client: "app/generated"
-        play_2_6_mock_client: "app/generated"
+        play_2_8_client: "app/generated"
+        play_2_8_mock_client: "app/generated"

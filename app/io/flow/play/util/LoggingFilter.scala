@@ -70,6 +70,7 @@ class FlowLoggingFilter @javax.inject.Inject() (
           .withKeyValue("request_headers",
             headerMap
               .map { case (key, value) => key.toLowerCase -> value }
+              .view
               .filterKeys(LoggedHeaders.contains))
           .withKeyValue("request_id", requestId)
           .info(line)

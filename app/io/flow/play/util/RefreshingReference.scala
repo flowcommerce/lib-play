@@ -89,14 +89,15 @@ trait RefreshingReference[T] {
   }
 
   // schedule subsequent reloads
-  scheduler.schedule(reloadInterval, reloadInterval) {
+  scheduler.scheduleWithFixedDelay(reloadInterval, reloadInterval) {
     doLoadRetry(1, maxAttempts) match {
-      case Success(data) => cache.set(data)
+      case Success(data) => () => cache.set(data)
       case Failure(ex) =>
-        log.
-          withKeyValue("max_attempts", maxAttempts).
-          withKeyValue("reload_interval", reloadInterval.toString).
-          warn("Failed to refresh cache. Will try again", ex)
+        () =>
+          log.
+            withKeyValue("max_attempts", maxAttempts).
+            withKeyValue("reload_interval", reloadInterval.toString).
+            warn("Failed to refresh cache. Will try again", ex)
     }
   }(retrieveExecutionContext)
 

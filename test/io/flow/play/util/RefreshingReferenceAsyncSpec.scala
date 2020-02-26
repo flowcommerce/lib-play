@@ -163,7 +163,7 @@ class RefreshingReferenceAsyncSpec extends WordSpec with GuiceOneAppPerSuite wit
           cache.get shouldBe Map("2" -> 2)
         }
         // f must be completed
-        f.eitherValue.value.right.value shouldBe Map("2" -> 2)
+        f.eitherValue.value shouldBe Right(Map("2" -> 2))
       }
     }
 

@@ -93,7 +93,7 @@ class RefreshingReferenceAsyncSpec extends WordSpec with GuiceOneAppPerSuite wit
       val retrieve = mock[() => Future[Map[String, Int]]]
       Mockito.when(retrieve.apply())
         .thenAnswer(_ => Future.successful(Map("1" -> 1)))
-        .thenAnswer(_ => new IllegalStateException("boom"))
+        .thenAnswer(_ => Future.failed(new IllegalStateException("boom")))
 
       withCache(createCache(10.millis, retrieve)) { cache =>
         cache.get shouldBe Map("1" -> 1)
@@ -111,23 +111,23 @@ class RefreshingReferenceAsyncSpec extends WordSpec with GuiceOneAppPerSuite wit
 
       withCache(createCache(10.millis, retrieve)) { cache =>
         cache.get shouldBe Map("1" -> 1, "2" -> 2)
-        eventually(Timeout(50.millis), Interval(5.millis)) {
+        eventually(Timeout(100.millis), Interval(5.millis)) {
           cache.get shouldBe Map("3" -> 3, "4" -> 4)
         }
       }
     }
 
-    "keep retrying if retrieve thows an exception" in {
+    "keep retrying if retrieve throws an exception" in {
       val retrieve = mock[() => Future[Map[String, Int]]]
       Mockito.when(retrieve.apply())
         .thenAnswer(_ => Future.successful(Map("1" -> 1, "2" -> 2)))
-        .thenAnswer(_ => new IllegalStateException("boom"))
+        .thenAnswer(_ => Future.failed(new IllegalStateException("boom")))
         .thenAnswer(_ => Future.successful(Map("3" -> 3, "4" -> 4)))
 
       withCache(createCache(10.millis, retrieve)) { cache =>
 
         cache.get shouldBe Map("1" -> 1, "2" -> 2)
-        eventually(Timeout(50.millis), Interval(5.millis)) {
+        eventually(Timeout(100.millis), Interval(5.millis)) {
           cache.get shouldBe Map("3" -> 3, "4" -> 4)
         }
       }
@@ -137,7 +137,7 @@ class RefreshingReferenceAsyncSpec extends WordSpec with GuiceOneAppPerSuite wit
       val retrieve = mock[() => Future[Map[String, Int]]]
       Mockito.when(retrieve.apply())
         .thenAnswer(_ => Future.successful(Map("1" -> 1, "2" -> 2)))
-        .thenAnswer(_ => new IllegalStateException("boom"))
+        .thenAnswer(_ => Future.failed(new IllegalStateException("boom")))
         .thenAnswer(_ => Future.failed(new IllegalStateException("boom")))
         .thenAnswer(_ => Future.successful(Map("3" -> 3, "4" -> 4)))
 

@@ -1,5 +1,3 @@
-import play.sbt.PlayScala._
-
 name := "lib-play-play28"
 
 organization := "io.flow"
@@ -20,8 +18,8 @@ lazy val root = project
       "com.pauldijou" %% "jwt-play-json" % "4.2.0",
       "com.ning" % "async-http-client" % "1.9.40",
       "org.apache.commons" % "commons-io" % "1.3.2",
+      "org.mockito" % "mockito-core" % "3.3.0" % Test,
       "org.scalatestplus.play" %% "scalatestplus-play" % "4.0.3" % Test,
-      specs2 % Test,
       compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.4.4" cross CrossVersion.full),
       "com.github.ghik" %% "silencer-lib" % "1.4.4" % Provided cross CrossVersion.full,
     ),

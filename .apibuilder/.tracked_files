@@ -5,24 +5,24 @@ flow:
     - app/generated/FlowCommonV0Client.scala
     play_2_8_mock_client:
     - app/generated/FlowCommonV0MockClient.scala
-  error:
-    play_2_8_client:
-    - app/generated/FlowErrorV0Client.scala
-    play_2_8_mock_client:
-    - app/generated/FlowErrorV0MockClient.scala
-  healthcheck:
-    play_2_8_client:
-    - app/generated/FlowHealthcheckV0Client.scala
-    play_2_8_mock_client:
-    - app/generated/FlowHealthcheckV0MockClient.scala
   permission:
     play_2_8_client:
     - app/generated/FlowPermissionV0Client.scala
     play_2_8_mock_client:
     - app/generated/FlowPermissionV0MockClient.scala
+  error:
+    play_2_8_client:
+    - app/generated/FlowErrorV0Client.scala
+    play_2_8_mock_client:
+    - app/generated/FlowErrorV0MockClient.scala
   registry:
     ning_1_9_client:
     - app/generated/FlowRegistryV0Client.scala
+  healthcheck:
+    play_2_8_client:
+    - app/generated/FlowHealthcheckV0Client.scala
+    play_2_8_mock_client:
+    - app/generated/FlowHealthcheckV0MockClient.scala
   token:
     play_2_8_client:
     - app/generated/FlowTokenV0Client.scala

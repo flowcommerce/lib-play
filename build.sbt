@@ -14,7 +14,7 @@ lazy val root = project
       ws,
       filters,
       guice,
-      "io.flow" %% "lib-log" % "0.1.8",
+      "io.flow" %% "lib-log" % "0.1.9",
       "com.pauldijou" %% "jwt-play-json" % "4.3.0",
       "com.ning" % "async-http-client" % "1.9.40",
       "org.apache.commons" % "commons-io" % "1.3.2",

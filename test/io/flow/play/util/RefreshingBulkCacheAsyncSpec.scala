@@ -1,13 +1,14 @@
 package io.flow.play.util
 
 import io.flow.log.RollbarProvider
-import org.scalatest.{Matchers, OptionValues, WordSpec}
+import org.scalatest.OptionValues
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import scala.concurrent.Future
 import scala.concurrent.duration.{FiniteDuration, _}
 
-class RefreshingBulkCacheAsyncSpec extends WordSpec with GuiceOneAppPerSuite with Matchers with OptionValues {
+class RefreshingBulkCacheAsyncSpec extends AnyWordSpec with GuiceOneAppPerSuite with Matchers with OptionValues {
 
   private[this] val logger = RollbarProvider.logger("test")
 

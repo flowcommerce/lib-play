@@ -3,10 +3,11 @@ package io.flow.play.util
 import akka.actor.ActorSystem
 import io.flow.log.RollbarProvider
 import org.mockito.Mockito
-import org.scalatest.{EitherValues, WordSpec}
 import org.scalatest.concurrent.PatienceConfiguration.{Interval, Timeout}
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
-import org.scalatest._
+import org.scalatest.{OptionValues,Succeeded,Assertion, EitherValues}
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.concurrent.Futures
@@ -15,7 +16,7 @@ import play.api.libs.concurrent.Futures._
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class RefreshingReferenceAsyncSpec extends WordSpec with GuiceOneAppPerSuite with Matchers with OptionValues
+class RefreshingReferenceAsyncSpec extends AnyWordSpec with GuiceOneAppPerSuite with Matchers with OptionValues
   with MockitoSugar with Eventually with ScalaFutures with EitherValues {
 
   private[this] val logger = RollbarProvider.logger("test")

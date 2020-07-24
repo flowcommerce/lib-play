@@ -2,16 +2,18 @@ package io.flow.play.util
 
 import io.flow.log.RollbarProvider
 import org.mockito.Mockito
+import org.scalatest.OptionValues
 import org.scalatest.concurrent.Eventually
 import org.scalatest.concurrent.PatienceConfiguration.Timeout
-import org.scalatest.{FlatSpec, Matchers, OptionValues}
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.duration._
 
-class RefreshingReferenceSpec extends FlatSpec with GuiceOneAppPerSuite with Matchers with OptionValues with MockitoSugar
+class RefreshingReferenceSpec extends AnyFlatSpec with GuiceOneAppPerSuite with Matchers with OptionValues with MockitoSugar
   with Eventually {
 
   private[this] val logger = RollbarProvider.logger("test")

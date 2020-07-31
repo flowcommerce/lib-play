@@ -4,7 +4,7 @@ organization := "io.flow"
 
 scalaVersion := "2.13.1"
 
-version := "0.6.6"
+version := "0.6.6-ben"
 
 lazy val root = project
   .in(file("."))
@@ -34,7 +34,6 @@ lazy val root = project
     // Suppresses problems with Scaladoc links
     scalacOptions in (Compile, doc) += "-no-link-warnings",
  
-    javaOptions in Test += "-Dconfig.file=conf/test.conf",
     resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/",
     resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
     resolvers += "Artifactory" at "https://flow.jfrog.io/flow/libs-release/",

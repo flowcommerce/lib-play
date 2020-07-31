@@ -3,19 +3,7 @@
 # lib-play
 Library supporting building REST APIs on play framework.
 
-## Provided Bindings
-
-    play.modules.enabled += "io.flow.play.clients.ConfigModule"
-    play.modules.enabled += "io.flow.play.clients.RegistryModule"
-    play.modules.enabled += "io.flow.play.clients.TokenModule"
-    play.modules.enabled += "io.flow.play.clients.UserModule"
-
 ## Request Logging
-
-To enable request logging, add the following to your
-play application config:
-
-    play.http.filters=io.flow.play.util.LoggingFilter
 
 By default, all HTTP methods will be logged. To only
 log a specific subset of methods, add the following:

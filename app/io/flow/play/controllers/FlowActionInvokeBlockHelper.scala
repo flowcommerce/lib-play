@@ -25,7 +25,7 @@ trait FlowActionInvokeBlockHelper {
     headers.get(AuthHeaders.Header).flatMap { v => parse(v)(f) }
 
   def parse[T <: AuthData](value: String)(f: Map[String, String] => Option[T]): Option[T] =
-    JwtJson.decodeJson(value, jwtSalt, JwtAlgorithm.allHmac) match {
+    JwtJson.decodeJson(value, jwtSalt, JwtAlgorithm.allHmac()) match {
       case Success(claims) => parseJwtToken(claims)(f)
       case _ => None
     }

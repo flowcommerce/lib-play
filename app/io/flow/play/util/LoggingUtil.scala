@@ -96,12 +96,12 @@ case class JsonSafeLogger(
   }
 
   private[this] def isFieldDenylisted(field: String, typ: Option[String]): Boolean = {
-    val whiteList = typ.map(_.toLowerCase.trim) match {
+    val allowlist = typ.map(_.toLowerCase.trim) match {
       case None => Set.empty[String]
       case Some(t) => config.allowlistModelFields.getOrElse(t, Set.empty[String])
     }
 
-    config.denylistFields.map(_.toLowerCase.trim).diff(whiteList.map(_.toLowerCase.trim)).contains(field)
+    config.denylistFields.map(_.toLowerCase.trim).diff(allowlist.map(_.toLowerCase.trim)).contains(field)
   }
 
   private[this] def redact(value: JsValue): JsValue = {

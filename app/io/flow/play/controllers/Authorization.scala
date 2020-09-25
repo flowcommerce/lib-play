@@ -39,7 +39,7 @@ class AuthorizationImpl @Inject() (
         }
 
       case "Bearer" :: value :: Nil =>
-        // whitelist only hmac algorithms
+        // allowlist only hmac algorithms
         JwtJson.decodeJson(value, jwtSalt, JwtAlgorithm.allHmac()) match {
           case Success(claims) =>
             (claims \ "id").asOpt[String].map(JwtToken)

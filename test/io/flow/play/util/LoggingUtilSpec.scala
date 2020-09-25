@@ -8,9 +8,9 @@ class LoggingUtilSpec extends LibPlaySpec {
   private[this] val jsonSafeLogger = JsonSafeLogger(
     rollbar = RollbarLogger.SimpleLogger,
     config = JsonSafeLoggerConfig(
-      blacklistFields = Set("cvv", "number", "token", "email", "password"),
-      blacklistModels = Set("password_change_form", "shipping_address"),
-      whitelistModelFields = Map(
+      denylistFields = Set("cvv", "number", "token", "email", "password"),
+      denylistModels = Set("password_change_form", "shipping_address"),
+      allowlistModelFields = Map(
         "item_form" -> Set("number"),
         "harmonized_item_form" -> Set("number"),
         "order_form" -> Set("number"),
@@ -19,7 +19,7 @@ class LoggingUtilSpec extends LibPlaySpec {
     )
   )
 
-  "safeJson when type is not known respects blacklistFields" in {
+  "safeJson when type is not known respects denylistFields" in {
     jsonSafeLogger.safeJson(JsNull) must equal(JsNull)
     jsonSafeLogger.safeJson(JsString("a")) must equal(JsString("a"))
 
@@ -62,7 +62,7 @@ class LoggingUtilSpec extends LibPlaySpec {
     )
   }
 
-  "safeJson with type whitelist" in {
+  "safeJson with type allowlist" in {
     jsonSafeLogger.safeJson(Json.obj("number" -> "1234567890"), typ = Some("order_form")) must equal(
       Json.obj("number" -> "1234567890")
     )
@@ -78,7 +78,7 @@ class LoggingUtilSpec extends LibPlaySpec {
     )
   }
 
-  "safeJson with blacklisted model" in {
+  "safeJson with denylisted model" in {
     Seq(
       "password_change_form",
       "Password_CHANGE_forM",
@@ -102,7 +102,7 @@ class LoggingUtilSpec extends LibPlaySpec {
     }
   }
 
-  "safeJson with nested blacklisted model" in {
+  "safeJson with nested denylisted model" in {
     jsonSafeLogger.safeJson(
       Json.obj(
         "password_change_form" -> Json.obj(

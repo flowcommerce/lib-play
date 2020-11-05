@@ -61,6 +61,7 @@ class FlowLoggingFilter @javax.inject.Inject() (
         ).mkString(" ")
 
         logger
+          .withKeyValue("http_version", requestHeader.version)
           .withKeyValue("method", requestHeader.method)
           .withKeyValue("host", requestHeader.host)
           .withKeyValue("path", requestHeader.path)

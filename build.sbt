@@ -20,7 +20,7 @@ lazy val root = project
       "org.apache.commons" % "commons-io" % "1.3.2",
       "org.mockito" % "mockito-core" % "3.6.28" % Test,
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
-      "org.scalatestplus" %% "mockito-3-3" % "3.2.1.0" % Test,
+      "org.scalatestplus" %% "mockito-3-3" % "3.2.2.0" % Test,
       compilerPlugin("com.github.ghik" %% "silencer-plugin" % "1.7.1" cross CrossVersion.full),
       "com.github.ghik" %% "silencer-lib" % "1.7.1" % Provided cross CrossVersion.full,
     ),

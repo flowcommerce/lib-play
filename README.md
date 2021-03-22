@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/flowcommerce/lib-play.svg?branch=master)](https://travis-ci.com/flowcommerce/lib-play)
+[![Build Status](https://travis-ci.org/flowcommerce/lib-play.svg?branch=primary)](https://travis-ci.com/flowcommerce/lib-play)
 
 # lib-play
 Library supporting building REST APIs on play framework.

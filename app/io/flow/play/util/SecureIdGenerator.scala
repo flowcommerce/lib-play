@@ -14,7 +14,7 @@ object SecureIdGenerator {
   * understand how the ID is used (e.g. 'F61').
   *
   * Secure id prefixes use the following format:
-  *   https://github.com/flowcommerce/standards/blob/main/Naming.md
+  *   https://www.notion.so/flow/Naming-b72c34dc49484a98a3b7b8fcbea65d1e#e4e4445685a24538a87a880d7149366c
   * If adding a new prefix, create a pull request to update the `Flow Prefixes`
   * section at the bottom of the document so others are aware.
   *

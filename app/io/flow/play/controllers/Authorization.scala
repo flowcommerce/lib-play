@@ -7,7 +7,7 @@ import pdi.jwt.{Jwt, JwtAlgorithm, JwtJson, JwtOptions}
 
 import scala.util.{Failure, Success}
 
-trait Authorization
+sealed trait Authorization
 
 case class JwtToken(userId: String) extends Authorization
 case class Token(token: String) extends Authorization

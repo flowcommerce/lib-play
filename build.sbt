@@ -23,7 +23,7 @@ lazy val root = project
       ws,
       filters,
       guice,
-      "io.flow" %% "lib-log" % "0.1.39",
+      "io.flow" %% "lib-log" % "0.1.41",
       "com.pauldijou" %% "jwt-play-json" % "5.0.0",
       "com.ning" % "async-http-client" % "1.9.40",
       "org.apache.commons" % "commons-io" % "1.3.2",
@@ -31,6 +31,10 @@ lazy val root = project
       "org.typelevel" %% "cats-core" % "2.6.1",
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
       "org.scalatestplus" %% "mockito-3-3" % "3.2.2.0" % Test,
+    ),
+
+    dependencyOverrides ++= Seq(
+      "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
     ),
     
     scalacOptions ++= allScalacOptions,

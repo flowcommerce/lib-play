@@ -1,6 +1,6 @@
 package io.flow.play.controllers
 
-import com.github.ghik.silencer.silent
+import scala.annotation.nowarn
 import io.flow.play.util.{AuthData, AuthHeaders, Config}
 import pdi.jwt.{JwtAlgorithm, JwtJson}
 import play.api.libs.json.JsObject
@@ -12,7 +12,7 @@ import scala.util.Success
 trait FlowActionInvokeBlockHelper {
   def config: Config
 
-  @silent def unauthorized[A](request: Request[A]): Result = Unauthorized
+  @nowarn def unauthorized[A](request: Request[A]): Result = Unauthorized
 
   def jwtSalt: String = config.requiredString("JWT_SALT")
 
@@ -25,7 +25,7 @@ trait FlowActionInvokeBlockHelper {
     headers.get(AuthHeaders.Header).flatMap { v => parse(v)(f) }
 
   def parse[T <: AuthData](value: String)(f: Map[String, String] => Option[T]): Option[T] =
-    JwtJson.decodeJson(value, jwtSalt, JwtAlgorithm.allHmac) match {
+    JwtJson.decodeJson(value, jwtSalt, JwtAlgorithm.allHmac()) match {
       case Success(claims) => parseJwtToken(claims)(f)
       case _ => None
     }

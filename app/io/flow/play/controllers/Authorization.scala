@@ -7,7 +7,7 @@ import pdi.jwt.{Jwt, JwtAlgorithm, JwtJson, JwtOptions}
 
 import scala.util.{Failure, Success}
 
-trait Authorization
+sealed trait Authorization
 
 case class JwtToken(userId: String) extends Authorization
 case class Token(token: String) extends Authorization
@@ -39,8 +39,8 @@ class AuthorizationImpl @Inject() (
         }
 
       case "Bearer" :: value :: Nil =>
-        // whitelist only hmac algorithms
-        JwtJson.decodeJson(value, jwtSalt, JwtAlgorithm.allHmac) match {
+        // allowlist only hmac algorithms
+        JwtJson.decodeJson(value, jwtSalt, JwtAlgorithm.allHmac()) match {
           case Success(claims) =>
             (claims \ "id").asOpt[String].map(JwtToken)
           case Failure(ex) =>

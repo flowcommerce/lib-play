@@ -32,10 +32,6 @@ lazy val root = project
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
       "org.scalatestplus" %% "mockito-3-3" % "3.2.2.0" % Test,
     ),
-
-    dependencyOverrides ++= Seq(
-      "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
-    ),
     
     scalacOptions ++= allScalacOptions,
     // Suppresses problems with Scaladoc links

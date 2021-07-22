@@ -58,4 +58,4 @@ publishTo := {
   }
 }
 
-version := "0.6.43"
+version := "0.6.44"

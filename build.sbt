@@ -27,7 +27,7 @@ lazy val root = project
       "com.pauldijou" %% "jwt-play-json" % "5.0.0",
       "com.ning" % "async-http-client" % "1.9.40",
       "org.apache.commons" % "commons-io" % "1.3.2",
-      "org.mockito" % "mockito-core" % "3.11.2" % Test,
+      "org.mockito" % "mockito-core" % "3.12.4" % Test,
       "org.typelevel" %% "cats-core" % "2.6.1",
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
       "org.scalatestplus" %% "mockito-3-3" % "3.2.2.0" % Test,

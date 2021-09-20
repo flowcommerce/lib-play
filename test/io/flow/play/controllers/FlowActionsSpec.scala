@@ -20,7 +20,7 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
 
   override def config: MockConfig = mockConfig
 
-  override def jwtSalt: String = "test"
+  override val jwtSalt: String = "test"
 
   private[this] def parseAuthData[T <: AuthData](data: AuthData)(f: Map[String, String] => Option[T]) = {
     parse(data.jwt(jwtSalt))(f).getOrElse {

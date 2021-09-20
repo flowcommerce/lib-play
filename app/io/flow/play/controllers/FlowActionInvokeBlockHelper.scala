@@ -14,7 +14,7 @@ trait FlowActionInvokeBlockHelper {
 
   @nowarn def unauthorized[A](request: Request[A]): Result = Unauthorized
 
-  def jwtSalt: String = config.requiredString("JWT_SALT")
+  val jwtSalt: String = config.requiredString("JWT_SALT")
 
   protected val DefaultAuthExpirationTimeSeconds = 180
 

@@ -9,7 +9,7 @@ import io.flow.play.controllers._
 @Singleton
 class RequestFactory @Inject()(myConfig: Config)(implicit logger: RollbarLogger) {
 
-    private lazy val helper = new FlowActionInvokeBlockHelper { val config = myConfig }
+    private val helper = new FlowActionInvokeBlockHelper { val config = myConfig }
     private def build[A, B <: AuthData](
         request: Request[A],
         authDataFromMap: Map[String, String] => Option[B],

@@ -34,6 +34,7 @@ trait FlowController extends BaseController with FlowControllerHelpers {
   def Checkout: CheckoutActionBuilder = flowControllerComponents.checkoutActionBuilder
   def CheckoutOrg: CheckoutOrgActionBuilder = flowControllerComponents.checkoutOrgActionBuilder
   def IdentifiedCustomer: IdentifiedCustomerActionBuilder = flowControllerComponents.identifiedCustomerActionBuilder
+  def IdentifiedChannel: IdentifiedChannelActionBuilder = flowControllerComponents.identifiedChannelActionBuilder
 }
 
 @ImplementedBy(classOf[FlowDefaultControllerComponents])
@@ -50,6 +51,7 @@ trait FlowControllerComponents {
   def checkoutActionBuilder: CheckoutActionBuilder
   def checkoutOrgActionBuilder: CheckoutOrgActionBuilder
   def identifiedCustomerActionBuilder: IdentifiedCustomerActionBuilder
+  def identifiedChannelActionBuilder: IdentifiedChannelActionBuilder
 }
 
 case class FlowDefaultControllerComponents @Inject()(
@@ -64,7 +66,8 @@ case class FlowDefaultControllerComponents @Inject()(
   customerOrgActionBuilder: CustomerOrgActionBuilder,
   checkoutActionBuilder: CheckoutActionBuilder,
   checkoutOrgActionBuilder: CheckoutOrgActionBuilder,
-  identifiedCustomerActionBuilder: IdentifiedCustomerActionBuilder
+  identifiedCustomerActionBuilder: IdentifiedCustomerActionBuilder,
+  identifiedChannelActionBuilder: IdentifiedChannelActionBuilder,
 ) extends FlowControllerComponents
 
 // Anonymous
@@ -152,6 +155,14 @@ class IdentifiedCookieActionBuilder @Inject()(val parser: BodyParsers.Default, v
         val auth = AuthHeaders.user(UserReference(id = userId))
         block(new IdentifiedRequest(auth, request))
     }
+}
+
+// IdentifiedChannel
+class IdentifiedChannelActionBuilder @Inject()(requestFactory: RequestFactory, val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
+  extends ActionBuilder[IdentifiedChannelRequest, AnyContent] with FlowActionInvokeBlockHelper {
+
+  def invokeBlock[A](request: Request[A], block: (IdentifiedChannelRequest[A]) => Future[Result]): Future[Result] =
+    requestFactory.identifiedChannel(request).fold(Future.successful(unauthorized(request)))(block)
 }
 
 object IdentifiedCookie {

@@ -104,3 +104,10 @@ class CustomerOrAnonymousRequest[A](
   request: Request[A]
 ) extends WrappedRequest[A](request)
 
+class IdentifiedChannelRequest[A](
+  val auth: ChannelAuthData.IdentifiedChannel,
+  request: Request[A]
+) extends WrappedRequest[A](request) {
+  val user: UserReference = auth.user
+  val channel: String = auth.channel
+}

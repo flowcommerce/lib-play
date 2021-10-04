@@ -13,6 +13,7 @@ case class AuthDataMap(
   session: Option[FlowSession] = None,
   user: Option[UserReference] = None,
   organization: Option[String] = None,
+  channel: Option[String] = None,
   environment: Option[Environment] = None,
   role: Option[Role] = None,
   customer: Option[CustomerReference] = None
@@ -25,6 +26,7 @@ case class AuthDataMap(
       AuthDataMap.Fields.UserId -> user.map(_.id),
       AuthDataMap.Fields.Session -> session.map(_.id),
       AuthDataMap.Fields.Organization -> organization,
+      AuthDataMap.Fields.Channel -> channel,
       AuthDataMap.Fields.Environment -> environment.map(_.toString),
       AuthDataMap.Fields.Role -> role.map(_.toString),
       AuthDataMap.Fields.Customer -> customer.map(_.number),
@@ -96,6 +98,7 @@ object AuthDataMap {
     val UserId = "user_id"
     val Session = "session"
     val Organization = "organization"
+    val Channel = "channel"
     val Environment = "environment"
     val Role = "role"
     val Customer = "customer"
@@ -112,6 +115,7 @@ object AuthDataMap {
       }
       val user: Option[UserReference] = data.get(Fields.UserId).map(UserReference.apply)
       val organizationId: Option[String] = data.get(Fields.Organization)
+      val channelId: Option[String] = data.get(Fields.Channel)
 
       val environment: Option[Environment] = data.get(Fields.Environment).map(Environment.apply).flatMap { e =>
         e match {
@@ -146,6 +150,7 @@ object AuthDataMap {
           session = session,
           user = user,
           organization = organizationId,
+          channel = channelId,
           environment = environment,
           role = role,
           customer = customer
@@ -164,6 +169,7 @@ object AuthData {
     session: Option[FlowSession],
     customer: Option[CustomerReference],
     organization: Option[String],
+    channel: Option[String],
     environment: Option[Environment]
   ) extends AuthData {
 
@@ -187,6 +193,7 @@ object AuthData {
       session = None,
       customer = None,
       organization = None,
+      channel = None,
       environment = None
     )
 
@@ -200,6 +207,7 @@ object AuthData {
             session = dm.session,
             customer = dm.customer,
             organization = dm.organization,
+            channel = dm.channel,
             environment = dm.environment
           )
         )
@@ -499,4 +507,55 @@ object OrgAuthData {
     }
   }
 
+}
+
+sealed trait ChannelAuthData extends AuthData {
+  def channel: String
+}
+
+object ChannelAuthData {
+  case class IdentifiedChannel(
+    override val createdAt: DateTime = DateTime.now,
+    override val requestId: String,
+    channel: String,
+    user: UserReference,
+    role: Role,
+    session: Option[FlowSession],
+    customer: Option[CustomerReference]
+  ) extends ChannelAuthData {
+
+    override protected def decorate(base: AuthDataMap): AuthDataMap = {
+      base.copy(
+        user = Some(user),
+        channel = Some(channel),
+        role = Some(role),
+      )
+    }
+
+  }
+
+  object IdentifiedChannel {
+
+    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[IdentifiedChannel] = {
+      AuthDataMap.fromMap(data) { dm =>
+        (dm.user, dm.channel, dm.role) match {
+          case (Some(user), Some(channel), Some(role)) => {
+            Some(
+              IdentifiedChannel(
+                createdAt = dm.createdAt,
+                requestId = dm.requestId,
+                user = user,
+                channel = channel,
+                role = role,
+                session = dm.session,
+                customer = dm.customer
+              )
+            )
+          }
+          case _ => None
+        }
+
+      }
+    }
+  }
 }

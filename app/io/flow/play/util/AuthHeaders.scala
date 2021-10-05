@@ -139,6 +139,29 @@ object AuthHeaders {
     )
   }
 
+  /**
+   * Helper to create a valid auth data for this user and channel.
+   *
+   * @param requestId Will be created if not specified
+   */
+  def channel(
+    user: UserReference,
+    channel: String,
+    role: Role = Role.Member,
+    requestId: String = generateRequestId(),
+    session: Option[FlowSession] = None,
+    customer: Option[CustomerReference] = None
+  ): ChannelAuthData.IdentifiedChannel = {
+    ChannelAuthData.IdentifiedChannel(
+      requestId = requestId,
+      user = user,
+      channel = channel,
+      role = role,
+      session = session,
+      customer = customer
+    )
+  }
+
   def createFlowSession(): FlowSession = {
     FlowSession(
       id = Constants.Prefixes.Session + generateToken()

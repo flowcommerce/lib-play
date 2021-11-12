@@ -32,6 +32,6 @@ class RequestFactory @Inject()(myConfig: Config)(implicit logger: RollbarLogger)
     def org[A](request: Request[A]): Option[OrgRequest[A]] = build(request, OrgAuthData.Org.fromMap).map(new OrgRequest(_, request))
     def sessionOrg[A](request: Request[A]): Option[SessionOrgRequest[A]] = build(request, OrgAuthData.Session.fromMap).map(new SessionOrgRequest(_, request))
     def session[A](request: Request[A]): Option[SessionRequest[A]] = build(request, AuthData.Session.fromMap).map(new SessionRequest(_, request))
-    def identifiedChannel[A](request: Request[A]): Option[IdentifiedChannelRequest[A]] = build(request, ChannelAuthData.IdentifiedChannel.fromMap).map(new IdentifiedChannelRequest(_, request))
+    def identifiedChannel[A](request: Request[A], channelId: String): Option[IdentifiedChannelRequest[A]] = build(request, ChannelAuthData.IdentifiedChannel.fromMap).map(new IdentifiedChannelRequest(_, request)).filter(_.channel == channelId)
 
 }

@@ -147,7 +147,6 @@ object AuthHeaders {
   def channel(
     user: UserReference,
     channel: String,
-    role: Role = Role.Member,
     requestId: String = generateRequestId(),
     session: Option[FlowSession] = None,
     customer: Option[CustomerReference] = None
@@ -156,7 +155,6 @@ object AuthHeaders {
       requestId = requestId,
       user = user,
       channel = channel,
-      role = role,
       session = session,
       customer = customer
     )

@@ -171,7 +171,6 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
         requestId = createTestId(),
         user = user,
         channel = createTestId(),
-        role = Role.Member,
         session = None,
         customer = None
       )

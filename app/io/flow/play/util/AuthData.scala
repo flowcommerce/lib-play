@@ -519,7 +519,6 @@ object ChannelAuthData {
     override val requestId: String,
     channel: String,
     user: UserReference,
-    role: Role,
     session: Option[FlowSession],
     customer: Option[CustomerReference]
   ) extends ChannelAuthData {
@@ -528,7 +527,6 @@ object ChannelAuthData {
       base.copy(
         user = Some(user),
         channel = Some(channel),
-        role = Some(role),
       )
     }
 
@@ -538,15 +536,14 @@ object ChannelAuthData {
 
     def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[IdentifiedChannel] = {
       AuthDataMap.fromMap(data) { dm =>
-        (dm.user, dm.channel, dm.role) match {
-          case (Some(user), Some(channel), Some(role)) => {
+        (dm.user, dm.channel) match {
+          case (Some(user), Some(channel)) => {
             Some(
               IdentifiedChannel(
                 createdAt = dm.createdAt,
                 requestId = dm.requestId,
                 user = user,
                 channel = channel,
-                role = role,
                 session = dm.session,
                 customer = dm.customer
               )

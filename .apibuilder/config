@@ -29,6 +29,11 @@ code:
       generators:
         play_2_8_client: "app/generated"
         play_2_8_mock_client: "app/generated"
+    token-internal:
+      version: latest
+      generators:
+        play_2_8_client: "app/generated"
+        play_2_8_mock_client: "app/generated"
     # User is needed for 'user' expansion
     user:
       version: latest

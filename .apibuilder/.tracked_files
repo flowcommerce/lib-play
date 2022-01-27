@@ -28,6 +28,11 @@ flow:
     - app/generated/FlowTokenV0Client.scala
     play_2_8_mock_client:
     - app/generated/FlowTokenV0MockClient.scala
+  token-internal:
+    play_2_8_client:
+    - app/generated/FlowTokenInternalV0Client.scala
+    play_2_8_mock_client:
+    - app/generated/FlowTokenInternalV0MockClient.scala
   user:
     play_2_8_client:
     - app/generated/FlowUserV0Client.scala

@@ -9,10 +9,53 @@ package io.flow.token.v0.mock {
 
     val baseUrl: String = "http://mock.localhost"
 
+    override def channelTokens: io.flow.token.v0.ChannelTokens = MockChannelTokensImpl
     override def organizationTokens: io.flow.token.v0.OrganizationTokens = MockOrganizationTokensImpl
     override def partnerTokens: io.flow.token.v0.PartnerTokens = MockPartnerTokensImpl
     override def tokens: io.flow.token.v0.Tokens = MockTokensImpl
     override def tokenValidations: io.flow.token.v0.TokenValidations = MockTokenValidationsImpl
+
+  }
+
+  object MockChannelTokensImpl extends MockChannelTokens
+
+  trait MockChannelTokens extends io.flow.token.v0.ChannelTokens {
+
+    def get(
+      channelId: String,
+      id: _root_.scala.Option[Seq[String]] = None,
+      limit: Long = 25L,
+      offset: Long = 0L,
+      sort: String = "-created_at",
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.token.v0.models.ChannelToken]] = scala.concurrent.Future.successful {
+      Nil
+    }
+
+    def getById(
+      channelId: String,
+      id: String,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.token.v0.models.ChannelToken] = scala.concurrent.Future.successful {
+      io.flow.token.v0.mock.Factories.makeChannelToken()
+    }
+
+    def putById(
+      channelId: String,
+      id: String,
+      channelTokenForm: io.flow.token.internal.v0.models.ChannelTokenForm,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.token.v0.models.ChannelToken] = scala.concurrent.Future.successful {
+      io.flow.token.v0.mock.Factories.makeChannelToken()
+    }
+
+    def deleteById(
+      channelId: String,
+      id: String,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit] = scala.concurrent.Future.successful {
+      // unit type
+    }
 
   }
 
@@ -173,7 +216,6 @@ package io.flow.token.v0.mock {
     def makeChannelToken(): io.flow.token.v0.models.ChannelToken = io.flow.token.v0.models.ChannelToken(
       id = Factories.randomString(24),
       channel = io.flow.common.v0.mock.Factories.makeChannelReference(),
-      user = io.flow.common.v0.mock.Factories.makeUserReference(),
       partial = Factories.randomString(24),
       createdAt = _root_.org.joda.time.DateTime.now,
       description = None
@@ -181,8 +223,7 @@ package io.flow.token.v0.mock {
 
     def makeChannelTokenReference(): io.flow.token.v0.models.ChannelTokenReference = io.flow.token.v0.models.ChannelTokenReference(
       id = Factories.randomString(24),
-      channel = io.flow.common.v0.mock.Factories.makeChannelReference(),
-      user = io.flow.common.v0.mock.Factories.makeUserReference()
+      channel = io.flow.common.v0.mock.Factories.makeChannelReference()
     )
 
     def makeCleartext(): io.flow.token.v0.models.Cleartext = io.flow.token.v0.models.Cleartext(

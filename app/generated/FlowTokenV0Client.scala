@@ -11,7 +11,6 @@ package io.flow.token.v0.models {
    */
   trait TokenDetailInterface {
     def id: String
-    def user: io.flow.common.v0.models.UserReference
     def partial: String
     def createdAt: _root_.org.joda.time.DateTime
     def description: _root_.scala.Option[String] = None
@@ -79,7 +78,6 @@ package io.flow.token.v0.models {
   final case class ChannelToken(
     override val id: String,
     channel: io.flow.common.v0.models.ChannelReference,
-    override val user: io.flow.common.v0.models.UserReference,
     override val partial: String,
     override val createdAt: _root_.org.joda.time.DateTime,
     override val description: _root_.scala.Option[String] = None
@@ -93,8 +91,7 @@ package io.flow.token.v0.models {
 
   final case class ChannelTokenReference(
     id: String,
-    channel: io.flow.common.v0.models.ChannelReference,
-    user: io.flow.common.v0.models.UserReference
+    channel: io.flow.common.v0.models.ChannelReference
   ) extends TokenReference {
     override val tokenReferenceDiscriminator: TokenReferenceDiscriminator = TokenReferenceDiscriminator.ChannelTokenReference
   }
@@ -273,6 +270,7 @@ package io.flow.token.v0.models {
     import io.flow.common.v0.models.json._
     import io.flow.error.v0.models.json._
     import io.flow.permission.v0.models.json._
+    import io.flow.token.internal.v0.models.json._
     import io.flow.token.v0.models.json._
 
     private[v0] implicit val jsonReadsUUID: play.api.libs.json.Reads[_root_.java.util.UUID] = __.read[String].map { str =>
@@ -301,18 +299,16 @@ package io.flow.token.v0.models {
       for {
         id <- (__ \ "id").read[String]
         channel <- (__ \ "channel").read[io.flow.common.v0.models.ChannelReference]
-        user <- (__ \ "user").read[io.flow.common.v0.models.UserReference]
         partial <- (__ \ "partial").read[String]
         createdAt <- (__ \ "created_at").read[_root_.org.joda.time.DateTime]
         description <- (__ \ "description").readNullable[String]
-      } yield ChannelToken(id, channel, user, partial, createdAt, description)
+      } yield ChannelToken(id, channel, partial, createdAt, description)
     }
 
     def jsObjectChannelToken(obj: io.flow.token.v0.models.ChannelToken): play.api.libs.json.JsObject = {
       play.api.libs.json.Json.obj(
         "id" -> play.api.libs.json.JsString(obj.id),
         "channel" -> io.flow.common.v0.models.json.jsObjectChannelReference(obj.channel),
-        "user" -> io.flow.common.v0.models.json.jsObjectUserReference(obj.user),
         "partial" -> play.api.libs.json.JsString(obj.partial),
         "created_at" -> play.api.libs.json.JsString(_root_.org.joda.time.format.ISODateTimeFormat.dateTime.print(obj.createdAt))
       ) ++ (obj.description match {
@@ -331,15 +327,13 @@ package io.flow.token.v0.models {
       for {
         id <- (__ \ "id").read[String]
         channel <- (__ \ "channel").read[io.flow.common.v0.models.ChannelReference]
-        user <- (__ \ "user").read[io.flow.common.v0.models.UserReference]
-      } yield ChannelTokenReference(id, channel, user)
+      } yield ChannelTokenReference(id, channel)
     }
 
     def jsObjectChannelTokenReference(obj: io.flow.token.v0.models.ChannelTokenReference): play.api.libs.json.JsObject = {
       play.api.libs.json.Json.obj(
         "id" -> play.api.libs.json.JsString(obj.id),
-        "channel" -> io.flow.common.v0.models.json.jsObjectChannelReference(obj.channel),
-        "user" -> io.flow.common.v0.models.json.jsObjectUserReference(obj.user)
+        "channel" -> io.flow.common.v0.models.json.jsObjectChannelReference(obj.channel)
       ) ++ play.api.libs.json.Json.obj("discriminator" -> "channel_token_reference")
     }
 
@@ -771,11 +765,14 @@ package io.flow.token.v0 {
     import io.flow.common.v0.models.json._
     import io.flow.error.v0.models.json._
     import io.flow.permission.v0.models.json._
+    import io.flow.token.internal.v0.models.json._
     import io.flow.token.v0.models.json._
 
     private[this] val logger = play.api.Logger("io.flow.token.v0.Client")
 
     logger.info(s"Initializing io.flow.token.v0.Client for url $baseUrl")
+
+    def channelTokens: ChannelTokens = ChannelTokens
 
     def organizationTokens: OrganizationTokens = OrganizationTokens
 
@@ -784,6 +781,77 @@ package io.flow.token.v0 {
     def tokens: Tokens = Tokens
 
     def tokenValidations: TokenValidations = TokenValidations
+
+    object ChannelTokens extends ChannelTokens {
+      override def get(
+        channelId: String,
+        id: _root_.scala.Option[Seq[String]] = None,
+        limit: Long = 25L,
+        offset: Long = 0L,
+        sort: String = "-created_at",
+        requestHeaders: Seq[(String, String)] = Nil
+      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.token.v0.models.ChannelToken]] = {
+        val queryParameters = Seq(
+          Some("limit" -> limit.toString),
+          Some("offset" -> offset.toString),
+          Some("sort" -> sort)
+        ).flatten ++
+          id.getOrElse(Nil).map("id" -> _)
+
+        _executeRequest("GET", s"/channel/${play.utils.UriEncoding.encodePathSegment(channelId, "UTF-8")}/tokens", queryParameters = queryParameters, requestHeaders = requestHeaders).map {
+          case r if r.status == 200 => _root_.io.flow.token.v0.Client.parseJson("Seq[io.flow.token.v0.models.ChannelToken]", r, _.validate[Seq[io.flow.token.v0.models.ChannelToken]])
+          case r if r.status == 401 => throw io.flow.token.v0.errors.UnitResponse(r.status)
+          case r if r.status == 404 => throw io.flow.token.v0.errors.UnitResponse(r.status)
+          case r if r.status == 422 => throw io.flow.token.v0.errors.GenericErrorResponse(r)
+          case r => throw io.flow.token.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 200, 401, 404, 422")
+        }
+      }
+
+      override def getById(
+        channelId: String,
+        id: String,
+        requestHeaders: Seq[(String, String)] = Nil
+      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.token.v0.models.ChannelToken] = {
+        _executeRequest("GET", s"/channel/${play.utils.UriEncoding.encodePathSegment(channelId, "UTF-8")}/tokens/${play.utils.UriEncoding.encodePathSegment(id, "UTF-8")}", requestHeaders = requestHeaders).map {
+          case r if r.status == 200 => _root_.io.flow.token.v0.Client.parseJson("io.flow.token.v0.models.ChannelToken", r, _.validate[io.flow.token.v0.models.ChannelToken])
+          case r if r.status == 401 => throw io.flow.token.v0.errors.UnitResponse(r.status)
+          case r if r.status == 404 => throw io.flow.token.v0.errors.UnitResponse(r.status)
+          case r if r.status == 422 => throw io.flow.token.v0.errors.GenericErrorResponse(r)
+          case r => throw io.flow.token.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 200, 401, 404, 422")
+        }
+      }
+
+      override def putById(
+        channelId: String,
+        id: String,
+        channelTokenForm: io.flow.token.internal.v0.models.ChannelTokenForm,
+        requestHeaders: Seq[(String, String)] = Nil
+      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.token.v0.models.ChannelToken] = {
+        val payload = play.api.libs.json.Json.toJson(channelTokenForm)
+
+        _executeRequest("PUT", s"/channel/${play.utils.UriEncoding.encodePathSegment(channelId, "UTF-8")}/tokens/${play.utils.UriEncoding.encodePathSegment(id, "UTF-8")}", body = Some(payload), requestHeaders = requestHeaders).map {
+          case r if r.status == 200 => _root_.io.flow.token.v0.Client.parseJson("io.flow.token.v0.models.ChannelToken", r, _.validate[io.flow.token.v0.models.ChannelToken])
+          case r if r.status == 401 => throw io.flow.token.v0.errors.UnitResponse(r.status)
+          case r if r.status == 404 => throw io.flow.token.v0.errors.UnitResponse(r.status)
+          case r if r.status == 422 => throw io.flow.token.v0.errors.GenericErrorResponse(r)
+          case r => throw io.flow.token.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 200, 401, 404, 422")
+        }
+      }
+
+      override def deleteById(
+        channelId: String,
+        id: String,
+        requestHeaders: Seq[(String, String)] = Nil
+      )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit] = {
+        _executeRequest("DELETE", s"/channel/${play.utils.UriEncoding.encodePathSegment(channelId, "UTF-8")}/tokens/${play.utils.UriEncoding.encodePathSegment(id, "UTF-8")}", requestHeaders = requestHeaders).map {
+          case r if r.status == 204 => ()
+          case r if r.status == 401 => throw io.flow.token.v0.errors.UnitResponse(r.status)
+          case r if r.status == 404 => throw io.flow.token.v0.errors.UnitResponse(r.status)
+          case r if r.status == 422 => throw io.flow.token.v0.errors.GenericErrorResponse(r)
+          case r => throw io.flow.token.v0.errors.FailedRequest(r.status, s"Unsupported response code[${r.status}]. Expected: 204, 401, 404, 422")
+        }
+      }
+    }
 
     object OrganizationTokens extends OrganizationTokens {
       override def get(
@@ -1074,12 +1142,43 @@ package io.flow.token.v0 {
 
     trait Client {
       def baseUrl: String
+      def channelTokens: io.flow.token.v0.ChannelTokens
       def organizationTokens: io.flow.token.v0.OrganizationTokens
       def partnerTokens: io.flow.token.v0.PartnerTokens
       def tokens: io.flow.token.v0.Tokens
       def tokenValidations: io.flow.token.v0.TokenValidations
     }
 
+  }
+
+  trait ChannelTokens {
+    def get(
+      channelId: String,
+      id: _root_.scala.Option[Seq[String]] = None,
+      limit: Long = 25L,
+      offset: Long = 0L,
+      sort: String = "-created_at",
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.token.v0.models.ChannelToken]]
+
+    def getById(
+      channelId: String,
+      id: String,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.token.v0.models.ChannelToken]
+
+    def putById(
+      channelId: String,
+      id: String,
+      channelTokenForm: io.flow.token.internal.v0.models.ChannelTokenForm,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.token.v0.models.ChannelToken]
+
+    def deleteById(
+      channelId: String,
+      id: String,
+      requestHeaders: Seq[(String, String)] = Nil
+    )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Unit]
   }
 
   trait OrganizationTokens {
@@ -1199,6 +1298,7 @@ package io.flow.token.v0 {
     import io.flow.common.v0.models.json._
     import io.flow.error.v0.models.json._
     import io.flow.permission.v0.models.json._
+    import io.flow.token.internal.v0.models.json._
     import io.flow.token.v0.models.json._
 
     final case class GenericErrorResponse(

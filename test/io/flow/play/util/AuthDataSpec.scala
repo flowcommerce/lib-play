@@ -50,6 +50,11 @@ class AuthDataSpec extends LibPlaySpec {
     auth.customer must be(Some(CustomerReference(customer)))
   }
 
+  "AuthData.organizationV2" in {
+    val auth = AuthHeaders.organizationV2("testify")
+    auth.organization must be("testify")
+  }
+
   "AuthData.generateRequestId" in {
     AuthHeaders.generateRequestId("foo").startsWith("foo") must be(true)
 

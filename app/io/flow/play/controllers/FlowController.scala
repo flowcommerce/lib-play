@@ -35,6 +35,7 @@ trait FlowController extends BaseController with FlowControllerHelpers {
   def CheckoutOrg: CheckoutOrgActionBuilder = flowControllerComponents.checkoutOrgActionBuilder
   def IdentifiedCustomer: IdentifiedCustomerActionBuilder = flowControllerComponents.identifiedCustomerActionBuilder
   def IdentifiedChannel: IdentifiedChannelActionBuilder = flowControllerComponents.identifiedChannelActionBuilder
+  def OrganizationV2: OrganizationV2ActionBuilder = flowControllerComponents.organizationV2ActionBuilder
 }
 
 @ImplementedBy(classOf[FlowDefaultControllerComponents])
@@ -52,6 +53,7 @@ trait FlowControllerComponents {
   def checkoutOrgActionBuilder: CheckoutOrgActionBuilder
   def identifiedCustomerActionBuilder: IdentifiedCustomerActionBuilder
   def identifiedChannelActionBuilder: IdentifiedChannelActionBuilder
+  def organizationV2ActionBuilder: OrganizationV2ActionBuilder
 }
 
 case class FlowDefaultControllerComponents @Inject()(
@@ -68,6 +70,7 @@ case class FlowDefaultControllerComponents @Inject()(
   checkoutOrgActionBuilder: CheckoutOrgActionBuilder,
   identifiedCustomerActionBuilder: IdentifiedCustomerActionBuilder,
   identifiedChannelActionBuilder: IdentifiedChannelActionBuilder,
+  organizationV2ActionBuilder: OrganizationV2ActionBuilder,
 ) extends FlowControllerComponents
 
 // Anonymous
@@ -165,6 +168,14 @@ class IdentifiedChannelActionBuilder @Inject()(requestFactory: RequestFactory, v
     requestFactory.identifiedChannel(request).fold(Future.successful(unauthorized(request)))(block)
 }
 
+// OrganizationV2
+class OrganizationV2ActionBuilder @Inject()(requestFactory: RequestFactory, val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
+  extends ActionBuilder[OrganizationV2Request, AnyContent] with FlowActionInvokeBlockHelper {
+
+  def invokeBlock[A](request: Request[A], block: (OrganizationV2Request[A]) => Future[Result]): Future[Result] =
+    requestFactory.organizationV2(request).fold(Future.successful(unauthorized(request)))(block)
+}
+
 object IdentifiedCookie {
 
   val UserKey = "user_id"
@@ -193,4 +204,12 @@ class IdentifiedCustomerActionBuilder @Inject()(requestFactory: RequestFactory, 
 
   def invokeBlock[A](request: Request[A], block: IdentifiedCustomerRequest[A] => Future[Result]): Future[Result] =
     requestFactory.identifiedCustomer(request).fold(Future.successful(unauthorized(request)))(block)
+}
+
+// OrganizationV2
+class OrganizationV2ChannelActionBuilder @Inject()(requestFactory: RequestFactory, val parser: BodyParsers.Default, val config: Config, implicit private val logger: RollbarLogger)(implicit val executionContext: ExecutionContext)
+  extends ActionBuilder[OrganizationV2Request, AnyContent] with FlowActionInvokeBlockHelper {
+
+  def invokeBlock[A](request: Request[A], block: (OrganizationV2Request[A]) => Future[Result]): Future[Result] =
+    requestFactory.organizationV2(request).fold(Future.successful(unauthorized(request)))(block)
 }

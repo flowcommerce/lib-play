@@ -556,3 +556,41 @@ object ChannelAuthData {
     }
   }
 }
+
+sealed trait OrganizationV2AuthData extends AuthData {
+  def organization: String
+}
+
+object OrganizationV2AuthData {
+  case class OrganizationV2(
+    override val createdAt: DateTime = DateTime.now,
+    override val requestId: String,
+    organization: String,
+  ) extends OrganizationV2AuthData {
+
+    override protected def decorate(base: AuthDataMap): AuthDataMap = {
+      base.copy(
+        organization = Some(organization),
+      )
+    }
+
+  }
+
+  object OrganizationV2 {
+
+    def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[OrganizationV2] = {
+      AuthDataMap.fromMap(data) { dm =>
+        dm.organization match {
+          case Some(org) => Some(
+            OrganizationV2(
+              createdAt = dm.createdAt,
+              requestId = dm.requestId,
+              organization = org
+            )
+          )
+          case _ => None
+        }
+      }
+    }
+  }
+}

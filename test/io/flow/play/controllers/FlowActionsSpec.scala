@@ -177,6 +177,15 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
     )(ChannelAuthData.IdentifiedChannel.fromMap)
   }
 
+  "parse OrganizationV2AuthData.OrganizationV2" in {
+    validateParse(
+      OrganizationV2AuthData.OrganizationV2(
+        requestId = createTestId(),
+        organization = createTestId()
+      )
+    )(OrganizationV2AuthData.OrganizationV2.fromMap)
+  }
+
   "expired" in {
     val data = AuthData.Anonymous.Empty
     validateParse(data)(AuthData.Anonymous.fromMap)

@@ -160,6 +160,21 @@ object AuthHeaders {
     )
   }
 
+  /**
+   * Helper to create a valid auth data for an OrganizationV2.
+   *
+   * @param requestId Will be created if not specified
+   */
+  def organizationV2(
+    organization: String,
+    requestId: String = generateRequestId()
+  ): OrganizationV2AuthData.OrganizationV2 = {
+    OrganizationV2AuthData.OrganizationV2(
+      requestId = requestId,
+      organization = organization
+    )
+  }
+
   def createFlowSession(): FlowSession = {
     FlowSession(
       id = Constants.Prefixes.Session + generateToken()

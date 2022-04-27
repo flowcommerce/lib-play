@@ -111,3 +111,10 @@ class IdentifiedChannelRequest[A](
   val user: UserReference = auth.user
   val channel: String = auth.channel
 }
+
+class OrganizationV2Request[A](
+  val auth: OrganizationV2AuthData.OrganizationV2,
+  request: Request[A]
+) extends WrappedRequest[A](request) {
+  val organization: String = auth.organization
+}

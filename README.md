@@ -14,7 +14,7 @@ By default, all HTTP methods will be logged. To only
 log a specific subset of methods, add the following:
 
     play.http.logging.methods = ["GET", "PUT"]
-    
+
 ## CORS
 
 A CORS request handler is provided. To enable, add the following

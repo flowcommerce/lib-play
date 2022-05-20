@@ -1,6 +1,6 @@
 package io.flow.play.util
 
-import io.flow.common.v0.models.{Environment, Role, UserReference}
+import io.flow.common.v0.models.{CustomerReference, Environment, Role, UserReference}
 import io.flow.log.RollbarProvider
 import io.flow.play.util.AuthDataMap.Fields
 import org.joda.time.DateTime
@@ -30,6 +30,24 @@ class AuthDataSpec extends LibPlaySpec {
     auth.organization must be("demo")
     auth.environment must be(Environment.Production)
     auth.role must be(Role.Admin)
+  }
+
+  "AuthData.channel defaults" in {
+    val auth = AuthHeaders.channel(UserReference("user-1"), "testify")
+    auth.user.id must be("user-1")
+    auth.channel must be("testify")
+  }
+
+  "AuthData.channel" in {
+    val requestId = "test-request"
+    val sessionId = "F51session"
+    val customer = "customerRef"
+    val auth = AuthHeaders.channel(UserReference("user-1"), "testify", requestId = requestId, session = Some(FlowSession(sessionId)), customer = Some(CustomerReference(customer)))
+    auth.user.id must be("user-1")
+    auth.channel must be("testify")
+    auth.requestId must be(requestId)
+    auth.session must be(Some(FlowSession(sessionId)))
+    auth.customer must be(Some(CustomerReference(customer)))
   }
 
   "AuthData.generateRequestId" in {

@@ -2,7 +2,7 @@ name := "lib-play-play28"
 
 organization := "io.flow"
 
-scalaVersion := "2.13.5"
+scalaVersion := "2.13.6"
 
 lazy val allScalacOptions = Seq(
   "-feature",
@@ -23,18 +23,14 @@ lazy val root = project
       ws,
       filters,
       guice,
-      "io.flow" %% "lib-log" % "0.1.41",
+      "io.flow" %% "lib-log" % "0.1.67",
       "com.pauldijou" %% "jwt-play-json" % "5.0.0",
       "com.ning" % "async-http-client" % "1.9.40",
       "org.apache.commons" % "commons-io" % "1.3.2",
-      "org.mockito" % "mockito-core" % "3.11.0" % Test,
-      "org.typelevel" %% "cats-core" % "2.6.1",
+      "org.mockito" % "mockito-core" % "4.5.1" % Test,
+      "org.typelevel" %% "cats-core" % "2.7.0",
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
       "org.scalatestplus" %% "mockito-3-3" % "3.2.2.0" % Test,
-    ),
-
-    dependencyOverrides ++= Seq(
-      "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
     ),
     
     scalacOptions ++= allScalacOptions,
@@ -62,4 +58,4 @@ publishTo := {
   }
 }
 
-version := "0.6.40"
+version := "0.7.30"

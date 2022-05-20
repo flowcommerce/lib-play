@@ -20,7 +20,7 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
 
   override def config: MockConfig = mockConfig
 
-  override def jwtSalt: String = "test"
+  override lazy val jwtSalt: String = "test"
 
   private[this] def parseAuthData[T <: AuthData](data: AuthData)(f: Map[String, String] => Option[T]) = {
     parse(data.jwt(jwtSalt))(f).getOrElse {
@@ -163,6 +163,18 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
         customer = customer
       )
     )(OrgAuthData.Customer.fromMap)
+  }
+
+  "parse ChannelAuthData.IdentifiedChannel" in {
+    validateParse(
+      ChannelAuthData.IdentifiedChannel(
+        requestId = createTestId(),
+        user = user,
+        channel = createTestId(),
+        session = None,
+        customer = None
+      )
+    )(ChannelAuthData.IdentifiedChannel.fromMap)
   }
 
   "expired" in {

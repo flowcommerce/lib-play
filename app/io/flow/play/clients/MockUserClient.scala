@@ -60,7 +60,7 @@ case class MockUsers(data: MockUserData) extends mock.MockUsers {
       id = Some(Seq(id)),
       requestHeaders = requestHeaders
     ).map { _.headOption.getOrElse {
-      throw new io.flow.token.v0.errors.UnitResponse(404)
+      throw new io.flow.user.v0.errors.UnitResponse(404)
     }}
   }
 

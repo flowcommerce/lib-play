@@ -5,10 +5,23 @@ Library supporting building REST APIs on play framework.
 
 ## Request Logging
 
+To enable request logging, add the following to your
+play application config:
+
+    play.http.filters=io.flow.play.util.LoggingFilter
+
 By default, all HTTP methods will be logged. To only
 log a specific subset of methods, add the following:
 
     play.http.logging.methods = ["GET", "PUT"]
+    
+## CORS
+
+A CORS request handler is provided. To enable, add the following
+to your play application config (instead of `LoggingFilter` above):
+
+    play.http.filters=io.flow.play.util.CorsWithLoggingFilter
+    play.filters.cors.allowedHttpMethods = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
 
 ## Global error handler for JSON APIs
 
@@ -22,9 +35,7 @@ Additionally, if flow environment is development, the actual contents
 of the exception will be returned (disabled in production to avoid
 leaking information).
 
-Disable with
-
-    play.http.errorHandler = null
+    play.http.errorHandler = "io.flow.play.util.ErrorHandler"
 
 ## Traits
 

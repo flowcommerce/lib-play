@@ -7,6 +7,14 @@ import play.api.mvc._
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.http.HttpFilters
 
+/**
+  * To use in any Flow app depending on lib-play:
+  *
+  * (1) Add this to your base.conf:
+  *    play.http.filters=io.flow.play.util.LoggingFilter
+  *
+  **/
+
 class LoggingFilter @javax.inject.Inject() (loggingFilter: FlowLoggingFilter) extends HttpFilters {
   def filters: Seq[Filter] = Seq(loggingFilter)
 }

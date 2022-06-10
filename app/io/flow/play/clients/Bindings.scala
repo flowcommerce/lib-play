@@ -30,7 +30,11 @@ class RegistryModule extends Module {
   def bindings(env: Environment, conf: Configuration) = {
     env.mode match {
       case Mode.Prod | Mode.Dev => {
+        val insideCluster = sys.env.get("FLOW_KUBERNETES_POD_IP").filterNot(_.isEmpty).isDefined
         FlowEnvironment.Current match {
+          case FlowEnvironment.Production if insideCluster => Seq(
+            bind[Registry].to[K8sProductionRegistry]
+          )
           case FlowEnvironment.Production => Seq(
             bind[Registry].to[ProductionRegistry]
           )

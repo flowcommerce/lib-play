@@ -25,7 +25,7 @@ code:
         play_2_8_client: "app/generated"
         play_2_8_mock_client: "app/generated"
     token:
-      version: latest
+      version: 0.16.4-ben
       generators:
         play_2_8_client: "app/generated"
         play_2_8_mock_client: "app/generated"

@@ -4,12 +4,12 @@ import java.util.UUID
 
 class UrlKeySpec extends LibPlaySpec {
 
-  val urlKey = UrlKey()
+  private[this] val urlKey: UrlKey = UrlKey()
 
   "generate" must {
 
     "does not generate reserved keys" in {
-      val key = urlKey.generate("members")()
+      val key = urlKey.generate("members")
       urlKey.validate(key) must be(Nil)
     }
 
@@ -46,32 +46,42 @@ class UrlKeySpec extends LibPlaySpec {
     }
 
    "good urls alone" in {
-      urlKey.generate("foos")() must be("foos")
-      urlKey.generate("foos-bar")() must be("foos-bar")
+      urlKey.generate("foos") must be("foos")
+      urlKey.generate("foos-bar") must be("foos-bar")
     }
 
    "numbers" in {
-      urlKey.generate("foos123")() must be("foos123")
+      urlKey.generate("foos123") must be("foos123")
     }
 
    "lower case" in {
-      urlKey.generate("FOOS-BAR")() must be("foos-bar")
+      urlKey.generate("FOOS-BAR") must be("foos-bar")
     }
 
    "trim" in {
-      urlKey.generate("  foos-bar  ")() must be("foos-bar")
+      urlKey.generate("  foos-bar  ") must be("foos-bar")
     }
 
    "leading garbage" in {
-      urlKey.generate("!foos")() must be("foos")
+      urlKey.generate("!foos") must be("foos")
     }
 
    "trailing garbage" in {
-      urlKey.generate("foos!")() must be("foos")
+      urlKey.generate("foos!") must be("foos")
     }
 
-   "allows underscores" in {
-      urlKey.generate("ning_1_8_client")() must be("ning_1_8_client")
+    "preserves leading dash" in {
+      urlKey.generate("-foos") must be("-foos")
+      urlKey.generate("--foos") must be("--foos")
+    }
+
+    "preserves trailing dash" in {
+      urlKey.generate("foos-") must be("foos-")
+      urlKey.generate("foos--") must be("foos--")
+    }
+
+    "allows underscores" in {
+      urlKey.generate("ning_1_8_client") must be("ning_1_8_client")
     }
 
   }
@@ -95,6 +105,10 @@ class UrlKeySpec extends LibPlaySpec {
    "label" in {
       urlKey.validate("bad", "Id") must be(Seq(s"Id must be at least ${urlKey.minKeyLength} characters"))
       urlKey.validate("no spaces", "Id") must be(Seq("Id must be in all lower case and contain alphanumerics only (-, _, and . are supported). A valid id would be: no-spaces"))
+    }
+
+    "trailing characters" in {
+      urlKey.validate("trailing-") must be(Nil)
     }
   }
 

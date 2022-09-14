@@ -23,7 +23,7 @@ case class UrlKey(
 
   private[this] val random = io.flow.util.Random()
 
-  // Only want lower case letters and dashes
+  // Only want lower case letters, dashes, underscore and period
   private[this] val Regexp1 = """([^0-9a-z\-\_\.])""".r
 
   // Turn multiple dashes into single dashes
@@ -31,9 +31,6 @@ case class UrlKey(
 
   // Turn multiple underscores into single underscore
   private[this] val Regexp3 = """(\_+)""".r
-
-  private[this] val RegexpLeadingSpaces = """^\-+""".r
-  private[this] val RegexpTrailingSpaces = """\-+$""".r
 
   /**
     * Deterministically generated a unique key that is URL safe.
@@ -88,16 +85,14 @@ case class UrlKey(
     * legibility.
     */
   def format(value: String): String = {
-    RegexpTrailingSpaces.replaceAllIn(
-      RegexpLeadingSpaces.replaceAllIn(
-        Regexp3.replaceAllIn(
-          Regexp2.replaceAllIn(
-            Regexp1.replaceAllIn(value.toLowerCase.trim, _ => "-"),
-            _ => "-"
-          ), _ => "_"
-        ), _ => ""),
-      _ => ""
-    )
+    Regexp1.replaceAllIn(
+      Regexp3.replaceAllIn(
+        Regexp2.replaceAllIn(
+          Regexp1.replaceAllIn(value.toLowerCase.trim, _ => " "),
+          _ => "-"
+        ), _ => "_"
+      ).trim
+    , _ => "-")
   }
 
   def validate(

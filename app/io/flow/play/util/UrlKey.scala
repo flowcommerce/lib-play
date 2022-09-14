@@ -3,9 +3,7 @@ package io.flow.play.util
 /**
   * Class designed to help generate URL friendly keys, with methods to
   * create unique tokens.
-  * 
-  * adapted drom https://github.com/mbryzek/apidoc
-  * 
+  *
   * @param minKeyLength Minimum length of key used for validation
   * @param reservedKeys Optionally validate that key cannot be one of these
   * @param maxIterations Upper limit on the number of iterations before we
@@ -23,14 +21,7 @@ case class UrlKey(
 
   private[this] val random = io.flow.util.Random()
 
-  // Only want lower case letters, dashes, underscore and period
-  private[this] val Regexp1 = """([^0-9a-z\-\_\.])""".r
-
-  // Turn multiple dashes into single dashes
-  private[this] val Regexp2 = """(\-+)""".r
-
-  // Turn multiple underscores into single underscore
-  private[this] val Regexp3 = """(\_+)""".r
+  private[this] val AcceptedChars: Set[String] = "0123456789abcdefghijklmnopqrstuvwxyz.-_".split("").toSet
 
   /**
     * Deterministically generated a unique key that is URL safe.
@@ -85,14 +76,7 @@ case class UrlKey(
     * legibility.
     */
   def format(value: String): String = {
-    Regexp1.replaceAllIn(
-      Regexp3.replaceAllIn(
-        Regexp2.replaceAllIn(
-          Regexp1.replaceAllIn(value.toLowerCase.trim, _ => " "),
-          _ => "-"
-        ), _ => "_"
-      ).trim
-    , _ => "-")
+    value.toLowerCase.trim.split("").filter(AcceptedChars.contains).mkString("")
   }
 
   def validate(

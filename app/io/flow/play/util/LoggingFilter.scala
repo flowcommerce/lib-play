@@ -50,11 +50,11 @@ class FlowLoggingFilter @javax.inject.Inject() (
         val headerMap = requestHeader.headers.toMap
         val requestId = headerMap.getOrElse("X-Flow-Request-Id", Nil).mkString(",")
         val line = Seq(
-          (requestHeader.method).toString,
+          requestHeader.method,
           s"${requestHeader.host}${requestHeader.uri}",
-          (result.header.status).toString,
+          result.header.status.toString,
           s"${requestTime}ms",
-          (requestId).toString,
+          requestId,
           headerMap.getOrElse("User-Agent", Nil).mkString(","),
           headerMap.getOrElse("X-Forwarded-For", Nil).mkString(","),
           headerMap.getOrElse("CF-Connecting-IP", Nil).mkString(",")

@@ -22,3 +22,6 @@ addSbtPlugin("io.flow" % "sbt-flow-linter" % "0.0.34")
   ThisBuild / libraryDependencySchemes ++= Seq(
     "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always
   )
+
+addSbtPlugin("com.github.sbt" % "sbt-git" % "2.0.1")
+

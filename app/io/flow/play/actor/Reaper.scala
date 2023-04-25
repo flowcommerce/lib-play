@@ -12,8 +12,8 @@ import scala.concurrent.duration.DurationInt
   * 1. Add the ActorRef to the set to be managed
   * {{{Reaper.get(system).watch(actorRef)}}}
   *
-  * 2. Call {{{Reaper.get(system).reapAll()}}} during shutdown to wait for all actors to be terminated
-  * This is done automatically by CoordinatedShutdownActorReaperModule if loaded.
+  * 2. Call {{{Reaper.get(system).reapAsync()}}} during shutdown to signal for all actors watched by
+  * the Reaper to be terminated. This is done automatically by CoordinatedShutdownActorReaperModule if loaded.
   */
 object Reaper extends ExtensionId[Reaper] with ExtensionIdProvider {
   override def lookup = Reaper
@@ -26,8 +26,7 @@ final class Reaper private[actor] (system: ActorSystem) extends Extension {
 
   def watch(ref: akka.actor.ActorRef): Unit = reaper ! ReaperActor.Watch(ref)
 
-  def reapAll(): Future[akka.Done] = {
-    implicit val timeout: Timeout = 60.seconds
+  def reapAsync()(implicit timeout: Timeout = 60.seconds): Future[akka.Done] = {
     (reaper ? ReaperActor.Reap).mapTo[akka.Done]
   }
 }

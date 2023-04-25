@@ -32,7 +32,7 @@ private[play] final class CoordinatedShutdownActorReaper @Inject() (
       .get(system)
       .addTask(CoordinatedShutdown.PhaseServiceRequestsDone, taskName = s"flow-cs-reap-actors") { () =>
         logger.info("Waiting for watched actors to stop")
-        reaper.reapAll().map { _ =>
+        reaper.reapAsync().map { _ =>
           logger.info("All watched actors stopped")
           akka.Done
         }

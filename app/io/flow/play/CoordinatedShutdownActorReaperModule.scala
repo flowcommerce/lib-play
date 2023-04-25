@@ -2,7 +2,7 @@ package io.flow.play
 
 import akka.actor.{ActorSystem, CoordinatedShutdown}
 import io.flow.log.RollbarLogger
-import io.flow.play.actor.Reaper
+import io.flow.akka.actor.Reaper
 import play.api.inject.Module
 import play.api.{Configuration, Environment}
 

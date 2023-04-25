@@ -2,7 +2,7 @@ package io.flow.play
 
 import akka.pattern.ask
 import akka.util.Timeout
-import io.flow.play.actor.ReaperActor
+import io.flow.akka.actor.ReaperActor
 import io.flow.play.util.LibPlaySpec
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.must.Matchers

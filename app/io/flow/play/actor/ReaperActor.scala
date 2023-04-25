@@ -3,7 +3,7 @@ package io.flow.play.actor
 import akka.actor.{Actor, ActorLogging, ActorRef, PoisonPill, Terminated}
 
 import javax.inject.Singleton
-import scala.collection.mutable.{ListBuffer => MutableListBuffer}
+import scala.collection.mutable.{Set => MutableSet}
 
 object ReaperActor {
   val Name: String = "flow-reaper-actor"
@@ -17,8 +17,8 @@ object ReaperActor {
  * Intended for use in graceful shutdown with CoordinatedShutdown.
  */
 @Singleton
-final class ReaperActor extends Actor with ActorLogging {
-  private[this] val watched = MutableListBuffer.empty[ActorRef]
+private[actor] final class ReaperActor extends Actor with ActorLogging {
+  private[this] val watched = MutableSet.empty[ActorRef]
   private[this] var stopSent: Boolean = false
 
   override def receive: Receive = {

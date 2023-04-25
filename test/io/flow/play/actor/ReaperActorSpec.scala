@@ -1,6 +1,6 @@
 package io.flow.play.actor
 
-import akka.actor.{Actor, ActorLogging, ActorSelection, ActorSystem, Props}
+import akka.actor.{ActorLogging, ActorSelection, ActorSystem, Props}
 import akka.testkit.{ImplicitSender, TestActors, TestKit, TestProbe}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.must.Matchers
@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicLong
 object ReaperActorSpec {
   case class SleepFor(millis: Long)
 
-  class SleepyActor(accumulator: AtomicLong) extends Actor with ActorLogging {
+  class SleepyActor(accumulator: AtomicLong) extends ReapedActor with ActorLogging {
     override def receive = {
       case SleepFor(millis) =>
         val cumulativeMillis = accumulator.addAndGet(millis)
@@ -28,7 +28,7 @@ class ReaperActorSpec extends TestKit(ActorSystem("ReaperActorSpec")) with Impli
   import ReaperActorSpec._
 
   override def beforeAll(): Unit = {
-    system.actorOf(Props(classOf[ReaperActor]), ReaperActor.Name)
+    Reaper.get(system)
     ()
   }
 
@@ -41,32 +41,29 @@ class ReaperActorSpec extends TestKit(ActorSystem("ReaperActorSpec")) with Impli
 
   "ReaperActor" must {
     "terminate watched actors" in {
-      val echo = system.actorOf(TestActors.echoActorProps)
-      reaper ! ReaperActor.Watch(echo)
+      val reaped = system.actorOf(TestActors.blackholeProps)
+      reaper ! ReaperActor.Watch(reaped)
       val probe = TestProbe()
-      probe.watch(echo)
+      probe.watch(reaped)
 
-      echo ! "hello"
-      expectMsg("hello")
       reaper ! ReaperActor.Reap
-      probe.expectTerminated(echo)
+      probe.expectTerminated(reaped)
       expectMsg(akka.Done) // from reaper when all watched actors have terminated
     }
   }
 
   "allow all messages in watched actors to process" in {
     val accumulator = new AtomicLong(0)
-    val sleeper = system.actorOf(Props(new SleepyActor(accumulator)))
-    reaper ! ReaperActor.Watch(sleeper)
+    val reaped = system.actorOf(Props(new SleepyActor(accumulator)))
     val probe = TestProbe()
-    probe.watch(sleeper)
+    probe.watch(reaped)
 
-    val messages = Seq(SleepFor(10), SleepFor(20), SleepFor(30), SleepFor(40), SleepFor(50))
+    val messages = Seq(10L,20,30,40,50,100).map(SleepFor.apply)
     messages.foreach { message =>
-      sleeper ! message
+      reaped ! message
     }
     reaper ! ReaperActor.Reap
-    probe.expectTerminated(sleeper)
+    probe.expectTerminated(reaped)
     expectMsg(akka.Done) // from reaper when all watched actors have terminated
     accumulator.get() mustBe messages.map(_.millis).sum
   }

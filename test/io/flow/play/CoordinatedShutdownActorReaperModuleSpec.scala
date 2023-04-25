@@ -12,15 +12,16 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-class ActorReaperModuleSpec extends LibPlaySpec with BeforeAndAfterAll with Matchers {
+class CoordinatedShutdownActorReaperModuleSpec extends LibPlaySpec with BeforeAndAfterAll with Matchers {
 
   override def fakeApplication(): Application =
     new GuiceApplicationBuilder()
-      .bindings(new ActorReaperModule())
+      .bindings(new CoordinatedShutdownActorReaperModule())
       .build()
 
-  "ActorReaperModule" should {
+  "CoordinatedShutdownActorReaperModule" should {
     "register ReaperActor" in {
+      // Look it up this way to verify that the module registered it (via its extension)
       val reaper = app.actorSystem.actorSelection("/user/" + ReaperActor.Name)
       implicit val timeout: Timeout = 3.seconds
       Await.result(reaper ? ReaperActor.Reap, timeout.duration) mustBe akka.Done

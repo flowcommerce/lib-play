@@ -5,11 +5,6 @@ code:
       generators:
         play_2_8_client: "app/generated"
         play_2_8_mock_client: "app/generated"
-    permission:
-      version: latest
-      generators:
-        play_2_8_client: "app/generated"
-        play_2_8_mock_client: "app/generated"
     error:
       version: latest
       generators:

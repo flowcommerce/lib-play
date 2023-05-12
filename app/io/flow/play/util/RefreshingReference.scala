@@ -152,7 +152,8 @@ object RefreshingReference {
     retrieveExecutionContext: ExecutionContext,
     reloadInterval: FiniteDuration,
     actorSystem: ActorSystem,
-    retrieve: () => T, maxAttempts: Int = 3
+    retrieve: () => T,
+    maxAttempts: Int
   ): RefreshingReference[T] = {
     val schedulerOuter = scheduler
     val retrieveExecutionContextOuter = retrieveExecutionContext

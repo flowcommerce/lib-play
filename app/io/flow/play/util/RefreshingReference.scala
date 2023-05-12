@@ -1,9 +1,9 @@
 package io.flow.play.util
 
 import java.util.concurrent.atomic.AtomicReference
-
 import akka.actor.Scheduler
 import io.flow.log.RollbarLogger
+import io.flow.util.Shutdownable
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.FiniteDuration
@@ -18,7 +18,7 @@ import scala.util.{Failure, Success, Try}
   * The class will not initialize if the retrieval function fails the first `maxAttempts` times to avoid querying a
   * cache that has never been initialized.
   */
-trait RefreshingReference[T] {
+trait RefreshingReference[T] extends Shutdownable {
 
   def logger: RollbarLogger
 
@@ -90,13 +90,17 @@ trait RefreshingReference[T] {
 
   // schedule subsequent reloads
   scheduler.scheduleWithFixedDelay(reloadInterval, reloadInterval) {
-    () => doLoadRetry(1, maxAttempts) match {
-      case Success(data) => cache.set(data)
-      case Failure(ex) =>
-        log.
-          withKeyValue("max_attempts", maxAttempts).
-          withKeyValue("reload_interval", reloadInterval.toString).
-          warn("Failed to refresh cache. Will try again", ex)
+    () => if (isShutdown) {
+      log.info("Not refreshing reference, shutdown in progress")
+    } else {
+      doLoadRetry(1, maxAttempts) match {
+        case Success(data) => cache.set(data)
+        case Failure(ex) =>
+          log.
+            withKeyValue("max_attempts", maxAttempts).
+            withKeyValue("reload_interval", reloadInterval.toString).
+            warn("Failed to refresh cache. Will try again", ex)
+      }
     }
   }(retrieveExecutionContext)
 

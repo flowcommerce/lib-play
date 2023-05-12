@@ -1,7 +1,8 @@
 package io.flow.play.util
 
 import java.util.concurrent.atomic.AtomicReference
-import akka.actor.Scheduler
+import akka.actor.{ActorSystem, Scheduler}
+import io.flow.akka.actor.ManagedShutdown
 import io.flow.log.RollbarLogger
 import io.flow.util.Shutdownable
 
@@ -116,6 +117,8 @@ trait RefreshingReference[T] extends Shutdownable {
 
 }
 
+abstract class ShutdownManangedRefreshingReference[T](override val system: ActorSystem) extends RefreshingReference[T] with ManagedShutdown
+
 object RefreshingReference {
 
   /**
@@ -143,4 +146,31 @@ object RefreshingReference {
     }
   }
 
+  def apply[T](
+    rollbarLogger: RollbarLogger,
+    scheduler: Scheduler,
+    retrieveExecutionContext: ExecutionContext,
+    reloadInterval: FiniteDuration,
+    actorSystem: ActorSystem,
+    retrieve: () => T, maxAttempts: Int = 3
+  ): RefreshingReference[T] = {
+    val schedulerOuter = scheduler
+    val retrieveExecutionContextOuter = retrieveExecutionContext
+    val reloadIntervalOuter = reloadInterval
+    val retrieveOuter = retrieve
+    val maxAttemptsOuter = maxAttempts
+    new ShutdownManangedRefreshingReference[T](actorSystem) {
+      override def logger: RollbarLogger = rollbarLogger
+
+      override def scheduler: Scheduler = schedulerOuter
+
+      override def retrieveExecutionContext: ExecutionContext = retrieveExecutionContextOuter
+
+      override def reloadInterval: FiniteDuration = reloadIntervalOuter
+
+      override def retrieve: T = retrieveOuter()
+
+      override def maxAttempts: Int = maxAttemptsOuter
+    }
+  }
 }

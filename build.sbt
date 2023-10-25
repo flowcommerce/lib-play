@@ -3,6 +3,7 @@ name := "lib-play-play28"
 organization := "io.flow"
 
 scalaVersion := "2.13.10"
+ThisBuild / javacOptions ++= Seq("-source", "17", "-target", "17")
 
 enablePlugins(GitVersioning)
 git.useGitDescribe := true
@@ -27,7 +28,8 @@ lazy val root = project
     libraryDependencies ++= Seq(
       ws,
       filters,
-      guice,
+      "com.google.inject" % "guice" % "5.1.0",
+      "com.google.inject.extensions" % "guice-assistedinject" % "5.1.0",
       "io.flow" %% "lib-log" % "0.2.4",
       "io.flow" %% "lib-akka-akka26" % "0.2.13",
       "com.pauldijou" %% "jwt-play-json" % "5.0.0",
@@ -40,11 +42,15 @@ lazy val root = project
       "org.scalatestplus" %% "mockito-3-3" % "3.2.2.0" % Test,
     ),
     
-    scalacOptions ++= allScalacOptions,
+    scalacOptions ++= allScalacOptions ++ Seq("-release", "17"),
     // Suppresses problems with Scaladoc links
     Compile / doc / scalacOptions += "-no-link-warnings",
  
     Test / javaOptions += "-Dconfig.file=conf/test.conf",
+    Test / javaOptions ++= Seq(
+      "--add-exports=java.base/sun.security.x509=ALL-UNNAMED",
+      "--add-opens=java.base/sun.security.ssl=ALL-UNNAMED"
+    ),
     resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/",
     resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
     resolvers += "Artifactory" at "https://flow.jfrog.io/flow/libs-release/",

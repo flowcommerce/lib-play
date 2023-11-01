@@ -61,8 +61,7 @@ class CustomerOrgRequest[A](
   val customer: CustomerReference = auth.customer
 }
 
-/**
-  * Any type of request that contains org data
+/** Any type of request that contains org data
   */
 class OrgRequest[A](
   val auth: OrgAuthData,
@@ -80,16 +79,14 @@ class IdentifiedCustomerRequest[A](
   val environment: Environment = auth.environment
 }
 
-/**
-  * Any type of request that contains checkout data
+/** Any type of request that contains checkout data
   */
 class CheckoutRequest[A](
   val auth: AuthData,
   request: Request[A]
 ) extends WrappedRequest[A](request)
 
-/**
-  * Any type of request that contains checkout org data
+/** Any type of request that contains checkout org data
   */
 class CheckoutOrgRequest[A](
   val auth: OrgAuthData,

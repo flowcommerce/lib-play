@@ -2,9 +2,8 @@ package io.flow.play.util
 
 import play.api.Configuration
 
-/**
-  * A chained configuration that favors environment variables, then
-  * system properties, then the play application configuration file.
+/** A chained configuration that favors environment variables, then system properties, then the play application
+  * configuration file.
   */
 @javax.inject.Singleton
 class DefaultConfig @javax.inject.Inject() (

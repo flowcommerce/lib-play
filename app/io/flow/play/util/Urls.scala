@@ -16,7 +16,8 @@ object Urls {
   }
 
   def downloadToTmpFile(url: String, prefix: String = "download", suffix: String = "tmp"): File = {
-    val finalSuffix = if (suffix.startsWith(".")) { suffix } else { "." + suffix }
+    val finalSuffix = if (suffix.startsWith(".")) { suffix }
+    else { "." + suffix }
     downloadToFile(url, File.createTempFile(prefix, finalSuffix))
   }
 

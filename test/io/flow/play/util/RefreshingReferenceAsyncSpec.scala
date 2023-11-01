@@ -16,8 +16,15 @@ import play.api.libs.concurrent.Futures._
 import scala.concurrent.Future
 import scala.concurrent.duration._
 
-class RefreshingReferenceAsyncSpec extends AnyWordSpec with GuiceOneAppPerSuite with Matchers with OptionValues
-  with MockitoSugar with Eventually with ScalaFutures with EitherValues {
+class RefreshingReferenceAsyncSpec
+  extends AnyWordSpec
+  with GuiceOneAppPerSuite
+  with Matchers
+  with OptionValues
+  with MockitoSugar
+  with Eventually
+  with ScalaFutures
+  with EitherValues {
 
   private[this] val logger = RollbarProvider.logger("test")
   implicit private[this] val system: ActorSystem = app.actorSystem
@@ -30,7 +37,7 @@ class RefreshingReferenceAsyncSpec extends AnyWordSpec with GuiceOneAppPerSuite 
   ): RefreshingReferenceAsync[Map[K, V]] =
     RefreshingReferenceAsync.fromActorSystem(retrieve, app.actorSystem, logger, reloadPeriod, maxAttempts)
 
-  private def withCache[K,V](
+  private def withCache[K, V](
     cache: RefreshingReferenceAsync[Map[K, V]]
   )(
     f: RefreshingReferenceAsync[Map[K, V]] => Assertion
@@ -42,14 +49,14 @@ class RefreshingReferenceAsyncSpec extends AnyWordSpec with GuiceOneAppPerSuite 
       ()
     }
 
-  private def withCacheInit[K,V](cache: RefreshingReferenceAsync[Map[K, V]]): Assertion =
+  private def withCacheInit[K, V](cache: RefreshingReferenceAsync[Map[K, V]]): Assertion =
     withCache(cache)(_ => Succeeded)
 
   "RefreshingReferenceAsync" should {
 
     "load and get" in {
       withCache(createCache[String, Int](1.minute, () => Future.successful(Map("1" -> 1)))) { cache =>
-      cache.get shouldBe Map("1" -> 1)
+        cache.get shouldBe Map("1" -> 1)
       }
     }
 
@@ -65,7 +72,8 @@ class RefreshingReferenceAsyncSpec extends AnyWordSpec with GuiceOneAppPerSuite 
 
     "refresh data" in {
       val retrieve = mock[() => Future[Map[String, Int]]]
-      Mockito.when(retrieve.apply())
+      Mockito
+        .when(retrieve.apply())
         .thenAnswer(_ => Future.successful(Map("1" -> 1)))
         .thenAnswer(_ => Future.successful(Map("2" -> 2)))
 
@@ -79,7 +87,8 @@ class RefreshingReferenceAsyncSpec extends AnyWordSpec with GuiceOneAppPerSuite 
 
     "return old data if retrieve fails" in {
       val retrieve = mock[() => Future[Map[String, Int]]]
-      Mockito.when(retrieve.apply())
+      Mockito
+        .when(retrieve.apply())
         .thenAnswer(_ => Future.successful(Map("1" -> 1)))
         .thenAnswer(_ => Future.failed(new IllegalStateException("boom")))
 
@@ -92,7 +101,8 @@ class RefreshingReferenceAsyncSpec extends AnyWordSpec with GuiceOneAppPerSuite 
 
     "return old data if retrieve throws an exception" in {
       val retrieve = mock[() => Future[Map[String, Int]]]
-      Mockito.when(retrieve.apply())
+      Mockito
+        .when(retrieve.apply())
         .thenAnswer(_ => Future.successful(Map("1" -> 1)))
         .thenAnswer(_ => Future.failed(new IllegalStateException("boom")))
 
@@ -105,7 +115,8 @@ class RefreshingReferenceAsyncSpec extends AnyWordSpec with GuiceOneAppPerSuite 
 
     "keep retrying if retrieve fails" in {
       val retrieve = mock[() => Future[Map[String, Int]]]
-      Mockito.when(retrieve.apply())
+      Mockito
+        .when(retrieve.apply())
         .thenAnswer(_ => Future.successful(Map("1" -> 1, "2" -> 2)))
         .thenAnswer(_ => Future.failed(new IllegalStateException("boom")))
         .thenAnswer(_ => Future.successful(Map("3" -> 3, "4" -> 4)))
@@ -120,13 +131,13 @@ class RefreshingReferenceAsyncSpec extends AnyWordSpec with GuiceOneAppPerSuite 
 
     "keep retrying if retrieve throws an exception" in {
       val retrieve = mock[() => Future[Map[String, Int]]]
-      Mockito.when(retrieve.apply())
+      Mockito
+        .when(retrieve.apply())
         .thenAnswer(_ => Future.successful(Map("1" -> 1, "2" -> 2)))
         .thenAnswer(_ => Future.failed(new IllegalStateException("boom")))
         .thenAnswer(_ => Future.successful(Map("3" -> 3, "4" -> 4)))
 
       withCache(createCache(10.millis, retrieve)) { cache =>
-
         cache.get shouldBe Map("1" -> 1, "2" -> 2)
         eventually(Timeout(100.millis), Interval(5.millis)) {
           cache.get shouldBe Map("3" -> 3, "4" -> 4)
@@ -136,7 +147,8 @@ class RefreshingReferenceAsyncSpec extends AnyWordSpec with GuiceOneAppPerSuite 
 
     "retry to retrieve when retrieve fails or throws an exception" in {
       val retrieve = mock[() => Future[Map[String, Int]]]
-      Mockito.when(retrieve.apply())
+      Mockito
+        .when(retrieve.apply())
         .thenAnswer(_ => Future.successful(Map("1" -> 1, "2" -> 2)))
         .thenAnswer(_ => Future.failed(new IllegalStateException("boom")))
         .thenAnswer(_ => Future.failed(new IllegalStateException("boom")))
@@ -152,7 +164,8 @@ class RefreshingReferenceAsyncSpec extends AnyWordSpec with GuiceOneAppPerSuite 
 
     "force the cache to refresh" in {
       val retrieve = mock[() => Future[Map[String, Int]]]
-      Mockito.when(retrieve.apply())
+      Mockito
+        .when(retrieve.apply())
         .thenReturn(Future.successful(Map("1" -> 1)))
         .thenReturn(Future.successful(Map("2" -> 2)))
 
@@ -170,7 +183,8 @@ class RefreshingReferenceAsyncSpec extends AnyWordSpec with GuiceOneAppPerSuite 
 
     "fetch at most once at a time" in {
       val retrieve = mock[() => Future[Map[String, Int]]]
-      Mockito.when(retrieve.apply())
+      Mockito
+        .when(retrieve.apply())
         .thenAnswer(_ => Future.successful(Map("1" -> 1)))
         .thenAnswer(_ => futures.delayed(50.millis)(Future.successful(Map("2" -> 2))))
 
@@ -188,7 +202,8 @@ class RefreshingReferenceAsyncSpec extends AnyWordSpec with GuiceOneAppPerSuite 
 
     "force the cache to refresh while retrieve in flight" in {
       val retrieve = mock[() => Future[Map[String, Int]]]
-      Mockito.when(retrieve.apply())
+      Mockito
+        .when(retrieve.apply())
         .thenAnswer(_ => Future.successful(Map("1" -> 1)))
         .thenAnswer(_ => futures.delayed(70.millis)(Future.successful(Map("2" -> 2))))
 

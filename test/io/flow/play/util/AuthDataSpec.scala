@@ -42,7 +42,13 @@ class AuthDataSpec extends LibPlaySpec {
     val requestId = "test-request"
     val sessionId = "F51session"
     val customer = "customerRef"
-    val auth = AuthHeaders.channel(UserReference("user-1"), "testify", requestId = requestId, session = Some(FlowSession(sessionId)), customer = Some(CustomerReference(customer)))
+    val auth = AuthHeaders.channel(
+      UserReference("user-1"),
+      "testify",
+      requestId = requestId,
+      session = Some(FlowSession(sessionId)),
+      customer = Some(CustomerReference(customer))
+    )
     auth.user.id must be("user-1")
     auth.channel must be("testify")
     auth.requestId must be(requestId)

@@ -13,11 +13,20 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import scala.concurrent.ExecutionContext.Implicits
 import scala.concurrent.duration._
 
-class RefreshingReferenceSpec extends AnyFlatSpec with GuiceOneAppPerSuite with Matchers with OptionValues with MockitoSugar
+class RefreshingReferenceSpec
+  extends AnyFlatSpec
+  with GuiceOneAppPerSuite
+  with Matchers
+  with OptionValues
+  with MockitoSugar
   with Eventually {
 
   private[this] val logger = RollbarProvider.logger("test")
-  def createCache[K, V](reloadPeriod: FiniteDuration, retrieve: () => Map[K, V], maxAttempts: Int = 1): RefreshingReference[Map[K, V]] =
+  def createCache[K, V](
+    reloadPeriod: FiniteDuration,
+    retrieve: () => Map[K, V],
+    maxAttempts: Int = 1
+  ): RefreshingReference[Map[K, V]] =
     RefreshingReference(logger, app.actorSystem.scheduler, Implicits.global, reloadPeriod, retrieve, maxAttempts)
 
   "RefreshingReference" should "load and get" in {
@@ -33,7 +42,8 @@ class RefreshingReferenceSpec extends AnyFlatSpec with GuiceOneAppPerSuite with 
 
   it should "refresh data" in {
     val retrieve = mock[() => Map[String, Int]]
-    Mockito.when(retrieve.apply())
+    Mockito
+      .when(retrieve.apply())
       .thenReturn(Map("1" -> 1))
       .thenReturn(Map("2" -> 2))
 
@@ -48,7 +58,8 @@ class RefreshingReferenceSpec extends AnyFlatSpec with GuiceOneAppPerSuite with 
 
   it should "return old data if retrieve fails" in {
     val retrieve = mock[() => Map[String, Int]]
-    Mockito.when(retrieve.apply())
+    Mockito
+      .when(retrieve.apply())
       .thenReturn(Map("2" -> 2))
       .thenThrow(new IllegalStateException("boom"))
 
@@ -61,7 +72,8 @@ class RefreshingReferenceSpec extends AnyFlatSpec with GuiceOneAppPerSuite with 
 
   it should "retry to retrieve" in {
     val retrieve = mock[() => Map[String, Int]]
-    Mockito.when(retrieve.apply())
+    Mockito
+      .when(retrieve.apply())
       .thenReturn(Map("1" -> 1, "2" -> 2))
       .thenThrow(new IllegalStateException("boom"))
       .thenReturn(Map("3" -> 3, "4" -> 4))
@@ -76,7 +88,8 @@ class RefreshingReferenceSpec extends AnyFlatSpec with GuiceOneAppPerSuite with 
 
   it should "force the cache to refresh" in {
     val retrieve = mock[() => Map[String, Int]]
-    Mockito.when(retrieve.apply())
+    Mockito
+      .when(retrieve.apply())
       .thenReturn(Map("1" -> 1))
       .thenReturn(Map("2" -> 2))
 

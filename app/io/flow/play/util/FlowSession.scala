@@ -4,15 +4,10 @@ import cats.implicits._
 import cats.data.Validated
 import io.flow.util.Constants
 
-
-/**
- * Makes available key data from the flow session. These data
- * come from the JWT Headers usually set by the API proxy. We
- * do not make ALL session data available - but provide a base
- * class here to expose more information over time as it becomes
- * critical (as well as providing a strongly typed class to
- * store the session id)
- */
+/** Makes available key data from the flow session. These data come from the JWT Headers usually set by the API proxy.
+  * We do not make ALL session data available - but provide a base class here to expose more information over time as it
+  * becomes critical (as well as providing a strongly typed class to store the session id)
+  */
 case class FlowSession(id: String) {
   FlowSession.assertValidSessionId(id)
 }

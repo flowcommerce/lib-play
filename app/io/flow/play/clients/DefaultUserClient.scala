@@ -7,4 +7,3 @@ class DefaultUserClient @javax.inject.Inject() (
   registry: Registry,
   ws: WSClient
 ) extends io.flow.user.v0.Client(ws, registry.host("user"))
-

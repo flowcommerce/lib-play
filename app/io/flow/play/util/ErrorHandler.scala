@@ -11,12 +11,10 @@ import play.api.mvc.Results.{InternalServerError, Status}
 
 import scala.concurrent.Future
 
-/**
-  * Custom error handler that always returns application/json
-  * 
-  * Server errors are logged w/ a unique error number that is presented
-  * in the message back to the client. This allows us to quickly cross
-  * reference an error to a specific point in the log.
+/** Custom error handler that always returns application/json
+  *
+  * Server errors are logged w/ a unique error number that is presented in the message back to the client. This allows
+  * us to quickly cross reference an error to a specific point in the log.
   */
 class ErrorHandler @Inject() (logger: RollbarLogger) extends HttpErrorHandler {
 
@@ -39,15 +37,16 @@ class ErrorHandler @Inject() (logger: RollbarLogger) extends HttpErrorHandler {
     val requestId = headerMap.getOrElse("X-Flow-Request-Id", Nil).mkString(",")
 
     val errorId = idGenerator.randomId().replaceAll("-", "")
-    logger.
-      withKeyValue("error_id", errorId).
-      withKeyValue("request_method", request.method).
-      withKeyValue("request_path", request.path).
-      withKeyValue("request_id", requestId).
-      error("server error", exception)
+    logger
+      .withKeyValue("error_id", errorId)
+      .withKeyValue("request_method", request.method)
+      .withKeyValue("request_path", request.path)
+      .withKeyValue("request_id", requestId)
+      .error("server error", exception)
 
     val msg = FlowEnv.Current match {
-      case FlowEnv.Development | FlowEnv.Workstation => s"A server error has occurred (#$errorId) for requestId($requestId). Additional info for development environment: $exception"
+      case FlowEnv.Development | FlowEnv.Workstation =>
+        s"A server error has occurred (#$errorId) for requestId($requestId). Additional info for development environment: $exception"
       case FlowEnv.Production => s"A server error has occurred (#$errorId)"
     }
 

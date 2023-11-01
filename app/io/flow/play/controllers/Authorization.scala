@@ -25,10 +25,9 @@ class AuthorizationImpl @Inject() (
     value.flatMap { get }
   }
 
-  /**
-    * Parses the actual authorization header value. Acceptable types are:
-    * - Basic - the API Token for the user.
-    * - Bearer - the JWT Token for the user with that contains an id field representing the user id in the database
+  /** Parses the actual authorization header value. Acceptable types are:
+    *   - Basic - the API Token for the user.
+    *   - Bearer - the JWT Token for the user with that contains an id field representing the user id in the database
     */
   def get(headerValue: String): Option[Authorization] = {
     headerValue.split(" ").toList match {

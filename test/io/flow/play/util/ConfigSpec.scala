@@ -7,7 +7,9 @@ import play.api.Configuration
 //todo move to lib-util
 class ConfigSpec extends LibPlaySpec {
 
-  private[this] lazy val config = new MockConfig(new DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty()))))
+  private[this] lazy val config = new MockConfig(
+    new DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty())))
+  )
 
   "optionalList" in {
     config.optionalList(createTestId()) must be(None)
@@ -17,7 +19,7 @@ class ConfigSpec extends LibPlaySpec {
   }
 
   "optionalString" in {
-    config.optionalString(createTestId())must be(None)
+    config.optionalString(createTestId()) must be(None)
 
     config.set("foo", "")
     config.optionalString("foo") must be(None)

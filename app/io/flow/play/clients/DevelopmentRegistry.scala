@@ -56,24 +56,25 @@ class DevelopmentRegistry @javax.inject.Inject() (
     import scala.concurrent.ExecutionContext.Implicits.global
 
     Await.result(
-      client.applications.getById(applicationId).map { app =>
-        app
-      }.recover {
-        case UnitResponse(401) => sys.error(s"Unauthorized to fetch application[$applicationId] from registry at $RegistryHost")
-        case UnitResponse(404) => sys.error(s"application[$applicationId] not found in registry at $RegistryHost")
-        case ex: Throwable => throw new Exception(s"ERROR connecting to registry at $RegistryHost", ex)
-      }
-      , Duration(5, "seconds")
+      client.applications
+        .getById(applicationId)
+        .map { app =>
+          app
+        }
+        .recover {
+          case UnitResponse(401) =>
+            sys.error(s"Unauthorized to fetch application[$applicationId] from registry at $RegistryHost")
+          case UnitResponse(404) => sys.error(s"application[$applicationId] not found in registry at $RegistryHost")
+          case ex: Throwable => throw new Exception(s"ERROR connecting to registry at $RegistryHost", ex)
+        },
+      Duration(5, "seconds")
     )
   }
 
-  /**
-    * Allows user to set an environment variable to specify the
-    * specific host for an application. If found, we use this value as
-    * the host for that service. Ex: USER_HOST=http://localhost:6021
-    * 
-    * Ex:
-    *   USER_HOST="http://localhost:6021" sbt
+  /** Allows user to set an environment variable to specify the specific host for an application. If found, we use this
+    * value as the host for that service. Ex: USER_HOST=http://localhost:6021
+    *
+    * Ex: USER_HOST="http://localhost:6021" sbt
     */
   protected def overridden(applicationId: String): Option[String] = {
     config.optionalString(overriddeVariableName(applicationId))

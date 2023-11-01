@@ -1,14 +1,14 @@
 package io.flow.play.util
 
-/**
-  * Class designed to help generate URL friendly keys, with methods to
-  * create unique tokens.
+/** Class designed to help generate URL friendly keys, with methods to create unique tokens.
   *
-  * @param minKeyLength Minimum length of key used for validation
-  * @param reservedKeys Optionally validate that key cannot be one of these
-  * @param maxIterations Upper limit on the number of iterations before we
-  *        raise an error. Used primarily in practice to prevent infinite
-  *        loops in key generation.
+  * @param minKeyLength
+  *   Minimum length of key used for validation
+  * @param reservedKeys
+  *   Optionally validate that key cannot be one of these
+  * @param maxIterations
+  *   Upper limit on the number of iterations before we raise an error. Used primarily in practice to prevent infinite
+  *   loops in key generation.
   */
 
 case class UrlKey(
@@ -23,21 +23,19 @@ case class UrlKey(
 
   private[this] val AcceptedChars: Set[String] = "0123456789abcdefghijklmnopqrstuvwxyz.-_".split("").toSet
 
-  /**
-    * Deterministically generated a unique key that is URL safe.
-    * 
-    * @param checkFunction Optionally provide your own function that accepts the 
-    *  generated key and returns true / false. If false, we will
-    *  iterate to create another key that you can check. This lets you
-    *  do things like check uniqueness of the key against an external
-    *  source (e.g. database table)
+  /** Deterministically generated a unique key that is URL safe.
+    *
+    * @param checkFunction
+    *   Optionally provide your own function that accepts the generated key and returns true / false. If false, we will
+    *   iterate to create another key that you can check. This lets you do things like check uniqueness of the key
+    *   against an external source (e.g. database table)
     */
   @scala.annotation.tailrec
   final def generate(
     value: String,
     suffix: Option[Int] = None
-  ) (
-    implicit checkFunction: String => Boolean = { _ => true }
+  )(implicit
+    checkFunction: String => Boolean = { _ => true }
   ): String = {
     val formatted = format(value)
 
@@ -70,10 +68,8 @@ case class UrlKey(
     }
   }
 
-  /**
-    * Takes a string and formats it to be url safe, removing non safe
-    * url characters and replacing while trying to maximize
-    * legibility.
+  /** Takes a string and formats it to be url safe, removing non safe url characters and replacing while trying to
+    * maximize legibility.
     */
   def format(value: String): String = {
     value.toLowerCase.trim.split("").filter(AcceptedChars.contains).mkString("")
@@ -88,7 +84,9 @@ case class UrlKey(
     if (key.length < minKeyLength) {
       Seq(s"$label must be at least $minKeyLength characters")
     } else if (key != generated) {
-      Seq(s"$label must be in all lower case and contain alphanumerics only (-, _, and . are supported). A valid ${label.toLowerCase} would be: $generated")
+      Seq(
+        s"$label must be in all lower case and contain alphanumerics only (-, _, and . are supported). A valid ${label.toLowerCase} would be: $generated"
+      )
     } else {
       val lower = lowerLabel.getOrElse(label.toLowerCase)
       reservedKeys.find(_ == generated) match {

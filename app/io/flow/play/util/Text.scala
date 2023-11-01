@@ -4,16 +4,16 @@ object Text {
 
   private[this] val Ellipsis = "..."
 
-  /**
-    * if value is longer than maxLength characters, it wil be truncated
-    * to <= (maxLength-Ellipsis.length) characters and an ellipsis
-    * added. We try to truncate on a space to avoid breaking a word in
-    * pieces.
-    * 
-    * @param value The string value to truncate
-    * @param maxLength The max length of the returned string, including the final ellipsis if added. Must be >= 10
-    * @param ellipsis If the string is truncated, this value will be appended to the string.
-   */
+  /** if value is longer than maxLength characters, it wil be truncated to <= (maxLength-Ellipsis.length) characters and
+    * an ellipsis added. We try to truncate on a space to avoid breaking a word in pieces.
+    *
+    * @param value
+    *   The string value to truncate
+    * @param maxLength
+    *   The max length of the returned string, including the final ellipsis if added. Must be >= 10
+    * @param ellipsis
+    *   If the string is truncated, this value will be appended to the string.
+    */
   def truncate(
     value: String,
     maxLength: Int = 80,

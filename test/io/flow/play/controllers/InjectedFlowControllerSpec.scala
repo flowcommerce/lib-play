@@ -26,4 +26,3 @@ class InjectedFlowControllerSpec extends PlaySpec with GuiceOneServerPerSuite {
 
 // Mimic usual controller
 class InjectedFlowControllerImpl extends InjectedFlowController
-

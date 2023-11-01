@@ -7,20 +7,17 @@ import play.api.mvc._
 import scala.concurrent.{ExecutionContext, Future}
 import play.api.http.HttpFilters
 
-/**
-  * To use in any Flow app depending on lib-play:
+/** To use in any Flow app depending on lib-play:
   *
-  * (1) Add this to your base.conf:
-  *    play.http.filters=io.flow.play.util.LoggingFilter
-  *
-  **/
+  * (1) Add this to your base.conf: play.http.filters=io.flow.play.util.LoggingFilter
+  */
 
 class LoggingFilter @javax.inject.Inject() (loggingFilter: FlowLoggingFilter) extends HttpFilters {
   def filters: Seq[Filter] = Seq(loggingFilter)
 }
 
-class FlowLoggingFilter @javax.inject.Inject() (
-  implicit ec: ExecutionContext,
+class FlowLoggingFilter @javax.inject.Inject() (implicit
+  ec: ExecutionContext,
   m: Materializer,
   logger: RollbarLogger,
   config: Config
@@ -32,10 +29,11 @@ class FlowLoggingFilter @javax.inject.Inject() (
     "User-Agent",
     "X-Forwarded-For",
     "CF-Connecting-IP",
-    "X-Apidoc-Version",
+    "X-Apidoc-Version"
   ).map(_.toLowerCase)
 
-  private val loggedRequestMethods = config.optionalList(LoggedRequestMethodConfig).getOrElse(DefaultLoggedRequestMethods).toSet
+  private val loggedRequestMethods =
+    config.optionalList(LoggedRequestMethodConfig).getOrElse(DefaultLoggedRequestMethods).toSet
 
   def apply(f: RequestHeader => Future[Result])(requestHeader: RequestHeader): Future[Result] = {
     val startTime = System.currentTimeMillis
@@ -69,11 +67,13 @@ class FlowLoggingFilter @javax.inject.Inject() (
           .withKeyValue("query_params", requestHeader.queryString)
           .withKeyValue("http_code", result.header.status)
           .withKeyValue("request_time_ms", requestTime)
-          .withKeyValue("request_headers",
+          .withKeyValue(
+            "request_headers",
             headerMap
               .map { case (key, value) => key.toLowerCase -> value }
               .view
-              .filterKeys(LoggedHeaders.contains))
+              .filterKeys(LoggedHeaders.contains)
+          )
           .withKeyValue("request_id", requestId)
           .info(line)
       }

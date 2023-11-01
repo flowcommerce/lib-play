@@ -29,47 +29,38 @@ case class AuthDataMap(
       AuthDataMap.Fields.Channel -> channel,
       AuthDataMap.Fields.Environment -> environment.map(_.toString),
       AuthDataMap.Fields.Role -> role.map(_.toString),
-      AuthDataMap.Fields.Customer -> customer.map(_.number),
+      AuthDataMap.Fields.Customer -> customer.map(_.number)
     ).flatMap { case (k, value) => value.map { v => k -> v } }
   }
 
 }
 
-/**
-  * Represents the data securely authenticated by the API proxy
-  * server. All of our software should depend on data from this object
-  * when retrieved from the X-Flow-Auth header (as opposed, for
-  * example, to relying on the organization id from the URL path).
+/** Represents the data securely authenticated by the API proxy server. All of our software should depend on data from
+  * this object when retrieved from the X-Flow-Auth header (as opposed, for example, to relying on the organization id
+  * from the URL path).
   *
-  * The API Proxy server validates this data, and also guarantees that
-  * the user is authorized to access information for the specified
-  * organization.
+  * The API Proxy server validates this data, and also guarantees that the user is authorized to access information for
+  * the specified organization.
   */
 sealed trait AuthData {
-  
+
   private[this] val header = JwtHeader(JwtAlgorithm.HS256)
 
-  /**
-    * Timestamp is used to expire authorizations automatically
+  /** Timestamp is used to expire authorizations automatically
     */
   def createdAt: DateTime
 
-  /**
-    * In production, we set request id in the API Proxy, and it is
-    * included as part of the auth header. Doing so allows us to trace a single
-    * API request across all the service calls we make (assuming we propagate
-    * the headers from auth data).
+  /** In production, we set request id in the API Proxy, and it is included as part of the auth header. Doing so allows
+    * us to trace a single API request across all the service calls we make (assuming we propagate the headers from auth
+    * data).
     */
   def requestId: String
 
-  /**
-    * Add specific data to assist in serialization to jwt map
+  /** Add specific data to assist in serialization to jwt map
     */
   protected def decorate(base: AuthDataMap): AuthDataMap
 
-  /**
-    * Converts this auth data to a valid JWT string using the provided
-    * jwt salt.
+  /** Converts this auth data to a valid JWT string using the provided jwt salt.
     */
   def jwt(salt: String): String = {
     val all = decorate(
@@ -304,12 +295,14 @@ object AuthData {
       AuthDataMap.fromMap(data) { dm =>
         (dm.session, dm.customer) match {
           case (Some(session), Some(customer)) =>
-            Some(Customer(
-              createdAt = dm.createdAt,
-              requestId = dm.requestId,
-              session = session,
-              customer = customer
-            ))
+            Some(
+              Customer(
+                createdAt = dm.createdAt,
+                requestId = dm.requestId,
+                session = session,
+                customer = customer
+              )
+            )
 
           case _ => None
         }
@@ -434,14 +427,16 @@ object OrgAuthData {
       AuthDataMap.fromMap(data) { dm =>
         (dm.organization, dm.environment, dm.session, dm.customer) match {
           case (Some(org), Some(env), Some(session), Some(customer)) => {
-            Some(Customer(
-              createdAt = dm.createdAt,
-              requestId = dm.requestId,
-              session = session,
-              organization = org,
-              environment = env,
-              customer = customer
-            ))
+            Some(
+              Customer(
+                createdAt = dm.createdAt,
+                requestId = dm.requestId,
+                session = session,
+                organization = org,
+                environment = env,
+                customer = customer
+              )
+            )
           }
           case _ => None
         }
@@ -451,11 +446,11 @@ object OrgAuthData {
 
   object Org {
 
-    /**
-      * Parses either an identified org or customer org or session org (or None)
+    /** Parses either an identified org or customer org or session org (or None)
       */
     def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[io.flow.play.util.OrgAuthData] = {
-      Identified.fromMap(data)
+      Identified
+        .fromMap(data)
         .orElse(Customer.fromMap(data))
         .orElse(Session.fromMap(data))
     }
@@ -463,46 +458,42 @@ object OrgAuthData {
 
   object IdentifiedCustomer {
 
-    /**
-      * Parses either an identified org or customer org (or None)
+    /** Parses either an identified org or customer org (or None)
       */
     def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[io.flow.play.util.OrgAuthData] = {
-      Identified.fromMap(data)
+      Identified
+        .fromMap(data)
         .orElse(Customer.fromMap(data))
     }
   }
 
-
-  /**
-    * Required wrapper to assist in migrating authorization in Checkout UI.
-    * Authorization header may be passed as either a Bearer JWT (represented as a OrgAuthData.Customer)
-    * or the legacy session (represented as an AuthData.Session)
+  /** Required wrapper to assist in migrating authorization in Checkout UI. Authorization header may be passed as either
+    * a Bearer JWT (represented as a OrgAuthData.Customer) or the legacy session (represented as an AuthData.Session)
     *
     * Note the different, intentionally referenced traits, OrgAuthData vs. AuthData
     */
   object Checkout {
 
-    /**
-      * Parses either a customer org or a session (or None)
+    /** Parses either a customer org or a session (or None)
       */
     def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[io.flow.play.util.AuthData] = {
-      OrgAuthData.Customer.fromMap(data)
+      OrgAuthData.Customer
+        .fromMap(data)
         .orElse(AuthData.Session.fromMap(data))
     }
   }
 
-  /**
-    * Required wrapper to assist in migrating authorization in Checkout UI.
-    * Authorization header may be passed as either a Bearer JWT (represented as a OrgAuthData.Customer)
-    * or the legacy session (represented as an OrgAuthData.SessionOrg)
+  /** Required wrapper to assist in migrating authorization in Checkout UI. Authorization header may be passed as either
+    * a Bearer JWT (represented as a OrgAuthData.Customer) or the legacy session (represented as an
+    * OrgAuthData.SessionOrg)
     */
   object CheckoutOrg {
 
-    /**
-      * Parses either a customer org or a session org (or None)
+    /** Parses either a customer org or a session org (or None)
       */
     def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[io.flow.play.util.OrgAuthData] = {
-      OrgAuthData.Customer.fromMap(data)
+      OrgAuthData.Customer
+        .fromMap(data)
         .orElse(OrgAuthData.Session.fromMap(data))
     }
   }
@@ -526,7 +517,7 @@ object ChannelAuthData {
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
       base.copy(
         user = Some(user),
-        channel = Some(channel),
+        channel = Some(channel)
       )
     }
 

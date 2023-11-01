@@ -5,9 +5,7 @@ import io.flow.util.Constants
 import io.flow.common.v0.models.{CustomerReference, Environment, Role, UserReference}
 import javax.inject.{Inject, Singleton}
 
-/**
-  * Creates a valid X-Flow-Auth header for talking directly to a
-  * service. Bound config must have a JWT_SALT parameter.
+/** Creates a valid X-Flow-Auth header for talking directly to a service. Bound config must have a JWT_SALT parameter.
   */
 @Singleton
 class AuthHeaders @Inject() (
@@ -26,17 +24,16 @@ class AuthHeaders @Inject() (
 
 }
 
-
 object AuthHeaders {
 
   private[this] val random = io.flow.util.Random()
 
   val Header = "X-Flow-Auth"
 
-  /**
-    * Helper to create a valid auth data for this user (no organization)
+  /** Helper to create a valid auth data for this user (no organization)
     *
-    * @param requestId Will be created if not specified
+    * @param requestId
+    *   Will be created if not specified
     */
   def user(
     user: UserReference,
@@ -74,10 +71,10 @@ object AuthHeaders {
     )
   }
 
-  /**
-    * Helper to create a valid auth data for this user and organization.
+  /** Helper to create a valid auth data for this user and organization.
     *
-    * @param requestId Will be created if not specified
+    * @param requestId
+    *   Will be created if not specified
     */
   def organization(
     user: UserReference,
@@ -87,7 +84,7 @@ object AuthHeaders {
     requestId: String = generateRequestId(),
     session: Option[FlowSession] = None,
     customer: Option[CustomerReference] = None
-): OrgAuthData.Identified = {
+  ): OrgAuthData.Identified = {
     OrgAuthData.Identified(
       requestId = requestId,
       user = user,
@@ -99,10 +96,10 @@ object AuthHeaders {
     )
   }
 
-  /**
-    * Helper to create a valid session org auth data
+  /** Helper to create a valid session org auth data
     *
-    * @param requestId Will be created if not specified
+    * @param requestId
+    *   Will be created if not specified
     */
   def organizationSession(
     org: String,
@@ -118,10 +115,10 @@ object AuthHeaders {
     )
   }
 
-  /**
-    * Helper to create a valid customer org auth data
+  /** Helper to create a valid customer org auth data
     *
-    * @param requestId Will be created if not specified
+    * @param requestId
+    *   Will be created if not specified
     */
   def organizationCustomer(
     org: String,
@@ -139,11 +136,11 @@ object AuthHeaders {
     )
   }
 
-  /**
-   * Helper to create a valid auth data for this user and channel.
-   *
-   * @param requestId Will be created if not specified
-   */
+  /** Helper to create a valid auth data for this user and channel.
+    *
+    * @param requestId
+    *   Will be created if not specified
+    */
   def channel(
     user: UserReference,
     channel: String,
@@ -176,14 +173,12 @@ object AuthHeaders {
     generateRequestId("libplay")
   }
 
-  /**
-    * Generates a unique request id with the specified prefix
-    * 
-    * @param prefix e.g. libplay, api, console, etc. This is a string that
-    *        will be prepended to the request id to help identify who
-    *        created the request Id in the first place (useful for
-    *        debugging). Recommend only using letters and numbers and
-    *        no punctuation to make cut & paste easier.
+  /** Generates a unique request id with the specified prefix
+    *
+    * @param prefix
+    *   e.g. libplay, api, console, etc. This is a string that will be prepended to the request id to help identify who
+    *   created the request Id in the first place (useful for debugging). Recommend only using letters and numbers and
+    *   no punctuation to make cut & paste easier.
     */
   def generateRequestId(prefix: String): String = {
     prefix + generateToken()

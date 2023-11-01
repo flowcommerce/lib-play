@@ -12,13 +12,10 @@ import io.flow.error.v0.models.json._
 
 trait FlowControllerHelpers {
 
-  /**
-    * Applications may override this variable to define applicable Expanders.
-    * Note this approach will be replaced by centralized expanding in the API
-    * proxy at some point.
+  /** Applications may override this variable to define applicable Expanders. Note this approach will be replaced by
+    * centralized expanding in the API proxy at some point.
     *
-    * For example:
-    * override expanders = Seq(new io.flow.play.expanders.User("user", userClient))
+    * For example: override expanders = Seq(new io.flow.play.expanders.User("user", userClient))
     */
   def expanders: Seq[Expander] = Nil
 
@@ -28,10 +25,8 @@ trait FlowControllerHelpers {
     tmp
   }
 
-  /**
-    * Even if not specified, play router passed in Some(Nil) as opposed
-    * to None. Here we return None if there is no list or the list is
-    * empty.
+  /** Even if not specified, play router passed in Some(Nil) as opposed to None. Here we return None if there is no list
+    * or the list is empty.
     */
   def optionals[T](values: Option[Seq[T]]): Option[Seq[T]] = {
     values match {
@@ -45,26 +40,22 @@ trait FlowControllerHelpers {
     }
   }
 
-  /**
-    * Helper class that responds to either form data or a Json
-    * object. If we receive form data (content-type:
-    * application/x-www-form-urlencoded), we turn that into a JSON
-    * Object automatically. This enables us to provide API endpoints
-    * that can respond either to form data or posted JSON objects. The
-    * original use case for which we added support for form data was
-    * to enable using "-d" from curl in the command line (simplifying
-    * the examples for our users).
+  /** Helper class that responds to either form data or a Json object. If we receive form data (content-type:
+    * application/x-www-form-urlencoded), we turn that into a JSON Object automatically. This enables us to provide API
+    * endpoints that can respond either to form data or posted JSON objects. The original use case for which we added
+    * support for form data was to enable using "-d" from curl in the command line (simplifying the examples for our
+    * users).
     */
   object JsValue {
 
     def async(
-               contentType: Option[String],
-               body: AnyContent
-             ) (
-               function: JsValue => Future[Result]
-             )(
-               implicit ec: ExecutionContext
-             ): Future[Result] = {
+      contentType: Option[String],
+      body: AnyContent
+    )(
+      function: JsValue => Future[Result]
+    )(implicit
+      ec: ExecutionContext
+    ): Future[Result] = {
       parse(
         contentType,
         body,
@@ -74,11 +65,11 @@ trait FlowControllerHelpers {
     }
 
     def sync(
-              contentType: Option[String],
-              body: AnyContent
-            ) (
-              function: JsValue => Result
-            ): Result = {
+      contentType: Option[String],
+      body: AnyContent
+    )(
+      function: JsValue => Result
+    ): Result = {
       parse(
         contentType,
         body,
@@ -88,11 +79,11 @@ trait FlowControllerHelpers {
     }
 
     private[this] def parse[T](
-                                contentType: Option[String],
-                                body: AnyContent,
-                                function: JsValue => T,
-                                errorFunction: Result => T
-                              ): T = {
+      contentType: Option[String],
+      body: AnyContent,
+      function: JsValue => T,
+      errorFunction: Result => T
+    ): T = {
       contentType match {
         case Some("application/x-www-form-urlencoded") =>
           function(
@@ -109,7 +100,9 @@ trait FlowControllerHelpers {
           errorFunction(
             UnprocessableEntity(
               Json.toJson(
-                Validation.error(s"Unsupported Content-Type, [$ct]. Must be 'application/x-www-form-urlencoded' or 'application/json'")
+                Validation.error(
+                  s"Unsupported Content-Type, [$ct]. Must be 'application/x-www-form-urlencoded' or 'application/json'"
+                )
               )
             )
           )
@@ -117,7 +110,9 @@ trait FlowControllerHelpers {
           errorFunction(
             UnprocessableEntity(
               Json.toJson(
-                Validation.error(s"Missing Content-Type Header. Must be 'application/x-www-form-urlencoded' or 'application/json'")
+                Validation.error(
+                  s"Missing Content-Type Header. Must be 'application/x-www-form-urlencoded' or 'application/json'"
+                )
               )
             )
           )
@@ -125,39 +120,37 @@ trait FlowControllerHelpers {
     }
   }
 
-  /**
-    * Helper class that iterates through defined 'expanders' and attempts to expand Json objects of the expandable type.
+  /** Helper class that iterates through defined 'expanders' and attempts to expand Json objects of the expandable type.
     */
 
   object Expansion {
     def async(
-               expand: Option[Seq[String]],
-               records: Seq[JsValue],
-               requestHeaders: Seq[(String, String)] = Nil
-             ) (
-               function: JsValue => Future[Result]
-             ) (
-               implicit ec: ExecutionContext
-             ): Future[Result] = {
+      expand: Option[Seq[String]],
+      records: Seq[JsValue],
+      requestHeaders: Seq[(String, String)] = Nil
+    )(
+      function: JsValue => Future[Result]
+    )(implicit
+      ec: ExecutionContext
+    ): Future[Result] = {
       withExpansion(
         expand,
         records,
         function,
         { errorResult => Future(errorResult) },
         requestHeaders = requestHeaders
-
       )
     }
 
     def sync(
-              expand: Option[Seq[String]],
-              records: Seq[JsValue],
-              requestHeaders: Seq[(String, String)] = Nil
-            ) (
-              function: JsValue => Result
-            ) (
-              implicit ec: ExecutionContext
-            ): Result = {
+      expand: Option[Seq[String]],
+      records: Seq[JsValue],
+      requestHeaders: Seq[(String, String)] = Nil
+    )(
+      function: JsValue => Result
+    )(implicit
+      ec: ExecutionContext
+    ): Result = {
       withExpansion(
         expand,
         records,
@@ -168,27 +161,28 @@ trait FlowControllerHelpers {
     }
 
     private[this] def withExpansion[T](
-                                        expand: Option[Seq[String]],
-                                        records: Seq[JsValue],
-                                        function: JsValue => T,
-                                        errorFunction: Result => T,
-                                        requestHeaders: Seq[(String, String)]
-                                      ) (
-                                        implicit ec: ExecutionContext
-                                      ): T = {
+      expand: Option[Seq[String]],
+      records: Seq[JsValue],
+      function: JsValue => T,
+      errorFunction: Result => T,
+      requestHeaders: Seq[(String, String)]
+    )(implicit
+      ec: ExecutionContext
+    ): T = {
       val res = expandersResult.filter(e => expand.getOrElse(Nil).contains(e.fieldName)).foldLeft(records) {
         case (data, e) => Await.result(e.expand(data, requestHeaders = requestHeaders), Duration(5, "seconds"))
       }
 
       res match {
         case js: Seq[JsValue] => function(Json.toJson(js))
-        case _ => errorFunction(
-          UnprocessableEntity(
-            Json.toJson(
-              Validation.error(s"Expansion failed for 'expand': $expand and 'records': $records")
+        case _ =>
+          errorFunction(
+            UnprocessableEntity(
+              Json.toJson(
+                Validation.error(s"Expansion failed for 'expand': $expand and 'records': $records")
+              )
             )
           )
-        )
       }
     }
   }

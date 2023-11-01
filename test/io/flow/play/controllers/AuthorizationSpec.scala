@@ -18,9 +18,9 @@ class AuthorizationSpec extends LibPlaySpec {
   )
 
   def createJWTHeader(
-                       userId: String,
-                       salt: String = mockConfig.requiredString("JWT_SALT")
-                     ): String = {
+    userId: String,
+    salt: String = mockConfig.requiredString("JWT_SALT")
+  ): String = {
     val token = JwtJson.encode(Json.obj("id" -> userId), salt, HS256)
     s"Bearer $token"
   }
@@ -29,20 +29,26 @@ class AuthorizationSpec extends LibPlaySpec {
     "Basic should decode a basic auth header" in {
       val headerValue = "Basic YWRtaW46"
 
-      new AuthorizationImpl(logger, mockConfig).get(headerValue).map {
-        case Token(token) => token must be("admin")
-        case _ => fail("Did not parse a Token, got a different type instead.")
-      }.getOrElse(fail("Could not parse token!"))
+      new AuthorizationImpl(logger, mockConfig)
+        .get(headerValue)
+        .map {
+          case Token(token) => token must be("admin")
+          case _ => fail("Did not parse a Token, got a different type instead.")
+        }
+        .getOrElse(fail("Could not parse token!"))
     }
 
     "Jwt should decode" in {
       val userId = "usr-20160130-1"
       val headerValue = createJWTHeader(userId = userId)
 
-      new AuthorizationImpl(logger, mockConfig).get(headerValue).map {
-        case JwtToken(id) => id must be(userId)
-        case _ => fail("Did not parse a JwtToken, got a different type instead.")
-      }.getOrElse(fail("Could not parse token!"))
+      new AuthorizationImpl(logger, mockConfig)
+        .get(headerValue)
+        .map {
+          case JwtToken(id) => id must be(userId)
+          case _ => fail("Did not parse a JwtToken, got a different type instead.")
+        }
+        .getOrElse(fail("Could not parse token!"))
     }
 
     "Jwt should fail to decode" in {

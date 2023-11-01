@@ -10,7 +10,9 @@ import play.api.Configuration
 
 class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
 
-  private[this] lazy val mockConfig = new MockConfig(new DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty()))))
+  private[this] lazy val mockConfig = new MockConfig(
+    new DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty())))
+  )
 
   private[this] val user = UserReference("usr-20151006-1")
   private[this] val session = AuthHeaders.createFlowSession()
@@ -184,8 +186,12 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
       data.copy(createdAt = DateTime.now.minusMinutes(1))
     )(AuthData.Anonymous.fromMap)
 
-    parse(data.copy(
-      createdAt = DateTime.now.minusMinutes(5)
-    ).jwt(jwtSalt))(AuthData.Anonymous.fromMap).isDefined must be(false)
+    parse(
+      data
+        .copy(
+          createdAt = DateTime.now.minusMinutes(5)
+        )
+        .jwt(jwtSalt)
+    )(AuthData.Anonymous.fromMap).isDefined must be(false)
   }
 }

@@ -6,8 +6,7 @@ import io.flow.log.RollbarLogger
 import scala.concurrent.duration.{FiniteDuration, _}
 import scala.concurrent.{ExecutionContext, Future}
 
-/**
-  * Example:
+/** Example:
   *
   * {{{
   * val cache = RefreshingReferenceAsync.fromActorSystem[String, String](
@@ -28,8 +27,7 @@ trait RefreshingBulkCacheAsync[K, V] extends RefreshingReferenceAsync[Map[K, V]]
 
 object RefreshingBulkCacheAsync {
 
-  /**
-    * Helper function to create a new [[RefreshingReference]]
+  /** Helper function to create a new [[RefreshingReference]]
     */
   def apply[K, V](
     retrieve: () => Future[Map[K, V]],
@@ -37,7 +35,7 @@ object RefreshingBulkCacheAsync {
     retrieveExecutionContext: ExecutionContext,
     rollbarLogger: RollbarLogger,
     reloadInterval: FiniteDuration = 1.minute,
-    maxAttempts: Int = 3,
+    maxAttempts: Int = 3
   ): RefreshingBulkCacheAsync[K, V] = {
     val schedulerOuter = scheduler
     val retrieveExecutionContextOuter = retrieveExecutionContext
@@ -54,8 +52,7 @@ object RefreshingBulkCacheAsync {
     }
   }
 
-  /**
-    * Helper function to create a new [[RefreshingReference]]
+  /** Helper function to create a new [[RefreshingReference]]
     *
     * Uses the system's scheduler and default dispatcher
     */

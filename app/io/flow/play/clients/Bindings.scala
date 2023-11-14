@@ -15,12 +15,12 @@ class ConfigModule extends Module {
       case Mode.Prod | Mode.Dev =>
         Seq(
           bind[Config].to[DefaultConfig],
-          bind[FlowPlayConfig].to[DefaultConfig]
+          bind[FlowPlayConfig].to[DefaultConfig],
         )
       case Mode.Test =>
         Seq(
           bind[Config].to[MockConfig],
-          bind[FlowPlayConfig].to[MockConfig]
+          bind[FlowPlayConfig].to[MockConfig],
         )
     }
   }
@@ -35,17 +35,17 @@ class RegistryModule extends Module {
         FlowEnvironment.Current match {
           case FlowEnvironment.Production =>
             Seq(
-              bind[Registry].to[ProductionRegistry]
+              bind[Registry].to[ProductionRegistry],
             )
           case FlowEnvironment.Development | FlowEnvironment.Workstation =>
             Seq(
-              bind[Registry].to[DevelopmentRegistry]
+              bind[Registry].to[DevelopmentRegistry],
             )
         }
       }
       case Mode.Test =>
         Seq(
-          bind[Registry].to[MockRegistry]
+          bind[Registry].to[MockRegistry],
         )
     }
   }
@@ -58,11 +58,11 @@ class TokenClientModule extends Module {
     env.mode match {
       case Mode.Prod | Mode.Dev =>
         Seq(
-          bind[TokenClient].to[DefaultTokenClient]
+          bind[TokenClient].to[DefaultTokenClient],
         )
       case Mode.Test =>
         Seq(
-          bind[TokenClient].to[MockTokenClient]
+          bind[TokenClient].to[MockTokenClient],
         )
     }
   }
@@ -75,11 +75,11 @@ class UserClientModule extends Module {
     env.mode match {
       case Mode.Prod | Mode.Dev =>
         Seq(
-          bind[UserClient].to[DefaultUserClient]
+          bind[UserClient].to[DefaultUserClient],
         )
       case Mode.Test =>
         Seq(
-          bind[UserClient].to[MockUserClient]
+          bind[UserClient].to[MockUserClient],
         )
     }
   }

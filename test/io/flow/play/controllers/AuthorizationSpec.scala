@@ -14,12 +14,12 @@ class AuthorizationSpec extends LibPlaySpec {
   private[this] val logger = RollbarProvider.logger("test")
 
   private[this] lazy val mockConfig = new MockConfig(
-    new DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty())))
+    new DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty()))),
   )
 
   def createJWTHeader(
     userId: String,
-    salt: String = mockConfig.requiredString("JWT_SALT")
+    salt: String = mockConfig.requiredString("JWT_SALT"),
   ): String = {
     val token = JwtJson.encode(Json.obj("id" -> userId), salt, HS256)
     s"Bearer $token"

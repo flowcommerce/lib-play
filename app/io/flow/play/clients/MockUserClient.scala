@@ -33,7 +33,7 @@ case class MockUsers(data: MockUserData) extends mock.MockUsers {
     limit: Long = 25,
     offset: Long = 0,
     sort: String = "-created_at",
-    requestHeaders: Seq[(String, String)] = Nil
+    requestHeaders: Seq[(String, String)] = Nil,
   )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[Seq[io.flow.common.v0.models.User]] =
     scala.concurrent.Future {
       data.users
@@ -57,11 +57,11 @@ case class MockUsers(data: MockUserData) extends mock.MockUsers {
 
   override def getById(
     id: String,
-    requestHeaders: Seq[(String, String)] = Nil
+    requestHeaders: Seq[(String, String)] = Nil,
   )(implicit ec: scala.concurrent.ExecutionContext): scala.concurrent.Future[io.flow.common.v0.models.User] = {
     get(
       id = Some(Seq(id)),
-      requestHeaders = requestHeaders
+      requestHeaders = requestHeaders,
     ).map {
       _.headOption.getOrElse {
         throw new io.flow.user.v0.errors.UnitResponse(404)

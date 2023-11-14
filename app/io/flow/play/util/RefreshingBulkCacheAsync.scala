@@ -35,7 +35,7 @@ object RefreshingBulkCacheAsync {
     retrieveExecutionContext: ExecutionContext,
     rollbarLogger: RollbarLogger,
     reloadInterval: FiniteDuration = 1.minute,
-    maxAttempts: Int = 3
+    maxAttempts: Int = 3,
   ): RefreshingBulkCacheAsync[K, V] = {
     val schedulerOuter = scheduler
     val retrieveExecutionContextOuter = retrieveExecutionContext
@@ -61,14 +61,14 @@ object RefreshingBulkCacheAsync {
     system: ActorSystem,
     rollbarLogger: RollbarLogger,
     reloadInterval: FiniteDuration = 1.minute,
-    maxAttempts: Int = 3
+    maxAttempts: Int = 3,
   ): RefreshingBulkCacheAsync[K, V] = apply(
     retrieve = retrieve,
     scheduler = system.scheduler,
     retrieveExecutionContext = system.dispatcher,
     reloadInterval = reloadInterval,
     rollbarLogger = rollbarLogger,
-    maxAttempts = maxAttempts
+    maxAttempts = maxAttempts,
   )
 
 }

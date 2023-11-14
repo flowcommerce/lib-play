@@ -95,13 +95,13 @@ class UrlKeySpec extends LibPlaySpec {
     "doesn't match generated" in {
       urlKey.validate("VALID") must be(
         Seq(
-          "Key must be in all lower case and contain alphanumerics only (-, _, and . are supported). A valid key would be: valid"
-        )
+          "Key must be in all lower case and contain alphanumerics only (-, _, and . are supported). A valid key would be: valid",
+        ),
       )
       urlKey.validate("bad nickname") must be(
         Seq(
-          "Key must be in all lower case and contain alphanumerics only (-, _, and . are supported). A valid key would be: badnickname"
-        )
+          "Key must be in all lower case and contain alphanumerics only (-, _, and . are supported). A valid key would be: badnickname",
+        ),
       )
     }
 
@@ -114,8 +114,8 @@ class UrlKeySpec extends LibPlaySpec {
       urlKey.validate("bad", "Id") must be(Seq(s"Id must be at least ${urlKey.minKeyLength} characters"))
       urlKey.validate("no spaces", "Id") must be(
         Seq(
-          "Id must be in all lower case and contain alphanumerics only (-, _, and . are supported). A valid id would be: nospaces"
-        )
+          "Id must be in all lower case and contain alphanumerics only (-, _, and . are supported). A valid id would be: nospaces",
+        ),
       )
     }
 

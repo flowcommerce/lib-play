@@ -12,7 +12,7 @@ class RequestFactory @Inject() (myConfig: Config)(implicit logger: RollbarLogger
   private val helper = new FlowActionInvokeBlockHelper { val config = myConfig }
   private def build[A, B <: AuthData](
     request: Request[A],
-    authDataFromMap: Map[String, String] => Option[B]
+    authDataFromMap: Map[String, String] => Option[B],
   ): Option[B] = helper.auth(request.headers)(authDataFromMap(_))
 
   def anonymous[A](request: Request[A]): AnonymousRequest[A] = {

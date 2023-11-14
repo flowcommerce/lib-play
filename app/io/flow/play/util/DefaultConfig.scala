@@ -7,12 +7,12 @@ import play.api.Configuration
   */
 @javax.inject.Singleton
 class DefaultConfig @javax.inject.Inject() (
-  appConfig: ApplicationConfig
+  appConfig: ApplicationConfig,
 ) extends ChainedConfig(Seq(EnvironmentConfig, PropertyConfig, appConfig))
 
 @javax.inject.Singleton
 case class ApplicationConfig @javax.inject.Inject() (
-  underlying: Configuration
+  underlying: Configuration,
 ) extends Config {
 
   override def optionalMap(name: String): Option[Map[String, Seq[String]]] =

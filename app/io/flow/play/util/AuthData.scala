@@ -16,7 +16,7 @@ case class AuthDataMap(
   channel: Option[String] = None,
   environment: Option[Environment] = None,
   role: Option[Role] = None,
-  customer: Option[CustomerReference] = None
+  customer: Option[CustomerReference] = None,
 ) {
 
   def toMap: Map[String, String] = {
@@ -29,7 +29,7 @@ case class AuthDataMap(
       AuthDataMap.Fields.Channel -> channel,
       AuthDataMap.Fields.Environment -> environment.map(_.toString),
       AuthDataMap.Fields.Role -> role.map(_.toString),
-      AuthDataMap.Fields.Customer -> customer.map(_.number)
+      AuthDataMap.Fields.Customer -> customer.map(_.number),
     ).flatMap { case (k, value) => value.map { v => k -> v } }
   }
 
@@ -66,8 +66,8 @@ sealed trait AuthData {
     val all = decorate(
       AuthDataMap(
         requestId = requestId,
-        createdAt = createdAt
-      )
+        createdAt = createdAt,
+      ),
     )
 
     val claimsSet: JwtClaim = JwtClaim() ++ (all.toMap.toSeq: _*)
@@ -96,7 +96,7 @@ object AuthDataMap {
   }
 
   def fromMap[T <: AuthData](data: Map[String, String])(
-    f: AuthDataMap => Option[T]
+    f: AuthDataMap => Option[T],
   )(implicit logger: RollbarLogger): Option[T] = {
     data.get("created_at").flatMap { ts =>
       val createdAt = ISODateTimeFormat.dateTimeParser.parseDateTime(ts)
@@ -144,8 +144,8 @@ object AuthDataMap {
           channel = channelId,
           environment = environment,
           role = role,
-          customer = customer
-        )
+          customer = customer,
+        ),
       )
     }
   }
@@ -161,7 +161,7 @@ object AuthData {
     customer: Option[CustomerReference],
     organization: Option[String],
     channel: Option[String],
-    environment: Option[Environment]
+    environment: Option[Environment],
   ) extends AuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
@@ -170,7 +170,7 @@ object AuthData {
         session = session,
         customer = customer,
         organization = organization,
-        environment = environment
+        environment = environment,
       )
     }
 
@@ -185,7 +185,7 @@ object AuthData {
       customer = None,
       organization = None,
       channel = None,
-      environment = None
+      environment = None,
     )
 
     def fromMap(data: Map[String, String])(implicit logger: RollbarLogger): Option[Anonymous] = {
@@ -199,8 +199,8 @@ object AuthData {
             customer = dm.customer,
             organization = dm.organization,
             channel = dm.channel,
-            environment = dm.environment
-          )
+            environment = dm.environment,
+          ),
         )
       }
     }
@@ -212,14 +212,14 @@ object AuthData {
     override val requestId: String,
     user: UserReference,
     session: Option[FlowSession],
-    customer: Option[CustomerReference]
+    customer: Option[CustomerReference],
   ) extends AuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
       base.copy(
         user = Some(user),
         session = session,
-        customer = customer
+        customer = customer,
       )
     }
 
@@ -235,7 +235,7 @@ object AuthData {
             requestId = dm.requestId,
             user = user,
             session = dm.session,
-            customer = dm.customer
+            customer = dm.customer,
           )
         }
       }
@@ -246,12 +246,12 @@ object AuthData {
   case class Session(
     override val createdAt: DateTime = DateTime.now,
     override val requestId: String,
-    session: FlowSession
+    session: FlowSession,
   ) extends AuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
       base.copy(
-        session = Some(session)
+        session = Some(session),
       )
     }
 
@@ -265,7 +265,7 @@ object AuthData {
           Session(
             createdAt = dm.createdAt,
             requestId = dm.requestId,
-            session = session
+            session = session,
           )
         }
       }
@@ -277,13 +277,13 @@ object AuthData {
     override val createdAt: DateTime = DateTime.now,
     override val requestId: String,
     session: FlowSession,
-    customer: CustomerReference
+    customer: CustomerReference,
   ) extends AuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
       base.copy(
         session = Some(session),
-        customer = Some(customer)
+        customer = Some(customer),
       )
     }
 
@@ -300,8 +300,8 @@ object AuthData {
                 createdAt = dm.createdAt,
                 requestId = dm.requestId,
                 session = session,
-                customer = customer
-              )
+                customer = customer,
+              ),
             )
 
           case _ => None
@@ -319,14 +319,14 @@ object OrgAuthData {
     override val requestId: String,
     override val organization: String,
     override val environment: Environment,
-    session: FlowSession
+    session: FlowSession,
   ) extends OrgAuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
       base.copy(
         organization = Some(organization),
         environment = Some(environment),
-        session = Some(session)
+        session = Some(session),
       )
     }
   }
@@ -343,7 +343,7 @@ object OrgAuthData {
                 requestId = dm.requestId,
                 session = session,
                 organization = org,
-                environment = env
+                environment = env,
               )
             }
           }
@@ -361,7 +361,7 @@ object OrgAuthData {
     user: UserReference,
     role: Role,
     session: Option[FlowSession],
-    customer: Option[CustomerReference]
+    customer: Option[CustomerReference],
   ) extends OrgAuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
@@ -371,7 +371,7 @@ object OrgAuthData {
         user = Some(user),
         role = Some(role),
         session = session,
-        customer = customer
+        customer = customer,
       )
     }
 
@@ -392,8 +392,8 @@ object OrgAuthData {
                 environment = env,
                 role = role,
                 session = dm.session,
-                customer = dm.customer
-              )
+                customer = dm.customer,
+              ),
             )
           }
           case _ => None
@@ -408,7 +408,7 @@ object OrgAuthData {
     override val organization: String,
     override val environment: Environment,
     session: FlowSession,
-    customer: CustomerReference
+    customer: CustomerReference,
   ) extends OrgAuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
@@ -416,7 +416,7 @@ object OrgAuthData {
         organization = Some(organization),
         environment = Some(environment),
         session = Some(session),
-        customer = Some(customer)
+        customer = Some(customer),
       )
     }
   }
@@ -434,8 +434,8 @@ object OrgAuthData {
                 session = session,
                 organization = org,
                 environment = env,
-                customer = customer
-              )
+                customer = customer,
+              ),
             )
           }
           case _ => None
@@ -511,13 +511,13 @@ object ChannelAuthData {
     channel: String,
     user: UserReference,
     session: Option[FlowSession],
-    customer: Option[CustomerReference]
+    customer: Option[CustomerReference],
   ) extends ChannelAuthData {
 
     override protected def decorate(base: AuthDataMap): AuthDataMap = {
       base.copy(
         user = Some(user),
-        channel = Some(channel)
+        channel = Some(channel),
       )
     }
 
@@ -536,8 +536,8 @@ object ChannelAuthData {
                 user = user,
                 channel = channel,
                 session = dm.session,
-                customer = dm.customer
-              )
+                customer = dm.customer,
+              ),
             )
           }
           case _ => None

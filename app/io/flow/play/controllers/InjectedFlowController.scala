@@ -24,7 +24,7 @@ trait InjectedFlowController extends FlowController with InjectedController {
     */
   protected def fallbackFlowControllerComponents: FlowControllerComponents = {
     throw new NoSuchElementException(
-      "FlowControllerComponents not set! Call setFlowControllerComponents or create the instance with dependency injection."
+      "FlowControllerComponents not set! Call setFlowControllerComponents or create the instance with dependency injection.",
     )
   }
 }

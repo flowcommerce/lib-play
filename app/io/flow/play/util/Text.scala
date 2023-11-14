@@ -17,7 +17,7 @@ object Text {
   def truncate(
     value: String,
     maxLength: Int = 80,
-    ellipsis: Option[String] = Some(Ellipsis)
+    ellipsis: Option[String] = Some(Ellipsis),
   ): String = {
     val suffix = ellipsis.getOrElse("")
     require(maxLength >= suffix.length, s"maxLength must be greater than the length of the suffix[${suffix.length}]")

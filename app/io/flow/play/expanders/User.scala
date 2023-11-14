@@ -14,11 +14,11 @@ import io.flow.common.v0.models.json._
  */
 case class User(
   fieldName: String,
-  userClient: io.flow.user.v0.interfaces.Client
+  userClient: io.flow.user.v0.interfaces.Client,
 ) extends Expander {
 
   def expand(records: Seq[JsValue], requestHeaders: Seq[(String, String)] = Nil)(implicit
-    ec: ExecutionContext
+    ec: ExecutionContext,
   ): Future[Seq[JsValue]] = {
     val userIds: Seq[String] = records.map { r =>
       ((r \ fieldName).validate[UserReference]: @unchecked) match {
@@ -43,7 +43,7 @@ case class User(
                           (userIdLookup.get(userReference.id) match { // getOrElse can't be used to serialize multiple types - no formatter
                             case Some(user) => Json.toJson(user)
                             case None => Json.toJson(userReference)
-                          })
+                          }),
                       )
                     }
                     case JsError(_) => r
@@ -51,7 +51,7 @@ case class User(
                 }
                 case JsError(_) => r
               }
-            }
+            },
           )
       }
     }

@@ -11,7 +11,7 @@ object FormData {
           if (key.contains("[]"))
             Json.toJson(value) // take seq for arrays
           else
-            Json.toJson(value.headOption.getOrElse(""))
+            Json.toJson(value.headOption.getOrElse("")),
         ) { case (newKey, v) =>
           val newVal = {
             val js = (v \ "").getOrElse(v)

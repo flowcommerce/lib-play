@@ -16,7 +16,7 @@ class FormDataSpec extends LibPlaySpec {
       "arr[][arr2][]" -> Seq("fruit", "vegitables"),
       "tags[]" -> Seq("foo", "bar"),
       "yikes" -> Seq("yes", "no"),
-      "port" -> Seq("9999")
+      "port" -> Seq("9999"),
     )
 
     "returns JsValue" in {

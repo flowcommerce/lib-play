@@ -5,7 +5,7 @@ import io.flow.play.util.{Config, DefaultConfig}
 import scala.collection.mutable
 
 class MockConfig @javax.inject.Inject() (
-  defaultConfig: DefaultConfig
+  defaultConfig: DefaultConfig,
 ) extends Config {
 
   override def optionalMap(name: String): Option[Map[String, Seq[String]]] = {

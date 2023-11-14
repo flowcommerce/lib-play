@@ -6,6 +6,6 @@ import scala.concurrent.{Future, ExecutionContext}
 trait Expander {
   val fieldName: String
   def expand(records: Seq[JsValue], requestHeaders: Seq[(String, String)] = Nil)(implicit
-    ec: ExecutionContext
+    ec: ExecutionContext,
   ): Future[Seq[JsValue]]
 }

@@ -33,14 +33,14 @@ class RefreshingReferenceAsyncSpec
   private def createCache[K, V](
     reloadPeriod: FiniteDuration,
     retrieve: () => Future[Map[K, V]],
-    maxAttempts: Int = 1
+    maxAttempts: Int = 1,
   ): RefreshingReferenceAsync[Map[K, V]] =
     RefreshingReferenceAsync.fromActorSystem(retrieve, app.actorSystem, logger, reloadPeriod, maxAttempts)
 
   private def withCache[K, V](
-    cache: RefreshingReferenceAsync[Map[K, V]]
+    cache: RefreshingReferenceAsync[Map[K, V]],
   )(
-    f: RefreshingReferenceAsync[Map[K, V]] => Assertion
+    f: RefreshingReferenceAsync[Map[K, V]] => Assertion,
   ): Assertion =
     try {
       f(cache)

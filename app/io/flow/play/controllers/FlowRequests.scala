@@ -6,14 +6,14 @@ import play.api.mvc._
 
 class AnonymousRequest[A](
   val auth: AuthData.Anonymous,
-  request: Request[A]
+  request: Request[A],
 ) extends WrappedRequest[A](request) {
   val user: Option[UserReference] = auth.user
 }
 
 class SessionOrgRequest[A](
   val auth: OrgAuthData.Session,
-  request: Request[A]
+  request: Request[A],
 ) extends WrappedRequest[A](request) {
   val flowSession: FlowSession = auth.session
   val organization: String = auth.organization
@@ -22,21 +22,21 @@ class SessionOrgRequest[A](
 
 class IdentifiedRequest[A](
   val auth: AuthData.Identified,
-  request: Request[A]
+  request: Request[A],
 ) extends WrappedRequest[A](request) {
   val user: UserReference = auth.user
 }
 
 class SessionRequest[A](
   val auth: AuthData.Session,
-  request: Request[A]
+  request: Request[A],
 ) extends WrappedRequest[A](request) {
   val flowSession: FlowSession = auth.session
 }
 
 class CustomerRequest[A](
   val auth: AuthData.Customer,
-  request: Request[A]
+  request: Request[A],
 ) extends WrappedRequest[A](request) {
   val flowSession: FlowSession = auth.session
   val customer: CustomerReference = auth.customer
@@ -44,7 +44,7 @@ class CustomerRequest[A](
 
 class IdentifiedOrgRequest[A](
   val auth: OrgAuthData.Identified,
-  request: Request[A]
+  request: Request[A],
 ) extends WrappedRequest[A](request) {
   val user: UserReference = auth.user
   val organization: String = auth.organization
@@ -53,7 +53,7 @@ class IdentifiedOrgRequest[A](
 
 class CustomerOrgRequest[A](
   val auth: OrgAuthData.Customer,
-  request: Request[A]
+  request: Request[A],
 ) extends WrappedRequest[A](request) {
   val organization: String = auth.organization
   val environment: Environment = auth.environment
@@ -65,7 +65,7 @@ class CustomerOrgRequest[A](
   */
 class OrgRequest[A](
   val auth: OrgAuthData,
-  request: Request[A]
+  request: Request[A],
 ) extends WrappedRequest[A](request) {
   val organization: String = auth.organization
   val environment: Environment = auth.environment
@@ -73,7 +73,7 @@ class OrgRequest[A](
 
 class IdentifiedCustomerRequest[A](
   val auth: OrgAuthData,
-  request: Request[A]
+  request: Request[A],
 ) extends WrappedRequest[A](request) {
   val organization: String = auth.organization
   val environment: Environment = auth.environment
@@ -83,14 +83,14 @@ class IdentifiedCustomerRequest[A](
   */
 class CheckoutRequest[A](
   val auth: AuthData,
-  request: Request[A]
+  request: Request[A],
 ) extends WrappedRequest[A](request)
 
 /** Any type of request that contains checkout org data
   */
 class CheckoutOrgRequest[A](
   val auth: OrgAuthData,
-  request: Request[A]
+  request: Request[A],
 ) extends WrappedRequest[A](request) {
   val organization: String = auth.organization
   val environment: Environment = auth.environment
@@ -98,12 +98,12 @@ class CheckoutOrgRequest[A](
 
 class CustomerOrAnonymousRequest[A](
   val auth: AuthData,
-  request: Request[A]
+  request: Request[A],
 ) extends WrappedRequest[A](request)
 
 class IdentifiedChannelRequest[A](
   val auth: ChannelAuthData.IdentifiedChannel,
-  request: Request[A]
+  request: Request[A],
 ) extends WrappedRequest[A](request) {
   val user: UserReference = auth.user
   val channel: String = auth.channel

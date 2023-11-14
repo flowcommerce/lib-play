@@ -20,7 +20,7 @@ class UserSpec extends LibPlaySpec with FutureAwaits with DefaultAwaitTimeout {
     common.User(
       id = IdGenerator("tst").randomId(),
       email = Some("test@flow.io"),
-      name = common.Name(first = Some("John"), last = Some("Smith"))
+      name = common.Name(first = Some("John"), last = Some("Smith")),
     )
   }
 
@@ -30,7 +30,7 @@ class UserSpec extends LibPlaySpec with FutureAwaits with DefaultAwaitTimeout {
       client.data.add(user)
 
       val expanded = await(
-        User("user", client).expand(Seq(Json.obj("user" -> Json.toJson(toReference(user)))))
+        User("user", client).expand(Seq(Json.obj("user" -> Json.toJson(toReference(user))))),
       ).headOption.getOrElse {
         sys.error("Expanded user not found")
       }
@@ -42,7 +42,7 @@ class UserSpec extends LibPlaySpec with FutureAwaits with DefaultAwaitTimeout {
       val user = buildUser()
 
       val expanded = await(
-        User("user", client).expand(Seq(Json.obj("user" -> Json.toJson(toReference(user)))))
+        User("user", client).expand(Seq(Json.obj("user" -> Json.toJson(toReference(user))))),
       ).headOption.getOrElse {
         sys.error("Expanded user not found")
       }

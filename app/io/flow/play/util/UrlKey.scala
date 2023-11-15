@@ -14,7 +14,7 @@ package io.flow.play.util
 case class UrlKey(
   minKeyLength: Int = 4,
   reservedKeys: Seq[String] = Nil,
-  maxIterations: Int = 1000
+  maxIterations: Int = 1000,
 ) {
   assert(minKeyLength > 0, s"minKeyLength[$minKeyLength] must be > 0")
   assert(maxIterations > 0, s"maxIterations[$maxIterations] must be > 0")
@@ -33,9 +33,9 @@ case class UrlKey(
   @scala.annotation.tailrec
   final def generate(
     value: String,
-    suffix: Option[Int] = None
+    suffix: Option[Int] = None,
   )(implicit
-    checkFunction: String => Boolean = { _ => true }
+    checkFunction: String => Boolean = { _ => true },
   ): String = {
     val formatted = format(value)
 
@@ -78,14 +78,14 @@ case class UrlKey(
   def validate(
     key: String,
     label: String = "Key",
-    lowerLabel: Option[String] = None
+    lowerLabel: Option[String] = None,
   ): Seq[String] = {
     val generated = format(key)
     if (key.length < minKeyLength) {
       Seq(s"$label must be at least $minKeyLength characters")
     } else if (key != generated) {
       Seq(
-        s"$label must be in all lower case and contain alphanumerics only (-, _, and . are supported). A valid ${label.toLowerCase} would be: $generated"
+        s"$label must be in all lower case and contain alphanumerics only (-, _, and . are supported). A valid ${label.toLowerCase} would be: $generated",
       )
     } else {
       val lower = lowerLabel.getOrElse(label.toLowerCase)

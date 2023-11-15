@@ -32,5 +32,5 @@ class FlowControllerSpec extends PlaySpec with GuiceOneServerPerSuite {
 // Mimic usual controller
 class FlowControllerImpl @Inject() (
   val flowControllerComponents: FlowControllerComponents,
-  val controllerComponents: ControllerComponents
+  val controllerComponents: ControllerComponents,
 ) extends FlowController

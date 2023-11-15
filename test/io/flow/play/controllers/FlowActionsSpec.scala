@@ -11,7 +11,7 @@ import play.api.Configuration
 class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
 
   private[this] lazy val mockConfig = new MockConfig(
-    new DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty())))
+    new DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty()))),
   )
 
   private[this] val user = UserReference("usr-20151006-1")
@@ -36,31 +36,31 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
 
   "parse AuthData.AnonymousAuth w/ no user" in {
     validateParse(
-      AuthData.Anonymous.Empty
+      AuthData.Anonymous.Empty,
     )(AuthData.Anonymous.fromMap)
   }
 
   "parse AuthData.AnonymousAuth w/ no user and session" in {
     validateParse(
       AuthData.Anonymous.Empty.copy(
-        session = Some(session)
-      )
+        session = Some(session),
+      ),
     )(AuthData.Anonymous.fromMap)
   }
 
   "parse AuthData.AnonymousAuth w/ no user, no session and customer" in {
     validateParse(
       AuthData.Anonymous.Empty.copy(
-        customer = Some(customer)
-      )
+        customer = Some(customer),
+      ),
     )(AuthData.Anonymous.fromMap)
   }
 
   "parse AuthData.AnonymousAuth w/ user" in {
     validateParse(
       AuthData.Anonymous.Empty.copy(
-        user = Some(user)
-      )
+        user = Some(user),
+      ),
     )(AuthData.Anonymous.fromMap)
   }
 
@@ -68,8 +68,8 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
     validateParse(
       AuthData.Anonymous.Empty.copy(
         organization = Some(createTestId()),
-        environment = Some(Environment.Sandbox)
-      )
+        environment = Some(Environment.Sandbox),
+      ),
     )(AuthData.Anonymous.fromMap)
   }
 
@@ -78,8 +78,8 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
       AuthData.Anonymous.Empty.copy(
         user = Some(user),
         session = Some(session),
-        customer = Some(customer)
-      )
+        customer = Some(customer),
+      ),
     )(AuthData.Anonymous.fromMap)
   }
 
@@ -87,8 +87,8 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
     validateParse(
       AuthData.Session(
         requestId = createTestId(),
-        session = session
-      )
+        session = session,
+      ),
     )(AuthData.Session.fromMap)
   }
 
@@ -97,8 +97,8 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
       AuthData.Customer(
         requestId = createTestId(),
         session = session,
-        customer = customer
-      )
+        customer = customer,
+      ),
     )(AuthData.Customer.fromMap)
   }
 
@@ -110,7 +110,7 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
       environment = Environment.Sandbox,
       role = Role.Member,
       session = None,
-      customer = None
+      customer = None,
     )
     validateParse(auth)(OrgAuthData.Identified.fromMap)
     validateParse(auth)(OrgAuthData.Org.fromMap)
@@ -125,8 +125,8 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
         environment = Environment.Sandbox,
         role = Role.Member,
         session = Some(session),
-        customer = None
-      )
+        customer = None,
+      ),
     )(OrgAuthData.Identified.fromMap)
   }
 
@@ -139,8 +139,8 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
         environment = Environment.Sandbox,
         role = Role.Member,
         session = None,
-        customer = Some(customer)
-      )
+        customer = Some(customer),
+      ),
     )(OrgAuthData.Identified.fromMap)
   }
 
@@ -149,7 +149,7 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
       requestId = createTestId(),
       session = session,
       organization = createTestId(),
-      environment = Environment.Sandbox
+      environment = Environment.Sandbox,
     )
     validateParse(auth)(OrgAuthData.Session.fromMap)
     validateParse(auth)(OrgAuthData.Org.fromMap)
@@ -162,8 +162,8 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
         session = session,
         organization = createTestId(),
         environment = Environment.Sandbox,
-        customer = customer
-      )
+        customer = customer,
+      ),
     )(OrgAuthData.Customer.fromMap)
   }
 
@@ -174,8 +174,8 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
         user = user,
         channel = createTestId(),
         session = None,
-        customer = None
-      )
+        customer = None,
+      ),
     )(ChannelAuthData.IdentifiedChannel.fromMap)
   }
 
@@ -183,15 +183,15 @@ class FlowActionsSpec extends LibPlaySpec with FlowActionInvokeBlockHelper {
     val data = AuthData.Anonymous.Empty
     validateParse(data)(AuthData.Anonymous.fromMap)
     validateParse(
-      data.copy(createdAt = DateTime.now.minusMinutes(1))
+      data.copy(createdAt = DateTime.now.minusMinutes(1)),
     )(AuthData.Anonymous.fromMap)
 
     parse(
       data
         .copy(
-          createdAt = DateTime.now.minusMinutes(5)
+          createdAt = DateTime.now.minusMinutes(5),
         )
-        .jwt(jwtSalt)
+        .jwt(jwtSalt),
     )(AuthData.Anonymous.fromMap).isDefined must be(false)
   }
 }

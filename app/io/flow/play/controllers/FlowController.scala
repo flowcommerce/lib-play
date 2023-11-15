@@ -69,7 +69,7 @@ case class FlowDefaultControllerComponents @Inject() (
   checkoutActionBuilder: CheckoutActionBuilder,
   checkoutOrgActionBuilder: CheckoutOrgActionBuilder,
   identifiedCustomerActionBuilder: IdentifiedCustomerActionBuilder,
-  identifiedChannelActionBuilder: IdentifiedChannelActionBuilder
+  identifiedChannelActionBuilder: IdentifiedChannelActionBuilder,
 ) extends FlowControllerComponents
 
 // Anonymous
@@ -77,7 +77,7 @@ class AnonymousActionBuilder @Inject() (
   requestFactory: RequestFactory,
   val parser: BodyParsers.Default,
   val config: Config,
-  implicit private val logger: RollbarLogger
+  implicit private val logger: RollbarLogger,
 )(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[AnonymousRequest, AnyContent]
   with FlowActionInvokeBlockHelper {
@@ -93,7 +93,7 @@ class IdentifiedActionBuilder @Inject() (
   requestFactory: RequestFactory,
   val parser: BodyParsers.Default,
   val config: Config,
-  implicit private val logger: RollbarLogger
+  implicit private val logger: RollbarLogger,
 )(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[IdentifiedRequest, AnyContent]
   with FlowActionInvokeBlockHelper {
@@ -107,7 +107,7 @@ class SessionActionBuilder @Inject() (
   requestFactory: RequestFactory,
   val parser: BodyParsers.Default,
   val config: Config,
-  implicit private val logger: RollbarLogger
+  implicit private val logger: RollbarLogger,
 )(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[SessionRequest, AnyContent]
   with FlowActionInvokeBlockHelper {
@@ -121,7 +121,7 @@ class CustomerActionBuilder @Inject() (
   requestFactory: RequestFactory,
   val parser: BodyParsers.Default,
   val config: Config,
-  implicit private val logger: RollbarLogger
+  implicit private val logger: RollbarLogger,
 )(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[CustomerRequest, AnyContent]
   with FlowActionInvokeBlockHelper {
@@ -135,7 +135,7 @@ class OrgActionBuilder @Inject() (
   requestFactory: RequestFactory,
   val parser: BodyParsers.Default,
   val config: Config,
-  implicit private val logger: RollbarLogger
+  implicit private val logger: RollbarLogger,
 )(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[OrgRequest, AnyContent]
   with FlowActionInvokeBlockHelper {
@@ -149,7 +149,7 @@ class CheckoutActionBuilder @Inject() (
   requestFactory: RequestFactory,
   val parser: BodyParsers.Default,
   val config: Config,
-  implicit private val logger: RollbarLogger
+  implicit private val logger: RollbarLogger,
 )(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[CheckoutRequest, AnyContent]
   with FlowActionInvokeBlockHelper {
@@ -163,7 +163,7 @@ class CheckoutOrgActionBuilder @Inject() (
   requestFactory: RequestFactory,
   val parser: BodyParsers.Default,
   val config: Config,
-  implicit private val logger: RollbarLogger
+  implicit private val logger: RollbarLogger,
 )(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[CheckoutOrgRequest, AnyContent]
   with FlowActionInvokeBlockHelper {
@@ -177,7 +177,7 @@ class IdentifiedOrgActionBuilder @Inject() (
   requestFactory: RequestFactory,
   val parser: BodyParsers.Default,
   val config: Config,
-  implicit private val logger: RollbarLogger
+  implicit private val logger: RollbarLogger,
 )(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[IdentifiedOrgRequest, AnyContent]
   with FlowActionInvokeBlockHelper {
@@ -191,7 +191,7 @@ class SessionOrgActionBuilder @Inject() (
   requestFactory: RequestFactory,
   val parser: BodyParsers.Default,
   val config: Config,
-  implicit private val logger: RollbarLogger
+  implicit private val logger: RollbarLogger,
 )(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[SessionOrgRequest, AnyContent]
   with FlowActionInvokeBlockHelper {
@@ -202,7 +202,7 @@ class SessionOrgActionBuilder @Inject() (
 
 // IdentifiedCookie
 class IdentifiedCookieActionBuilder @Inject() (val parser: BodyParsers.Default, val config: Config)(implicit
-  val executionContext: ExecutionContext
+  val executionContext: ExecutionContext,
 ) extends ActionBuilder[IdentifiedRequest, AnyContent]
   with FlowActionInvokeBlockHelper {
 
@@ -220,7 +220,7 @@ class IdentifiedChannelActionBuilder @Inject() (
   requestFactory: RequestFactory,
   val parser: BodyParsers.Default,
   val config: Config,
-  implicit private val logger: RollbarLogger
+  implicit private val logger: RollbarLogger,
 )(implicit val executionContext: ExecutionContext)
   extends ActionBuilder[IdentifiedChannelRequest, AnyContent]
   with FlowActionInvokeBlockHelper {
@@ -243,10 +243,10 @@ object IdentifiedCookie {
 class CustomerOrgActionBuilder @Inject() (
   requestFactory: RequestFactory,
   val parser: BodyParsers.Default,
-  val config: Config
+  val config: Config,
 )(
   implicit private val logger: RollbarLogger,
-  implicit val executionContext: ExecutionContext
+  implicit val executionContext: ExecutionContext,
 ) extends ActionBuilder[CustomerOrgRequest, AnyContent]
   with FlowActionInvokeBlockHelper {
 
@@ -258,10 +258,10 @@ class CustomerOrgActionBuilder @Inject() (
 class IdentifiedCustomerActionBuilder @Inject() (
   requestFactory: RequestFactory,
   val parser: BodyParsers.Default,
-  val config: Config
+  val config: Config,
 )(
   implicit private val logger: RollbarLogger,
-  implicit val executionContext: ExecutionContext
+  implicit val executionContext: ExecutionContext,
 ) extends ActionBuilder[IdentifiedCustomerRequest, AnyContent]
   with FlowActionInvokeBlockHelper {
 

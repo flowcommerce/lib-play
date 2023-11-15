@@ -24,7 +24,7 @@ object Validation {
   def errors(messages: Seq[String]): GenericError = {
     GenericError(
       code = GenericErrorCode.GenericError,
-      messages = messages
+      messages = messages,
     )
   }
 

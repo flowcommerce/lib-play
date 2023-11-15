@@ -50,31 +50,31 @@ trait FlowControllerHelpers {
 
     def async(
       contentType: Option[String],
-      body: AnyContent
+      body: AnyContent,
     )(
-      function: JsValue => Future[Result]
+      function: JsValue => Future[Result],
     )(implicit
-      ec: ExecutionContext
+      ec: ExecutionContext,
     ): Future[Result] = {
       parse(
         contentType,
         body,
         function,
-        { errorResult => Future(errorResult) }
+        { errorResult => Future(errorResult) },
       )
     }
 
     def sync(
       contentType: Option[String],
-      body: AnyContent
+      body: AnyContent,
     )(
-      function: JsValue => Result
+      function: JsValue => Result,
     ): Result = {
       parse(
         contentType,
         body,
         function,
-        { errorResult => errorResult }
+        { errorResult => errorResult },
       )
     }
 
@@ -82,39 +82,39 @@ trait FlowControllerHelpers {
       contentType: Option[String],
       body: AnyContent,
       function: JsValue => T,
-      errorFunction: Result => T
+      errorFunction: Result => T,
     ): T = {
       contentType match {
         case Some("application/x-www-form-urlencoded") =>
           function(
-            body.asFormUrlEncoded.map(FormData.formDataToJson).getOrElse(Json.obj())
+            body.asFormUrlEncoded.map(FormData.formDataToJson).getOrElse(Json.obj()),
           )
         case Some("application/json") =>
           function(
             body.asJson match {
               case Some(json) => json
               case None => Json.toJson(Validation.invalidJsonDocument())
-            }
+            },
           )
         case Some(ct) =>
           errorFunction(
             UnprocessableEntity(
               Json.toJson(
                 Validation.error(
-                  s"Unsupported Content-Type, [$ct]. Must be 'application/x-www-form-urlencoded' or 'application/json'"
-                )
-              )
-            )
+                  s"Unsupported Content-Type, [$ct]. Must be 'application/x-www-form-urlencoded' or 'application/json'",
+                ),
+              ),
+            ),
           )
         case None =>
           errorFunction(
             UnprocessableEntity(
               Json.toJson(
                 Validation.error(
-                  s"Missing Content-Type Header. Must be 'application/x-www-form-urlencoded' or 'application/json'"
-                )
-              )
-            )
+                  s"Missing Content-Type Header. Must be 'application/x-www-form-urlencoded' or 'application/json'",
+                ),
+              ),
+            ),
           )
       }
     }
@@ -127,36 +127,36 @@ trait FlowControllerHelpers {
     def async(
       expand: Option[Seq[String]],
       records: Seq[JsValue],
-      requestHeaders: Seq[(String, String)] = Nil
+      requestHeaders: Seq[(String, String)] = Nil,
     )(
-      function: JsValue => Future[Result]
+      function: JsValue => Future[Result],
     )(implicit
-      ec: ExecutionContext
+      ec: ExecutionContext,
     ): Future[Result] = {
       withExpansion(
         expand,
         records,
         function,
         { errorResult => Future(errorResult) },
-        requestHeaders = requestHeaders
+        requestHeaders = requestHeaders,
       )
     }
 
     def sync(
       expand: Option[Seq[String]],
       records: Seq[JsValue],
-      requestHeaders: Seq[(String, String)] = Nil
+      requestHeaders: Seq[(String, String)] = Nil,
     )(
-      function: JsValue => Result
+      function: JsValue => Result,
     )(implicit
-      ec: ExecutionContext
+      ec: ExecutionContext,
     ): Result = {
       withExpansion(
         expand,
         records,
         function,
         { errorResult => errorResult },
-        requestHeaders = requestHeaders
+        requestHeaders = requestHeaders,
       )
     }
 
@@ -165,9 +165,9 @@ trait FlowControllerHelpers {
       records: Seq[JsValue],
       function: JsValue => T,
       errorFunction: Result => T,
-      requestHeaders: Seq[(String, String)]
+      requestHeaders: Seq[(String, String)],
     )(implicit
-      ec: ExecutionContext
+      ec: ExecutionContext,
     ): T = {
       val res = expandersResult.filter(e => expand.getOrElse(Nil).contains(e.fieldName)).foldLeft(records) {
         case (data, e) => Await.result(e.expand(data, requestHeaders = requestHeaders), Duration(5, "seconds"))
@@ -179,9 +179,9 @@ trait FlowControllerHelpers {
           errorFunction(
             UnprocessableEntity(
               Json.toJson(
-                Validation.error(s"Expansion failed for 'expand': $expand and 'records': $records")
-              )
-            )
+                Validation.error(s"Expansion failed for 'expand': $expand and 'records': $records"),
+              ),
+            ),
           )
       }
     }

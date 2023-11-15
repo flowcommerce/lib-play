@@ -14,9 +14,9 @@ class LoggingUtilSpec extends LibPlaySpec {
         "item_form" -> Set("number"),
         "harmonized_item_form" -> Set("number"),
         "order_form" -> Set("number"),
-        "order_put_form" -> Set("number")
-      )
-    )
+        "order_put_form" -> Set("number"),
+      ),
+    ),
   )
 
   "safeJson when type is not known respects denylistFields" in {
@@ -26,7 +26,7 @@ class LoggingUtilSpec extends LibPlaySpec {
     jsonSafeLogger.safeJson(Json.obj("foo" -> "bar")) must equal(Json.obj("foo" -> "bar"))
 
     jsonSafeLogger.safeJson(Json.obj("foo" -> "bar", "cvv" -> "123", "number" -> "1234567890")) must equal(
-      Json.obj("foo" -> "bar", "cvv" -> "xxx", "number" -> "xxx")
+      Json.obj("foo" -> "bar", "cvv" -> "xxx", "number" -> "xxx"),
     )
 
     Seq("cvv", "CVV", "Cvv") foreach { cvv =>
@@ -35,17 +35,17 @@ class LoggingUtilSpec extends LibPlaySpec {
           Seq(
             Json.obj("foo" -> "bar"),
             Json.obj("cvv" -> cvv),
-            Json.obj("number" -> "1234567890")
-          )
-        )
+            Json.obj("number" -> "1234567890"),
+          ),
+        ),
       ) must equal(
         JsArray(
           Seq(
             Json.obj("foo" -> "bar"),
             Json.obj("cvv" -> "xxx"),
-            Json.obj("number" -> "xxx")
-          )
-        )
+            Json.obj("number" -> "xxx"),
+          ),
+        ),
       )
     }
   }
@@ -53,28 +53,28 @@ class LoggingUtilSpec extends LibPlaySpec {
   "safeJson with nested types" in {
     jsonSafeLogger.safeJson(
       Json.obj(
-        "items" -> Json.obj("number" -> "1234567890")
-      )
+        "items" -> Json.obj("number" -> "1234567890"),
+      ),
     ) must equal(
       Json.obj(
-        "items" -> Json.obj("number" -> "xxx")
-      )
+        "items" -> Json.obj("number" -> "xxx"),
+      ),
     )
   }
 
   "safeJson with type allowlist" in {
     jsonSafeLogger.safeJson(Json.obj("number" -> "1234567890"), typ = Some("order_form")) must equal(
-      Json.obj("number" -> "1234567890")
+      Json.obj("number" -> "1234567890"),
     )
 
     jsonSafeLogger.safeJson(
       Json.obj(
-        "order_form" -> Json.obj("number" -> "1234567890")
-      )
+        "order_form" -> Json.obj("number" -> "1234567890"),
+      ),
     ) must equal(
       Json.obj(
-        "order_form" -> Json.obj("number" -> "1234567890")
-      )
+        "order_form" -> Json.obj("number" -> "1234567890"),
+      ),
     )
   }
 
@@ -85,19 +85,19 @@ class LoggingUtilSpec extends LibPlaySpec {
       ".password_change_form",
       "foo.password_change_form",
       "io.flow.user.v0.models.password_change_form",
-      "iO.flOw.User.V0.mOdels.PasSword_CHANGE_forM"
+      "iO.flOw.User.V0.mOdels.PasSword_CHANGE_forM",
     ) foreach { typ =>
       jsonSafeLogger.safeJson(
         Json.obj(
           "current" -> "foo",
-          "new" -> "bar"
+          "new" -> "bar",
         ),
-        Some(typ)
+        Some(typ),
       ) must equal(
         Json.obj(
           "current" -> "xxx",
-          "new" -> "xxx"
-        )
+          "new" -> "xxx",
+        ),
       )
     }
   }
@@ -107,16 +107,16 @@ class LoggingUtilSpec extends LibPlaySpec {
       Json.obj(
         "password_change_form" -> Json.obj(
           "current" -> "foo",
-          "new" -> "bar"
-        )
-      )
+          "new" -> "bar",
+        ),
+      ),
     ) must equal(
       Json.obj(
         "password_change_form" -> Json.obj(
           "current" -> "xxx",
-          "new" -> "xxx"
-        )
-      )
+          "new" -> "xxx",
+        ),
+      ),
     )
   }
 

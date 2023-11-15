@@ -9,7 +9,7 @@ import scala.concurrent.duration.Duration
 
 @javax.inject.Singleton
 class DevelopmentRegistry @javax.inject.Inject() (
-  config: Config
+  config: Config,
 ) extends Registry {
 
   private[this] lazy val RegistryHost: String = {
@@ -67,7 +67,7 @@ class DevelopmentRegistry @javax.inject.Inject() (
           case UnitResponse(404) => sys.error(s"application[$applicationId] not found in registry at $RegistryHost")
           case ex: Throwable => throw new Exception(s"ERROR connecting to registry at $RegistryHost", ex)
         },
-      Duration(5, "seconds")
+      Duration(5, "seconds"),
     )
   }
 

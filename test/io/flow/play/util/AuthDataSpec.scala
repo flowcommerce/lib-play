@@ -47,7 +47,7 @@ class AuthDataSpec extends LibPlaySpec {
       "testify",
       requestId = requestId,
       session = Some(FlowSession(sessionId)),
-      customer = Some(CustomerReference(customer))
+      customer = Some(CustomerReference(customer)),
     )
     auth.user.id must be("user-1")
     auth.channel must be("testify")
@@ -71,7 +71,7 @@ class AuthDataSpec extends LibPlaySpec {
       Fields.Organization -> orgAuthDataCustomer.organization,
       Fields.Environment -> orgAuthDataCustomer.environment.toString,
       Fields.Session -> orgAuthDataCustomer.session.id,
-      Fields.Customer -> orgAuthDataCustomer.customer.number
+      Fields.Customer -> orgAuthDataCustomer.customer.number,
     )
 
     val auth: Option[AuthData] = OrgAuthData.Checkout.fromMap(customerData)(logger)
@@ -92,7 +92,7 @@ class AuthDataSpec extends LibPlaySpec {
     val sessionData: Map[String, String] = Map(
       Fields.CreatedAt -> authDataSession.createdAt.toString,
       Fields.RequestId -> authDataSession.requestId,
-      Fields.Session -> authDataSession.session.id
+      Fields.Session -> authDataSession.session.id,
     )
 
     val auth: Option[AuthData] = OrgAuthData.Checkout.fromMap(sessionData)(logger)
@@ -109,7 +109,7 @@ class AuthDataSpec extends LibPlaySpec {
       Fields.RequestId -> authDataSession.requestId,
       Fields.Session -> authDataSession.session.id,
       Fields.Organization -> authDataSession.organization,
-      Fields.Environment -> authDataSession.environment.toString
+      Fields.Environment -> authDataSession.environment.toString,
     )
 
     val auth: Option[AuthData] = OrgAuthData.CheckoutOrg.fromMap(sessionData)(logger)
@@ -127,7 +127,7 @@ class AuthDataSpec extends LibPlaySpec {
       Fields.Organization -> orgAuthDataCustomer.organization,
       Fields.Environment -> orgAuthDataCustomer.environment.toString,
       Fields.Session -> orgAuthDataCustomer.session.id,
-      Fields.Customer -> orgAuthDataCustomer.customer.number
+      Fields.Customer -> orgAuthDataCustomer.customer.number,
     )
 
     val auth: Option[AuthData] = OrgAuthData.IdentifiedCustomer.fromMap(customerData)(logger)
@@ -144,7 +144,7 @@ class AuthDataSpec extends LibPlaySpec {
       Fields.RequestId -> orgAuthDataCustomer.requestId,
       Fields.Organization -> orgAuthDataCustomer.organization,
       Fields.Session -> orgAuthDataCustomer.session.id,
-      Fields.Customer -> orgAuthDataCustomer.customer.number
+      Fields.Customer -> orgAuthDataCustomer.customer.number,
     )
 
     val auth = AuthData.Anonymous.fromMap(customerData)(logger).get
@@ -155,7 +155,7 @@ class AuthDataSpec extends LibPlaySpec {
     val anonAuthData = AuthData.Anonymous.Empty.copy(createdAt = DateTime.now)
     val anonData = Map(
       Fields.CreatedAt -> anonAuthData.createdAt.toString,
-      Fields.RequestId -> anonAuthData.requestId
+      Fields.RequestId -> anonAuthData.requestId,
     )
 
     val anonAuth = AuthData.Anonymous.fromMap(anonData)(logger).get

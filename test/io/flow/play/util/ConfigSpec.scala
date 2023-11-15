@@ -8,7 +8,7 @@ import play.api.Configuration
 class ConfigSpec extends LibPlaySpec {
 
   private[this] lazy val config = new MockConfig(
-    new DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty())))
+    new DefaultConfig(ApplicationConfig(Configuration(ConfigFactory.empty()))),
   )
 
   "optionalList" in {

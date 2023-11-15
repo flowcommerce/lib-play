@@ -16,7 +16,7 @@ class RefreshingBulkCacheAsyncSpec extends AnyWordSpec with GuiceOneAppPerSuite 
   def createCache[K, V](
     reloadPeriod: FiniteDuration,
     retrieve: () => Future[Map[K, V]],
-    maxAttempts: Int = 1
+    maxAttempts: Int = 1,
   ): RefreshingBulkCacheAsync[K, V] =
     RefreshingBulkCacheAsync.fromActorSystem(retrieve, app.actorSystem, logger, reloadPeriod, maxAttempts)
 

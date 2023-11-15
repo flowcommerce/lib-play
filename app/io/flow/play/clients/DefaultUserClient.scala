@@ -5,5 +5,5 @@ import play.api.libs.ws.WSClient
 @javax.inject.Singleton
 class DefaultUserClient @javax.inject.Inject() (
   registry: Registry,
-  ws: WSClient
+  ws: WSClient,
 ) extends io.flow.user.v0.Client(ws, registry.host("user"))

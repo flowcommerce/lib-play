@@ -12,7 +12,7 @@ import javax.inject.{Inject, Singleton}
 final class CoordinatedShutdownActorReaperModule extends Module {
   def bindings(env: Environment, conf: Configuration) = {
     Seq(
-      bind[CoordinatedShutdownActorReaper].toSelf.eagerly()
+      bind[CoordinatedShutdownActorReaper].toSelf.eagerly(),
     )
   }
 }
@@ -20,7 +20,7 @@ final class CoordinatedShutdownActorReaperModule extends Module {
 @Singleton
 private[play] final class CoordinatedShutdownActorReaper @Inject() (
   system: ActorSystem,
-  rollbar: RollbarLogger
+  rollbar: RollbarLogger,
 ) {
   @Inject
   def initialize(): Unit = {

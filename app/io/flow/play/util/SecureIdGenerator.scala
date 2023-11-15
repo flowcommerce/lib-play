@@ -21,7 +21,7 @@ object SecureIdGenerator {
   *   uppercase.
   */
 case class SecureIdGenerator(
-  prefix: String
+  prefix: String,
 ) {
   assert(prefix.trim == prefix, s"prefix[$prefix] must be trimmed")
   assert(prefix.toUpperCase == prefix, s"prefix[$prefix] must be in upper case")
@@ -30,7 +30,7 @@ case class SecureIdGenerator(
     prefix.length >= SecureIdGenerator.MinPrefixLength &&
       prefix.length <= SecureIdGenerator.MaxPrefixLength,
     s"prefix[$prefix] must be between " +
-      s"${SecureIdGenerator.MinPrefixLength} and ${SecureIdGenerator.MaxPrefixLength} characters"
+      s"${SecureIdGenerator.MinPrefixLength} and ${SecureIdGenerator.MaxPrefixLength} characters",
   )
   assert(!io.flow.util.BadWords.contains(prefix), s"prefix[$prefix] is on the black list and cannot be used")
 

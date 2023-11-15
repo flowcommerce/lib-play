@@ -9,7 +9,7 @@ import javax.inject.{Inject, Singleton}
   */
 @Singleton
 class AuthHeaders @Inject() (
-  config: Config
+  config: Config,
 ) {
 
   val FlowRequestId = "X-Flow-Request-Id"
@@ -18,7 +18,7 @@ class AuthHeaders @Inject() (
   def headers(auth: AuthData): Seq[(String, String)] = {
     Seq(
       AuthHeaders.Header -> auth.jwt(jwtSalt),
-      FlowRequestId -> auth.requestId
+      FlowRequestId -> auth.requestId,
     )
   }
 
@@ -39,35 +39,35 @@ object AuthHeaders {
     user: UserReference,
     requestId: String = generateRequestId(),
     session: Option[FlowSession] = None,
-    customer: Option[CustomerReference] = None
+    customer: Option[CustomerReference] = None,
   ): AuthData.Identified = {
     AuthData.Identified(
       requestId = requestId,
       user = user,
       session = session,
-      customer = customer
+      customer = customer,
     )
   }
 
   def session(
     requestId: String = generateRequestId(),
-    session: FlowSession = createFlowSession()
+    session: FlowSession = createFlowSession(),
   ): AuthData.Session = {
     AuthData.Session(
       requestId = requestId,
-      session = session
+      session = session,
     )
   }
 
   def customer(
     requestId: String = generateRequestId(),
     session: FlowSession = createFlowSession(),
-    customer: CustomerReference = createCustomerReference()
+    customer: CustomerReference = createCustomerReference(),
   ): AuthData.Customer = {
     AuthData.Customer(
       requestId = requestId,
       session = session,
-      customer = customer
+      customer = customer,
     )
   }
 
@@ -83,7 +83,7 @@ object AuthHeaders {
     environment: Environment,
     requestId: String = generateRequestId(),
     session: Option[FlowSession] = None,
-    customer: Option[CustomerReference] = None
+    customer: Option[CustomerReference] = None,
   ): OrgAuthData.Identified = {
     OrgAuthData.Identified(
       requestId = requestId,
@@ -92,7 +92,7 @@ object AuthHeaders {
       environment = environment,
       role = role,
       session = session,
-      customer = customer
+      customer = customer,
     )
   }
 
@@ -105,13 +105,13 @@ object AuthHeaders {
     org: String,
     environment: Environment,
     requestId: String = generateRequestId(),
-    session: FlowSession = createFlowSession()
+    session: FlowSession = createFlowSession(),
   ): OrgAuthData.Session = {
     OrgAuthData.Session(
       requestId = requestId,
       session = session,
       organization = org,
-      environment = environment
+      environment = environment,
     )
   }
 
@@ -125,14 +125,14 @@ object AuthHeaders {
     environment: Environment,
     requestId: String = generateRequestId(),
     session: FlowSession = createFlowSession(),
-    customer: CustomerReference = createCustomerReference()
+    customer: CustomerReference = createCustomerReference(),
   ): OrgAuthData.Customer = {
     OrgAuthData.Customer(
       requestId = requestId,
       organization = org,
       environment = environment,
       session = session,
-      customer = customer
+      customer = customer,
     )
   }
 
@@ -146,26 +146,26 @@ object AuthHeaders {
     channel: String,
     requestId: String = generateRequestId(),
     session: Option[FlowSession] = None,
-    customer: Option[CustomerReference] = None
+    customer: Option[CustomerReference] = None,
   ): ChannelAuthData.IdentifiedChannel = {
     ChannelAuthData.IdentifiedChannel(
       requestId = requestId,
       user = user,
       channel = channel,
       session = session,
-      customer = customer
+      customer = customer,
     )
   }
 
   def createFlowSession(): FlowSession = {
     FlowSession(
-      id = Constants.Prefixes.Session + generateToken()
+      id = Constants.Prefixes.Session + generateToken(),
     )
   }
 
   def createCustomerReference(): CustomerReference = {
     CustomerReference(
-      number = generateToken()
+      number = generateToken(),
     )
   }
 

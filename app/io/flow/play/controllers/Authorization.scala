@@ -14,7 +14,7 @@ case class Token(token: String) extends Authorization
 
 class AuthorizationImpl @Inject() (
   logger: RollbarLogger,
-  config: Config
+  config: Config,
 ) {
 
   private[this] lazy val jwtSalt = {

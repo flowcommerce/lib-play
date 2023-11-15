@@ -32,7 +32,7 @@ case class LoggingUtil(rollbar: RollbarLogger) {
         "routing_number",
         "secret_key",
         "client_secret",
-        "fingerprint"
+        "fingerprint",
       ),
       denylistModels =
         Set("password_change_form", "cipher_form", "ach_authorization_form", "stripe_authentication_data_form"),
@@ -47,9 +47,9 @@ case class LoggingUtil(rollbar: RollbarLogger) {
         "packaging" -> Set("number"),
         "partner_order_identifier_form" -> Set("number"),
         "organization_put_form" -> Set("name"),
-        "tariff_code" -> Set("code")
-      )
-    )
+        "tariff_code" -> Set("code"),
+      ),
+    ),
   )
 
 }
@@ -64,7 +64,7 @@ case class LoggingUtil(rollbar: RollbarLogger) {
 case class JsonSafeLoggerConfig(
   denylistFields: Set[String],
   denylistModels: Set[String],
-  allowlistModelFields: Map[String, Set[String]]
+  allowlistModelFields: Map[String, Set[String]],
 )
 
 /** Configures the white lists and black lists that are used to determine exactly which field values are redacted in the
@@ -72,7 +72,7 @@ case class JsonSafeLoggerConfig(
   */
 case class JsonSafeLogger(
   config: JsonSafeLoggerConfig,
-  rollbar: RollbarLogger
+  rollbar: RollbarLogger,
 ) {
 
   /** Accepts a JsValue, redacting any fields that may contain sensitive data
@@ -83,7 +83,7 @@ case class JsonSafeLogger(
     */
   def safeJson(
     value: JsValue,
-    typ: Option[String] = None
+    typ: Option[String] = None,
   ): JsValue = {
     if (typ.exists(config.denylistFields) || typ.exists(isTypeDenylisted)) {
       redact(value)
@@ -103,7 +103,7 @@ case class JsonSafeLogger(
                   case _ => k -> safeJson(v, typ)
                 }
               }
-            }
+            },
           )
 
         case ar: JsArray => JsArray(ar.value.map { v => safeJson(v) })

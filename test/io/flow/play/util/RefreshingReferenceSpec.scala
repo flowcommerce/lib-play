@@ -25,7 +25,7 @@ class RefreshingReferenceSpec
   def createCache[K, V](
     reloadPeriod: FiniteDuration,
     retrieve: () => Map[K, V],
-    maxAttempts: Int = 1
+    maxAttempts: Int = 1,
   ): RefreshingReference[Map[K, V]] =
     RefreshingReference(logger, app.actorSystem.scheduler, Implicits.global, reloadPeriod, retrieve, maxAttempts)
 

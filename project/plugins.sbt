@@ -10,13 +10,13 @@ resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releas
 resolvers += "Artifactory" at "https://flow.jfrog.io/flow/libs-release-local/"
 
 // Use the Play sbt plugin for Play projects
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.8.20")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.9.0")
 
 addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat" % "0.4.1")
 
 resolvers += "Flow Plugins" at "https://flow.jfrog.io/flow/plugins-release/"
 
-addSbtPlugin("io.flow" % "sbt-flow-linter" % "0.0.41")
+addSbtPlugin("io.flow" % "sbt-flow-linter" % "0.0.54")
 
 // Resolve scala-xml version dependency mismatch, see https://github.com/sbt/sbt/issues/7007
 ThisBuild / libraryDependencySchemes ++= Seq(

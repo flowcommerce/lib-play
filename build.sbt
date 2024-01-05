@@ -30,6 +30,7 @@ lazy val root = project
     libraryDependencies ++= Seq(
       ws,
       filters,
+      guice,
       "com.google.inject" % "guice" % "5.1.0",
       "com.google.inject.extensions" % "guice-assistedinject" % "5.1.0",
       "io.flow" %% "lib-log" % "0.2.12",

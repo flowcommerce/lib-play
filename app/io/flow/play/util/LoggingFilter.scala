@@ -24,39 +24,50 @@ class FlowLoggingFilter @javax.inject.Inject() (implicit
 ) extends Filter {
 
   private val LoggedRequestMethodConfig = "play.http.logging.methods"
-  private val DefaultLoggedRequestMethods = Seq("GET", "PATCH", "POST", "PUT", "DELETE", "OPTIONS", "HEAD")
+
   private val LoggedHeaders = Seq(
-    "User-Agent",
-    "X-Forwarded-For",
-    "CF-Connecting-IP",
-    "X-Apidoc-Version",
-  ).map(_.toLowerCase)
+    Constants.Headers.UserAgent,
+    Constants.Headers.ForwardedFor,
+    Constants.Headers.CfConnectingIp,
+    Constants.Headers.CfTrueClientIp,
+    Constants.Headers.CfRay,
+    Constants.Headers.ApiDocVersion,
+    Constants.Headers.FlowIp,
+    Constants.Headers.FlowRequestId,
+    Constants.Headers.DatadogTraceId,
+  )
 
   private val loggedRequestMethods =
-    config.optionalList(LoggedRequestMethodConfig).getOrElse(DefaultLoggedRequestMethods).toSet
+    config.optionalList(LoggedRequestMethodConfig).map(_.toSet)
 
   def apply(f: RequestHeader => Future[Result])(requestHeader: RequestHeader): Future[Result] = {
     val startTime = System.currentTimeMillis
     f(requestHeader).map { result =>
       /*
        * If user defined a list of methods that produce logs, then use that
-       * Otherwise default to list defined here, which is everything
+       * Otherwise default to everything
        */
-      if (loggedRequestMethods.contains(requestHeader.method)) {
-        val endTime = System.currentTimeMillis
-        val requestTime = endTime - startTime
+      if (loggedRequestMethods.fold(true)(_.contains(requestHeader.method))) {
+        val requestTime = System.currentTimeMillis - startTime
         val headerMap = requestHeader.headers.toMap
-        val requestId = headerMap.getOrElse("X-Flow-Request-Id", Nil).mkString(",")
+
+        val userAgent = headerMap.getOrElse(Constants.Headers.UserAgent, Nil).mkString("[", ",", "]")
+        val flowIp = headerMap.getOrElse(Constants.Headers.FlowIp, Nil).mkString(",")
+        val flowRequestId = headerMap.getOrElse(Constants.Headers.FlowRequestId, Nil).mkString(",")
+
         val line = Seq(
           requestHeader.method,
           s"${requestHeader.host}${requestHeader.uri}",
+          requestHeader.version,
           result.header.status.toString,
           s"${requestTime}ms",
-          requestId,
-          headerMap.getOrElse("User-Agent", Nil).mkString(","),
-          headerMap.getOrElse("X-Forwarded-For", Nil).mkString(","),
-          headerMap.getOrElse("CF-Connecting-IP", Nil).mkString(","),
+          userAgent,
         ).mkString(" ")
+
+        val loggedRequestHeaders = (for {
+          header <- LoggedHeaders
+          value <- headerMap.get(header)
+        } yield header -> value).toMap
 
         logger
           .withKeyValue("https", requestHeader.secure)
@@ -67,14 +78,9 @@ class FlowLoggingFilter @javax.inject.Inject() (implicit
           .withKeyValue("query_params", requestHeader.queryString)
           .withKeyValue("http_code", result.header.status)
           .withKeyValue("request_time_ms", requestTime)
-          .withKeyValue(
-            "request_headers",
-            headerMap
-              .map { case (key, value) => key.toLowerCase -> value }
-              .view
-              .filterKeys(LoggedHeaders.contains),
-          )
-          .withKeyValue("request_id", requestId)
+          .withKeyValue("request_headers", loggedRequestHeaders)
+          .withKeyValue("x-flow-ip", flowIp)
+          .withKeyValue("x-flow-request-id", flowRequestId)
           .info(line)
       }
 

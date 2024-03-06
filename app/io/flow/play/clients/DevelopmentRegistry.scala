@@ -4,11 +4,13 @@ import io.flow.play.util.Config
 import io.flow.registry.v0.Client
 import io.flow.registry.v0.errors.UnitResponse
 import io.flow.registry.v0.models.Application
+import play.api.libs.ws.WSClient
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
 @javax.inject.Singleton
 class DevelopmentRegistry @javax.inject.Inject() (
+  ws: WSClient,
   config: Config,
 ) extends Registry {
 
@@ -30,7 +32,7 @@ class DevelopmentRegistry @javax.inject.Inject() (
     }
   }
 
-  private[this] lazy val client = new Client(RegistryHost)
+  private[this] lazy val client = new Client(ws, RegistryHost)
 
   override def host(applicationId: String): String = {
     val varName = overriddeVariableName(applicationId)

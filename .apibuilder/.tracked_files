@@ -21,7 +21,7 @@ flow:
     play_2_8_mock_client:
     - app/generated/FlowPermissionV0MockClient.scala
   registry:
-    ning_1_9_client:
+    play_2_8_client:
     - app/generated/FlowRegistryV0Client.scala
   token:
     play_2_8_client:

@@ -18,7 +18,7 @@ code:
     registry:
       version: latest
       generators:
-        ning_1_9_client: "app/generated"
+        play_2_8_client: "app/generated"
     healthcheck:
       version: latest
       generators:

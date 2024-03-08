@@ -2,7 +2,7 @@ package io.flow.play
 
 import akka.actor.{ActorSystem, CoordinatedShutdown}
 import io.flow.log.RollbarLogger
-import io.flow.akka.actor.Reaper
+import io.flow.akka.actor.{ManagedShutdownPhase, Reaper}
 import play.api.inject.Module
 import play.api.{Configuration, Environment}
 
@@ -24,18 +24,27 @@ private[play] final class CoordinatedShutdownActorReaper @Inject() (
 ) {
   @Inject
   def initialize(): Unit = {
-    val logger = rollbar.fingerprint("CoordinatedShutdownActorReaper")
     val reaper = Reaper.get(system)
     implicit val ec = system.dispatcher
 
-    CoordinatedShutdown
-      .get(system)
-      .addTask(CoordinatedShutdown.PhaseServiceRequestsDone, taskName = s"flow-cs-reap-actors") { () =>
-        logger.info("Waiting for watched actors to stop")
-        reaper.reapAsync().map { _ =>
-          logger.info("All watched actors stopped")
-          akka.Done
-        }
+    def coordinatedShutdownPhase(phase: ManagedShutdownPhase): String =
+      phase match {
+        case ManagedShutdownPhase.ServiceUnbind => CoordinatedShutdown.PhaseBeforeServiceUnbind
+        case ManagedShutdownPhase.ServiceRequestsDone => CoordinatedShutdown.PhaseServiceRequestsDone
+        case ManagedShutdownPhase.ServiceStop => CoordinatedShutdown.PhaseServiceStop
       }
+
+    ManagedShutdownPhase.All.foreach { phase =>
+      CoordinatedShutdown
+        .get(system)
+        .addTask(coordinatedShutdownPhase(phase), taskName = s"flow-coordinated-shutdown-$phase") { () =>
+          val logger = rollbar.fingerprint("CoordinatedShutdownActorReaper").withKeyValue("phase", phase.toString)
+          logger.info(s"phase $phase: waiting for watched actors to stop")
+          reaper.reapAsync(phase).map { _ =>
+            logger.info(s"phase $phase: all watched actors stopped")
+            akka.Done
+          }
+        }
+    }
   }
 }

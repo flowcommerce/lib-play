@@ -39,9 +39,9 @@ private[play] final class CoordinatedShutdownActorReaper @Inject() (
         .get(system)
         .addTask(coordinatedShutdownPhase(phase), taskName = s"flow-coordinated-shutdown-$phase") { () =>
           val logger = rollbar.fingerprint("CoordinatedShutdownActorReaper").withKeyValue("phase", phase.toString)
-          logger.info("Waiting for watched actors to stop")
+          logger.info(s"phase $phase: waiting for watched actors to stop")
           reaper.reapAsync(phase).map { _ =>
-            logger.info("All watched actors stopped")
+            logger.info(s"phase $phase: all watched actors stopped")
             akka.Done
           }
         }

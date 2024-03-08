@@ -2,7 +2,7 @@ package io.flow.play
 
 import akka.pattern.ask
 import akka.util.Timeout
-import io.flow.akka.actor.ReaperActor
+import io.flow.akka.actor.{ManagedShutdownPhase, ReaperActor}
 import io.flow.play.util.LibPlaySpec
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.must.Matchers
@@ -20,11 +20,15 @@ class CoordinatedShutdownActorReaperModuleSpec extends LibPlaySpec with BeforeAn
       .build()
 
   "CoordinatedShutdownActorReaperModule" should {
-    "register ReaperActor" in {
+    def verify(phase: ManagedShutdownPhase) = {
       // Look it up this way to verify that the module registered it (via its extension)
-      val reaper = app.actorSystem.actorSelection("/user/" + ReaperActor.Name)
+      val reaper = app.actorSystem.actorSelection("/user/" + ReaperActor.name(phase))
       implicit val timeout: Timeout = 3.seconds
       Await.result(reaper ? ReaperActor.Reap, timeout.duration) mustBe akka.Done
+    }
+
+    "register ReaperActor for all ManagedShutdownPhases" in {
+      ManagedShutdownPhase.All.foreach(verify)
     }
   }
 }

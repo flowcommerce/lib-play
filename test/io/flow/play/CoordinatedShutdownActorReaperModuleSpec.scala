@@ -15,7 +15,7 @@ class CoordinatedShutdownActorReaperModuleSpec extends LibPlaySpec with Matchers
     def verify(phase: ManagedShutdownPhase) = {
       // Look it up this way to verify that the module registered it (via its extension loaded in test.conf)
       val reaper = app.actorSystem.actorSelection("/user/" + ReaperActor.name(phase))
-      implicit val timeout: Timeout = 10.seconds
+      implicit val timeout: Timeout = 3.seconds
       Await.result(reaper ? ReaperActor.Reap, timeout.duration) mustBe akka.Done
     }
 

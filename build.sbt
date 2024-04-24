@@ -5,8 +5,20 @@ organization := "io.flow"
 scalaVersion := "2.13.10"
 ThisBuild / javacOptions ++= Seq("-source", "17", "-target", "17")
 
+// Resolve scala-xml version dependency mismatch, see https://github.com/sbt/sbt/issues/7007
+ThisBuild / libraryDependencySchemes ++= Seq(
+  "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always,
+)
+
 enablePlugins(GitVersioning)
 git.useGitDescribe := true
+
+coverageExcludedFiles := ".*\\/app/generated\\/.*"
+coverageDataDir := file("target/scala-2.13")
+coverageHighlighting := true
+coverageFailOnMinimum := true
+coverageMinimumStmtTotal := 58
+coverageMinimumBranchTotal := 58
 
 lazy val allScalacOptions = Seq(
   "-feature",

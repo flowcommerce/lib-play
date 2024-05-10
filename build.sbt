@@ -2,7 +2,7 @@ name := "lib-play-play28"
 
 organization := "io.flow"
 
-scalaVersion := "2.13.10"
+scalaVersion := "2.13.13"
 ThisBuild / javacOptions ++= Seq("-source", "17", "-target", "17")
 
 // Resolve scala-xml version dependency mismatch, see https://github.com/sbt/sbt/issues/7007

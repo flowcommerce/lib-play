@@ -2,7 +2,7 @@ name := "lib-play-play28"
 
 organization := "io.flow"
 
-scalaVersion := "2.13.14"
+scalaVersion := "2.13.15"
 ThisBuild / javacOptions ++= Seq("-source", "17", "-target", "17")
 
 // Resolve scala-xml version dependency mismatch, see https://github.com/sbt/sbt/issues/7007
@@ -45,8 +45,8 @@ lazy val root = project
       guice,
       "com.google.inject" % "guice" % "5.1.0",
       "com.google.inject.extensions" % "guice-assistedinject" % "5.1.0",
-      "io.flow" %% "lib-log" % "0.2.25",
-      "io.flow" %% "lib-akka-akka26" % "0.2.40",
+      "io.flow" %% "lib-log" % "0.2.26",
+      "io.flow" %% "lib-akka-akka26" % "0.2.41",
       "com.pauldijou" %% "jwt-play-json" % "5.0.0",
       "org.apache.commons" % "commons-io" % "1.3.2",
       "org.mockito" % "mockito-core" % "4.11.0" % Test,

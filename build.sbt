@@ -1,4 +1,4 @@
-name := "lib-play-play28"
+name := "lib-play-play29"
 
 organization := "io.flow"
 
@@ -43,16 +43,16 @@ lazy val root = project
       ws,
       filters,
       guice,
-      "com.google.inject" % "guice" % "5.1.0",
-      "com.google.inject.extensions" % "guice-assistedinject" % "5.1.0",
+//      "com.google.inject" % "guice" % "5.1.0",
+//      "com.google.inject.extensions" % "guice-assistedinject" % "5.1.0",
       "io.flow" %% "lib-log" % "0.2.28",
-      "io.flow" %% "lib-akka-akka26" % "0.2.43",
+      "io.flow" %% "lib-akka-akka26" % "0.2.43-SNAPSHOT",
       "com.pauldijou" %% "jwt-play-json" % "5.0.0",
       "org.apache.commons" % "commons-io" % "1.3.2",
-      "org.mockito" % "mockito-core" % "4.11.0" % Test,
-      "org.typelevel" %% "cats-core" % "2.10.0",
+      "org.mockito" % "mockito-core" % "5.11.0" % Test,
+      "org.typelevel" %% "cats-core" % "2.12.0",
       "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
-      "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
+      "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.1" % Test,
       "org.scalatestplus" %% "mockito-3-3" % "3.2.2.0" % Test,
     ),
     scalacOptions ++= allScalacOptions ++ Seq("-release", "17"),

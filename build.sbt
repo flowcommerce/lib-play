@@ -1,4 +1,5 @@
-name := "lib-play-play28"
+name := "lib-play-play29"
+version := "1.0.0-SNAPSHOT"
 
 organization := "io.flow"
 

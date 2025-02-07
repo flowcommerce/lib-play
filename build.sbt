@@ -1,4 +1,5 @@
-name := "lib-play-play28"
+name := "lib-play-play29"
+version := "1.0.0-SNAPSHOT"
 
 organization := "io.flow"
 
@@ -43,10 +44,10 @@ lazy val root = project
       ws,
       filters,
       guice,
-      "com.google.inject" % "guice" % "5.1.0",
-      "com.google.inject.extensions" % "guice-assistedinject" % "5.1.0",
-      "io.flow" %% "lib-log" % "0.2.29",
-      "io.flow" %% "lib-akka-akka26" % "0.2.44",
+//      "com.google.inject" % "guice" % "6.0.0",
+//      "com.google.inject.extensions" % "guice-assistedinject" % "6.0.0",
+      "io.flow" %% "lib-log-play29" % "0.2.32",
+      "io.flow" %% "lib-akka-play29" % "1.0.0-SNAPSHOT",
       "com.pauldijou" %% "jwt-play-json" % "5.0.0",
       "org.apache.commons" % "commons-io" % "1.3.2",
       "org.mockito" % "mockito-core" % "4.11.0" % Test,

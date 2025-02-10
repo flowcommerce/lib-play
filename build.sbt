@@ -43,7 +43,7 @@ lazy val root = project
       ws,
       filters,
       guice,
-      "io.flow" %% "lib-log-play29" % "0.2.32",
+      "io.flow" %% "lib-log-play29" % "0.2.33",
       "io.flow" %% "lib-akka-play29" % "0.2.45",
       "com.pauldijou" %% "jwt-play-json" % "5.0.0",
       "org.apache.commons" % "commons-io" % "1.3.2",

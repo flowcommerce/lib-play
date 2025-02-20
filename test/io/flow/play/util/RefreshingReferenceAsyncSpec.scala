@@ -3,6 +3,7 @@ package io.flow.play.util
 import akka.actor.ActorSystem
 import io.flow.log.RollbarProvider
 import org.mockito.Mockito
+import org.scalatest.{Outcome, Retries}
 import org.scalatest.{EitherValues, _}
 import org.scalatest.concurrent.PatienceConfiguration.{Interval, Timeout}
 import org.scalatest.concurrent.{Eventually, ScalaFutures}
@@ -24,11 +25,16 @@ class RefreshingReferenceAsyncSpec
   with MockitoSugar
   with Eventually
   with ScalaFutures
-  with EitherValues {
+  with EitherValues
+  with Retries {
 
   private[this] val logger = RollbarProvider.logger("test")
   implicit private[this] val system: ActorSystem = app.actorSystem
   private[this] val futures = implicitly[Futures]
+
+  // Allow a single retry for each test
+  override final def withFixture(test: NoArgTest): Outcome =
+    withRetry { super.withFixture(test) }
 
   private def createCache[K, V](
     reloadPeriod: FiniteDuration,

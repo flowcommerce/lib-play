@@ -43,7 +43,7 @@ lazy val root = project
       filters,
       guice,
       "io.flow" %% "lib-log-play29" % "0.2.37",
-      "io.flow" %% "lib-akka-play29" % "0.2.49",
+      "io.flow" %% "lib-akka-play29" % "0.2.50",
       "com.pauldijou" %% "jwt-play-json" % "5.0.0",
       "org.apache.commons" % "commons-io" % "1.3.2",
       "org.mockito" % "mockito-core" % "4.11.0" % Test,

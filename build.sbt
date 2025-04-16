@@ -45,6 +45,7 @@ lazy val root = project
       "io.flow" %% "lib-log-play29" % "0.2.40",
       "io.flow" %% "lib-akka-play29" % "0.2.51",
       "com.github.jwt-scala" %% "jwt-play-json" % "10.0.4",
+      "javax.inject" % "javax.inject" % "1",
       "org.apache.commons" % "commons-io" % "1.3.2",
       "org.typelevel" %% "cats-core" % "2.10.0",
       "org.mockito" % "mockito-core" % "4.11.0" % Test,

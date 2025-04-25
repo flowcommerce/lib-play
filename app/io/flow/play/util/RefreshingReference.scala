@@ -4,10 +4,11 @@ import java.util.concurrent.atomic.AtomicReference
 import akka.actor.{ActorSystem, Scheduler}
 import io.flow.akka.actor.ManagedShutdown
 import io.flow.log.RollbarLogger
-import io.flow.util.Shutdownable
+import io.flow.util.{CacheStatsRecorder, HasCacheStatsRecorder, NoOpCacheStatsRecorder, Shutdownable}
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.FiniteDuration
+import scala.util.chaining.scalaUtilChainingOps
 import scala.util.{Failure, Success, Try}
 
 /** Maintains a reference that gets refreshed every `reloadInterval`
@@ -18,7 +19,8 @@ import scala.util.{Failure, Success, Try}
   * The class will not initialize if the retrieval function fails the first `maxAttempts` times to avoid querying a
   * cache that has never been initialized.
   */
-trait RefreshingReference[T] extends Shutdownable {
+trait RefreshingReference[T] extends Shutdownable with NoOpCacheStatsRecorder {
+  self: HasCacheStatsRecorder =>
 
   def logger: RollbarLogger
 
@@ -57,7 +59,7 @@ trait RefreshingReference[T] extends Shutdownable {
   def forceRefresh(): Boolean = {
     doLoadRetry(1, maxAttempts) match {
       case Success(data) =>
-        cache.set(data)
+        cache.set(data).tap(_ => cacheStatsRecorder.recordRemoval(CacheStatsRecorder.RemovalReason.Explicit))
         true
       case Failure(ex) =>
         log.withKeyValue("max_attempts", maxAttempts).warn("Failed to initialize cache", ex)
@@ -65,7 +67,7 @@ trait RefreshingReference[T] extends Shutdownable {
     }
   }
 
-  def get: T = cache.get()
+  def get: T = cache.get().tap(_ => cacheStatsRecorder.recordHits(1L))
 
   // load blocking and fail if the retrieval is not successful after maxAttempts
   private[this] val cache: AtomicReference[T] = {
@@ -75,6 +77,7 @@ trait RefreshingReference[T] extends Shutdownable {
         log.withKeyValue("max_attempts", maxAttempts).warn("Failed to initialize cache", ex)
         throw ex
     }
+    cacheStatsRecorder.recordMisses(1L) // First get is a miss
     new AtomicReference(retrieved)
   }
 
@@ -84,7 +87,10 @@ trait RefreshingReference[T] extends Shutdownable {
       log.info("Not refreshing reference, shutdown in progress")
     } else {
       doLoadRetry(1, maxAttempts) match {
-        case Success(data) => cache.set(data)
+        case Success(data) =>
+          cache
+            .set(data)
+            .tap(_ => cacheStatsRecorder.recordRemoval(CacheStatsRecorder.RemovalReason.Expired))
         case Failure(ex) =>
           log
             .withKeyValue("max_attempts", maxAttempts)
@@ -95,15 +101,21 @@ trait RefreshingReference[T] extends Shutdownable {
   }(retrieveExecutionContext)
 
   private def doLoadRetry(attempts: Int, maxAttempts: Int): Try[T] =
-    Try(retrieve)
-      .recoverWith {
-        case ex if attempts < maxAttempts =>
-          log
-            .withKeyValue("max_attempts", maxAttempts)
-            .withKeyValue("reload_interval", reloadInterval.toString)
-            .info("Failed to refresh cache. Trying again...", ex)
-          doLoadRetry(attempts + 1, maxAttempts)
-      }
+    Success(System.nanoTime()).flatMap { startTime =>
+      Try(retrieve)
+        .tap {
+          case Failure(_) => cacheStatsRecorder.recordLoadFailure(System.nanoTime() - startTime)
+          case Success(_) => cacheStatsRecorder.recordLoadSuccess(System.nanoTime() - startTime)
+        }
+        .recoverWith {
+          case ex if attempts < maxAttempts =>
+            log
+              .withKeyValue("max_attempts", maxAttempts)
+              .withKeyValue("reload_interval", reloadInterval.toString)
+              .info("Failed to refresh cache. Trying again...", ex)
+            doLoadRetry(attempts + 1, maxAttempts)
+        }
+    }
 
 }
 

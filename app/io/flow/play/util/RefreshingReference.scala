@@ -1,11 +1,11 @@
 package io.flow.play.util
 
-import java.util.concurrent.atomic.AtomicReference
 import akka.actor.{ActorSystem, Scheduler}
 import io.flow.akka.actor.ManagedShutdown
 import io.flow.log.RollbarLogger
 import io.flow.util.{CacheStatsRecorder, HasCacheStatsRecorder, NoOpCacheStatsRecorder, Shutdownable}
 
+import java.util.concurrent.atomic.AtomicReference
 import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.FiniteDuration
 import scala.util.chaining.scalaUtilChainingOps
@@ -121,7 +121,8 @@ trait RefreshingReference[T] extends Shutdownable with NoOpCacheStatsRecorder {
 
 abstract class ShutdownManangedRefreshingReference[T](override val system: ActorSystem)
   extends RefreshingReference[T]
-  with ManagedShutdown
+  with HasCacheStatsRecorder
+  with ManagedShutdown {}
 
 object RefreshingReference {
 
@@ -134,22 +135,25 @@ object RefreshingReference {
     reloadInterval: FiniteDuration,
     retrieve: () => T,
     maxAttempts: Int = 3,
+    statsRecorder: CacheStatsRecorder = CacheStatsRecorder.NoOpCacheStatsRecorder,
   ): RefreshingReference[T] = {
     val schedulerOuter = scheduler
     val retrieveExecutionContextOuter = retrieveExecutionContext
     val reloadIntervalOuter = reloadInterval
     val retrieveOuter = retrieve
     val maxAttemptsOuter = maxAttempts
-    new RefreshingReference[T]() {
+    new RefreshingReference[T]() with HasCacheStatsRecorder {
       override def logger: RollbarLogger = rollbarLogger
       override def scheduler: Scheduler = schedulerOuter
       override def retrieveExecutionContext: ExecutionContext = retrieveExecutionContextOuter
       override def reloadInterval: FiniteDuration = reloadIntervalOuter
       override def retrieve: T = retrieveOuter()
       override def maxAttempts: Int = maxAttemptsOuter
+      override def cacheStatsRecorder: CacheStatsRecorder = statsRecorder
     }
   }
 
+  // Generated caches use this
   def apply[T](
     rollbarLogger: RollbarLogger,
     scheduler: Scheduler,
@@ -158,6 +162,27 @@ object RefreshingReference {
     actorSystem: ActorSystem,
     retrieve: () => T,
     maxAttempts: Int,
+  ): RefreshingReference[T] =
+    forActorSystem(
+      rollbarLogger,
+      scheduler,
+      retrieveExecutionContext,
+      reloadInterval,
+      actorSystem,
+      retrieve,
+      maxAttempts,
+      statsRecorder = CacheStatsRecorder.NoOpCacheStatsRecorder,
+    )
+
+  def forActorSystem[T](
+    rollbarLogger: RollbarLogger,
+    scheduler: Scheduler,
+    retrieveExecutionContext: ExecutionContext,
+    reloadInterval: FiniteDuration,
+    actorSystem: ActorSystem,
+    retrieve: () => T,
+    maxAttempts: Int,
+    statsRecorder: CacheStatsRecorder,
   ): RefreshingReference[T] = {
     val schedulerOuter = scheduler
     val retrieveExecutionContextOuter = retrieveExecutionContext
@@ -166,16 +191,12 @@ object RefreshingReference {
     val maxAttemptsOuter = maxAttempts
     new ShutdownManangedRefreshingReference[T](actorSystem) {
       override def logger: RollbarLogger = rollbarLogger
-
       override def scheduler: Scheduler = schedulerOuter
-
       override def retrieveExecutionContext: ExecutionContext = retrieveExecutionContextOuter
-
       override def reloadInterval: FiniteDuration = reloadIntervalOuter
-
       override def retrieve: T = retrieveOuter()
-
       override def maxAttempts: Int = maxAttemptsOuter
+      override def cacheStatsRecorder: CacheStatsRecorder = statsRecorder
     }
   }
 }

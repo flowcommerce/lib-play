@@ -98,7 +98,7 @@ lazy val standalone: Project = project
       "com.typesafe.play" %% "play-jdbc" % "2.9.6",
       "io.flow" %% "lib-postgresql-play29" % "0.2.90",
       "io.flow" %% "lib-metrics-play29" % "1.1.18",
-      "org.postgresql" % "postgresql" % "42.7.4",
+      "org.postgresql" % "postgresql" % "42.7.7",
     ),
     libraryDependencies ++= Seq(
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,

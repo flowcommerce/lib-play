@@ -19,8 +19,8 @@ import scala.util.control.NonFatal
   * long-running Play service.
   *
   * This is not a full Play application, but it does support key Play features such as `ApplicationLifecycle`, Play
-  * configuration, and Guice dependency injection.  This should allow most of our normal service code to be used
-  * outside of a Play service.
+  * configuration, and Guice dependency injection. This should allow most of our normal service code to be used outside
+  * of a Play service.
   *
   * Module support is provided, but modules must be explicitly specified via the `modules` method. Modules listed in
   * configuration files under the `play.modules.enabled` setting will not be loaded. This design choice helps avoid

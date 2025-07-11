@@ -88,7 +88,7 @@ lazy val lib: Project = project
   )
 
 lazy val standalone: Project = project
-  .dependsOn(lib)
+  .dependsOn(lib) // neeeded for our Config
   .settings(
     name := "lib-play-standalone-play29",
     scalacOptions ++= allScalacOptions,
@@ -96,8 +96,9 @@ lazy val standalone: Project = project
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-guice" % "2.9.6",
       "com.typesafe.play" %% "play-jdbc" % "2.9.6",
-      "io.flow" %% "lib-postgresql-play29" % "0.2.90",
+      "io.flow" %% "lib-log-play29" % "0.2.42",
       "io.flow" %% "lib-metrics-play29" % "1.1.18",
+      "io.flow" %% "lib-postgresql-play29" % "0.2.90",
       "org.postgresql" % "postgresql" % "42.7.7",
     ),
     libraryDependencies ++= Seq(

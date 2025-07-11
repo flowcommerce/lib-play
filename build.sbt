@@ -1,3 +1,6 @@
+import sbt.file
+import scoverage.ScoverageKeys.{coverageDataDir, coverageHighlighting}
+
 ThisBuild / organization := "io.flow"
 ThisBuild / scalaVersion := "2.13.16"
 
@@ -22,13 +25,6 @@ ThisBuild / libraryDependencySchemes ++= Seq(
 
 enablePlugins(GitVersioning)
 git.useGitDescribe := true
-
-coverageExcludedFiles := ".*\\/app/generated\\/.*"
-coverageDataDir := file("target/scala-2.13")
-coverageHighlighting := true
-coverageFailOnMinimum := true
-coverageMinimumStmtTotal := 58
-coverageMinimumBranchTotal := 58
 
 lazy val allScalacOptions = Seq(
   "-feature",
@@ -85,6 +81,14 @@ lazy val lib: Project = project
       "--add-exports=java.base/sun.security.x509=ALL-UNNAMED",
       "--add-opens=java.base/sun.security.ssl=ALL-UNNAMED",
     ),
+  )
+  .settings(
+    coverageExcludedFiles := ".*\\/app/generated\\/.*",
+    coverageDataDir := file("target/scala-2.13"),
+    coverageHighlighting := true,
+    coverageFailOnMinimum := true,
+    coverageMinimumStmtTotal := 58,
+    coverageMinimumBranchTotal := 58,
   )
 
 lazy val standalone: Project = project

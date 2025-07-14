@@ -1,8 +1,22 @@
-name := "lib-play-play29"
-organization := "io.flow"
+import sbt.file
+import scoverage.ScoverageKeys.{coverageDataDir, coverageHighlighting}
 
-scalaVersion := "2.13.16"
-ThisBuild / javacOptions ++= Seq("-source", "17", "-target", "17")
+ThisBuild / organization := "io.flow"
+ThisBuild / scalaVersion := "2.13.16"
+
+inThisBuild(
+  Seq(
+    resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/",
+    resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
+    resolvers += "Artifactory" at "https://flow.jfrog.io/flow/libs-release/",
+    credentials += Credentials(
+      "Artifactory Realm",
+      "flow.jfrog.io",
+      System.getenv("ARTIFACTORY_USERNAME"),
+      System.getenv("ARTIFACTORY_PASSWORD"),
+    ),
+  ),
+)
 
 // Resolve scala-xml version dependency mismatch, see https://github.com/sbt/sbt/issues/7007
 ThisBuild / libraryDependencySchemes ++= Seq(
@@ -11,13 +25,6 @@ ThisBuild / libraryDependencySchemes ++= Seq(
 
 enablePlugins(GitVersioning)
 git.useGitDescribe := true
-
-coverageExcludedFiles := ".*\\/app/generated\\/.*"
-coverageDataDir := file("target/scala-2.13")
-coverageHighlighting := true
-coverageFailOnMinimum := true
-coverageMinimumStmtTotal := 58
-coverageMinimumBranchTotal := 58
 
 lazy val allScalacOptions = Seq(
   "-feature",
@@ -33,10 +40,23 @@ lazy val allScalacOptions = Seq(
 
 val akkaVersion = play.core.PlayVersion.akkaVersion
 
-lazy val root = project
-  .in(file("."))
-  .enablePlugins(PlayScala)
+lazy val root = (project in file("."))
+  .aggregate(lib, standalone)
   .settings(
+    scalacOptions ++= allScalacOptions ++ Seq("-release", "17"),
+    scalafmtOnCompile := true,
+    Test / javaOptions ++= Seq(
+      "--add-exports=java.base/sun.security.x509=ALL-UNNAMED",
+      "--add-opens=java.base/sun.security.ssl=ALL-UNNAMED",
+    ),
+    publish / skip := true,
+  )
+
+lazy val lib: Project = project
+  .enablePlugins(PlayScala)
+  .enablePlugins(GitVersioning)
+  .settings(
+    name := "lib-play-play29",
     scalafmtOnCompile := true,
     libraryDependencies ++= Seq(
       ws,
@@ -61,18 +81,43 @@ lazy val root = project
       "--add-exports=java.base/sun.security.x509=ALL-UNNAMED",
       "--add-opens=java.base/sun.security.ssl=ALL-UNNAMED",
     ),
-    resolvers += "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/",
-    resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases",
-    resolvers += "Artifactory" at "https://flow.jfrog.io/flow/libs-release/",
-    credentials += Credentials(
-      "Artifactory Realm",
-      "flow.jfrog.io",
-      System.getenv("ARTIFACTORY_USERNAME"),
-      System.getenv("ARTIFACTORY_PASSWORD"),
-    ),
+  )
+  .settings(
+    coverageExcludedFiles := ".*\\/app/generated\\/.*",
+    coverageDataDir := file("target/scala-2.13"),
+    coverageHighlighting := true,
+    coverageFailOnMinimum := true,
+    coverageMinimumStmtTotal := 58,
+    coverageMinimumBranchTotal := 58,
   )
 
-publishTo := {
+lazy val standalone: Project = project
+  .dependsOn(lib) // neeeded for our Config
+  .settings(
+    name := "lib-play-standalone-play29",
+    scalacOptions ++= allScalacOptions,
+    scalafmtOnCompile := true,
+    libraryDependencies ++= Seq(
+      "com.typesafe.play" %% "play-guice" % "2.9.6",
+      "com.typesafe.play" %% "play-jdbc" % "2.9.6",
+      "io.flow" %% "lib-log-play29" % "0.2.42",
+      "io.flow" %% "lib-metrics-play29" % "1.1.18",
+      "io.flow" %% "lib-postgresql-play29" % "0.2.90",
+      "org.postgresql" % "postgresql" % "42.7.7",
+    ),
+    libraryDependencies ++= Seq(
+      "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
+      "com.h2database" % "h2" % "2.3.232" % Test,
+    ),
+    git.useGitDescribe := true,
+    Test / javaOptions ++= Seq(
+      "--add-exports=java.base/sun.security.x509=ALL-UNNAMED",
+      "--add-opens=java.base/sun.security.ssl=ALL-UNNAMED",
+    ),
+    Test / fork := true,
+  )
+
+ThisBuild / publishTo := {
   val host = "https://flow.jfrog.io/flow"
   if (isSnapshot.value) {
     Some("Artifactory Realm" at s"$host/libs-snapshot-local;build.timestamp=" + new java.util.Date().getTime)

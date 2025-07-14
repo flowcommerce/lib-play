@@ -91,7 +91,6 @@ lazy val lib: Project = project
   )
 
 lazy val standalone: Project = project
-  .dependsOn(lib) // neeeded for our Config
   .enablePlugins(GitVersioning)
   .settings(
     name := "lib-play-standalone-play29",
@@ -100,6 +99,7 @@ lazy val standalone: Project = project
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-guice" % "2.9.6",
       "com.typesafe.play" %% "play-jdbc" % "2.9.6",
+      "io.flow" %% "lib-play-play29" % "0.8.20", // required for flow Config modules
       "io.flow" %% "lib-log-play29" % "0.2.42",
       "io.flow" %% "lib-metrics-play29" % "1.1.18",
       "io.flow" %% "lib-postgresql-play29" % "0.2.90",

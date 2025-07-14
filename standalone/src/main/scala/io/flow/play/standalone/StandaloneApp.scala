@@ -41,16 +41,24 @@ import scala.util.control.NonFatal
   * }}}
   */
 trait StandaloneApp {
+  def run(args: Array[String])(implicit injector: Injector): Unit
+
   final def main(args: Array[String]): Unit =
     StandaloneApp.withInjector(environment, modules) { injector =>
       run(args)(injector)
     }
 
-  def run(args: Array[String])(implicit injector: Injector): Unit
+  final def inject[T: ClassTag](implicit injector: Injector): T = injector.instanceOf[T]
 
-  def inject[T: ClassTag](implicit injector: Injector): T = injector.instanceOf[T]
+  final def rollbar(implicit injector: Injector): RollbarLogger = inject[RollbarLogger]
 
-  def modules: Seq[GuiceableModule] = Seq(
+  def modules: Seq[GuiceableModule] = StandaloneApp.DefaultModules
+
+  def environment: Environment = StandaloneApp.DefaultEnvironment
+}
+
+object StandaloneApp {
+  lazy val DefaultModules: Seq[GuiceableModule] = Seq(
     new Modules.PlayConfigurationModule(),
     new Modules.PlayApplicationLifecycleModule(),
     new Modules.SLFLoggerConfigurationModule(),
@@ -61,11 +69,7 @@ trait StandaloneApp {
     new MetricsModule(),
   )
 
-  def environment: Environment = StandaloneApp.DefaultEnvironment
-}
-
-object StandaloneApp {
-  private lazy val DefaultEnvironment: Environment = {
+  lazy val DefaultEnvironment: Environment = {
     val mode = FlowEnvironment.Current match {
       case FlowEnvironment.Development | FlowEnvironment.Workstation => Mode.Test
       case FlowEnvironment.Production => Mode.Prod
@@ -77,7 +81,10 @@ object StandaloneApp {
       .copy(classLoader = Thread.currentThread().getContextClassLoader)
   }
 
-  private def withInjector[T](environment: Environment, modules: Seq[GuiceableModule])(f: Injector => T): T =
+  def withInjector[T](
+    environment: Environment,
+    modules: Seq[GuiceableModule],
+  )(f: Injector => T): T =
     try {
       val configuration = Configuration.load(
         classLoader = environment.classLoader,

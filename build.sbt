@@ -23,8 +23,7 @@ ThisBuild / libraryDependencySchemes ++= Seq(
   "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always,
 )
 
-enablePlugins(GitVersioning)
-git.useGitDescribe := true
+ThisBuild / git.useGitDescribe := true
 
 lazy val allScalacOptions = Seq(
   "-feature",
@@ -93,6 +92,7 @@ lazy val lib: Project = project
 
 lazy val standalone: Project = project
   .dependsOn(lib) // neeeded for our Config
+  .enablePlugins(GitVersioning)
   .settings(
     name := "lib-play-standalone-play29",
     scalacOptions ++= allScalacOptions,

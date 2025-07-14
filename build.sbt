@@ -117,7 +117,7 @@ lazy val standalone: Project = project
     Test / fork := true,
   )
 
-publishTo := {
+ThisBuild / publishTo := {
   val host = "https://flow.jfrog.io/flow"
   if (isSnapshot.value) {
     Some("Artifactory Realm" at s"$host/libs-snapshot-local;build.timestamp=" + new java.util.Date().getTime)

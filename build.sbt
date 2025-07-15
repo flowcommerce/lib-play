@@ -91,7 +91,7 @@ lazy val lib: Project = project
 
 lazy val standalone: Project = project
   .enablePlugins(GitVersioning)
-  .dependsOn(lib % Test)
+  .dependsOn(lib % Test) // ConfigModule
   .settings(
     name := "lib-play-standalone-play29",
     git.useGitDescribe := true,

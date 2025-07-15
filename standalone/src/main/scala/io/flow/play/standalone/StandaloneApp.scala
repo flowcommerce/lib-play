@@ -2,7 +2,7 @@ package io.flow.play.standalone
 
 import io.flow.log.RollbarLogger
 import io.flow.util.FlowEnvironment
-import play.api._
+import play.api.{Application, Environment, Mode}
 import play.api.inject.ApplicationLifecycle
 import play.api.inject.guice.GuiceApplicationBuilder
 
@@ -52,6 +52,7 @@ trait StandaloneApp {
 }
 
 object StandaloneApp {
+
   lazy val DefaultEnvironment: Environment = {
     val mode = FlowEnvironment.Current match {
       case FlowEnvironment.Development | FlowEnvironment.Workstation => Mode.Test

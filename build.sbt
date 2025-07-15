@@ -23,8 +23,6 @@ ThisBuild / libraryDependencySchemes ++= Seq(
   "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always,
 )
 
-ThisBuild / git.useGitDescribe := true
-
 lazy val allScalacOptions = Seq(
   "-feature",
   "-Xfatal-warnings",
@@ -56,6 +54,8 @@ lazy val lib: Project = project
   .enablePlugins(GitVersioning)
   .settings(
     name := "lib-play-play29",
+    git.useGitDescribe := true,
+    scalacOptions ++= allScalacOptions ++ Seq("-release", "17"),
     scalafmtOnCompile := true,
     libraryDependencies ++= Seq(
       ws,
@@ -72,7 +72,6 @@ lazy val lib: Project = project
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
       "org.scalatestplus" %% "mockito-3-3" % "3.2.2.0" % Test,
     ),
-    scalacOptions ++= allScalacOptions ++ Seq("-release", "17"),
     // Suppresses problems with Scaladoc links
     Compile / doc / scalacOptions += "-no-link-warnings",
     Test / javaOptions += "-Dconfig.file=conf/test.conf",
@@ -94,22 +93,19 @@ lazy val standalone: Project = project
   .enablePlugins(GitVersioning)
   .settings(
     name := "lib-play-standalone-play29",
-    scalacOptions ++= allScalacOptions,
+    git.useGitDescribe := true,
+    scalacOptions ++= allScalacOptions ++ Seq("-release", "17"),
     scalafmtOnCompile := true,
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-guice" % "2.9.6",
       "com.typesafe.play" %% "play-jdbc" % "2.9.6",
-      "io.flow" %% "lib-play-play29" % "0.8.20", // required for flow Config modules
       "io.flow" %% "lib-log-play29" % "0.2.42",
       "io.flow" %% "lib-metrics-play29" % "1.1.18",
       "io.flow" %% "lib-postgresql-play29" % "0.2.90",
       "org.postgresql" % "postgresql" % "42.7.7",
-    ),
-    libraryDependencies ++= Seq(
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
       "com.h2database" % "h2" % "2.3.232" % Test,
     ),
-    git.useGitDescribe := true,
     Test / javaOptions ++= Seq(
       "--add-exports=java.base/sun.security.x509=ALL-UNNAMED",
       "--add-opens=java.base/sun.security.ssl=ALL-UNNAMED",

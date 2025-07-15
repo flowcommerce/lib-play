@@ -1,6 +1,7 @@
 package io.flow.play.standalone
 
 import org.scalatest.wordspec.AnyWordSpec
+import play.api.Application
 import play.api.inject.ApplicationLifecycle
 
 import java.util.concurrent.atomic.AtomicBoolean

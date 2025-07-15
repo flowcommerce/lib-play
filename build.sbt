@@ -91,6 +91,7 @@ lazy val lib: Project = project
 
 lazy val standalone: Project = project
   .enablePlugins(GitVersioning)
+  .dependsOn(lib % Test)
   .settings(
     name := "lib-play-standalone-play29",
     git.useGitDescribe := true,
@@ -98,13 +99,9 @@ lazy val standalone: Project = project
     scalafmtOnCompile := true,
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-guice" % "2.9.6",
-      "com.typesafe.play" %% "play-jdbc" % "2.9.6",
       "io.flow" %% "lib-log-play29" % "0.2.42",
       "io.flow" %% "lib-metrics-play29" % "1.1.18",
-      "io.flow" %% "lib-postgresql-play29" % "0.2.90",
-      "org.postgresql" % "postgresql" % "42.7.7",
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
-      "com.h2database" % "h2" % "2.3.232" % Test,
     ),
     Test / javaOptions ++= Seq(
       "--add-exports=java.base/sun.security.x509=ALL-UNNAMED",

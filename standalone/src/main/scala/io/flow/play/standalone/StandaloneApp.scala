@@ -1,7 +1,6 @@
 package io.flow.play.standalone
 
 import io.flow.log.{RollbarLogger, RollbarModule}
-import io.flow.play.clients.ConfigModule
 import io.flow.play.metrics.{MetricsModule, MetricsSystem}
 import io.flow.util.FlowEnvironment
 import play.api.db.{DBModule, HikariCPModule}
@@ -14,6 +13,11 @@ import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, Future}
 import scala.reflect.ClassTag
 import scala.util.control.NonFatal
+
+// Subset of play.api.Application, no ActorSystem etc.
+trait Application {
+  def injector: Injector
+}
 
 /** Provides a foundation for an opinionated application that performs work and then terminates, as opposed to a
   * long-running Play service.
@@ -32,7 +36,7 @@ import scala.util.control.NonFatal
   * Example usage:
   * {{{
   * object MyApp extends StandaloneApp {
-  *   override def run(args: Array[String])(implicit injector: Injector): Unit = {
+  *   override def run(args: Array[String])(implicit app: Application): Unit = {
   *     val myObj = inject[MyObj]
   *     // do something
   *   }
@@ -41,16 +45,16 @@ import scala.util.control.NonFatal
   * }}}
   */
 trait StandaloneApp {
-  def run(args: Array[String])(implicit injector: Injector): Unit
+  def run(args: Array[String])(implicit app: Application): Unit
 
   final def main(args: Array[String]): Unit =
-    StandaloneApp.withInjector(environment, modules) { injector =>
-      run(args)(injector)
+    StandaloneApp.withApplication(environment, modules) { app =>
+      run(args)(app)
     }
 
-  final def inject[T: ClassTag](implicit injector: Injector): T = injector.instanceOf[T]
+  final def inject[T: ClassTag](implicit app: Application): T = app.injector.instanceOf[T]
 
-  final def rollbar(implicit injector: Injector): RollbarLogger = inject[RollbarLogger]
+  final def rollbar(implicit app: Application): RollbarLogger = inject[RollbarLogger]
 
   def modules: Seq[GuiceableModule] = StandaloneApp.DefaultModules
 
@@ -64,7 +68,7 @@ object StandaloneApp {
     new Modules.SLFLoggerConfigurationModule(),
     new DBModule(),
     new HikariCPModule(),
-    new ConfigModule(),
+    new Modules.FlowConfigurationModule(),
     new RollbarModule(),
     new MetricsModule(),
   )
@@ -81,10 +85,10 @@ object StandaloneApp {
       .copy(classLoader = Thread.currentThread().getContextClassLoader)
   }
 
-  def withInjector[T](
+  def withApplication[T](
     environment: Environment,
     modules: Seq[GuiceableModule],
-  )(f: Injector => T): T =
+  )(f: Application => T): T =
     try {
       val configuration = Configuration.load(
         classLoader = environment.classLoader,
@@ -92,19 +96,22 @@ object StandaloneApp {
         directSettings = Map.empty[String, String],
         allowMissingApplicationConf = true,
       )
-      val injector = new GuiceInjectorBuilder(environment, configuration, modules).build()
-      val applicationLifecycle = injector.instanceOf[ApplicationLifecycle]
+      val _injector = new GuiceInjectorBuilder(environment, configuration, modules).build()
+      val applicationLifecycle = _injector.instanceOf[ApplicationLifecycle]
 
       // Force a flush here if the application has not flushed logs yet. Rollbar by default flushes every 10 seconds.
-      val logger = injector.instanceOf[RollbarLogger]
+      val logger = _injector.instanceOf[RollbarLogger]
       applicationLifecycle.addStopHook(() => Future.successful(logger.rollbar.foreach(_.close(true))))
 
       // DatadogMetricsSystem pushes a final report on close.
-      val metricsSystem = injector.instanceOf[MetricsSystem]
+      val metricsSystem = _injector.instanceOf[MetricsSystem]
       applicationLifecycle.addStopHook(() => Future.successful(metricsSystem.close()))
 
       try {
-        f(injector)
+        val app = new Application {
+          override def injector: Injector = _injector
+        }
+        f(app)
       } finally {
         stopApp(applicationLifecycle)
       }

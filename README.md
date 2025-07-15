@@ -1,7 +1,13 @@
 [![Build Status](https://travis-ci.org/flowcommerce/lib-play.svg?branch=main)](https://app.travis-ci.com/flowcommerce/lib-play)
 
+# lib-play-standalone
+Provides a foundation for an opinionated application that performs work and then terminates, as opposed to a
+long-running Play service. One example would be a cron job.  See `io.flow.play.standalone.StandaloneApp`.
+
+Does *not* require lib-play, but it can be added if your application does.
+
 # lib-play
-Library supporting building REST APIs on play framework.
+Library supporting building REST APIs on play framework._
 
 ## Provided Bindings
 

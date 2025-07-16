@@ -1,0 +1,24 @@
+<!--
+    Logging configuration for testing, no JSON
+    https://www.playframework.com/documentation/latest/SettingsLogger
+-->
+<configuration>
+
+  <conversionRule conversionWord="coloredLevel" converterClass="play.api.libs.logback.ColoredLevel" />
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <!-- We use short exception stack trace logging to limit output for CI. -->
+      <!-- Change to full if you need to do further debugging, but never commit that. -->
+      <pattern>%d{HH:mm:ss} %coloredLevel %logger{15} - %message%n%ex{short}</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="play" level="INFO" />
+  <logger name="application" level="INFO" />
+
+  <root level="INFO">
+    <appender-ref ref="STDOUT"/>
+  </root>
+
+</configuration>

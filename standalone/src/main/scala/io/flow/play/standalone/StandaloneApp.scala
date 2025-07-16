@@ -15,7 +15,7 @@ import scala.util.control.NonFatal
   * long-running Play service.
   *
   * A default set of modules are loaded by default (see reference.conf) to support common behaviors such as
-  * configuration, logging and metrics reporting.
+  * configuration and logging.
   *
   * Example usage:
   * {{{

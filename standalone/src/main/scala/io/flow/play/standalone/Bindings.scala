@@ -2,35 +2,49 @@ package io.flow.play.standalone
 
 import com.google.inject.Provider
 import com.rollbar.notifier.Rollbar
+import play.api.inject._
 import play.api.{Configuration, Environment, Mode}
-import play.api.inject.{bind, _}
 
 import javax.inject.{Inject, Singleton}
 
 // This is duplication of io.flow.play.clients.ConfigModule in lib-play.  Depending on lib-play
 // makes publishing more difficult due to versioning.
-final class FlowConfigModule
-  extends SimpleModule((env, conf) => {
-    import FlowConfigModule.{DefaultConfig, MockConfig}
-    import io.flow.util.{Config => FlowConfig}
+final class FlowConfigModule extends Module {
+  import FlowConfigModule.{DefaultConfig, MockConfig}
+  import io.flow.util.{Config => FlowConfig}
 
+  override def bindings(env: Environment, conf: Configuration): collection.Seq[Binding[_]] = {
     assert(conf.entrySet.nonEmpty, "Expected configuration to be non empty before provision")
 
-    env.mode match {
-      case Mode.Prod | Mode.Dev =>
-        Seq(
-          bind[FlowConfig].to[DefaultConfig],
-        )
-      case Mode.Test =>
-        Seq(
-          bind[FlowConfig].to[MockConfig],
-        )
+    // We bind ours only if the one from lib-play is not possibly available.
+    val configModule = resolveModuleClasses("io.flow.play.clients.ConfigModule").headOption
+    if (configModule.isEmpty) {
+      env.mode match {
+        case Mode.Prod | Mode.Dev =>
+          Seq(
+            bind[FlowConfig].to[DefaultConfig],
+          )
+        case Mode.Test =>
+          Seq(
+            bind[FlowConfig].to[MockConfig],
+          )
+      }
+    } else Seq.empty
+  }
+
+  private def resolveModuleClasses(classNames: String*): Seq[Class[_]] =
+    classNames.flatMap { name =>
+      scala.util.Try(Class.forName(name)).toOption.filter { cls =>
+        classOf[com.google.inject.Module].isAssignableFrom(cls) ||
+        classOf[play.api.inject.Module].isAssignableFrom(cls)
+      }
     }
-  })
+}
 
 // Duplication of io.flow.play.clients.ConfigModule in lib-play
 object FlowConfigModule {
   import io.flow.util.{ChainedConfig, Config, EnvironmentConfig, PropertyConfig}
+
   import scala.collection.mutable
 
   /** A chained configuration that favors environment variables, then system properties, then the play application

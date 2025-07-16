@@ -52,14 +52,7 @@ trait StandaloneApp {
     * class MyAppSpec extends PlaySpec with GuiceOneAppPerSuite { override def fakeApplication(): Application = MyApp.build() }
     * }}}
     */
-  def build(): Application = {
-    // We provide io.flow.play.standalone.FlowConfigModule, disable this one if present
-    val excludedModules = StandaloneApp.resolveModuleClasses("io.flow.play.clients.ConfigModule")
-
-    new GuiceApplicationBuilder(environment)
-      .disable(excludedModules: _*)
-      .build()
-  }
+  def build(): Application = new GuiceApplicationBuilder(environment).build()
 }
 
 object StandaloneApp {
@@ -91,13 +84,5 @@ object StandaloneApp {
       case NonFatal(t) =>
         t.printStackTrace()
         throw t
-    }
-
-  def resolveModuleClasses(classNames: String*): Seq[Class[_]] =
-    classNames.flatMap { name =>
-      scala.util.Try(Class.forName(name)).toOption.filter { cls =>
-        classOf[com.google.inject.Module].isAssignableFrom(cls) ||
-        classOf[play.api.inject.Module].isAssignableFrom(cls)
-      }
     }
 }

@@ -1,6 +1,5 @@
 package io.flow.play.standalone
 
-import io.flow.log.RollbarLogger
 import io.flow.util.FlowEnvironment
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.{Application, Environment, Mode}
@@ -12,9 +11,6 @@ import scala.util.control.NonFatal
 
 /** Provides a foundation for an opinionated application that performs work and then terminates, as opposed to a
   * long-running Play service.
-  *
-  * A default set of modules are loaded by default (see reference.conf) to support common behaviors such as
-  * configuration and logging.
   *
   * Example usage:
   * {{{
@@ -38,8 +34,6 @@ trait StandaloneApp {
     StandaloneApp.run(build(), shutdownDuration)(f)
 
   final def inject[T: ClassTag](implicit app: Application): T = app.injector.instanceOf[T]
-
-  final def rollbar(implicit app: Application): RollbarLogger = inject[RollbarLogger]
 
   def environment: Environment = StandaloneApp.DefaultEnvironment
 

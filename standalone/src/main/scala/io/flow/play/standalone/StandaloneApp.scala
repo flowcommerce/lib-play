@@ -2,12 +2,11 @@ package io.flow.play.standalone
 
 import io.flow.log.RollbarLogger
 import io.flow.util.FlowEnvironment
-import play.api.{Application, Environment, Mode}
-import play.api.inject.ApplicationLifecycle
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.{Application, Environment, Mode}
 
-import scala.concurrent.duration.DurationInt
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Await
+import scala.concurrent.duration.{DurationInt, FiniteDuration}
 import scala.reflect.ClassTag
 import scala.util.control.NonFatal
 
@@ -31,13 +30,20 @@ trait StandaloneApp {
   def run(args: Array[String])(implicit app: Application): Unit
 
   final def main(args: Array[String]): Unit =
-    StandaloneApp.withApplication(environment) { app =>
+    withApplication { app =>
       run(args)(app)
     }
+
+  final def withApplication[T](f: Application => T): T =
+    StandaloneApp.run(build(), shutdownDuration)(f)
 
   final def inject[T: ClassTag](implicit app: Application): T = app.injector.instanceOf[T]
 
   final def rollbar(implicit app: Application): RollbarLogger = inject[RollbarLogger]
+
+  def environment: Environment = StandaloneApp.DefaultEnvironment
+
+  def shutdownDuration: FiniteDuration = 10.seconds // Duration to wait for the application to stop normally
 
   /** StandaloneApp implementations can be provided in unit tests using GuiceFakeApplicationFactory.
     * {{{
@@ -46,9 +52,8 @@ trait StandaloneApp {
     * class MyAppSpec extends PlaySpec with GuiceOneAppPerSuite { override def fakeApplication(): Application = MyApp.build() }
     * }}}
     */
-  final def build(): Application = StandaloneApp.build(environment)
+  def build(): Application = new GuiceApplicationBuilder(environment).build()
 
-  def environment: Environment = StandaloneApp.DefaultEnvironment
 }
 
 object StandaloneApp {
@@ -65,40 +70,20 @@ object StandaloneApp {
       .copy(classLoader = Thread.currentThread().getContextClassLoader)
   }
 
-  def withApplication[T](
-    environment: Environment = DefaultEnvironment,
+  def run[T](
+    app: Application,
+    shutdownDuration: FiniteDuration,
   )(f: Application => T): T =
     try {
-      val app = build(environment)
-      run(app)(f)
+      try {
+        f(app)
+      } finally {
+        Await.result(app.stop(), shutdownDuration)
+        ()
+      }
     } catch {
       case NonFatal(t) =>
         t.printStackTrace()
         throw t
     }
-
-  private def build(environment: Environment): Application = {
-    val app = new GuiceApplicationBuilder(environment).build()
-
-    // Force a flush here if the application has not flushed logs yet. Rollbar by default flushes every 10 seconds.
-    // We could try moving this to the module, however it is currently in lib-log and not Play aware.
-    val logger = app.injector.instanceOf[RollbarLogger]
-    val applicationLifecycle = app.injector.instanceOf[ApplicationLifecycle]
-    applicationLifecycle.addStopHook(() => Future.successful(logger.rollbar.foreach(_.close(true))))
-
-    app
-  }
-
-  private def run[T](app: Application)(f: Application => T): T = {
-    def stopApp(): Unit = {
-      Await.result(app.stop(), 30.seconds)
-      ()
-    }
-
-    try {
-      f(app)
-    } finally {
-      stopApp()
-    }
-  }
 }

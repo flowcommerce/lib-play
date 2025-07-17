@@ -35,9 +35,9 @@ private object RollbarLifecycleModule {
         phase = CoordinatedShutdown.PhaseActorSystemTerminate, // latest possible
         taskName = s"rollbar-close",
       ) { () =>
-        implicit val blockingEc = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(1))
-        Future(blocking(closeRollbar()))
-          .map(_ => akka.Done)
+        val blockingEc = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(1))
+        Future(blocking(closeRollbar()))(blockingEc)
+          .map(_ => akka.Done)(blockingEc)
           .andThen { case _ => blockingEc.shutdown() }(ExecutionContext.global) // ensure shutdown happens
       }
   }

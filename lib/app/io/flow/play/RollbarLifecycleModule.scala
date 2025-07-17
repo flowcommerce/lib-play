@@ -6,6 +6,7 @@ import com.rollbar.notifier.Rollbar
 import play.api.inject.{Binding, Module}
 import play.api.{Configuration, Environment}
 
+import java.util.concurrent.Executors
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future, blocking}
 
@@ -34,8 +35,10 @@ private object RollbarLifecycleModule {
         phase = CoordinatedShutdown.PhaseActorSystemTerminate, // latest possible
         taskName = s"rollbar-close",
       ) { () =>
-        implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.global
-        Future(blocking(closeRollbar())).map(_ => akka.Done)
+        implicit val blockingEc = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(1))
+        Future(blocking(closeRollbar()))
+          .map(_ => akka.Done)
+          .andThen { case _ => blockingEc.shutdown() }(ExecutionContext.global) // ensure shutdown happens
       }
   }
 }

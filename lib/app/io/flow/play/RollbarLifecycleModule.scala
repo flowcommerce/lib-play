@@ -35,8 +35,7 @@ private object RollbarLifecycleModule {
         taskName = s"rollbar-close",
       ) { () =>
         implicit val ec = system.dispatcher
-        Future(blocking(closeRollbar()))
-          .map(_ => akka.Done)
+        Future(blocking(closeRollbar())).map(_ => akka.Done)
       }
   }
 }

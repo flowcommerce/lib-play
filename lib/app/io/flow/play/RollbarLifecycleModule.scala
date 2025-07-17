@@ -1,14 +1,12 @@
 package io.flow.play
 
 import akka.actor.{ActorSystem, CoordinatedShutdown}
-import com.google.inject.Provider
-import com.rollbar.notifier.Rollbar
+import io.flow.log.RollbarLogger
 import play.api.inject.{Binding, Module}
 import play.api.{Configuration, Environment}
 
-import java.util.concurrent.Executors
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future, blocking}
+import scala.concurrent.{Future, blocking}
 
 final class RollbarLifecycleModule extends Module {
   override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] =
@@ -21,24 +19,23 @@ private object RollbarLifecycleModule {
   @Singleton
   final class LifecycleHookRunner @Inject() (
     system: ActorSystem,
-    rollbarProvider: Provider[Option[Rollbar]],
+    logger: RollbarLogger,
   ) {
-    def closeRollbar(): Unit =
-      rollbarProvider.get().foreach { rollbar =>
-        rollbar.info("Closing Rollbar")
+    def closeRollbar(): Unit = {
+      logger.info("Closing Rollbar")
+      logger.rollbar.foreach { rollbar =>
         rollbar.close(true)
       }
+    }
 
     CoordinatedShutdown
       .get(system)
       .addTask(
-        phase = CoordinatedShutdown.PhaseActorSystemTerminate, // latest possible
+        phase = CoordinatedShutdown.PhaseBeforeActorSystemTerminate, // latest possible
         taskName = s"rollbar-close",
       ) { () =>
-        val blockingEc = ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(1))
-        Future(blocking(closeRollbar()))(blockingEc)
-          .map(_ => akka.Done)(blockingEc)
-          .andThen { case _ => blockingEc.shutdown() }(ExecutionContext.global) // ensure shutdown happens
+        implicit val ec = system.dispatcher
+        Future(blocking(closeRollbar())).map(_ => akka.Done)
       }
   }
 }

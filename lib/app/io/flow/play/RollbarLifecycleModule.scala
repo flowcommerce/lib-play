@@ -7,7 +7,7 @@ import play.api.inject.{Binding, Module}
 import play.api.{Configuration, Environment}
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future, blocking}
 
 final class RollbarLifecycleModule extends Module {
   override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] =
@@ -34,8 +34,8 @@ private object RollbarLifecycleModule {
         phase = CoordinatedShutdown.PhaseActorSystemTerminate, // latest possible
         taskName = s"rollbar-close",
       ) { () =>
-        implicit val ec: ExecutionContext = system.dispatcher
-        Future(closeRollbar()).map(_ => akka.Done)
+        implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.global
+        Future(blocking(closeRollbar())).map(_ => akka.Done)
       }
   }
 }

@@ -1,11 +1,13 @@
 package io.flow.play
 
+import akka.actor.{ActorSystem, CoordinatedShutdown}
 import com.google.inject.Provider
 import com.rollbar.notifier.Rollbar
-import play.api.inject.{ApplicationLifecycle, Binding, Module}
+import play.api.inject.{Binding, Module}
 import play.api.{Configuration, Environment}
 
 import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 final class RollbarLifecycleModule extends Module {
   override def bindings(environment: Environment, configuration: Configuration): Seq[Binding[_]] =
@@ -14,21 +16,26 @@ final class RollbarLifecycleModule extends Module {
     )
 }
 
-object RollbarLifecycleModule {
-  import scala.concurrent.Future
-
+private object RollbarLifecycleModule {
   @Singleton
   final class LifecycleHookRunner @Inject() (
+    system: ActorSystem,
     rollbarProvider: Provider[Option[Rollbar]],
-    applicationLifecycle: ApplicationLifecycle,
   ) {
-    rollbarProvider.get().foreach { rollbar =>
-      applicationLifecycle.addStopHook { () =>
-        Future.successful {
-          rollbar.info("Closing Rollbar")
-          rollbar.close(true)
-        }
+    def closeRollbar(): Unit =
+      rollbarProvider.get().foreach { rollbar =>
+        rollbar.info("Closing Rollbar")
+        rollbar.close(true)
       }
-    }
+
+    CoordinatedShutdown
+      .get(system)
+      .addTask(
+        phase = CoordinatedShutdown.PhaseActorSystemTerminate, // latest possible
+        taskName = s"rollbar-close",
+      ) { () =>
+        implicit val ec: ExecutionContext = system.dispatcher
+        Future(closeRollbar()).map(_ => akka.Done)
+      }
   }
 }

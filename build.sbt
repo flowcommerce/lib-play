@@ -67,7 +67,7 @@ lazy val lib: Project = project
       "javax.inject" % "javax.inject" % "1",
       "org.apache.commons" % "commons-io" % "1.3.2",
       "org.typelevel" %% "cats-core" % "2.10.0",
-      "org.mockito" % "mockito-core" % "4.11.0" % Test,
+      "org.mockito" % "mockito-core" % "5.18.0" % Test,
       "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
       "org.scalatestplus" %% "mockito-3-3" % "3.2.2.0" % Test,

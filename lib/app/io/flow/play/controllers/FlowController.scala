@@ -13,11 +13,11 @@ import scala.concurrent.{ExecutionContext, Future}
   *
   *   1. Extend play controller with FlowController
   *
-  * 2. In controller's constructor provide the following for DI
-  * {{{
+  *   2. In controller's constructor provide the following for DI
+  *      {{{
   * val controllerComponents: ControllerComponents,
   * val flowControllerComponents: FlowControllerComponents
-  * }}}
+  *      }}}
   *
   * If you want the components to be set automatically by DI, you can extend [[InjectedFlowController]] instead.
   */

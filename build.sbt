@@ -70,7 +70,7 @@ lazy val lib: Project = project
       "org.mockito" % "mockito-core" % "5.18.0" % Test,
       "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
-      "org.scalatestplus" %% "mockito-3-3" % "3.2.2.0" % Test,
+      "org.scalatestplus" %% "mockito-3-4" % "3.2.10.0" % Test,
     ),
     // Suppresses problems with Scaladoc links
     Compile / doc / scalacOptions += "-no-link-warnings",

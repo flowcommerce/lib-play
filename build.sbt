@@ -66,7 +66,7 @@ lazy val lib: Project = project
       "com.github.jwt-scala" %% "jwt-play-json" % "11.0.2",
       "javax.inject" % "javax.inject" % "1",
       "org.apache.commons" % "commons-io" % "1.3.2",
-      "org.typelevel" %% "cats-core" % "2.10.0",
+      "org.typelevel" %% "cats-core" % "2.13.0",
       "org.mockito" % "mockito-core" % "5.18.0" % Test,
       "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
       "org.scalatestplus.play" %% "scalatestplus-play" % "7.0.2" % Test,

@@ -61,8 +61,8 @@ lazy val lib: Project = project
       ws,
       filters,
       guice,
-      "io.flow" %% "lib-log-play29" % "0.2.47",
-      "io.flow" %% "lib-akka-play29" % "0.2.58",
+      "io.flow" %% "lib-log-play29" % "0.2.48",
+      "io.flow" %% "lib-akka-play29" % "0.2.59",
       "com.github.jwt-scala" %% "jwt-play-json" % "11.0.2",
       "javax.inject" % "javax.inject" % "1",
       "org.apache.commons" % "commons-io" % "1.3.2",
@@ -98,7 +98,7 @@ lazy val standalone: Project = project
     scalafmtOnCompile := true,
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-guice" % "2.9.6",
-      "io.flow" %% "lib-util" % "0.2.61",
+      "io.flow" %% "lib-util" % "0.2.62",
       "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
     ),
     Test / javaOptions ++= Seq(

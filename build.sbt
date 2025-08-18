@@ -61,7 +61,7 @@ lazy val lib: Project = project
       ws,
       filters,
       guice,
-      "io.flow" %% "lib-log-play29" % "0.2.48",
+      "io.flow" %% "lib-log-play29" % "0.2.49",
       "io.flow" %% "lib-akka-play29" % "0.2.60",
       "com.github.jwt-scala" %% "jwt-play-json" % "11.0.2",
       "javax.inject" % "javax.inject" % "1",

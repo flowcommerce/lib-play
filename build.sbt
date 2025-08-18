@@ -69,7 +69,7 @@ lazy val lib: Project = project
       "org.typelevel" %% "cats-core" % "2.10.0",
       "org.mockito" % "mockito-core" % "5.19.0" % Test,
       "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
-      "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
+      "org.scalatestplus.play" %% "scalatestplus-play" % "6.0.0" % Test,
       "org.scalatestplus" %% "mockito-3-4" % "3.2.10.0" % Test,
     ),
     // Suppresses problems with Scaladoc links
@@ -99,7 +99,7 @@ lazy val standalone: Project = project
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-guice" % "2.9.6",
       "io.flow" %% "lib-util" % "0.2.61",
-      "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % Test,
+      "org.scalatestplus.play" %% "scalatestplus-play" % "6.0.0" % Test,
     ),
     Test / javaOptions ++= Seq(
       "--add-exports=java.base/sun.security.x509=ALL-UNNAMED",

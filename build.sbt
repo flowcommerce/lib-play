@@ -2,7 +2,7 @@ import sbt.file
 import scoverage.ScoverageKeys.{coverageDataDir, coverageHighlighting}
 
 ThisBuild / organization := "io.flow"
-ThisBuild / scalaVersion := "2.13.16"
+ThisBuild / scalaVersion := "2.13.17"
 
 inThisBuild(
   Seq(

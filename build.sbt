@@ -98,7 +98,7 @@ lazy val standalone: Project = project
     scalafmtOnCompile := true,
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-guice" % "2.9.6",
-      "io.flow" %% "lib-util" % "0.2.68",
+      "io.flow" %% "lib-util" % "0.2.69",
       "org.scalatestplus.play" %% "scalatestplus-play" % "6.0.0" % Test,
     ),
     Test / javaOptions ++= Seq(

@@ -23,6 +23,9 @@ class FlowLoggingFilter @javax.inject.Inject() (implicit
   config: Config,
 ) extends Filter {
 
+  type LineDecorator = (Seq[String], RequestHeader, Result) => Seq[String]
+  type LoggerDecorator = (RollbarLogger, RequestHeader, Result) => RollbarLogger
+
   private val LoggedRequestMethodConfig = "play.http.logging.methods"
 
   private val LoggedHeaders = Seq(
@@ -82,7 +85,8 @@ class FlowLoggingFilter @javax.inject.Inject() (implicit
           .withKeyValue("x-flow-ip", flowIp)
           .withKeyValue("x-flow-request-id", flowRequestId)
 
-        decorate(linelogger).info(decorate(lineParts).mkString(" "))
+        val line = lineDecorator(lineParts, requestHeader, result).mkString(" ")
+        loggerDecorator(linelogger, requestHeader, result).info(line)
       }
 
       result
@@ -91,9 +95,7 @@ class FlowLoggingFilter @javax.inject.Inject() (implicit
 
   override implicit def mat: Materializer = m
 
-  // Allow sub-class to add additional values to the line being logged
-  protected def decorate(lineParts: Seq[String]) = lineParts
+  protected def lineDecorator: LineDecorator = (parts, _, _) => parts
 
-  // Allow sub-class to add additional key value pairs
-  protected def decorate(logger: RollbarLogger): RollbarLogger = logger
+  protected def loggerDecorator: LoggerDecorator = (logger, _, _) => logger
 }

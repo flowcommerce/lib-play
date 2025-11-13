@@ -55,21 +55,21 @@ class FlowLoggingFilter @javax.inject.Inject() (implicit
         val flowIp = headerMap.getOrElse(Constants.Headers.FlowIp, Nil).mkString(",")
         val flowRequestId = headerMap.getOrElse(Constants.Headers.FlowRequestId, Nil).mkString(",")
 
-        val line = Seq(
+        val lineParts = Seq(
           requestHeader.method,
           s"${requestHeader.host}${requestHeader.uri}",
           requestHeader.version,
           result.header.status.toString,
           s"${requestTime}ms",
           userAgent,
-        ).mkString(" ")
+        )
 
         val loggedRequestHeaders = (for {
           header <- LoggedHeaders
           value <- headerMap.get(header)
         } yield header -> value).toMap
 
-        logger
+        val linelogger = logger
           .withKeyValue("https", requestHeader.secure)
           .withKeyValue("http_version", requestHeader.version)
           .withKeyValue("method", requestHeader.method)
@@ -81,7 +81,8 @@ class FlowLoggingFilter @javax.inject.Inject() (implicit
           .withKeyValue("request_headers", loggedRequestHeaders)
           .withKeyValue("x-flow-ip", flowIp)
           .withKeyValue("x-flow-request-id", flowRequestId)
-          .info(line)
+
+        decorate(linelogger).info(decorate(lineParts).mkString(" "))
       }
 
       result
@@ -89,4 +90,10 @@ class FlowLoggingFilter @javax.inject.Inject() (implicit
   }
 
   override implicit def mat: Materializer = m
+
+  // Allow sub-class to add additional values to the line being logged
+  protected def decorate(lineParts: Seq[String]) = lineParts
+
+  // Allow sub-class to add additional key value pairs
+  protected def decorate(logger: RollbarLogger): RollbarLogger = logger
 }
